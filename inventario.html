@@ -122,10 +122,30 @@
       min-width: 110px;
     }
 
+    .tabla-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 10px;
+    }
+
+    .aviso-giro {
+      display: none;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
     .tabla-items {
       width: 100%;
+      min-width: 720px;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 0;
     }
 
     .tabla-items th,
@@ -184,75 +204,33 @@
         flex-direction: column;
       }
 
-      .tabla-items,
-      .tabla-items thead,
-      .tabla-items tbody,
+      .aviso-giro {
+        display: block;
+      }
+
       .tabla-items th,
-      .tabla-items td,
-      .tabla-items tr {
-        display: block;
-        width: 100%;
-      }
-
-      .tabla-items thead {
-        display: none;
-      }
-
-      .tabla-items tr {
-        background: #f8fafc;
-        border: 1px solid #dbe3ea;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 12px;
-      }
-
       .tabla-items td {
-        border: none;
-        padding: 6px 0;
-        text-align: left;
+        white-space: nowrap;
       }
 
-      .tabla-items td select,
-      .tabla-items td input,
-      .tabla-items td button {
-        width: 100%;
+      .tabla-items th:nth-child(1),
+      .tabla-items td:nth-child(1) {
+        min-width: 170px;
       }
 
-      .tabla-items td:nth-child(1)::before {
-        content: "Grupo";
-        display: block;
-        font-weight: bold;
-        margin-bottom: 6px;
-        color: #374151;
+      .tabla-items th:nth-child(2),
+      .tabla-items td:nth-child(2) {
+        min-width: 240px;
       }
 
-      .tabla-items td:nth-child(2)::before {
-        content: "Subgrupo";
-        display: block;
-        font-weight: bold;
-        margin-bottom: 6px;
-        color: #374151;
+      .tabla-items th:nth-child(3),
+      .tabla-items td:nth-child(3) {
+        min-width: 110px;
       }
 
-      .tabla-items td:nth-child(3)::before {
-        content: "Cantidad";
-        display: block;
-        font-weight: bold;
-        margin-bottom: 6px;
-        color: #374151;
-      }
-
-      .tabla-items td:nth-child(4)::before {
-        content: "Acción";
-        display: block;
-        font-weight: bold;
-        margin-bottom: 6px;
-        color: #374151;
-      }
-
-      .btn-x,
-      .btn-mas {
-        width: 100%;
+      .tabla-items th:nth-child(4),
+      .tabla-items td:nth-child(4) {
+        min-width: 90px;
       }
     }
   </style>
@@ -374,17 +352,21 @@
         <div><strong>Observación:</strong> <span id="resumenObservacion3"></span></div>
       </div>
 
-      <table class="tabla-items">
-        <thead>
-          <tr>
-            <th style="width: 30%;">Grupo</th>
-            <th style="width: 40%;">Subgrupo</th>
-            <th style="width: 20%;">Cantidad</th>
-            <th style="width: 10%;">Acción</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyItems"></tbody>
-      </table>
+      <div class="aviso-giro">Para ver mejor los ítems, gira tu celular horizontalmente o desliza la tabla.</div>
+
+      <div class="tabla-scroll">
+        <table class="tabla-items">
+          <thead>
+            <tr>
+              <th style="width: 30%;">Grupo</th>
+              <th style="width: 40%;">Subgrupo</th>
+              <th style="width: 20%;">Cantidad</th>
+              <th style="width: 10%;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyItems"></tbody>
+        </table>
+      </div>
 
       <div class="acciones-items">
         <button type="button" class="btn-mas" onclick="agregarFilaItem()">+ Agregar ítem</button>
