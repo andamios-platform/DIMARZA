@@ -1,1 +1,1247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kardex Andamieros</title>
 
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --primary:#1e40af;
+      --primary2:#2563eb;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#dbe3ef;
+      --danger:#dc2626;
+      --ok:#16a34a;
+      --shadow:0 8px 24px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:1600px;
+      margin:0 auto;
+      padding:18px;
+    }
+
+    .topbar{
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      color:#fff;
+      border-radius:24px;
+      padding:22px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+    }
+
+    .topbar h1{
+      margin:0 0 6px 0;
+      font-size:28px;
+    }
+
+    .topbar p{
+      margin:0;
+      opacity:.95;
+    }
+
+    .steps{
+      display:flex;
+      gap:12px;
+      margin:16px 0 20px;
+      flex-wrap:wrap;
+    }
+
+    .step{
+      background:#e5edff;
+      color:#274690;
+      padding:12px 16px;
+      border-radius:999px;
+      font-weight:700;
+    }
+
+    .step.active{
+      background:var(--primary);
+      color:white;
+    }
+
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
+    }
+
+    .card h2{
+      margin:0 0 14px;
+      font-size:20px;
+      color:#0f172a;
+    }
+
+    .grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .grid-2{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .grid-3{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .grid-4{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field label{
+      font-size:13px;
+      font-weight:700;
+      color:#374151;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      padding:11px 12px;
+      border:1px solid #cfd8e3;
+      border-radius:12px;
+      font-size:14px;
+      background:white;
+    }
+
+    .field input[readonly]{
+      background:#f3f6fb;
+      color:#475569;
+    }
+
+    .equipos-grid{
+      display:grid;
+      gap:16px;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      align-items:start;
+    }
+
+    .equipo-card{
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+      transition:.2s ease;
+      cursor:pointer;
+      aspect-ratio:1 / 1;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      align-self:start;
+    }
+
+    .equipo-card:hover{
+      transform:translateY(-4px) scale(1.02);
+      box-shadow:0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    .equipo-card.active{
+      border:2px solid var(--primary2);
+      background:#f8fbff;
+      aspect-ratio:auto;
+      align-items:stretch;
+      text-align:left;
+    }
+
+    .equipo-card.complete{
+      border:2px solid #16a34a !important;
+      background:#e8fbe8 !important;
+    }
+
+    .equipo-title{
+      font-weight:700;
+      color:#0f172a;
+      line-height:1.35;
+      margin-bottom:10px;
+    }
+
+    .equipo-status{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .equipo-body{
+      display:none;
+      margin-top:12px;
+      cursor:default;
+      width:100%;
+    }
+
+    .equipo-card.active .equipo-body{
+      display:block;
+    }
+
+    .sub-bloque{
+      border:1px solid #dbe3ef;
+      border-radius:14px;
+      padding:12px;
+      margin-top:10px;
+      background:#fff;
+    }
+
+    .sub-bloque h4{
+      margin:0 0 10px 0;
+      font-size:14px;
+      color:#1e3a8a;
+    }
+
+    .sub-body{
+      margin-top:10px;
+    }
+
+    .sub-body.disabled{
+      opacity:.45;
+      pointer-events:none;
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    button{
+      border:none;
+      border-radius:14px;
+      padding:12px 18px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .btn-primary{ background:var(--primary); color:#fff; }
+    .btn-secondary{ background:#e5e7eb; color:#111827; }
+    .btn-success{ background:var(--ok); color:#fff; }
+    .btn-danger{ background:var(--danger); color:#fff; }
+
+    .loading{
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.75);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+    }
+
+    .loading.show{ display:flex; }
+
+    .loader-box{
+      background:white;
+      padding:22px 26px;
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      font-weight:700;
+    }
+
+    .success-box{
+      max-width:700px;
+      margin:0 auto;
+      text-align:center;
+      padding:30px 20px;
+    }
+
+    .success-icon{
+      font-size:56px;
+      margin-bottom:12px;
+    }
+
+    .success-text{
+      font-size:18px;
+      margin:20px 0;
+      color:#166534;
+      font-weight:700;
+    }
+
+    @media (max-width: 1200px){
+      .equipos-grid{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 980px){
+      .grid-4, .grid-3, .grid-2, .equipos-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .topbar h1{
+        font-size:22px;
+      }
+    }
+
+    @media (max-width: 640px){
+      .equipos-grid,
+      .grid-4,
+      .grid-3,
+      .grid-2{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loading" id="loading">
+    <div class="loader-box">Procesando...</div>
+  </div>
+
+  <div class="app">
+    <div class="topbar">
+      <h1>KARDEX ANDAMIEROS</h1>
+      <p>Registro de entrega por responsable y equipos asignados</p>
+    </div>
+
+    <div class="steps">
+      <div class="step active" id="step1Indicator">Paso 1: Datos generales</div>
+      <div class="step" id="step2Indicator">Paso 2: Equipos</div>
+      <div class="step" id="step3Indicator">Paso 3: Confirmación</div>
+    </div>
+
+    <section class="screen active" id="screen1">
+      <div class="card">
+        <h2>Datos generales</h2>
+
+        <div class="grid grid-4">
+          <div class="field">
+            <label>Fecha</label>
+            <input type="date" id="fecha">
+          </div>
+
+          <div class="field">
+            <label>Unidad minera</label>
+            <select id="unidad">
+              <option value="">Seleccione</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Servicio</label>
+            <select id="servicio">
+              <option value="">Seleccione</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Turno</label>
+            <select id="turno">
+              <option value="">Seleccione</option>
+              <option value="DIA">DIA</option>
+              <option value="NOCHE">NOCHE</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Andamiero responsable</label>
+            <select id="responsable">
+              <option value="">Seleccione</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Documento responsable</label>
+            <input type="text" id="documentoResponsable" readonly>
+          </div>
+
+          <div class="field">
+            <label>Supervisor a cargo</label>
+            <select id="supervisor">
+              <option value="">Seleccione</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Documento supervisor</label>
+            <input type="text" id="documentoSupervisor" readonly>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-secondary" type="button" onclick="limpiarTodo()">Limpiar</button>
+          <button class="btn-primary" type="button" onclick="goToStep2()">Siguiente</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen2">
+      <div class="card">
+        <h2>Equipos asignados</h2>
+        <div class="equipos-grid" id="equiposContainer"></div>
+
+        <div class="actions">
+          <button class="btn-secondary" type="button" onclick="goToStep1()">Atrás</button>
+          <button class="btn-secondary" type="button" onclick="limpiarEquipos()">Limpiar</button>
+          <button class="btn-danger" type="button" onclick="cancelarFormulario()">Cancelar</button>
+          <button class="btn-success" type="button" onclick="guardar()">Guardar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen3">
+      <div class="card success-box">
+        <div class="success-icon">✅</div>
+        <h2>Registro completado</h2>
+        <p id="successText" class="success-text">Registro guardado correctamente.</p>
+
+        <div class="actions" style="justify-content:center;">
+          <button class="btn-primary" type="button" onclick="nuevoRegistro()">Nuevo registro</button>
+          <button class="btn-secondary" type="button" onclick="location.href='index.html'">Volver al menú</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbywKDiXXawq0BkcWLhlW279LCBOjC6tWfBiKr8YAuH8MuEwWuFM025SDiKUV3jnnAlD/exec";
+
+    let baseData = {
+      responsables: [],
+      supervisores: [],
+      unidadesMap: {},
+      items: []
+    };
+
+    const EQUIPOS = [
+      { key:'arnes6', title:'Arnés Mecánico 6 argollas Talla: _______', itemBase:'Arnés Mecánico 6 argollas Talla: _______', hasMarca:true },
+      { key:'arnes4', title:'Arnés Mecánico 4 argollas Talla: _______', itemBase:'Arnés Mecánico 4 argollas Talla: _______', hasMarca:true },
+      { key:'bloque', title:'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69', itemBase:'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69', dual:true },
+      { key:'caboCon', title:'Cabo en Y MSA con amortiguador de impacto', itemBase:'Cabo en Y MSA con amortiguador de impacto' },
+      { key:'caboSin', title:'Cabo en Y MSA sin amortiguador de impacto', itemBase:'Cabo en Y MSA sin amortiguador de impacto' },
+      { key:'caja', title:'Caja Herramientas de pláctico TRUPPER', itemBase:'Caja Herramientas de pláctico TRUPPER' },
+      { key:'correaje', title:'Correaje de Andamiero', itemBase:'Correaje de Andamiero', hasPortas:true },
+      { key:'faja09', title:'Faja Anclaje MSA doble argolla 0.9m', itemBase:'Faja Anclaje MSA doble argolla 0.9m' },
+      { key:'faja18', title:'Faja Anclaje MSAdoble argolla 1.8M', itemBase:'Faja Anclaje MSAdoble argolla 1.8M' },
+      { key:'flexo5', title:'Flexometro de 5m', itemBase:'Flexometro de 5m' },
+      { key:'hombrera', title:'Hombrera de cuero', itemBase:'Hombrera de cuero' },
+      { key:'kit', title:'Kit Antitrauma MSA Model 10063431', itemBase:'Kit Antitrauma MSA Model 10063431', dual:true, dualPrefix:'Kit' },
+      { key:'llaveCarraca', title:'Llave Carrraca ALFMAN QLF-RW 1922', itemBase:'Llave Carrraca ALFMAN QLF-RW 1922', hasDriza:true },
+      { key:'llaveF8', title:'Llave Francesa 8"', itemBase:'Llave Francesa 8"', hasDriza:true },
+      { key:'llaveM22', title:'Llave Mixta 22mm', itemBase:'Llave Mixta 22mm', hasDriza:true },
+      { key:'martillo', title:'Martillo Andamiero ALFMAN ACF H0075', itemBase:'Martillo Andamiero ALFMAN ACF H0075', hasDriza:true },
+      { key:'nivel', title:'Nivel de Mano STANLEY 9"', itemBase:'Nivel de Mano STANLEY 9"', hasDriza:true },
+      { key:'rodillera', title:'Rodillera', itemBase:'Rodillera' }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setToday();
+      loadInitialData();
+    });
+
+    async function apiCall(action, payload = null) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          action,
+          payload
+        })
+      });
+
+      const data = await res.json();
+
+      if (data && data.ok === false) {
+        throw new Error(data.message || "Error en Apps Script.");
+      }
+
+      return data;
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('show', !!show);
+    }
+
+    function setToday() {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      document.getElementById('fecha').value = `${y}-${m}-${d}`;
+    }
+
+    function normalize(s) {
+      return String(s || '').replace(/\s+/g, ' ').trim();
+    }
+
+    async function loadInitialData() {
+      showLoading(true);
+      try {
+        const data = await apiCall("getInitialData");
+        baseData = data;
+        fillResponsables();
+        fillSupervisores();
+        fillUnidades();
+        buildEquipos();
+        bindEvents();
+      } catch (err) {
+        alert("Error al cargar datos: " + err.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function fillResponsables() {
+      const select = document.getElementById('responsable');
+      select.innerHTML = '<option value="">Seleccione</option>';
+      baseData.responsables.forEach(r => {
+        const op = document.createElement('option');
+        op.value = r.nombre;
+        op.textContent = r.nombre;
+        select.appendChild(op);
+      });
+    }
+
+    function fillSupervisores() {
+      const select = document.getElementById('supervisor');
+      select.innerHTML = '<option value="">Seleccione</option>';
+      baseData.supervisores.forEach(r => {
+        const op = document.createElement('option');
+        op.value = r.nombre;
+        op.textContent = r.nombre;
+        select.appendChild(op);
+      });
+    }
+
+    function fillUnidades() {
+      const select = document.getElementById('unidad');
+      select.innerHTML = '<option value="">Seleccione</option>';
+      Object.keys(baseData.unidadesMap).sort().forEach(u => {
+        const op = document.createElement('option');
+        op.value = u;
+        op.textContent = u;
+        select.appendChild(op);
+      });
+    }
+
+    function bindEvents() {
+      document.getElementById('unidad').addEventListener('change', onUnidadChange);
+      document.getElementById('responsable').addEventListener('change', onResponsableChange);
+      document.getElementById('supervisor').addEventListener('change', onSupervisorChange);
+    }
+
+    function onUnidadChange() {
+      const unidad = document.getElementById('unidad').value;
+      const servicio = document.getElementById('servicio');
+      servicio.innerHTML = '<option value="">Seleccione</option>';
+
+      if (!unidad || !baseData.unidadesMap[unidad]) return;
+
+      baseData.unidadesMap[unidad].forEach(s => {
+        const op = document.createElement('option');
+        op.value = s;
+        op.textContent = s;
+        servicio.appendChild(op);
+      });
+    }
+
+    function onResponsableChange() {
+      const nombre = document.getElementById('responsable').value;
+      const found = baseData.responsables.find(x => x.nombre === nombre);
+      document.getElementById('documentoResponsable').value = found ? found.documento : '';
+    }
+
+    function onSupervisorChange() {
+      const nombre = document.getElementById('supervisor').value;
+      const found = baseData.supervisores.find(x => x.nombre === nombre);
+      document.getElementById('documentoSupervisor').value = found ? found.documento : '';
+    }
+
+    function getItemOptions(itemBase) {
+      return baseData.items.filter(it => normalize(it.item) === normalize(itemBase));
+    }
+
+    function buildEquipos() {
+      const container = document.getElementById('equiposContainer');
+      container.innerHTML = '';
+
+      EQUIPOS.forEach(eq => {
+        const card = document.createElement('div');
+        card.className = 'equipo-card';
+        card.id = `${eq.key}_card`;
+        card.onclick = () => toggleEquipoCard(eq.key);
+
+        if (eq.dual) {
+          const prefix1 = eq.dualPrefix || eq.title;
+          const prefix2 = eq.dualPrefix || eq.title;
+
+          card.innerHTML = `
+            <div class="equipo-title">${eq.title}</div>
+            <div class="equipo-status" id="${eq.key}_status">No seleccionado</div>
+            <div class="equipo-body" id="${eq.key}_body" onclick="event.stopPropagation()">
+
+              <div class="sub-bloque">
+                <h4>${prefix1} 1</h4>
+                <div class="field">
+                  <label>Estado</label>
+                  <select id="${eq.key}_1_estado" onchange="toggleSubBloque('${eq.key}', 1)">
+                    <option value="">No aplica</option>
+                    <option value="SI">Seleccionar</option>
+                  </select>
+                </div>
+
+                <div class="sub-body disabled" id="${eq.key}_1_body">
+                  <div class="grid grid-2">
+                    <div class="field">
+                      <label>Código</label>
+                      <select id="${eq.key}_1_codigo" onchange="onSubCodigoChange('${eq.key}', 1)">
+                        <option value="">Seleccione</option>
+                      </select>
+                    </div>
+
+                    <div class="field">
+                      <label>Serie</label>
+                      <select id="${eq.key}_1_serie" onchange="onSubSerieChange('${eq.key}', 1)">
+                        <option value="">Seleccione</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <input type="hidden" id="${eq.key}_1_marca" value="">
+                </div>
+              </div>
+
+              <div class="sub-bloque">
+                <h4>${prefix2} 2</h4>
+                <div class="field">
+                  <label>Estado</label>
+                  <select id="${eq.key}_2_estado" onchange="toggleSubBloque('${eq.key}', 2)">
+                    <option value="">No aplica</option>
+                    <option value="SI">Seleccionar</option>
+                  </select>
+                </div>
+
+                <div class="sub-body disabled" id="${eq.key}_2_body">
+                  <div class="grid grid-2">
+                    <div class="field">
+                      <label>Código</label>
+                      <select id="${eq.key}_2_codigo" onchange="onSubCodigoChange('${eq.key}', 2)">
+                        <option value="">Seleccione</option>
+                      </select>
+                    </div>
+
+                    <div class="field">
+                      <label>Serie</label>
+                      <select id="${eq.key}_2_serie" onchange="onSubSerieChange('${eq.key}', 2)">
+                        <option value="">Seleccione</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <input type="hidden" id="${eq.key}_2_marca" value="">
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          card.innerHTML = `
+            <div class="equipo-title">${eq.title}</div>
+            <div class="equipo-status" id="${eq.key}_status">No seleccionado</div>
+            <div class="equipo-body" id="${eq.key}_body" onclick="event.stopPropagation()">
+              <div class="grid ${eq.hasMarca ? 'grid-3' : 'grid-2'}">
+                <div class="field">
+                  <label>Código</label>
+                  <select id="${eq.key}_codigo" onchange="onCodigoChange('${eq.key}')">
+                    <option value="">Seleccione</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Serie</label>
+                  <select id="${eq.key}_serie" onchange="onSerieChange('${eq.key}')">
+                    <option value="">Seleccione</option>
+                  </select>
+                </div>
+
+                ${eq.hasMarca ? `
+                  <div class="field">
+                    <label>Marca</label>
+                    <input type="text" id="${eq.key}_marca" readonly>
+                  </div>
+                ` : `
+                  <input type="hidden" id="${eq.key}_marca" value="">
+                `}
+              </div>
+
+              ${eq.hasDriza ? `
+                <div class="sub-bloque">
+                  <h4>Driza</h4>
+                  <div class="field">
+                    <label>¿Lleva driza?</label>
+                    <select id="${eq.key}_driza" onclick="event.stopPropagation()">
+                      <option value="">No lleva</option>
+                      <option value="SI">Sí lleva</option>
+                    </select>
+                  </div>
+                </div>
+              ` : ``}
+
+              ${eq.hasPortas ? `
+                <div class="sub-bloque">
+                  <h4>Accesorios del correaje</h4>
+                  <div class="grid grid-2">
+                    <div class="field">
+                      <label>¿Lleva Porta Carraca?</label>
+                      <select id="${eq.key}_portaCarraca" onclick="event.stopPropagation()">
+                        <option value="">No lleva</option>
+                        <option value="SI">Sí lleva</option>
+                      </select>
+                    </div>
+
+                    <div class="field">
+                      <label>¿Lleva Porta Martillo?</label>
+                      <select id="${eq.key}_portaMartillo" onclick="event.stopPropagation()">
+                        <option value="">No lleva</option>
+                        <option value="SI">Sí lleva</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              ` : ``}
+            </div>
+          `;
+        }
+
+        container.appendChild(card);
+        loadEquipoOptions(eq);
+      });
+    }
+
+    function loadEquipoOptions(eq) {
+      if (!eq.itemBase) return;
+
+      const options = getItemOptions(eq.itemBase);
+
+      if (eq.dual) {
+        [1, 2].forEach(n => {
+          const codigoSel = document.getElementById(`${eq.key}_${n}_codigo`);
+          const serieSel = document.getElementById(`${eq.key}_${n}_serie`);
+
+          codigoSel.innerHTML = '<option value="">Seleccione</option>';
+          serieSel.innerHTML = '<option value="">Seleccione</option>';
+
+          options.forEach(opt => {
+            const val = JSON.stringify(opt);
+
+            const opC = document.createElement('option');
+            opC.value = val;
+            opC.textContent = opt.codigo || '(Sin código)';
+            codigoSel.appendChild(opC);
+
+            const opS = document.createElement('option');
+            opS.value = val;
+            opS.textContent = opt.serie || '(Sin serie)';
+            serieSel.appendChild(opS);
+          });
+        });
+      } else {
+        const codigoSel = document.getElementById(`${eq.key}_codigo`);
+        const serieSel = document.getElementById(`${eq.key}_serie`);
+        if (!codigoSel || !serieSel) return;
+
+        codigoSel.innerHTML = '<option value="">Seleccione</option>';
+        serieSel.innerHTML = '<option value="">Seleccione</option>';
+
+        options.forEach(opt => {
+          const val = JSON.stringify(opt);
+
+          const opC = document.createElement('option');
+          opC.value = val;
+          opC.textContent = opt.codigo || '(Sin código)';
+          codigoSel.appendChild(opC);
+
+          const opS = document.createElement('option');
+          opS.value = val;
+          opS.textContent = opt.serie || '(Sin serie)';
+          serieSel.appendChild(opS);
+        });
+      }
+    }
+
+    function toggleEquipoCard(key) {
+      const card = document.getElementById(`${key}_card`);
+      const status = document.getElementById(`${key}_status`);
+      const isActive = card.classList.contains('active');
+
+      EQUIPOS.forEach(item => {
+        if (item.key === key) return;
+
+        const otherCard = document.getElementById(`${item.key}_card`);
+        const otherStatus = document.getElementById(`${item.key}_status`);
+
+        if (!otherCard.classList.contains('active')) return;
+
+        otherCard.classList.remove('active');
+        otherStatus.textContent = otherCard.classList.contains('complete') ? 'Completo' : 'Seleccionado';
+      });
+
+      if (isActive) {
+        card.classList.remove('active');
+        status.textContent = card.classList.contains('complete') ? 'Completo' : 'Seleccionado';
+      } else {
+        card.classList.add('active');
+        status.textContent = card.classList.contains('complete') ? 'Completo' : 'Seleccionado';
+      }
+
+      actualizarEstadoTarjeta(key);
+    }
+
+    function toggleSubBloque(key, n) {
+      const estado = document.getElementById(`${key}_${n}_estado`).value;
+      const body = document.getElementById(`${key}_${n}_body`);
+
+      if (estado === 'SI') {
+        body.classList.remove('disabled');
+      } else {
+        body.classList.add('disabled');
+        document.getElementById(`${key}_${n}_codigo`).value = '';
+        document.getElementById(`${key}_${n}_serie`).value = '';
+        document.getElementById(`${key}_${n}_marca`).value = '';
+      }
+
+      actualizarEstadoTarjeta(key);
+    }
+
+    function onCodigoChange(key) {
+      const codigoSel = document.getElementById(`${key}_codigo`);
+      const serieSel = document.getElementById(`${key}_serie`);
+      const marcaInp = document.getElementById(`${key}_marca`);
+
+      if (!codigoSel.value) {
+        serieSel.value = '';
+        if (marcaInp) marcaInp.value = '';
+        actualizarEstadoTarjeta(key);
+        return;
+      }
+
+      const obj = JSON.parse(codigoSel.value);
+      setSelectByPayload(serieSel, obj);
+      if (marcaInp) marcaInp.value = obj.marca || '';
+      actualizarEstadoTarjeta(key);
+    }
+
+    function onSerieChange(key) {
+      const codigoSel = document.getElementById(`${key}_codigo`);
+      const serieSel = document.getElementById(`${key}_serie`);
+      const marcaInp = document.getElementById(`${key}_marca`);
+
+      if (!serieSel.value) {
+        codigoSel.value = '';
+        if (marcaInp) marcaInp.value = '';
+        actualizarEstadoTarjeta(key);
+        return;
+      }
+
+      const obj = JSON.parse(serieSel.value);
+      setSelectByPayload(codigoSel, obj);
+      if (marcaInp) marcaInp.value = obj.marca || '';
+      actualizarEstadoTarjeta(key);
+    }
+
+    function onSubCodigoChange(key, n) {
+      const codigoSel = document.getElementById(`${key}_${n}_codigo`);
+      const serieSel = document.getElementById(`${key}_${n}_serie`);
+      const marcaInp = document.getElementById(`${key}_${n}_marca`);
+
+      if (!codigoSel.value) {
+        serieSel.value = '';
+        marcaInp.value = '';
+        actualizarEstadoTarjeta(key);
+        return;
+      }
+
+      const obj = JSON.parse(codigoSel.value);
+      setSelectByPayload(serieSel, obj);
+      marcaInp.value = obj.marca || '';
+      actualizarEstadoTarjeta(key);
+    }
+
+    function onSubSerieChange(key, n) {
+      const codigoSel = document.getElementById(`${key}_${n}_codigo`);
+      const serieSel = document.getElementById(`${key}_${n}_serie`);
+      const marcaInp = document.getElementById(`${key}_${n}_marca`);
+
+      if (!serieSel.value) {
+        codigoSel.value = '';
+        marcaInp.value = '';
+        actualizarEstadoTarjeta(key);
+        return;
+      }
+
+      const obj = JSON.parse(serieSel.value);
+      setSelectByPayload(codigoSel, obj);
+      marcaInp.value = obj.marca || '';
+      actualizarEstadoTarjeta(key);
+    }
+
+    function setSelectByPayload(select, obj) {
+      const target = JSON.stringify(obj);
+      const options = Array.from(select.options);
+      const found = options.find(op => op.value === target);
+      select.value = found ? target : '';
+    }
+
+    function goToStep2() {
+      const err = validarPaso1();
+      if (err) {
+        alert(err);
+        return;
+      }
+
+      document.getElementById('screen1').classList.remove('active');
+      document.getElementById('screen2').classList.add('active');
+      document.getElementById('screen3').classList.remove('active');
+
+      document.getElementById('step1Indicator').classList.remove('active');
+      document.getElementById('step2Indicator').classList.add('active');
+      document.getElementById('step3Indicator').classList.remove('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToStep1() {
+      document.getElementById('screen2').classList.remove('active');
+      document.getElementById('screen3').classList.remove('active');
+      document.getElementById('screen1').classList.add('active');
+
+      document.getElementById('step2Indicator').classList.remove('active');
+      document.getElementById('step3Indicator').classList.remove('active');
+      document.getElementById('step1Indicator').classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToStep3(message) {
+      document.getElementById('screen1').classList.remove('active');
+      document.getElementById('screen2').classList.remove('active');
+      document.getElementById('screen3').classList.add('active');
+
+      document.getElementById('step1Indicator').classList.remove('active');
+      document.getElementById('step2Indicator').classList.remove('active');
+      document.getElementById('step3Indicator').classList.add('active');
+
+      document.getElementById('successText').textContent = message || 'Registro guardado correctamente.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nuevoRegistro() {
+      limpiarTodo();
+
+      document.getElementById('screen3').classList.remove('active');
+      document.getElementById('screen2').classList.remove('active');
+      document.getElementById('screen1').classList.add('active');
+
+      document.getElementById('step3Indicator').classList.remove('active');
+      document.getElementById('step2Indicator').classList.remove('active');
+      document.getElementById('step1Indicator').classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validarPaso1() {
+      const fecha = document.getElementById('fecha').value.trim();
+      const unidad = document.getElementById('unidad').value.trim();
+      const servicio = document.getElementById('servicio').value.trim();
+      const responsable = document.getElementById('responsable').value.trim();
+      const documentoResponsable = document.getElementById('documentoResponsable').value.trim();
+      const turno = document.getElementById('turno').value.trim();
+      const supervisor = document.getElementById('supervisor').value.trim();
+      const documentoSupervisor = document.getElementById('documentoSupervisor').value.trim();
+
+      if (!fecha) return 'Debe ingresar la fecha.';
+      if (!unidad) return 'Debe seleccionar la unidad minera.';
+      if (!servicio) return 'Debe seleccionar el servicio.';
+      if (!responsable) return 'Debe seleccionar el andamiero responsable.';
+      if (!documentoResponsable) return 'No se encontró documento del responsable.';
+      if (!turno) return 'Debe seleccionar el turno.';
+      if (!supervisor) return 'Debe seleccionar el supervisor.';
+      if (!documentoSupervisor) return 'No se encontró documento del supervisor.';
+
+      return '';
+    }
+
+    function validarEquipos() {
+      const usados = new Set();
+
+      for (const eq of EQUIPOS) {
+        const card = document.getElementById(`${eq.key}_card`);
+        if (!card.classList.contains('active') && !card.classList.contains('complete')) continue;
+
+        if (eq.dual) {
+          for (let n = 1; n <= 2; n++) {
+            const estado = document.getElementById(`${eq.key}_${n}_estado`).value;
+            if (estado !== 'SI') continue;
+
+            const codigoVal = document.getElementById(`${eq.key}_${n}_codigo`).value;
+            const serieVal = document.getElementById(`${eq.key}_${n}_serie`).value;
+
+            if (!codigoVal && !serieVal) {
+              return `Debe seleccionar código o serie en ${eq.title} ${n}.`;
+            }
+
+            const obj = codigoVal ? JSON.parse(codigoVal) : JSON.parse(serieVal);
+            const codigoNormalizado = normalize(obj.codigo).toUpperCase();
+
+            if (codigoNormalizado && codigoNormalizado !== 'S/C') {
+              const firma = `${normalize(obj.item)}||${codigoNormalizado}`;
+              if (usados.has(firma)) {
+                return `No puede repetir el mismo equipo en ${eq.title}.`;
+              }
+              usados.add(firma);
+            }
+          }
+        } else {
+          const codigoVal = document.getElementById(`${eq.key}_codigo`).value;
+          const serieVal = document.getElementById(`${eq.key}_serie`).value;
+
+          if (!codigoVal && !serieVal) {
+            return `Debe seleccionar código o serie en: ${eq.title}`;
+          }
+
+          const obj = codigoVal ? JSON.parse(codigoVal) : JSON.parse(serieVal);
+          const codigoNormalizado = normalize(obj.codigo).toUpperCase();
+
+          if (codigoNormalizado && codigoNormalizado !== 'S/C') {
+            const firma = `${normalize(obj.item)}||${codigoNormalizado}`;
+            if (usados.has(firma)) {
+              return `No puede repetir el mismo equipo en la misma ficha: ${eq.title}`;
+            }
+            usados.add(firma);
+          }
+        }
+      }
+
+      return '';
+    }
+
+    function collectPayload() {
+      const payload = {
+        general: {
+          fecha: document.getElementById('fecha').value,
+          unidad: document.getElementById('unidad').value,
+          servicio: document.getElementById('servicio').value,
+          responsable: document.getElementById('responsable').value,
+          documentoResponsable: document.getElementById('documentoResponsable').value,
+          turno: document.getElementById('turno').value,
+          supervisor: document.getElementById('supervisor').value,
+          documentoSupervisor: document.getElementById('documentoSupervisor').value
+        },
+        equipos: {}
+      };
+
+      EQUIPOS.forEach(eq => {
+        const card = document.getElementById(`${eq.key}_card`);
+
+        if (!card.classList.contains('active') && !card.classList.contains('complete')) {
+          if (eq.dual) {
+            payload.equipos[`${eq.key}1`] = { activo:false, codigo:'', serie:'', marca:'' };
+            payload.equipos[`${eq.key}2`] = { activo:false, codigo:'', serie:'', marca:'' };
+          } else {
+            payload.equipos[eq.key] = {
+              activo:false,
+              codigo:'',
+              serie:'',
+              marca:'',
+              driza:false,
+              portaCarraca:false,
+              portaMartillo:false
+            };
+          }
+          return;
+        }
+
+        if (eq.dual) {
+          [1, 2].forEach(n => {
+            const estado = document.getElementById(`${eq.key}_${n}_estado`).value;
+            const codigoVal = document.getElementById(`${eq.key}_${n}_codigo`).value;
+            const serieVal = document.getElementById(`${eq.key}_${n}_serie`).value;
+            const marca = document.getElementById(`${eq.key}_${n}_marca`).value || '';
+
+            if (estado !== 'SI') {
+              payload.equipos[`${eq.key}${n}`] = { activo:false, codigo:'', serie:'', marca:'' };
+              return;
+            }
+
+            let data = { codigo:'', serie:'', marca:'' };
+            if (codigoVal) data = JSON.parse(codigoVal);
+            else if (serieVal) data = JSON.parse(serieVal);
+
+            payload.equipos[`${eq.key}${n}`] = {
+              activo:true,
+              codigo:data.codigo || '',
+              serie:data.serie || '',
+              marca:data.marca || marca || ''
+            };
+          });
+        } else {
+          const codigoVal = document.getElementById(`${eq.key}_codigo`).value;
+          const serieVal = document.getElementById(`${eq.key}_serie`).value;
+          const marca = document.getElementById(`${eq.key}_marca`).value || '';
+          const driza = eq.hasDriza ? document.getElementById(`${eq.key}_driza`).value === 'SI' : false;
+          const portaCarraca = eq.hasPortas ? document.getElementById(`${eq.key}_portaCarraca`).value === 'SI' : false;
+          const portaMartillo = eq.hasPortas ? document.getElementById(`${eq.key}_portaMartillo`).value === 'SI' : false;
+
+          let data = { codigo:'', serie:'', marca:'' };
+          if (codigoVal) data = JSON.parse(codigoVal);
+          else if (serieVal) data = JSON.parse(serieVal);
+
+          payload.equipos[eq.key] = {
+            activo:true,
+            codigo:data.codigo || '',
+            serie:data.serie || '',
+            marca:data.marca || marca || '',
+            driza,
+            portaCarraca,
+            portaMartillo
+          };
+        }
+      });
+
+      return payload;
+    }
+
+    async function guardar() {
+      const err1 = validarPaso1();
+      if (err1) {
+        alert(err1);
+        goToStep1();
+        return;
+      }
+
+      const err2 = validarEquipos();
+      if (err2) {
+        alert(err2);
+        return;
+      }
+
+      const payload = collectPayload();
+      showLoading(true);
+
+      try {
+        const res = await apiCall("saveKardex", payload);
+        goToStep3(res.message || "Registro guardado correctamente.");
+      } catch (err) {
+        alert("Error al guardar: " + err.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function limpiarEquipos() {
+      EQUIPOS.forEach(eq => {
+        document.getElementById(`${eq.key}_card`).classList.remove('active', 'complete');
+        document.getElementById(`${eq.key}_status`).textContent = 'No seleccionado';
+
+        if (eq.dual) {
+          [1, 2].forEach(n => {
+            document.getElementById(`${eq.key}_${n}_estado`).value = '';
+            document.getElementById(`${eq.key}_${n}_codigo`).value = '';
+            document.getElementById(`${eq.key}_${n}_serie`).value = '';
+            document.getElementById(`${eq.key}_${n}_marca`).value = '';
+            document.getElementById(`${eq.key}_${n}_body`).classList.add('disabled');
+          });
+        } else {
+          document.getElementById(`${eq.key}_codigo`).value = '';
+          document.getElementById(`${eq.key}_serie`).value = '';
+          document.getElementById(`${eq.key}_marca`).value = '';
+
+          if (eq.hasDriza) {
+            document.getElementById(`${eq.key}_driza`).value = '';
+          }
+
+          if (eq.hasPortas) {
+            document.getElementById(`${eq.key}_portaCarraca`).value = '';
+            document.getElementById(`${eq.key}_portaMartillo`).value = '';
+          }
+        }
+      });
+    }
+
+    function limpiarTodo() {
+      setToday();
+      document.getElementById('unidad').value = '';
+      document.getElementById('servicio').innerHTML = '<option value="">Seleccione</option>';
+      document.getElementById('responsable').value = '';
+      document.getElementById('documentoResponsable').value = '';
+      document.getElementById('turno').value = '';
+      document.getElementById('supervisor').value = '';
+      document.getElementById('documentoSupervisor').value = '';
+      limpiarEquipos();
+    }
+
+    function cancelarFormulario() {
+      limpiarTodo();
+      goToStep1();
+    }
+
+    function actualizarEstadoTarjeta(key) {
+      const card = document.getElementById(`${key}_card`);
+      const status = document.getElementById(`${key}_status`);
+      const eq = EQUIPOS.find(x => x.key === key);
+
+      let completo = false;
+
+      if (eq.dual) {
+        for (let n = 1; n <= 2; n++) {
+          const estado = document.getElementById(`${key}_${n}_estado`).value;
+          const codigo = document.getElementById(`${key}_${n}_codigo`).value;
+          const serie = document.getElementById(`${key}_${n}_serie`).value;
+
+          if (estado === 'SI') {
+            if (codigo || serie) {
+              completo = true;
+            } else {
+              completo = false;
+              break;
+            }
+          }
+        }
+      } else {
+        const codigo = document.getElementById(`${key}_codigo`).value;
+        const serie = document.getElementById(`${key}_serie`).value;
+
+        if (codigo || serie) {
+          completo = true;
+        }
+      }
+
+      if (completo) {
+        card.classList.add('complete');
+      } else {
+        card.classList.remove('complete');
+      }
+
+      if (card.classList.contains('active')) {
+        status.textContent = completo ? 'Completo' : 'Seleccionado';
+      } else {
+        status.textContent = completo ? 'Completo' : 'No seleccionado';
+      }
+    }
+  </script>
+</body>
+</html>
