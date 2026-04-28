@@ -415,10 +415,9 @@
       </div>
     </section>
   </div>
-
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbywKDiXXawq0BkcWLhlW279LCBOjC6tWfBiKr8YAuH8MuEwWuFM025SDiKUV3jnnAlD/exec";
-
+    const API_URL = "https://script.google.com/macros/s/AKfycbzctYfYeN_KUF1Zteaww21gZz1s6AkOXPGlGYmwaoBUMYpeXOG2CU5l-3pWb9U_3UQ1OA/exec";
+    
     let baseData = {
       responsables: [],
       supervisores: [],
@@ -453,25 +452,40 @@
     });
 
     async function apiCall(action, payload = null) {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify({
-          action,
-          payload
-        })
-      });
+  return new Promise((resolve, reject) => {
+    const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
 
-      const data = await res.json();
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      script.remove();
 
       if (data && data.ok === false) {
-        throw new Error(data.message || "Error en Apps Script.");
+        reject(new Error(data.message || 'Error en Apps Script.'));
+      } else {
+        resolve(data);
       }
+    };
 
-      return data;
+    let url = API_URL +
+      '?action=' + encodeURIComponent(action) +
+      '&callback=' + encodeURIComponent(callbackName);
+
+    if (payload) {
+      url += '&payload=' + encodeURIComponent(JSON.stringify(payload));
     }
+
+    const script = document.createElement('script');
+    script.src = url;
+
+    script.onerror = function() {
+      delete window[callbackName];
+      script.remove();
+      reject(new Error('No se pudo conectar con Apps Script.'));
+    };
+
+    document.body.appendChild(script);
+  });
+}
 
     function showLoading(show) {
       document.getElementById('loading').classList.toggle('show', !!show);
