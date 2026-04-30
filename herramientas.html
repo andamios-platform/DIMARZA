@@ -465,19 +465,86 @@
     flex-direction:column;
   }
 }
-    @media (max-width: 640px){
+@media (max-width: 640px){
+
+  .app{
+    padding:10px;
+  }
+
+  .topbar{
+    padding:16px;
+    border-radius:18px;
+  }
+
+  .topbar h1{
+    font-size:20px;
+  }
+
+  .topbar p{
+    font-size:13px;
+  }
+
+  .steps{
+    gap:8px;
+  }
+
+  .step{
+    width:100%;
+    text-align:center;
+    font-size:13px;
+    padding:10px 12px;
+  }
+
+  .card{
+    padding:14px;
+    border-radius:16px;
+  }
+
+  .card h2{
+    font-size:18px;
+  }
+
+  .equipos-grid,
+  .grid-4,
+  .grid-3,
+  .grid-2{
+    grid-template-columns:1fr;
+  }
+
+  .equipo-card{
+    min-height:150px;
+    padding:14px;
+    border-radius:16px;
+  }
+
+  .equipo-card.active{
+    min-height:auto;
+  }
+
+  .equipo-title{
+    font-size:14px;
+  }
+
+  .equipo-status{
+    font-size:11px;
+  }
 
   .field input,
   .field select{
     font-size:16px;
+    padding:12px;
   }
 
+  .actions{
+    flex-direction:column;
+  }
+
+  button{
+    width:100%;
+    padding:14px;
+    font-size:15px;
+  }
 }
-    @media (max-width: 640px){
-
-  .equipo-card{
-    min-height:120px;
-  }
 
 }
   </style>
