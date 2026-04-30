@@ -149,6 +149,24 @@
       align-items:center;
       text-align:center;
       align-self:start;
+
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      color: white;
+      overflow: hidden;
+    }
+
+    .equipo-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    }
+
+    .equipo-card > * {
+      position: relative;
+      z-index: 1;
     }
 
     .equipo-card:hover{
@@ -158,22 +176,23 @@
 
     .equipo-card.active{
       border:2px solid var(--primary2);
-      background:#f8fbff;
+      background-color:#f8fbff;
       aspect-ratio:auto;
       align-items:stretch;
       text-align:left;
     }
-
+    
     .equipo-card.complete{
       border:2px solid #16a34a !important;
-      background:#e8fbe8 !important;
+      background-color:#e8fbe8 !important;
     }
 
     .equipo-title{
       font-weight:700;
-      color:#0f172a;
+      color:white;
       line-height:1.35;
       margin-bottom:10px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
     }
 
     .equipo-status{
@@ -303,6 +322,79 @@
         grid-template-columns:1fr;
       }
     }
+
+
+    .equipo-card.arnes6 {
+  background-image: url('img/ArnésMecánico6argollas.JPG');
+}
+
+.equipo-card.arnes4 {
+  background-image: url('img/ArnésMecánico4argollas.jpg');
+}
+
+.equipo-card.bloque {
+  background-image: url('img/BloqueRetráctilSafewazeDobleLatitude-Pde1.8mGanchoEscala.JPG');
+}
+
+.equipo-card.caboCon {
+  background-image: url('img/CaboenYMSAconamortiguadordeimpacto.png');
+}
+
+.equipo-card.caboSin {
+  background-image: url('img/Cabosinamortiguadordeimpacto.jpg');
+}
+
+.equipo-card.caja {
+  background-image: url('img/CajaHerramientasdeplácticoTRUPPER.JPG');
+}
+
+.equipo-card.correaje {
+  background-image: url('img/CorreajedeAndamiero.JPG');
+}
+
+.equipo-card.faja09 {
+  background-image: url('img/FajaAnclajeMSAdobleargolla0.9m.jpg');
+}
+
+.equipo-card.faja18 {
+  background-image: url('img/FajaAnclajeMSAdobleargolla1.8M.JPG');
+}
+
+.equipo-card.flexo5 {
+  background-image: url('img/Flexometrode5m.jpg');
+}
+
+.equipo-card.hombrera {
+  background-image: url('img/Hombreradecuero.JPG');
+}
+
+.equipo-card.kit {
+  background-image: url('img/KitAntitraumaMSAModel10063431.JPG');
+}
+
+.equipo-card.llaveCarraca {
+  background-image: url('img/LlaveCarrracaALFMANQLF-RW1922.jpg');
+}
+
+.equipo-card.llaveF8 {
+  background-image: url('img/LlaveFrancesa8.jpg');
+}
+
+.equipo-card.llaveM22 {
+  background-image: url('img/LlaveMixta22mm.JPG');
+}
+
+.equipo-card.martillo {
+  background-image: url('img/MartilloAndamieroALFMANACFH0075.jpg');
+}
+
+.equipo-card.nivel {
+  background-image: url('img/NiveldeManoSTANLEY9.JPG');
+}
+
+.equipo-card.rodillera {
+  background-image: url('img/Rodillera.JPG');
+}
   </style>
 </head>
 
@@ -596,7 +688,7 @@
 
       EQUIPOS.forEach(eq => {
         const card = document.createElement('div');
-        card.className = 'equipo-card';
+        card.className = `equipo-card ${eq.key}`;
         card.id = `${eq.key}_card`;
         card.onclick = () => toggleEquipoCard(eq.key);
 
