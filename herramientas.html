@@ -649,40 +649,21 @@
       loadInitialData();
     });
 
-    async function apiCall(action, payload = null) {
-  return new Promise((resolve, reject) => {
-    const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+async function apiCall(action, payload = null) {
+  let url = API_URL + '?action=' + encodeURIComponent(action);
 
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      script.remove();
+  if (payload) {
+    url += '&payload=' + encodeURIComponent(JSON.stringify(payload));
+  }
 
-      if (data && data.ok === false) {
-        reject(new Error(data.message || 'Error en Apps Script.'));
-      } else {
-        resolve(data);
-      }
-    };
+  const response = await fetch(url);
+  const data = await response.json();
 
-    let url = API_URL +
-      '?action=' + encodeURIComponent(action) +
-      '&callback=' + encodeURIComponent(callbackName);
+  if (data && data.ok === false) {
+    throw new Error(data.message || 'Error en Apps Script');
+  }
 
-    if (payload) {
-      url += '&payload=' + encodeURIComponent(JSON.stringify(payload));
-    }
-
-    const script = document.createElement('script');
-    script.src = url;
-
-    script.onerror = function() {
-      delete window[callbackName];
-      script.remove();
-      reject(new Error('No se pudo conectar con Apps Script.'));
-    };
-
-    document.body.appendChild(script);
-  });
+  return data;
 }
 
     function showLoading(show) {
