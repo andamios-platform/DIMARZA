@@ -626,9 +626,16 @@
         <p id="successText" class="success-text">Registro guardado correctamente.</p>
 
         <div class="actions" style="justify-content:center;">
-          <button class="btn-primary" type="button" onclick="nuevoRegistro()">Nuevo registro</button>
-          <button class="btn-secondary" type="button" onclick="location.href='index.html'">Volver al menú</button>
-        </div>
+        <button class="btn-success" type="button" onclick="enviarWhatsApp()">
+          Enviar por WhatsApp
+        </button>
+      
+        <button class="btn-primary" type="button" onclick="nuevoRegistro()">Nuevo registro</button>
+      
+        <button class="btn-secondary" type="button" onclick="location.href='index.html'">
+          Volver al menú
+        </button>
+      </div>
       </div>
     </section>
   </div>
@@ -1177,6 +1184,7 @@ async function apiCall(action, payload = null) {
       document.getElementById('step1Indicator').classList.add('active');
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.ultimoPdfUrl = null;
     }
 
     function validarPaso1() {
@@ -1360,6 +1368,11 @@ async function apiCall(action, payload = null) {
 
       try {
         const res = await apiCall("saveKardex", payload);
+        // 🔥 GUARDAR LINK DEL PDF
+        if (res.pdfUrl) {
+          window.ultimoPdfUrl = res.pdfUrl;
+        }
+       
         goToStep3(res.message || "Registro guardado correctamente.");
       } catch (err) {
         alert("Error al guardar: " + err.message);
@@ -1414,7 +1427,26 @@ async function apiCall(action, payload = null) {
       limpiarTodo();
       goToStep1();
     }
-
+    function enviarWhatsApp() {
+        if (!window.ultimoPdfUrl) {
+          alert("No se encontró el PDF.");
+          return;
+        }
+      
+        const numero = "51970961031";
+        const responsable = document.getElementById('responsable').value;
+        const unidad = document.getElementById('unidad').value;
+        
+        const mensaje =
+          "KARDEX GENERADO\n" +
+          "Responsable: " + responsable + "\n" +
+          "Unidad: " + unidad + "\n\n" +
+          window.ultimoPdfUrl;
+      
+        const url = "https://wa.me/" + numero + "?text=" + encodeURIComponent(mensaje);
+      
+        window.open(url, "_blank");
+      }
     function actualizarEstadoTarjeta(key) {
       const card = document.getElementById(`${key}_card`);
       const status = document.getElementById(`${key}_status`);
