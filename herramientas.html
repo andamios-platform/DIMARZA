@@ -792,7 +792,9 @@ async function apiCall(action, payload = null) {
     function onSupervisorChange() {
       const nombre = document.getElementById('supervisor').value;
       const found = baseData.supervisores.find(x => x.nombre === nombre);
+    
       document.getElementById('documentoSupervisor').value = found ? found.documento : '';
+      window.telefonoSupervisor = found ? found.telefono : '';
     }
 
     function getItemOptions(itemBase) {
@@ -1433,7 +1435,12 @@ async function apiCall(action, payload = null) {
           return;
         }
       
-        const numero = "51970961031";
+        if (!window.telefonoSupervisor) {
+          alert("El supervisor seleccionado no tiene teléfono registrado.");
+          return;
+        }
+        
+        const numero = "51" + window.telefonoSupervisor;
         const responsable = document.getElementById('responsable').value;
         const unidad = document.getElementById('unidad').value;
         
