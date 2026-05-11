@@ -68,16 +68,49 @@
       flex: 1;
     }
 
-    .btn {
-      display: block;
-      padding: 18px;
-      border-radius: 12px;
-      font-weight: bold;
-      background: #1a73e8;
-      color: white;
-      transition: 0.2s;
-      font-size: 16px;
-    }
+      .btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      
+        gap: 14px;
+      
+        padding: 25px 18px;
+      
+        border-radius: 16px;
+      
+        color: white;
+        font-weight: bold;
+        font-size: 17px;
+      
+        transition: 0.25s;
+      
+        box-shadow: 0 8px 20px rgba(0,0,0,0.20);
+      }
+      
+      .btn:hover {
+        transform: translateY(-6px) scale(1.03);
+      }
+      
+      .icono {
+        width: 55px;
+        height: 55px;
+      }
+      
+      /* COLORES */
+      
+      .inventario {
+        background: linear-gradient(135deg, #1565c0, #0d47a1);
+      }
+      
+      .desempeno {
+        background: linear-gradient(135deg, #00897b, #00695c);
+      }
+      
+      .herramientas {
+        background: linear-gradient(135deg, #ef6c00, #e65100);
+      }
 
     .btn:hover {
       background: #1558b0;
@@ -132,17 +165,24 @@
 </head>
 <body>
 
-  <div class="contenedor">
-    <h1>ANDAMIOS</h1>
-    <div class="sub">Seleccione una opción</div>
+<div class="botones">
 
-    <div class="botones">
-      <a class="btn" href="inventario.html">Inventario</a>
-      <a class="btn" href="evaluacion.html">Evaluación de Desempeño</a>
-      <a class="btn" href="herramientas.html">Herramientas</a>
+  <a class="btn inventario" href="inventario.html">
+    <img src="img/icon-inventario.png" class="icono">
+    <span>Inventario</span>
+  </a>
 
-    </div>
-  </div>
+  <a class="btn desempeno" href="evaluacion.html">
+    <img src="img/icon-desempeno.png" class="icono">
+    <span>Evaluación de Desempeño</span>
+  </a>
+
+  <a class="btn herramientas" href="herramientas.html">
+    <img src="img/icon-herramientas.png" class="icono">
+    <span>Herramientas</span>
+  </a>
+
+</div>
 
 </body>
 </html>
