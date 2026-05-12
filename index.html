@@ -42,13 +42,43 @@
       box-shadow: 0 12px 35px rgba(0,0,0,0.30);
     
       width: 100%;
-      max-width: 700px;
+      max-width: 850px;
     }
 
+    .titulo-principal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 12px;
+    }
+    
+    .logo {
+      width: 85px;
+      height: auto;
+    }
+    
+    .textos {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
     h1 {
-      margin-bottom: 10px;
-      color: #1a73e8;
-      font-size: 36px;
+      margin: 0;
+      color: #1565c0;
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    }
+    
+    .empresa {
+      color: #374151;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 6px;
     }
 
     .sub {
@@ -94,8 +124,8 @@
       }
       
       .icono {
-        width: 55px;
-        height: 55px;
+        width: 64px;
+        height: 64px;
       }
       
       /* COLORES */
@@ -118,8 +148,30 @@
         padding: 25px 20px;
       }
 
+      
+      .titulo-principal {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .textos {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      
+      .logo {
+        width: 70px;
+      }
+      
       h1 {
-        font-size: 28px;
+        font-size: 34px;
+      }
+      
+      .empresa {
+        font-size: 18px;
+        letter-spacing: 4px;
       }
 
       .sub {
