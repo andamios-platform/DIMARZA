@@ -168,6 +168,32 @@ Guardar Registro
 const WEB_APP_URL =
 "https://script.google.com/macros/s/AKfycbwW3fwko5KFkzYFAEl46BBOhI3rQubwFgS9fVO-i3cdKZaUrfIFTH9sTYizpcxikqNc/exec";
 
+const servicioSelect = document.getElementById("servicio");
+const camposSierraGorda = document.getElementById("camposSierraGorda");
+const toneladasInput = document.getElementById("toneladas");
+const tonelajeRealInput = document.getElementById("tonelajeReal");
+
+servicioSelect.addEventListener("change", () => {
+
+  const servicio = servicioSelect.value;
+
+  if (
+    servicio === "SIERRA GORDA DIMARZA" ||
+    servicio === "SIERRA GORDA SEMIVA"
+  ) {
+    camposSierraGorda.style.display = "block";
+    toneladasInput.required = true;
+    tonelajeRealInput.required = true;
+  } else {
+    camposSierraGorda.style.display = "none";
+    toneladasInput.required = false;
+    tonelajeRealInput.required = false;
+    toneladasInput.value = "";
+    tonelajeRealInput.value = "";
+  }
+
+});
+  
 document
 .getElementById("formulario")
 .addEventListener("submit", async(e)=>{
@@ -192,7 +218,13 @@ turnos:
 document.getElementById("turnos").value,
 
 costoSinIvaCLP:
-document.getElementById("costo").value
+document.getElementById("costo").value,
+
+toneladas:
+document.getElementById("toneladas").value,
+
+tonelajeReal:
+document.getElementById("tonelajeReal").value
 
 };
 
