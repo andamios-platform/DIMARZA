@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EDPS - Dimarza</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#0f172a;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+}
+
+.container{
+width:100%;
+max-width:700px;
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+h1{
+text-align:center;
+margin-bottom:25px;
+color:#0f172a;
+}
+
+.form-group{
+margin-bottom:18px;
+}
+
+label{
+display:block;
+margin-bottom:6px;
+font-weight:600;
+color:#334155;
+}
+
+input,
+select{
+width:100%;
+padding:12px;
+border:1px solid #cbd5e1;
+border-radius:10px;
+font-size:15px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:#0f172a;
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.02);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Registro EDPS</h1>
+
+<form id="formulario">
+
+<div class="form-group">
+<label>EDPS</label>
+<input type="text" id="edps" required>
+</div>
+
+<div class="form-group">
+<label>Servicio</label>
+
+<select id="servicio" required>
+<option value="">Seleccione</option>
+<option value="MONTAJE">MONTAJE</option>
+<option value="DESMONTAJE">DESMONTAJE</option>
+<option value="MODIFICACION">MODIFICACION</option>
+</select>
+
+</div>
+
+<div class="form-group">
+<label>Fecha Inicio</label>
+<input type="date" id="fechaInicio" required>
+</div>
+
+<div class="form-group">
+<label>Fecha Fin</label>
+<input type="date" id="fechaFin" required>
+</div>
+
+<div class="form-group">
+<label>Turnos</label>
+<input type="number" id="turnos" required>
+</div>
+
+<div class="form-group">
+<label>Costo Sin IVA (CLP)</label>
+<input type="number" id="costo" required>
+</div>
+
+<button type="submit">
+Guardar Registro
+</button>
+
+</form>
+
+</div>
+
+<script>
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/TU_LINK/exec";
+
+document
+.getElementById("formulario")
+.addEventListener("submit", async(e)=>{
+
+e.preventDefault();
+
+const data = {
+
+edps:
+document.getElementById("edps").value,
+
+servicio:
+document.getElementById("servicio").value,
+
+fechaInicio:
+document.getElementById("fechaInicio").value,
+
+fechaFin:
+document.getElementById("fechaFin").value,
+
+turnos:
+document.getElementById("turnos").value,
+
+costoSinIvaCLP:
+document.getElementById("costo").value
+
+};
+
+try{
+
+const response = await fetch(WEB_APP_URL, {
+
+method:"POST",
+
+body:JSON.stringify(data)
+
+});
+
+const resultado = await response.text();
+
+alert("Registro guardado correctamente");
+
+document.getElementById("formulario").reset();
+
+}catch(error){
+
+alert("Error al guardar");
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
