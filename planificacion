@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Importar Planificación - Dimarza</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0f172a;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:30px;
+}
+.container{
+  background:white;
+  max-width:900px;
+  width:100%;
+  padding:30px;
+  border-radius:20px;
+}
+h1{text-align:center;color:#0f172a;}
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+button{
+  background:#0f172a;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+  font-size:13px;
+}
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+}
+th{
+  background:#e5e7eb;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Importar Planificación</h1>
+
+  <input type="file" id="excelFile" accept=".xlsx,.xls">
+
+  <button onclick="procesarExcel()">Procesar Excel</button>
+  <button onclick="enviarDatos()">Enviar a Google Sheets</button>
+
+  <div id="resumen"></div>
+  <div id="vistaPrevia"></div>
+</div>
+
+<script>
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbyy7CDSuZSLgy2V9sUemGndXdsdDct6Ox2ucJTn6z0LlNErGfYvRwxgLcPbmfYVcSxP/exec";
+
+let registrosFiltrados = [];
+
+function limpiar(valor){
+  return String(valor || "").trim().toUpperCase();
+}
+
+function procesarExcel(){
+
+  const file = document.getElementById("excelFile").files[0];
+
+  if(!file){
+    alert("Selecciona un archivo Excel");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data,{type:"array"});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    const filas = XLSX.utils.sheet_to_json(sheet,{
+      header:1,
+      defval:""
+    });
+
+    const encabezados = filas[6];
+
+    const indexTAG = encabezados.indexOf("TAG");
+    const indexTarea = encabezados.indexOf("TAREA");
+    const indexOT = encabezados.indexOf("OT's PM");
+    const indexEmpresa = encabezados.indexOf("EMPRESA");
+    const indexAndamios = encabezados.indexOf("Andamios");
+
+    if(
+      indexTAG === -1 ||
+      indexTarea === -1 ||
+      indexOT === -1 ||
+      indexEmpresa === -1 ||
+      indexAndamios === -1
+    ){
+      alert("No se encontraron todas las columnas necesarias en la fila 7");
+      return;
+    }
+
+    registrosFiltrados = [];
+
+    for(let i = 7; i < filas.length; i++){
+
+      const fila = filas[i];
+
+      const empresa = limpiar(fila[indexEmpresa]);
+      const andamios = limpiar(fila[indexAndamios]);
+
+      if(empresa === "DIMARZA" && andamios === "SI"){
+
+        registrosFiltrados.push({
+          tag: fila[indexTAG],
+          tarea: fila[indexTarea],
+          ot: fila[indexOT],
+          empresa: fila[indexEmpresa]
+        });
+
+      }
+    }
+
+    mostrarVistaPrevia();
+
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+function mostrarVistaPrevia(){
+
+  document.getElementById("resumen").innerHTML =
+    `<p><b>${registrosFiltrados.length}</b> registros encontrados para importar.</p>`;
+
+  let html = `
+  <table>
+    <tr>
+      <th>TAG-C</th>
+      <th>ACTIVIDAD</th>
+      <th>OT</th>
+      <th>CONTRATISTA</th>
+    </tr>
+  `;
+
+  registrosFiltrados.slice(0,20).forEach(r=>{
+    html += `
+    <tr>
+      <td>${r.tag}</td>
+      <td>${r.tarea}</td>
+      <td>${r.ot}</td>
+      <td>${r.empresa}</td>
+    </tr>
+    `;
+  });
+
+  html += "</table>";
+
+  document.getElementById("vistaPrevia").innerHTML = html;
+}
+
+async function enviarDatos(){
+
+  if(registrosFiltrados.length === 0){
+    alert("Primero procesa un Excel válido");
+    return;
+  }
+
+  try{
+
+    const response = await fetch(WEB_APP_URL,{
+      method:"POST",
+      body:JSON.stringify({
+        registros: registrosFiltrados
+      })
+    });
+
+    const resultado = await response.text();
+
+    alert(resultado);
+
+  }catch(error){
+    alert("Error al enviar datos");
+  }
+}
+</script>
+
+</body>
+</html>
