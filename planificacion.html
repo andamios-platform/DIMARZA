@@ -198,7 +198,10 @@ async function enviarDatos(){
     const resultado = await response.text();
 
     alert(resultado);
-
+    registrosFiltrados = [];
+    document.getElementById("excelFile").value = "";
+    document.getElementById("resumen").innerHTML = "";
+    document.getElementById("vistaPrevia").innerHTML = "";
   }catch(error){
     alert("Error al enviar datos");
   }
