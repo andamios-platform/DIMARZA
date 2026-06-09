@@ -114,12 +114,13 @@
         
           letter-spacing: 1px;
         }
-
-    .botones {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-    }
+      
+        .botones {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
 
     a {
       text-decoration: none;
@@ -172,6 +173,9 @@
     .edps {
         background: linear-gradient(135deg, #7b1fa2, #4a148c);
       }
+    .planificacion {
+        background: linear-gradient(135deg, #5e35b1, #311b92);
+      }    
 
     /* 📱 MODO CELULAR */
     @media (max-width: 768px) {
@@ -285,6 +289,10 @@
       <a class="btn edps" href="edps.html">
         <img src="img/edps.png" class="icono">
         <span>EDPS</span>
+      </a>
+      <a class="btn planificacion" href="planificacion.html">
+        <img src="img/planificacion.png" class="icono">
+        <span>Planificación</span>
       </a>
 
     </div>
