@@ -3,236 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Importar Planificación - Dimarza</title>
+<title>Planificación - Dimarza</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#0f172a;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:30px;
-}
-.container{
-  background:white;
-  max-width:900px;
-  width:100%;
-  padding:30px;
-  border-radius:20px;
-}
-h1{text-align:center;color:#0f172a;}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-}
-button{
-  background:#0f172a;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:20px;
-  font-size:13px;
-}
-th,td{
-  border:1px solid #ddd;
-  padding:8px;
-}
-th{
-  background:#e5e7eb;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#0f172a;min-height:100vh;padding:30px;}
+.container{background:white;max-width:1000px;margin:auto;padding:30px;border-radius:20px;}
+h1,h2{text-align:center;color:#0f172a;}
+input,select,button{width:100%;padding:12px;margin-top:12px;border-radius:10px;border:1px solid #ccc;box-sizing:border-box;}
+button{background:#0f172a;color:white;font-weight:bold;cursor:pointer;}
+.bloque{border:1px solid #ddd;border-radius:15px;padding:20px;margin-top:25px;}
+table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px;}
+th,td{border:1px solid #ddd;padding:8px;}
+th{background:#e5e7eb;}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <h1>Importar Planificación</h1>
+<h1>Planificación Dimarza</h1>
 
-  <input type="text" id="parada" placeholder="Nombre de la parada" required>
-  <input type="text" id="planta" placeholder="Planta" required>
-  <input type="text" id="area" placeholder="Área" required>
+<div class="bloque">
+<h2>1. Cargar Actividades</h2>
 
-  <input type="file" id="excelFile" accept=".xlsx,.xls">
+<input type="text" id="parada" placeholder="Nombre de la parada">
+<input type="text" id="planta" placeholder="Planta">
+<input type="text" id="area" placeholder="Área">
 
-  <button onclick="procesarExcel()">Procesar Excel</button>
-  <button onclick="enviarDatos()">Enviar a Google Sheets</button>
+<input type="file" id="excelActividades" accept=".xlsx,.xls">
 
-  <div id="resumen"></div>
-  <div id="vistaPrevia"></div>
+<button onclick="procesarActividades()">Procesar Actividades</button>
+<button onclick="enviarActividades()">Enviar Actividades</button>
+
+<div id="resumenActividades"></div>
+<div id="tablaActividades"></div>
+</div>
+
+<div class="bloque">
+<h2>2. Cargar Gantt</h2>
+
+<select id="paradaGantt">
+<option value="">Seleccione parada</option>
+</select>
+
+<input type="file" id="excelGantt" accept=".xlsx,.xls">
+
+<button onclick="procesarGantt()">Procesar Gantt</button>
+<button onclick="enviarGantt()">Actualizar con Gantt</button>
+
+<div id="resumenGantt"></div>
+<div id="tablaGantt"></div>
+</div>
+
 </div>
 
 <script>
 const WEB_APP_URL =
 "https://script.google.com/macros/s/AKfycbwWDyT47LtsHZB8LZUGQ1rxAAoRWvqT1M8fD0alhdqmrUFP-hXgZhPszzTofH9CLJrv/exec";
 
-let registrosFiltrados = [];
+let actividades = [];
+let gantt = [];
 
-function limpiar(valor){
-  return String(valor || "").trim().toUpperCase();
+function limpiar(v){
+  return String(v || "").trim().toUpperCase();
 }
 
-function procesarExcel(){
+async function cargarParadas(){
+  const res = await fetch(WEB_APP_URL);
+  const paradas = await res.json();
+
+  const select = document.getElementById("paradaGantt");
+  select.innerHTML = `<option value="">Seleccione parada</option>`;
+
+  paradas.forEach(p=>{
+    select.innerHTML += `<option value="${p}">${p}</option>`;
+  });
+}
+
+cargarParadas();
+
+function procesarActividades(){
 
   const parada = document.getElementById("parada").value.trim();
   const planta = document.getElementById("planta").value.trim();
   const area = document.getElementById("area").value.trim();
 
   if(!parada || !planta || !area){
-    alert("Completa Parada, Planta y Área antes de procesar");
+    alert("Completa Parada, Planta y Área");
     return;
   }
 
-  const file = document.getElementById("excelFile").files[0];
+  const file = document.getElementById("excelActividades").files[0];
 
   if(!file){
-    alert("Selecciona un archivo Excel");
+    alert("Selecciona el Excel de actividades");
     return;
   }
 
   const reader = new FileReader();
 
   reader.onload = function(e){
-
     const data = new Uint8Array(e.target.result);
     const workbook = XLSX.read(data,{type:"array"});
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    const filas = XLSX.utils.sheet_to_json(sheet,{
-      header:1,
-      defval:""
-    });
-
+    const filas = XLSX.utils.sheet_to_json(sheet,{header:1,defval:""});
     const encabezados = filas[6];
 
-    const indexTAG = encabezados.indexOf("TAG");
-    const indexTarea = encabezados.indexOf("TAREA");
-    const indexOT = encabezados.indexOf("OT's PM");
-    const indexEmpresa = encabezados.indexOf("EMPRESA");
-    const indexAndamios = encabezados.indexOf("Andamios");
+    const iTAG = encabezados.indexOf("TAG");
+    const iTarea = encabezados.indexOf("TAREA");
+    const iOT = encabezados.indexOf("OT's PM");
+    const iEmpresa = encabezados.indexOf("EMPRESA");
+    const iAndamios = encabezados.indexOf("Andamios");
 
-    if(
-      indexTAG === -1 ||
-      indexTarea === -1 ||
-      indexOT === -1 ||
-      indexEmpresa === -1 ||
-      indexAndamios === -1
-    ){
-      alert("No se encontraron todas las columnas necesarias en la fila 7");
+    if(iTAG === -1 || iTarea === -1 || iOT === -1 || iEmpresa === -1 || iAndamios === -1){
+      alert("No se encontraron columnas necesarias en fila 7");
       return;
     }
 
-    registrosFiltrados = [];
+    actividades = [];
 
-    for(let i = 7; i < filas.length; i++){
-
+    for(let i=7; i<filas.length; i++){
       const fila = filas[i];
 
-      const empresa = limpiar(fila[indexEmpresa]);
-      const andamios = limpiar(fila[indexAndamios]);
-
-      if(empresa === "DIMARZA" && andamios === "SI"){
-
-        registrosFiltrados.push({
-          parada: parada,
-          planta: planta,
-          area: area,
-          tag: fila[indexTAG],
-          tarea: fila[indexTarea],
-          ot: fila[indexOT],
-          empresa: fila[indexEmpresa]
+      if(limpiar(fila[iEmpresa]) === "DIMARZA" && limpiar(fila[iAndamios]) === "SI"){
+        actividades.push({
+          parada,
+          planta,
+          area,
+          tag: fila[iTAG],
+          ot: fila[iOT],
+          tarea: fila[iTarea],
+          empresa: fila[iEmpresa]
         });
-
       }
     }
 
-    mostrarVistaPrevia();
-
+    mostrarActividades();
   };
 
   reader.readAsArrayBuffer(file);
 }
 
-function mostrarVistaPrevia(){
+function mostrarActividades(){
+  document.getElementById("resumenActividades").innerHTML =
+  `<p><b>${actividades.length}</b> actividades encontradas.</p>`;
 
-  document.getElementById("resumen").innerHTML =
-    `<p><b>${registrosFiltrados.length}</b> registros encontrados para importar.</p>`;
+  let html = `<table><tr><th>Parada</th><th>Planta</th><th>Área</th><th>TAG</th><th>OT</th><th>Actividad</th></tr>`;
 
-  let html = `
-  <table>
-    <tr>
-      <th>PARADA</th>
-      <th>PLANTA</th>
-      <th>ÁREA</th>
-      <th>TAG-C</th>
-      <th>OT</th>
-      <th>ACTIVIDAD</th>
-      <th>CONTRATISTA</th>
-    </tr>
-  `;
-
-  registrosFiltrados.slice(0,20).forEach(r=>{
-    html += `
-    <tr>
-      <td>${r.parada}</td>
-      <td>${r.planta}</td>
-      <td>${r.area}</td>
-      <td>${r.tag}</td>
-      <td>${r.ot}</td>
-      <td>${r.tarea}</td>
-      <td>${r.empresa}</td>
-    </tr>
-    `;
+  actividades.slice(0,20).forEach(r=>{
+    html += `<tr><td>${r.parada}</td><td>${r.planta}</td><td>${r.area}</td><td>${r.tag}</td><td>${r.ot}</td><td>${r.tarea}</td></tr>`;
   });
 
-  html += "</table>";
-
-  document.getElementById("vistaPrevia").innerHTML = html;
+  html += `</table>`;
+  document.getElementById("tablaActividades").innerHTML = html;
 }
 
-async function enviarDatos(){
-
-  if(registrosFiltrados.length === 0){
-    alert("Primero procesa un Excel válido");
+async function enviarActividades(){
+  if(actividades.length === 0){
+    alert("Primero procesa actividades");
     return;
   }
 
-  try{
+  const res = await fetch(WEB_APP_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      tipo:"ACTIVIDADES",
+      registros:actividades
+    })
+  });
 
-    const response = await fetch(WEB_APP_URL,{
-      method:"POST",
-      body:JSON.stringify({
-        registros: registrosFiltrados
-      })
-    });
+  alert(await res.text());
 
-    const resultado = await response.text();
+  actividades = [];
+  document.getElementById("parada").value = "";
+  document.getElementById("planta").value = "";
+  document.getElementById("area").value = "";
+  document.getElementById("excelActividades").value = "";
+  document.getElementById("resumenActividades").innerHTML = "";
+  document.getElementById("tablaActividades").innerHTML = "";
 
-    alert(resultado);
+  cargarParadas();
+}
 
-    registrosFiltrados = [];
-    document.getElementById("parada").value = "";
-    document.getElementById("planta").value = "";
-    document.getElementById("area").value = "";
-    document.getElementById("excelFile").value = "";
-    document.getElementById("resumen").innerHTML = "";
-    document.getElementById("vistaPrevia").innerHTML = "";
+function procesarGantt(){
 
-  }catch(error){
-    alert("Error al enviar datos");
+  const parada = document.getElementById("paradaGantt").value;
+
+  if(!parada){
+    alert("Selecciona una parada");
+    return;
   }
+
+  const file = document.getElementById("excelGantt").files[0];
+
+  if(!file){
+    alert("Selecciona el Excel del Gantt");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data,{type:"array"});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    const filas = XLSX.utils.sheet_to_json(sheet,{defval:""});
+
+    gantt = filas.map(r=>({
+      ot: r["OT"],
+      comienzo: r["Comienzo"],
+      fin: r["Fin"],
+      duracion: r["Duración"],
+      personas: r["N° personas"]
+    })).filter(r=>r.ot);
+
+    mostrarGantt();
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+function mostrarGantt(){
+  document.getElementById("resumenGantt").innerHTML =
+  `<p><b>${gantt.length}</b> registros del Gantt encontrados.</p>`;
+
+  let html = `<table><tr><th>OT</th><th>Comienzo</th><th>Fin</th><th>Duración</th><th>Personas</th></tr>`;
+
+  gantt.slice(0,20).forEach(r=>{
+    html += `<tr><td>${r.ot}</td><td>${r.comienzo}</td><td>${r.fin}</td><td>${r.duracion}</td><td>${r.personas}</td></tr>`;
+  });
+
+  html += `</table>`;
+  document.getElementById("tablaGantt").innerHTML = html;
+}
+
+async function enviarGantt(){
+  const parada = document.getElementById("paradaGantt").value;
+
+  if(!parada || gantt.length === 0){
+    alert("Selecciona parada y procesa el Gantt");
+    return;
+  }
+
+  const res = await fetch(WEB_APP_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      tipo:"GANTT",
+      parada:parada,
+      registros:gantt
+    })
+  });
+
+  alert(await res.text());
+
+  gantt = [];
+  document.getElementById("excelGantt").value = "";
+  document.getElementById("resumenGantt").innerHTML = "";
+  document.getElementById("tablaGantt").innerHTML = "";
 }
 </script>
 
