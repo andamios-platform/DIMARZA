@@ -32,6 +32,7 @@ input,button{
   margin-top:12px;
   border-radius:10px;
   border:1px solid #ccc;
+  box-sizing:border-box;
 }
 button{
   background:#0f172a;
@@ -60,6 +61,10 @@ th{
 <div class="container">
   <h1>Importar Planificación</h1>
 
+  <input type="text" id="parada" placeholder="Nombre de la parada" required>
+  <input type="text" id="planta" placeholder="Planta" required>
+  <input type="text" id="area" placeholder="Área" required>
+
   <input type="file" id="excelFile" accept=".xlsx,.xls">
 
   <button onclick="procesarExcel()">Procesar Excel</button>
@@ -71,7 +76,7 @@ th{
 
 <script>
 const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbyy7CDSuZSLgy2V9sUemGndXdsdDct6Ox2ucJTn6z0LlNErGfYvRwxgLcPbmfYVcSxP/exec";
+"https://script.google.com/macros/s/AKfycbwWDyT47LtsHZB8LZUGQ1rxAAoRWvqT1M8fD0alhdqmrUFP-hXgZhPszzTofH9CLJrv/exec";
 
 let registrosFiltrados = [];
 
@@ -80,6 +85,15 @@ function limpiar(valor){
 }
 
 function procesarExcel(){
+
+  const parada = document.getElementById("parada").value.trim();
+  const planta = document.getElementById("planta").value.trim();
+  const area = document.getElementById("area").value.trim();
+
+  if(!parada || !planta || !area){
+    alert("Completa Parada, Planta y Área antes de procesar");
+    return;
+  }
 
   const file = document.getElementById("excelFile").files[0];
 
@@ -132,6 +146,9 @@ function procesarExcel(){
       if(empresa === "DIMARZA" && andamios === "SI"){
 
         registrosFiltrados.push({
+          parada: parada,
+          planta: planta,
+          area: area,
           tag: fila[indexTAG],
           tarea: fila[indexTarea],
           ot: fila[indexOT],
@@ -156,9 +173,12 @@ function mostrarVistaPrevia(){
   let html = `
   <table>
     <tr>
+      <th>PARADA</th>
+      <th>PLANTA</th>
+      <th>ÁREA</th>
       <th>TAG-C</th>
-      <th>ACTIVIDAD</th>
       <th>OT</th>
+      <th>ACTIVIDAD</th>
       <th>CONTRATISTA</th>
     </tr>
   `;
@@ -166,9 +186,12 @@ function mostrarVistaPrevia(){
   registrosFiltrados.slice(0,20).forEach(r=>{
     html += `
     <tr>
+      <td>${r.parada}</td>
+      <td>${r.planta}</td>
+      <td>${r.area}</td>
       <td>${r.tag}</td>
-      <td>${r.tarea}</td>
       <td>${r.ot}</td>
+      <td>${r.tarea}</td>
       <td>${r.empresa}</td>
     </tr>
     `;
@@ -198,10 +221,15 @@ async function enviarDatos(){
     const resultado = await response.text();
 
     alert(resultado);
+
     registrosFiltrados = [];
+    document.getElementById("parada").value = "";
+    document.getElementById("planta").value = "";
+    document.getElementById("area").value = "";
     document.getElementById("excelFile").value = "";
     document.getElementById("resumen").innerHTML = "";
     document.getElementById("vistaPrevia").innerHTML = "";
+
   }catch(error){
     alert("Error al enviar datos");
   }
