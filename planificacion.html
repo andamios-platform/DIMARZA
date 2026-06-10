@@ -319,13 +319,21 @@ function procesarGantt(){
 
     const filas = XLSX.utils.sheet_to_json(sheet,{defval:""});
 
-    gantt = filas.map(r=>({
-      ot: r["OT"],
-      comienzo: r["Comienzo"],
-      fin: r["Fin"],
-      duracion: r["Duración"],
-      personas: r["N° personas"]
-    })).filter(r=>r.ot);
+    gantt = filas
+  .filter(r => {
+    const ot = limpiar(r["OT"]);
+    const actividad = limpiar(r["Nombre de tarea"]);
+
+    return ot !== "" && actividad.includes("ANDAMIO");
+  })
+  .map(r => ({
+    ot: r["OT"],
+    actividadGantt: r["Nombre de tarea"],
+    comienzo: r["Comienzo"],
+    fin: r["Fin"],
+    duracion: r["Duración"],
+    personas: r["N° personas"]
+  }));
 
     mostrarGantt();
   };
@@ -335,12 +343,27 @@ function procesarGantt(){
 
 function mostrarGantt(){
   document.getElementById("resumenGantt").innerHTML =
-  `<p><b>${gantt.length}</b> registros del Gantt encontrados.</p>`;
+  `<p><b>${gantt.length}</b> actividades de andamios encontradas en el Gantt.</p>`;
 
-  let html = `<table><tr><th>OT</th><th>Comienzo</th><th>Fin</th><th>Duración</th><th>Personas</th></tr>`;
+  let html = `<table>
+    <tr>
+      <th>OT</th>
+      <th>Actividad detectada</th>
+      <th>Comienzo</th>
+      <th>Fin</th>
+      <th>Duración</th>
+      <th>Personas</th>
+    </tr>`;
 
   gantt.slice(0,20).forEach(r=>{
-    html += `<tr><td>${r.ot}</td><td>${r.comienzo}</td><td>${r.fin}</td><td>${r.duracion}</td><td>${r.personas}</td></tr>`;
+    html += `<tr>
+      <td>${r.ot}</td>
+      <td>${r.actividadGantt}</td>
+      <td>${r.comienzo}</td>
+      <td>${r.fin}</td>
+      <td>${r.duracion}</td>
+      <td>${r.personas}</td>
+    </tr>`;
   });
 
   html += `</table>`;
