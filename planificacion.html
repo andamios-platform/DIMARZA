@@ -148,7 +148,7 @@ th{
 
 <script>
 const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbzNMwqZNaabk4W6EIKy8iv4CYvbOIPs-2dLuASiTFr5I_Vopj5vdARXha6SmHRMWjhg/exec";
+"https://script.google.com/macros/s/AKfycbwav0zWo92vEtHKq9EnaCNlBYw-3fc-Egi6WL_jSlBUJfEu3lsSJu1zzqsblWb0UHOG/exec";
 
 let actividades = [];
 let gantt = [];
@@ -319,22 +319,36 @@ function procesarGantt(){
 
     const filas = XLSX.utils.sheet_to_json(sheet,{defval:""});
 
-    gantt = filas
-  .filter(r => {
-    const ot = limpiar(r["OT"]);
+  gantt = filas
+  .map(r => {
     const actividad = limpiar(r["Nombre de tarea"]);
+    let tipo = "";
 
-    return ot !== "" && actividad.includes("ANDAMIO");
+    if (actividad.includes("ACARREO")) {
+      tipo = "ACARREO";
+    } else if (
+      actividad.includes("DESARME") &&
+      actividad.includes("ANDAMIO")
+    ) {
+      tipo = "DESMONTAJE";
+    } else if (
+      actividad.includes("ARMADO") &&
+      actividad.includes("ANDAMIO")
+    ) {
+      tipo = "MONTAJE";
+    }
+
+    return {
+      ot: r["OT"],
+      actividadGantt: r["Nombre de tarea"],
+      tipo: tipo,
+      comienzo: r["Comienzo"],
+      fin: r["Fin"],
+      duracion: r["Duración"],
+      personas: r["N° personas"]
+    };
   })
-  .map(r => ({
-    ot: r["OT"],
-    actividadGantt: r["Nombre de tarea"],
-    comienzo: r["Comienzo"],
-    fin: r["Fin"],
-    duracion: r["Duración"],
-    personas: r["N° personas"]
-  }));
-
+  .filter(r => r.ot && r.tipo !== "");
     mostrarGantt();
   };
 
