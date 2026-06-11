@@ -419,8 +419,9 @@ function mostrarGantt(){
 
   document.getElementById("resumenGantt").innerHTML =
   `<p><b>${gantt.length}</b> actividades de andamios encontradas.</p>
-   <p><b>${sinOT}</b> actividades necesitan asignar OT manualmente.</p>`;
+  <p><b>${sinOT}</b> actividades no tienen OT. Puedes escribirla manualmente o eliminar la fila.</p>
 
+  
   let html = `<table>
     <tr>
       <th>Eliminar</th>
@@ -445,11 +446,13 @@ function mostrarGantt(){
     });
 
     html += `<tr>
-      <td><button class="eliminar" onclick="eliminarGantt(${index})">🗑</button></td>
-      <td>
-        <select onchange="actualizarOTGantt(${index}, this.value)">
-          ${opcionesOT}
-        </select>
+           <td>
+        <input
+          type="text"
+          value="${r.ot || ""}"
+          placeholder="Ingrese OT"
+          onchange="actualizarOTGantt(${index}, this.value)"
+        >
       </td>
       <td>${r.tipo}</td>
       <td>${r.actividadGantt}</td>
@@ -481,12 +484,7 @@ async function enviarGantt(){
     return;
   }
 
-  if(gantt.some(r => !r.ot)){
-    alert("Hay actividades del Gantt sin OT asignada");
-    return;
-  }
-
-  const res = await fetch(WEB_APP_URL,{
+   const res = await fetch(WEB_APP_URL,{
     method:"POST",
     body:JSON.stringify({
       tipo:"GANTT",
