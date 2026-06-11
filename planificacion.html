@@ -419,9 +419,8 @@ function mostrarGantt(){
 
   document.getElementById("resumenGantt").innerHTML =
   `<p><b>${gantt.length}</b> actividades de andamios encontradas.</p>
-  <p><b>${sinOT}</b> actividades no tienen OT. Puedes escribirla manualmente o eliminar la fila.</p>
+   <p><b>${sinOT}</b> actividades no tienen OT. Puedes escribirla manualmente o eliminar la fila.</p>`;
 
-  
   let html = `<table>
     <tr>
       <th>Eliminar</th>
@@ -435,18 +434,9 @@ function mostrarGantt(){
     </tr>`;
 
   gantt.forEach((r,index)=>{
-
-    let opcionesOT = `<option value="">Seleccione OT</option>`;
-
-    otsParada.forEach(ot=>{
-      opcionesOT += `
-        <option value="${ot}" ${String(r.ot) === String(ot) ? "selected" : ""}>
-          ${ot}
-        </option>`;
-    });
-
     html += `<tr>
-           <td>
+      <td><button class="eliminar" onclick="eliminarGantt(${index})">🗑</button></td>
+      <td>
         <input
           type="text"
           value="${r.ot || ""}"
