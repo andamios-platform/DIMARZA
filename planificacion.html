@@ -93,6 +93,7 @@ th{
 <div id="menuPrincipal" class="menu">
   <button onclick="mostrarModulo('actividades')">📄 Cargar Actividades</button>
   <button onclick="mostrarModulo('gantt')">📅 Cargar Gantt</button>
+  <button onclick="mostrarModulo('corregir')">✏️ Corregir OT</button>
 </div>
 
 <div id="moduloActividades" class="bloque">
@@ -131,11 +132,28 @@ th{
 <div id="tablaGantt"></div>
 </div>
 
+<div id="moduloCorregir" class="bloque">
+<h2>Corregir OT Faltantes</h2>
+
+<button class="volver" onclick="volverMenu()">← Volver al menú</button>
+
+<select id="paradaCorregir">
+<option value="">Seleccione parada</option>
+</select>
+
+<button onclick="buscarOTFaltantes()">Buscar OT faltantes</button>
+<button onclick="guardarOTCorregidas()">Guardar correcciones</button>
+
+<div id="resumenCorregir"></div>
+<div id="tablaCorregir"></div>
+</div>
+
+  
 </div>
 
 <script>
 const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbxFRdvleePV-NW1FSbV1q-Yh6bdeH7d7xZFip4y66dMa1PWACtx4qB9PYlvuTRi8j9B/exec";
+"https://script.google.com/macros/s/AKfycbxx2oE2bMpxvrEU0jW44SWe0t4BDa9jn7zUtEBCL6v_zpn3cfnlg8CI-VcbNdbCU04/exec";
 
 let actividades = [];
 let gantt = [];
@@ -145,6 +163,11 @@ function mostrarModulo(tipo){
   document.getElementById("menuPrincipal").style.display = "none";
   document.getElementById("moduloActividades").style.display = "none";
   document.getElementById("moduloGantt").style.display = "none";
+  document.getElementById("moduloCorregir").style.display = "none";
+  if(tipo === "corregir"){
+  document.getElementById("moduloCorregir").style.display = "block";
+  cargarParadasCorregir();
+}
 
   if(tipo === "actividades"){
     document.getElementById("moduloActividades").style.display = "block";
@@ -160,6 +183,7 @@ function volverMenu(){
   document.getElementById("menuPrincipal").style.display = "flex";
   document.getElementById("moduloActividades").style.display = "none";
   document.getElementById("moduloGantt").style.display = "none";
+  document.getElementById("moduloCorregir").style.display = "none";
 }
 
 function limpiar(v){
@@ -489,6 +513,104 @@ async function enviarGantt(){
   document.getElementById("excelGantt").value = "";
   document.getElementById("resumenGantt").innerHTML = "";
   document.getElementById("tablaGantt").innerHTML = "";
+}
+
+
+  let otFaltantes = [];
+
+async function cargarParadasCorregir(){
+  const res = await fetch(WEB_APP_URL);
+  const paradas = await res.json();
+
+  const select = document.getElementById("paradaCorregir");
+  select.innerHTML = `<option value="">Seleccione parada</option>`;
+
+  paradas.forEach(p=>{
+    select.innerHTML += `<option value="${p}">${p}</option>`;
+  });
+}
+
+async function buscarOTFaltantes(){
+  const parada = document.getElementById("paradaCorregir").value;
+
+  if(!parada){
+    alert("Selecciona una parada");
+    return;
+  }
+
+  const res = await fetch(
+    WEB_APP_URL + "?accion=ots_faltantes&parada=" + encodeURIComponent(parada)
+  );
+
+  otFaltantes = await res.json();
+
+  mostrarOTFaltantes();
+}
+
+function mostrarOTFaltantes(){
+  document.getElementById("resumenCorregir").innerHTML =
+  `<p><b>${otFaltantes.length}</b> registros sin OT encontrados.</p>`;
+
+  let html = `<table>
+    <tr>
+      <th>Eliminar</th>
+      <th>Fila</th>
+      <th>TAG</th>
+      <th>Actividad</th>
+      <th>OT</th>
+    </tr>`;
+
+  otFaltantes.forEach((r,index)=>{
+    html += `<tr>
+      <td><button class="eliminar" onclick="eliminarOTFaltante(${index})">🗑</button></td>
+      <td>${r.fila}</td>
+      <td>${r.tag}</td>
+      <td>${r.actividad}</td>
+      <td>
+        <input
+          type="text"
+          value="${r.ot || ""}"
+          placeholder="Ingrese OT"
+          onchange="actualizarOTFaltante(${index}, this.value)"
+        >
+      </td>
+    </tr>`;
+  });
+
+  html += `</table>`;
+  document.getElementById("tablaCorregir").innerHTML = html;
+}
+
+function actualizarOTFaltante(index, valor){
+  otFaltantes[index].ot = valor;
+}
+
+function eliminarOTFaltante(index){
+  otFaltantes.splice(index, 1);
+  mostrarOTFaltantes();
+}
+
+async function guardarOTCorregidas(){
+  const corregidas = otFaltantes.filter(r => r.ot && String(r.ot).trim() !== "");
+
+  if(corregidas.length === 0){
+    alert("No hay OT corregidas para guardar");
+    return;
+  }
+
+  const res = await fetch(WEB_APP_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      tipo:"CORREGIR_OT",
+      registros:corregidas
+    })
+  });
+
+  alert(await res.text());
+
+  otFaltantes = [];
+  document.getElementById("resumenCorregir").innerHTML = "";
+  document.getElementById("tablaCorregir").innerHTML = "";
 }
 </script>
 
