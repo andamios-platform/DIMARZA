@@ -556,6 +556,8 @@
 
       if (!unidad) {
         selectServicio.innerHTML = '<option value="">Seleccione primero una unidad minera</option>';
+
+
         return;
       }
 
@@ -578,6 +580,7 @@
 
       if (!cargo) {
         select.innerHTML = '<option value="">Seleccione primero un cargo</option>';
+
         return;
       }
 
@@ -607,6 +610,7 @@
 
       if (!cargoEvaluado) {
         select.innerHTML = '<option value="">Seleccione primero un cargo</option>';
+
         return;
       }
 
@@ -690,6 +694,7 @@
 
       if (!fecha || !cargoEvaluador || !evaluadorNombre) {
         setMensaje("Complete todos los campos de la primera página.");
+
         return;
       }
 
@@ -759,6 +764,8 @@
 
       if (!fecha || !cargoEvaluador || !evaluadorNombre || !unidadMinera || !servicio || !cargoEvaluado || !evaluadoNombre) {
         setMensaje("Complete todos los campos antes de guardar.");
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = "Guardar evaluación";
         return;
       }
 
@@ -767,6 +774,8 @@
         const seleccionado = document.querySelector(`input[name="item${i}"]:checked`);
         if (!seleccionado) {
           setMensaje(`Falta seleccionar una opción en el criterio ${i}.`);
+              btnGuardar.disabled = false;
+              btnGuardar.innerText = "Guardar evaluación";
           return;
         }
         puntajes.push(Number(seleccionado.value));
@@ -803,6 +812,8 @@
         document.getElementById("evaluadoNombre").innerHTML = '<option value="">Seleccione primero un cargo</option>';
 
         window.scrollTo({ top: 0, behavior: "smooth" });
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = "Guardar evaluación";
       } catch (error) {
         setMensaje("Error: " + error.message);
         btnGuardar.disabled = false;
