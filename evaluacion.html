@@ -411,7 +411,7 @@
 
       <div class="acciones">
         <button class="btn-secundario" type="button" onclick="volverAPaso1()">Atrás</button>
-        <button class="btn-principal" type="button" onclick="guardarTodo()">Guardar evaluación</button>
+        <button id="btnGuardarEvaluacion" class="btn-principal" type="button" onclick="guardarTodo()">Guardar evaluación</button>
       </div>
     </div>
 
@@ -419,7 +419,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwT6GKaVcq82bYkV58znslYAbgt2q79RSAWyJXlaC7Xkj6KMyMtVeXCWowlg985m2tSCA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwePhcC00uUjdqXa6A59RxSQOx0yiMZxXnU9NkqJ1qSYo_QRlQllRtDpTw4YJzZKu16dw/exec";
     let config = null;
 
     const estructura = [
@@ -739,6 +739,16 @@
     }
 
     async function guardarTodo() {
+
+      const btnGuardar = document.getElementById("btnGuardarEvaluacion");
+
+      if (btnGuardar.disabled) {
+        return;
+      }
+      
+      btnGuardar.disabled = true;
+      btnGuardar.innerText = "Guardando...";
+      
       const fecha = document.getElementById("fecha").value;
       const cargoEvaluador = document.getElementById("cargoEvaluador").value;
       const evaluadorNombre = document.getElementById("evaluadorNombre").value;
@@ -795,6 +805,8 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (error) {
         setMensaje("Error: " + error.message);
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = "Guardar evaluación";
       }
     }
 
