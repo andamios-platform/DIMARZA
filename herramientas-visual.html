@@ -278,6 +278,117 @@ th,td{
     text-align:center;
   }
 }
+
+  .modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    z-index:9999;
+
+    justify-content:center;
+    align-items:center;
+
+    padding:25px;
+}
+
+.modal-contenido{
+
+    background:white;
+
+    width:100%;
+    max-width:950px;
+
+    border-radius:20px;
+
+    padding:25px;
+
+    max-height:90vh;
+
+    overflow:auto;
+
+    position:relative;
+
+    animation:aparecer .25s ease;
+}
+
+@keyframes aparecer{
+
+from{
+
+transform:scale(.9);
+
+opacity:0;
+
+}
+
+to{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+}
+
+.cerrar{
+
+position:absolute;
+
+right:18px;
+
+top:12px;
+
+font-size:35px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+.modal-img{
+
+width:230px;
+
+height:230px;
+
+background-size:contain;
+
+background-repeat:no-repeat;
+
+background-position:center;
+
+margin:auto;
+
+margin-bottom:20px;
+
+}
+
+.modal h2{
+
+text-align:center;
+
+margin-bottom:20px;
+
+}
+
+.modal-resumen{
+
+display:flex;
+
+justify-content:center;
+
+gap:35px;
+
+margin-bottom:20px;
+
+font-weight:bold;
+
+font-size:18px;
+
+}
 </style>
 </head>
 
@@ -388,7 +499,10 @@ async function cargarInventario(){
 
 function pintarResumen(data){
 
-  const activos = data.filter(x => (x.codigo || "").trim() !== "");
+  const activos = data.filter(x =>
+  (x.codigo || "").trim() !== "" &&
+  !normal(x.item).includes("DRIZA")
+);
 
   const disponibles = activos.filter(x => normal(x.estado) === "DISPONIBLE").length;
 
@@ -418,6 +532,7 @@ function pintarInventario(data){
   });
 
   Object.keys(agrupado).sort((a,b)=>a.localeCompare(b,"es")).forEach(nombre => {
+    if (normal(nombre).includes("DRIZA")) return;
     const lista = agrupado[nombre].filter(x => (x.codigo || "").trim() !== "");
     const disponibles = lista.filter(x => normal(x.estado) === "DISPONIBLE").length;
     const entregadas = lista.filter(x => normal(x.estado) === "ENTREGADO").length;
@@ -426,73 +541,44 @@ function pintarInventario(data){
     const card = document.createElement("div");
     card.className = "equipo-card";
 
-    card.innerHTML = `
-      <div class="equipo-img" style="background-image:url('${imagen}')"></div>
+card.innerHTML = `
+<div class="equipo-img" style="background-image:url('${imagen}')"></div>
 
-      <div class="equipo-info">
-        <div class="equipo-title">${nombre}</div>
+<div class="equipo-info">
 
-        <div class="contadores">
-          <div class="contador total">
-            <h3>${lista.length}</h3>
-            <span>Total</span>
-          </div>
+  <div class="equipo-title">
+    ${nombre}
+  </div>
 
-          <div class="contador disponible">
-            <h3>${disponibles}</h3>
-            <span>Disp.</span>
-          </div>
+  <div class="contadores">
 
-          <div class="contador entregado">
-            <h3>${entregadas}</h3>
-            <span>Entreg.</span>
-          </div>
-        </div>
+    <div class="contador total">
+      <h3>${lista.length}</h3>
+      <span>Total</span>
+    </div>
 
-        <button class="btn-detalle" type="button" onclick="toggleDetalle(this)">
-          Ver detalle
-        </button>
-      </div>
+    <div class="contador disponible">
+      <h3>${disponibles}</h3>
+      <span>Disp.</span>
+    </div>
 
-      <div class="detail">
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Serie</th>
-              <th>Marca</th>
-              <th>Caja</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
+    <div class="contador entregado">
+      <h3>${entregadas}</h3>
+      <span>Entreg.</span>
+    </div>
 
-          <tbody>
-            ${lista.map(x => `
-              <tr>
-                <td>${x.codigo || "-"}</td>
-                <td>${x.serie || "-"}</td>
-                <td>${x.marca || "-"}</td>
-                <td>${x.caja || "-"}</td>
-                <td class="estado ${normal(x.estado).toLowerCase()}">${x.estado || "-"}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
+  </div>
 
+</div>
+`;
+
+    card.onclick = () => abrirModal(nombre, lista, imagen);
     contenedor.appendChild(card);
   });
 
   if(!data.length){
     contenedor.innerHTML = "<div class='loading'>No se encontraron resultados.</div>";
   }
-}
-
-function toggleDetalle(btn){
-  const card = btn.closest(".equipo-card");
-  card.classList.toggle("open");
-  btn.textContent = card.classList.contains("open") ? "Ocultar detalle" : "Ver detalle";
 }
 
 function filtrarInventario(){
@@ -541,7 +627,114 @@ function normal(v){
     .replace(/\s+/g," ")
     .trim();
 }
+
+
+  function abrirModal(nombre, lista, imagen){
+
+const disponibles=lista.filter(x=>normal(x.estado)=="DISPONIBLE").length;
+
+const entregadas=lista.filter(x=>normal(x.estado)=="ENTREGADO").length;
+
+document.getElementById("contenidoModal").innerHTML=`
+
+<div class="modal-img"
+
+style="background-image:url('${imagen}')">
+
+</div>
+
+<h2>${nombre}</h2>
+
+<div class="modal-resumen">
+
+<div>📦 ${lista.length} Total</div>
+
+<div>🟢 ${disponibles} Disponibles</div>
+
+<div>🔴 ${entregadas} Entregadas</div>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Código</th>
+
+<th>Serie</th>
+
+<th>Marca</th>
+
+<th>Caja</th>
+
+<th>Estado</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${lista.map(x=>`
+
+<tr>
+
+<td>${x.codigo||"-"}</td>
+
+<td>${x.serie||"-"}</td>
+
+<td>${x.marca||"-"}</td>
+
+<td>${x.caja||"-"}</td>
+
+<td>${x.estado}</td>
+
+</tr>
+
+`).join("")}
+
+</tbody>
+
+</table>
+
+`;
+
+document.getElementById("modal").style.display="flex";
+
+}
+
+function cerrarModal(){
+
+document.getElementById("modal").style.display="none";
+
+}
+
+window.onclick=function(e){
+
+const modal=document.getElementById("modal");
+
+if(e.target==modal){
+
+cerrarModal();
+
+}
+
+}
 </script>
 
+<div id="modal" class="modal">
+
+  <div class="modal-contenido">
+
+    <span class="cerrar" onclick="cerrarModal()">&times;</span>
+
+    <div id="contenidoModal"></div>
+
+  </div>
+
+</div>
+  
 </body>
 </html>
