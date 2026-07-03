@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -6,184 +6,16 @@
 <title>Inventario de Herramientas</title>
 
 <style>
-
-   .item-card{
-  border:2px solid rgba(255,255,255,0.4);
-  border-radius:18px;
-  padding:16px;
-  transition:.2s ease;
-  cursor:pointer;
-  min-height:250px;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
-  position:relative;
-  color:white;
-  overflow:hidden;
-  background-size:cover;
-  background-repeat:no-repeat;
-  background-position:center;
-  background-color:#0f172a;
-  box-shadow:var(--shadow);
-}
-
-   .item-card.arnes6,
-.item-card.arnes4,
-.item-card.caja,
-.item-card.kit,
-.item-card.bloque{
-    background-size:contain;
-    background-repeat:no-repeat;
-    background-position:center;
-}
-
-.item-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,0.48);
-}
-
-.item-card > *{
-  position:relative;
-  z-index:1;
-}
-
-.item-card:hover{
-  transform:translateY(-4px) scale(1.02);
-  box-shadow:0 12px 30px rgba(0,0,0,0.18);
-}
-
-.item-card h3{
-  margin:0 0 10px;
-  font-size:15px;
-  color:white;
-  line-height:1.25;
-  text-shadow:0 2px 6px rgba(0,0,0,0.9);
-}
-
-.item-card.open{
-  aspect-ratio:auto;
-  align-items:stretch;
-  text-align:left;
-}
-
-.detail{
-  background:white;
-  color:#1f2937;
-  border-radius:14px;
-  padding:10px;
-}
-
-.item-card.arnes6{
-  background-image:url('img/ArnésMecánico6argollas.JPG');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-color:#0f172a;
-}
-
-.item-card.arnes4{
-  background-image:url('img/ArnésMecánico4argollas.jpg');
-}
-
-.item-card.bloque{
-  background-image:url('img/BloqueRetráctilSafewazeDobleLatitude-Pde1.8mGanchoEscala.JPG');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-color:#0f172a;
-}
-
-.item-card.caboCon{
-  background-image:url('img/CaboenYMSAconamortiguadordeimpacto.png');
-}
-
-.item-card.caboSin{
-  background-image:url('img/Cabosinamortiguadordeimpacto.jpg');
-}
-
-.item-card.caja{
-  background-image:url('img/CajaHerramientasdeplácticoTRUPPER.JPG');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-color:#0f172a;
-}
-
-.item-card.correaje{
-  background-image:url('img/CorreajedeAndamiero.JPG');
-}
-
-.item-card.faja09{
-  background-image:url('img/FajaAnclajeMSAdobleargolla0.9m.jpg');
-}
-
-.item-card.faja18{
-  background-image:url('img/FajaAnclajeMSAdobleargolla1.8M.JPG');
-}
-
-.item-card.flexo5{
-  background-image:url('img/Flexometrode5m.jpg');
-}
-
-.item-card.flexo8{
-  background-image:url('img/Flexometrode8m.JPG');
-}
-
-.item-card.hombrera{
-  background-image:url('img/Hombreradecuero.JPG');
-}
-
-.item-card.kit{
-  background-image:url('img/KitAntitraumaMSAModel10063431.JPG');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-color:#0f172a;
-}
-
-.item-card.llaveCarraca{
-  background-image:url('img/LlaveCarrracaALFMANQLF-RW1922.jpg');
-}
-
-.item-card.llaveF8{
-  background-image:url('img/LlaveFrancesa8.jpg');
-}
-
-.item-card.llaveF12{
-  background-image:url('img/LlaveFrancesa12.JPG');
-}
-
-.item-card.llaveM22{
-  background-image:url('img/LlaveMixta22mm.JPG');
-}
-
-.item-card.martillo{
-  background-image:url('img/MartilloAndamieroALFMANACFH0075.jpg');
-}
-
-.item-card.nivel{
-  background-image:url('img/NiveldeManoSTANLEY9.JPG');
-}
-
-.item-card.rodillera{
-  background-image:url('img/Rodillera.JPG');
-}
-
-.item-card.balde{
-  background-image:url('img/BaldelainerodelonaHAUK.png');
-}
-
-.item-card.polea{
-  background-image:url('img/PoleaconFrenoSECURPULLEY.jpg');
-}
-
 :root{
   --bg:#f5f7fb;
-  --card:#fff;
+  --card:#ffffff;
   --primary:#1e40af;
+  --primary2:#2563eb;
   --text:#1f2937;
   --muted:#6b7280;
   --border:#dbe3ef;
-  --ok:#16a34a;
   --danger:#dc2626;
+  --ok:#16a34a;
   --shadow:0 8px 24px rgba(15,23,42,.08);
   --radius:18px;
 }
@@ -192,20 +24,20 @@
 
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial, Helvetica, sans-serif;
   background:var(--bg);
   color:var(--text);
 }
 
 .app{
-  max-width:1300px;
-  margin:auto;
+  max-width:1600px;
+  margin:0 auto;
   padding:18px;
 }
 
 .topbar{
-  background:linear-gradient(135deg,#1e40af,#2563eb);
-  color:white;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;
   border-radius:24px;
   padding:22px;
   box-shadow:var(--shadow);
@@ -213,7 +45,8 @@ body{
 }
 
 .topbar h1{
-  margin:0 0 6px;
+  margin:0 0 6px 0;
+  font-size:28px;
 }
 
 .topbar p{
@@ -233,25 +66,20 @@ body{
   border:none;
   border-radius:14px;
   padding:12px 18px;
+  font-size:14px;
   font-weight:700;
   cursor:pointer;
   text-decoration:none;
   display:inline-block;
+  box-shadow:var(--shadow);
 }
 
-.btn-primary{
-  background:var(--primary);
-  color:white;
-}
-
-.btn-secondary{
-  background:#e5e7eb;
-  color:#111827;
-}
+.btn-primary{ background:var(--primary); color:#fff; }
+.btn-secondary{ background:#e5e7eb; color:#111827; }
 
 .stats{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:14px;
   margin-bottom:18px;
 }
@@ -267,6 +95,7 @@ body{
 .stat .num{
   font-size:30px;
   font-weight:900;
+  color:#0f172a;
 }
 
 .stat .label{
@@ -291,43 +120,74 @@ body{
   font-size:16px;
 }
 
-.grid{
+.equipos-grid{
   display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:16px;
+  grid-template-columns:repeat(5,minmax(0,1fr));
   align-items:start;
 }
 
-.item-card{
+.equipo-card{
   border:2px solid rgba(255,255,255,0.4);
   border-radius:18px;
   padding:16px;
+  background:#fff;
   transition:.2s ease;
   cursor:pointer;
   aspect-ratio:1 / 1;
-  min-height:auto;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   text-align:center;
+  align-self:start;
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
   position:relative;
   color:white;
   overflow:hidden;
-  background-size:cover;
-  background-position:center;
   box-shadow:var(--shadow);
 }
-.item-card h3{
-  margin:0 0 10px;
-  font-size:17px;
-  color:#0f172a;
+
+.equipo-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.38);
+}
+
+.equipo-card > *{
+  position:relative;
+  z-index:1;
+}
+
+.equipo-card:hover{
+  transform:translateY(-4px) scale(1.02);
+  box-shadow:0 12px 30px rgba(0,0,0,0.12);
+}
+
+.equipo-card.open{
+  aspect-ratio:auto;
+  align-items:stretch;
+  text-align:left;
+}
+
+.equipo-title{
+  font-weight:800;
+  color:white;
+  line-height:1.25;
+  margin-bottom:10px;
+  text-shadow:0 2px 6px rgba(0,0,0,0.9);
+  font-size:15px;
 }
 
 .badges{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
+  justify-content:center;
   margin:10px 0;
 }
 
@@ -338,17 +198,21 @@ body{
   font-weight:800;
 }
 
-.badge.total{background:#e5edff;color:#1e40af;}
-.badge.ok{background:#dcfce7;color:#166534;}
-.badge.danger{background:#fee2e2;color:#991b1b;}
+.badge.total{ background:#e5edff; color:#1e40af; }
+.badge.ok{ background:#dcfce7; color:#166534; }
+.badge.danger{ background:#fee2e2; color:#991b1b; }
 
 .detail{
   display:none;
   margin-top:12px;
   overflow:auto;
+  background:white;
+  color:#1f2937;
+  border-radius:14px;
+  padding:10px;
 }
 
-.item-card.open .detail{
+.equipo-card.open .detail{
   display:block;
 }
 
@@ -387,37 +251,186 @@ th{
   padding:30px;
 }
 
+/* IMÁGENES */
+.equipo-card.arnes6{
+  background-image:url('img/ArnésMecánico6argollas.JPG');
+}
+
+.equipo-card.arnes4{
+  background-image:url('img/ArnésMecánico4argollas.jpg');
+}
+
+.equipo-card.bloque{
+  background-image:url('img/BloqueRetráctilSafewazeDobleLatitude-Pde1.8mGanchoEscala.JPG');
+}
+
+.equipo-card.caboCon{
+  background-image:url('img/CaboenYMSAconamortiguadordeimpacto.png');
+}
+
+.equipo-card.caboSin{
+  background-image:url('img/Cabosinamortiguadordeimpacto.jpg');
+}
+
+.equipo-card.caja{
+  background-image:url('img/CajaHerramientasdeplácticoTRUPPER.JPG');
+}
+
+.equipo-card.correaje{
+  background-image:url('img/CorreajedeAndamiero.JPG');
+}
+
+.equipo-card.faja09{
+  background-image:url('img/FajaAnclajeMSAdobleargolla0.9m.jpg');
+}
+
+.equipo-card.faja18{
+  background-image:url('img/FajaAnclajeMSAdobleargolla1.8M.JPG');
+}
+
+.equipo-card.flexo5{
+  background-image:url('img/Flexometrode5m.jpg');
+}
+
+.equipo-card.flexo8{
+  background-image:url('img/Flexometrode8m.JPG');
+}
+
+.equipo-card.hombrera{
+  background-image:url('img/Hombreradecuero.JPG');
+}
+
+.equipo-card.kit{
+  background-image:url('img/KitAntitraumaMSAModel10063431.JPG');
+}
+
+.equipo-card.llaveCarraca{
+  background-image:url('img/LlaveCarrracaALFMANQLF-RW1922.jpg');
+}
+
+.equipo-card.llaveF8{
+  background-image:url('img/LlaveFrancesa8.jpg');
+}
+
+.equipo-card.llaveF12{
+  background-image:url('img/LlaveFrancesa12.JPG');
+}
+
+.equipo-card.llaveM22{
+  background-image:url('img/LlaveMixta22mm.JPG');
+}
+
+.equipo-card.martillo{
+  background-image:url('img/MartilloAndamieroALFMANACFH0075.jpg');
+}
+
+.equipo-card.nivel{
+  background-image:url('img/NiveldeManoSTANLEY9.JPG');
+}
+
+.equipo-card.rodillera{
+  background-image:url('img/Rodillera.JPG');
+}
+
+.equipo-card.balde{
+  background-image:url('img/BaldelainerodelonaHAUK.png');
+}
+
+.equipo-card.polea{
+  background-image:url('img/PoleaconFrenoSECURPULLEY.jpg');
+}
+
+.equipo-card.portaCarraca{
+  background-image:url('img/LlaveCarrracaALFMANQLF-RW1922.jpg');
+}
+
+.equipo-card.portaMartillo{
+  background-image:url('img/MartilloAndamieroALFMANACFH0075.jpg');
+}
+
+.equipo-card.driza{
+  background-image:url('img/Cabosinamortiguadordeimpacto.jpg');
+}
+
+/* IMÁGENES COMPLETAS */
+.equipo-card.arnes6,
+.equipo-card.arnes4,
+.equipo-card.bloque,
+.equipo-card.caja,
+.equipo-card.kit,
+.equipo-card.balde,
+.equipo-card.polea,
+.equipo-card.caboCon,
+.equipo-card.caboSin,
+.equipo-card.faja09,
+.equipo-card.faja18{
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-color:#0f172a;
+}
+
 @media(max-width:1200px){
-  .grid{
+  .equipos-grid{
     grid-template-columns:repeat(4,minmax(0,1fr));
   }
 }
 
 @media(max-width:980px){
   .stats{
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 
-  .grid{
+  .equipos-grid{
     grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .topbar h1{
+    font-size:22px;
   }
 }
 
 @media(max-width:640px){
+  .app{
+    padding:10px;
+  }
+
+  .topbar{
+    padding:16px;
+    border-radius:18px;
+  }
+
+  .topbar h1{
+    font-size:20px;
+  }
+
+  .topbar p{
+    font-size:13px;
+  }
+
   .stats,
-  .grid{
+  .equipos-grid{
     grid-template-columns:1fr;
   }
 
-  .item-card{
+  .equipo-card{
     min-height:150px;
     aspect-ratio:auto;
   }
 
-  .item-card:hover{
+  .equipo-card:hover{
     transform:none;
+    box-shadow:var(--shadow);
   }
-}
+
+  .actions{
+    flex-direction:column;
+  }
+
+  .btn{
+    width:100%;
+    text-align:center;
+  }
 }
 </style>
 </head>
@@ -431,7 +444,7 @@ th{
   </div>
 
   <div class="actions">
-    <a class="btn btn-secondary" href="index.html">⬅ Volver al menú</a>
+    <a class="btn btn-secondary" href="visualizacion.html">⬅ Volver a visualización</a>
     <a class="btn btn-primary" href="herramientas.html">Registrar entrega</a>
   </div>
 
@@ -440,14 +453,17 @@ th{
       <div class="num" id="totalHerramientas">0</div>
       <div class="label">Herramientas</div>
     </div>
+
     <div class="stat">
       <div class="num" id="totalDisponibles">0</div>
       <div class="label">Disponibles</div>
     </div>
+
     <div class="stat">
       <div class="num" id="totalEntregadas">0</div>
       <div class="label">Entregadas</div>
     </div>
+
     <div class="stat">
       <div class="num" id="totalCajas">0</div>
       <div class="label">Cajas</div>
@@ -459,7 +475,7 @@ th{
   </div>
 
   <div id="loading" class="loading">Cargando inventario...</div>
-  <div class="grid" id="contenedorInventario"></div>
+  <div class="equipos-grid" id="contenedorInventario"></div>
 
 </div>
 
@@ -523,10 +539,10 @@ function pintarInventario(data){
     const entregadas = lista.filter(x => normal(x.estado) === "ENTREGADO").length;
 
     const card = document.createElement("div");
-    card.className = "item-card " + obtenerClaseImagen(nombre);
+    card.className = "equipo-card " + obtenerClaseImagen(nombre);
 
     card.innerHTML = `
-      <h3>${nombre}</h3>
+      <div class="equipo-title">${nombre}</div>
 
       <div class="badges">
         <span class="badge total">Total: ${lista.length}</span>
@@ -573,7 +589,7 @@ function pintarInventario(data){
 }
 
 function toggleDetalle(btn){
-  const card = btn.closest(".item-card");
+  const card = btn.closest(".equipo-card");
   card.classList.toggle("open");
   btn.textContent = card.classList.contains("open") ? "Ocultar detalle" : "Ver detalle";
 }
@@ -596,12 +612,14 @@ function filtrarInventario(){
       x.caja,
       x.estado
     ].join(" "));
+
     return texto.includes(q);
   });
 
   pintarResumen(filtrado);
   pintarInventario(filtrado);
 }
+
 function obtenerClaseImagen(nombre){
   const n = normal(nombre);
 
@@ -627,9 +645,13 @@ function obtenerClaseImagen(nombre){
   if(n.includes("RODILLERA")) return "rodillera";
   if(n.includes("BALDE")) return "balde";
   if(n.includes("POLEA")) return "polea";
+  if(n.includes("PORTA CARRACA")) return "portaCarraca";
+  if(n.includes("PORTA MARTILLO")) return "portaMartillo";
+  if(n.includes("DRIZA")) return "driza";
 
   return "";
 }
+
 function normal(v){
   return String(v || "")
     .toUpperCase()
