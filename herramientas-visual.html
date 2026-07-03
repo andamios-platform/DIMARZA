@@ -413,7 +413,7 @@ function pintarInventario(data){
   });
 
   Object.keys(agrupado).sort((a,b)=>a.localeCompare(b,"es")).forEach(nombre => {
-    const lista = agrupado[nombre];
+    const lista = agrupado[nombre].filter(x => (x.codigo || "").trim() !== "");
     const disponibles = lista.filter(x => normal(x.estado) === "DISPONIBLE").length;
     const entregadas = lista.filter(x => normal(x.estado) === "ENTREGADO").length;
     const imagen = obtenerImagen(nombre);
