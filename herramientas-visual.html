@@ -387,11 +387,16 @@ async function cargarInventario(){
 }
 
 function pintarResumen(data){
-  const disponibles = data.filter(x => normal(x.estado) === "DISPONIBLE").length;
-  const entregadas = data.filter(x => normal(x.estado) === "ENTREGADO").length;
-  const cajas = new Set(data.map(x => x.caja).filter(Boolean));
 
-  document.getElementById("totalHerramientas").textContent = data.length;
+  const activos = data.filter(x => (x.codigo || "").trim() !== "");
+
+  const disponibles = activos.filter(x => normal(x.estado) === "DISPONIBLE").length;
+
+  const entregadas = activos.filter(x => normal(x.estado) === "ENTREGADO").length;
+
+  const cajas = new Set(activos.map(x => x.caja).filter(Boolean));
+
+  document.getElementById("totalHerramientas").textContent = activos.length;
   document.getElementById("totalDisponibles").textContent = disponibles;
   document.getElementById("totalEntregadas").textContent = entregadas;
   document.getElementById("totalCajas").textContent = cajas.size;
