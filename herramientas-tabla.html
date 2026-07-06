@@ -1,1 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Herramientas</title>
 
+<style>
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --primary:#0f766e;
+  --primary2:#115e59;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:#dbe3ef;
+  --shadow:0 8px 24px rgba(15,23,42,.08);
+  --radius:18px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.app{
+  max-width:1600px;
+  margin:0 auto;
+  padding:18px;
+}
+
+.topbar{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:white;
+  border-radius:24px;
+  padding:22px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+}
+
+.topbar h1{
+  margin:0 0 6px;
+  font-size:28px;
+}
+
+.topbar p{
+  margin:0;
+  opacity:.95;
+}
+
+.actions{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+
+.btn{
+  border:none;
+  border-radius:14px;
+  padding:12px 18px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block;
+  box-shadow:var(--shadow);
+}
+
+.btn-primary{
+  background:var(--primary);
+  color:white;
+}
+
+.btn-secondary{
+  background:#e5e7eb;
+  color:#111827;
+}
+
+.search-card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+}
+
+.search-card input{
+  width:100%;
+  padding:14px;
+  border:1px solid #cfd8e3;
+  border-radius:14px;
+  font-size:16px;
+}
+
+.table-card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:900px;
+}
+
+th{
+  background:#f3f4f6;
+  color:#374151;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+th,td{
+  padding:14px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+  vertical-align:middle;
+}
+
+td.nombre{
+  text-align:left;
+  font-weight:800;
+  color:#111827;
+}
+
+.img-tool{
+  width:85px;
+  height:85px;
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
+  margin:auto;
+}
+
+.total{
+  font-size:24px;
+  font-weight:900;
+  color:#0f766e;
+}
+
+.chips{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.chip{
+  background:#e0f2fe;
+  color:#075985;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.grupo-marca{
+  margin-bottom:12px;
+}
+
+.grupo-marca:last-child{
+  margin-bottom:0;
+}
+
+.marca-titulo{
+  font-weight:900;
+  color:#115e59;
+  margin-bottom:8px;
+  text-align:left;
+}
+
+.loading{
+  text-align:center;
+  font-weight:800;
+  padding:30px;
+}
+
+@media(max-width:640px){
+  .app{
+    padding:10px;
+  }
+
+  .topbar{
+    padding:16px;
+    border-radius:18px;
+  }
+
+  .topbar h1{
+    font-size:20px;
+  }
+
+  .actions{
+    flex-direction:column;
+  }
+
+  .btn{
+    width:100%;
+    text-align:center;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <h1>📋 Catálogo de Herramientas</h1>
+    <p>Resumen general por herramienta, total y códigos registrados</p>
+  </div>
+
+  <div class="actions">
+    <a class="btn btn-secondary" href="visualizacion.html">⬅ Volver a visualización</a>
+    <a class="btn btn-primary" href="herramientas.html">Registrar entrega</a>
+  </div>
+
+  <div class="search-card">
+    <input type="text" id="buscar" placeholder="🔍 Buscar herramienta, código o marca...">
+  </div>
+
+  <div class="table-card">
+    <div id="loading" class="loading">Cargando catálogo...</div>
+
+    <table id="tablaCatalogo" style="display:none;">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Herramienta</th>
+          <th>Total</th>
+          <th>Códigos</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyCatalogo"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxzoRJ6iPz4ivS75kgUWg5vaK2OkcGE2WPmM-fDpQF-ztpnFmrSSBH3MStUsWEnmyHcvA/exec";
+
+const IMAGENES = {
+  "ARNES MECANICO 6": "img/ArnésMecánico6argollas.JPG",
+  "ARNES MECANICO 4": "img/ArnésMecánico4argollas.jpg",
+  "BALDE": "img/BaldelainerodelonaHAUK.png",
+  "BLOQUE RETRACTIL": "img/BloqueRetráctilSafewazeDobleLatitude-Pde1.8mGanchoEscala.JPG",
+  "CABO EN Y CON": "img/CaboenYMSAconamortiguadordeimpacto.png",
+  "CABO EN Y SIN": "img/Cabosinamortiguadordeimpacto.jpg",
+  "CABO EN Y MSA SIN": "img/Cabosinamortiguadordeimpacto.jpg",
+  "CAJA HERRAMIENTAS": "img/CajaHerramientasdeplácticoTRUPPER.JPG",
+  "CORREAJE": "img/CorreajedeAndamiero.JPG",
+  "DRIZA": "img/Cabosinamortiguadordeimpacto.jpg",
+  "FAJA ANCLAJE MSA DOBLE ARGOLLA 0.9": "img/FajaAnclajeMSAdobleargolla0.9m.jpg",
+  "FAJA ANCLAJE MSADOBLE": "img/FajaAnclajeMSAdobleargolla1.8M.JPG",
+  "FAJA ANCLAJE MSA DOBLE ARGOLLA 1.8": "img/FajaAnclajeMSAdobleargolla1.8M.JPG",
+  "FLEXOMETRO DE 5": "img/Flexometrode5m.jpg",
+  "FLEXOMETRO DE 8": "img/Flexometrode8m.JPG",
+  "HOMBRERA": "img/Hombreradecuero.JPG",
+  "KIT ANTITRAUMA": "img/KitAntitraumaMSAModel10063431.JPG",
+  "LLAVE CARRRACA": "img/LlaveCarrracaALFMANQLF-RW1922.jpg",
+  "LLAVE FRANCESA 12": "img/LlaveFrancesa12.JPG",
+  "LLAVE FRANCESA 8": "img/LlaveFrancesa8.jpg",
+  "LLAVE MIXTA": "img/LlaveMixta22mm.JPG",
+  "MARTILLO": "img/MartilloAndamieroALFMANACFH0075.jpg",
+  "NIVEL": "img/NiveldeManoSTANLEY9.JPG",
+  "POLEA": "img/PoleaconFrenoSECURPULLEY.jpg",
+  "PORTA CARRACA": "img/portacarraca.jpg",
+  "PORTA MARTILLO": "img/portamartillo.jpg",
+  "RODILLERA": "img/Rodillera.JPG"
+};
+
+let catalogoOriginal = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarCatalogo();
+  document.getElementById("buscar").addEventListener("input", filtrarCatalogo);
+});
+
+async function cargarCatalogo(){
+  try{
+    const res = await fetch(API_URL + "?action=getInventarioHerramientas");
+    const data = await res.json();
+
+    if(!data.ok){
+      throw new Error(data.message || "Error al cargar catálogo");
+    }
+
+    const activos = (data.inventario || []).filter(x =>
+      (x.codigo || "").trim() !== "" &&
+      !normal(x.item).includes("DRIZA")
+    );
+
+    catalogoOriginal = construirCatalogo(activos);
+    pintarCatalogo(catalogoOriginal);
+
+  }catch(err){
+    document.getElementById("loading").textContent = "Error: " + err.message;
+  }
+}
+
+function construirCatalogo(data){
+  const agrupado = {};
+
+  data.forEach(x => {
+    const item = x.item || "SIN NOMBRE";
+
+    if(!agrupado[item]){
+      agrupado[item] = [];
+    }
+
+    agrupado[item].push(x);
+  });
+
+  return Object.keys(agrupado)
+    .sort((a,b)=>a.localeCompare(b,"es"))
+    .map(item => {
+      const lista = agrupado[item];
+
+      return {
+        item,
+        total: lista.length,
+        imagen: obtenerImagen(item),
+        codigosHTML: construirCodigos(item, lista),
+        textoBusqueda: normal([
+          item,
+          lista.map(x => x.codigo).join(" "),
+          lista.map(x => x.marca).join(" ")
+        ].join(" "))
+      };
+    });
+}
+
+function construirCodigos(item, lista){
+  if(normal(item).includes("ARNES")){
+    return construirCodigosPorMarca(lista);
+  }
+
+  const codigos = lista
+    .map(x => (x.codigo || "").trim())
+    .filter(Boolean)
+    .sort((a,b)=>a.localeCompare(b,"es", {numeric:true}));
+
+  return `<div class="chips">${codigos.map(c => `<span class="chip">${c}</span>`).join("")}</div>`;
+}
+
+function construirCodigosPorMarca(lista){
+  const marcas = {};
+
+  lista.forEach(x => {
+    const marca = (x.marca || "SIN MARCA").trim() || "SIN MARCA";
+
+    if(!marcas[marca]){
+      marcas[marca] = [];
+    }
+
+    marcas[marca].push((x.codigo || "").trim());
+  });
+
+  return Object.keys(marcas)
+    .sort((a,b)=>a.localeCompare(b,"es"))
+    .map(marca => {
+      const codigos = marcas[marca]
+        .filter(Boolean)
+        .sort((a,b)=>a.localeCompare(b,"es", {numeric:true}));
+
+      return `
+        <div class="grupo-marca">
+          <div class="marca-titulo">${marca} (${codigos.length})</div>
+          <div class="chips">
+            ${codigos.map(c => `<span class="chip">${c}</span>`).join("")}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function pintarCatalogo(data){
+  const loading = document.getElementById("loading");
+  const tabla = document.getElementById("tablaCatalogo");
+  const tbody = document.getElementById("tbodyCatalogo");
+
+  loading.style.display = "none";
+  tabla.style.display = "table";
+  tbody.innerHTML = "";
+
+  if(!data.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="loading">No se encontraron resultados.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  data.forEach(x => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>
+        <div class="img-tool" style="background-image:url('${x.imagen}')"></div>
+      </td>
+      <td class="nombre">${x.item}</td>
+      <td class="total">${x.total}</td>
+      <td>${x.codigosHTML}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+function filtrarCatalogo(){
+  const q = normal(document.getElementById("buscar").value);
+
+  if(!q){
+    pintarCatalogo(catalogoOriginal);
+    return;
+  }
+
+  const filtrado = catalogoOriginal.filter(x => x.textoBusqueda.includes(q));
+  pintarCatalogo(filtrado);
+}
+
+function obtenerImagen(nombre){
+  const n = normal(nombre);
+
+  if(IMAGENES[n]){
+    return IMAGENES[n];
+  }
+
+  let mejorCoincidencia = "";
+  let imagen = "img/icon-herramientas.svg";
+
+  for(const clave in IMAGENES){
+    if(n.includes(clave) && clave.length > mejorCoincidencia.length){
+      mejorCoincidencia = clave;
+      imagen = IMAGENES[clave];
+    }
+  }
+
+  return imagen;
+}
+
+function normal(v){
+  return String(v || "")
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ")
+    .trim();
+}
+</script>
+
+</body>
+</html>
