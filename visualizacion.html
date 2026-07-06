@@ -1,25 +1,173 @@
-<a class="btn inventario" href="herramientas-visual.html">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualización</title>
 
-    <img src="img/icon-herramientas.svg" class="icono">
+<style>
 
-    <span>Inventario Visual</span>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background-image:
+    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.65)),
+    url("img/fondo.png");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
 
-</a>
-<a class="btn catalogo" href="herramientas-tabla.html">
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
 
-    <img src="img/icon-tabla.svg" class="icono">
+.contenedor{
 
-    <span>Catálogo Maestro</span>
+    text-align:center;
 
-</a>
-<a class="volver" href="index.html">
+    background-image:url("img/fondoclaro.png");
 
-← Volver al menú principal
+    background-size:cover;
 
-</a>
+    background-position:center;
+
+    background-color:rgba(255,255,255,.08);
+
+    background-blend-mode:soft-light;
+
+    border-radius:28px;
+
+    padding:40px;
+
+    width:100%;
+
+    max-width:900px;
+
+    box-shadow:0 18px 45px rgba(0,0,0,.35);
+
+}
+
+.titulo-principal{
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+gap:25px;
+
+margin-bottom:15px;
+
+}
+
+.logo{
+
+width:160px;
+
+}
+
+.empresa{
+
+color:#0d3f8f;
+
+font-size:30px;
+
+font-weight:800;
+
+letter-spacing:5px;
+
+}
+
+h1{
+
+margin:0;
+
+font-size:72px;
+
+color:#1565c0;
+
+}
+
+.sub{
+
+margin-top:10px;
+
+font-size:18px;
+
+color:#6b7280;
+
+}
+
+.botones{
+
+display:flex;
+
+gap:20px;
+
+margin-top:35px;
+
+flex-wrap:wrap;
+
+}
+
+a{
+
+flex:1;
+
+text-decoration:none;
+
+}
+
+.btn{
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+justify-content:center;
+
+gap:15px;
+
+padding:28px;
+
+border-radius:18px;
+
+color:white;
+
+font-size:18px;
+
+font-weight:bold;
+
+transition:.25s;
+
+box-shadow:0 8px 20px rgba(0,0,0,.25);
+
+}
+
+.btn:hover{
+
+transform:translateY(-6px);
+
+}
+
+.icono{
+
+width:70px;
+
+height:70px;
+
+}
+
 .inventario{
 
-background:linear-gradient(135deg,#2563eb,#1e40af);
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
 
 }
 
@@ -28,3 +176,109 @@ background:linear-gradient(135deg,#2563eb,#1e40af);
 background:linear-gradient(135deg,#0f766e,#115e59);
 
 }
+
+.volver{
+
+margin-top:35px;
+
+display:inline-block;
+
+background:#374151;
+
+color:white;
+
+padding:14px 24px;
+
+border-radius:14px;
+
+font-weight:bold;
+
+}
+
+@media(max-width:768px){
+
+.botones{
+
+flex-direction:column;
+
+}
+
+.logo{
+
+width:90px;
+
+}
+
+h1{
+
+font-size:42px;
+
+}
+
+.empresa{
+
+font-size:20px;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<div class="titulo-principal">
+
+<img src="img/mini-logo.png" class="logo">
+
+<div>
+
+<div class="empresa">DIMARZA</div>
+
+<h1>VISUALIZACIÓN</h1>
+
+<div class="sub">
+
+Consulta y análisis del inventario
+
+</div>
+
+</div>
+
+</div>
+
+<div class="botones">
+
+<a class="btn inventario" href="herramientas-visual.html">
+
+<img src="img/icon-herramientas.svg" class="icono">
+
+<span>Inventario Visual</span>
+
+</a>
+
+<a class="btn catalogo" href="herramientas-tabla.html">
+
+<img src="img/icon-tabla.svg" class="icono">
+
+<span>Catálogo Maestro</span>
+
+</a>
+
+</div>
+
+<a class="volver" href="index.html">
+
+← Volver al menú principal
+
+</a>
+
+</div>
+
+</body>
+
+</html>
