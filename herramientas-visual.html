@@ -470,10 +470,10 @@ const IMAGENES = {
   "NIVEL": "img/NiveldeManoSTANLEY9.JPG",
   "POLEA": "img/PoleaconFrenoSECURPULLEY.jpg",
   "PORTA CARRACA": "img/portacarraca.jpg",
-  "PORTA MARTILLO": "img/portamartillo2.jpg",
+  "PORTA MARTILLO": "img/portamartillo.jpg",
   "RODILLERA": "img/Rodillera.JPG"
 };
-
+ 
 let inventarioOriginal = [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -610,15 +610,28 @@ function filtrarInventario(){
 }
 
 function obtenerImagen(nombre){
-  const n = normal(nombre);
 
-  for(const clave in IMAGENES){
-    if(n.includes(clave)){
-      return IMAGENES[clave];
+    const n = normal(nombre);
+
+    // 1. Buscar coincidencia exacta
+    if(IMAGENES[n]){
+        return IMAGENES[n];
     }
-  }
 
-  return "img/icon-herramientas.svg";
+    // 2. Buscar la coincidencia MÁS LARGA
+    let mejorCoincidencia = "";
+    let imagen = "img/icon-herramientas.svg";
+
+    for(const clave in IMAGENES){
+
+        if(n.includes(clave) && clave.length > mejorCoincidencia.length){
+            mejorCoincidencia = clave;
+            imagen = IMAGENES[clave];
+        }
+
+    }
+
+    return imagen;
 }
 
 function normal(v){
@@ -722,7 +735,6 @@ if(e.target==modal){
 cerrarModal();
 
 }
-
 }
 </script>
 
