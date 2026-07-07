@@ -294,7 +294,10 @@
     
     @media (max-width: 800px) {
       .filters {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 14px;
+        align-items: end;
       }
 
       .detalle-grid {
@@ -319,7 +322,16 @@
             <option value="">Todos los supervisores</option>
           </select>
         </div>
-
+        <div>
+          <label for="filtroEstado">Filtrar por estado</label>
+          <select id="filtroEstado">
+            <option value="">Todos los estados</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="APROBADO">Aprobado</option>
+            <option value="OBSERVADO">Observado</option>
+            <option value="DEVUELTO">Devuelto</option>
+          </select>
+        </div>
         <div>
           <label for="buscarTexto">Buscar</label>
           <input id="buscarTexto" type="text" placeholder="Caja, responsable, servicio o ID">
@@ -368,6 +380,7 @@
       cargarCajas();
 
       document.getElementById('filtroSupervisor').addEventListener('change', pintarTabla);
+      document.getElementById('filtroEstado').addEventListener('change', pintarTabla);
       document.getElementById('buscarTexto').addEventListener('input', pintarTabla);
     });
 
@@ -415,6 +428,7 @@
 function pintarTabla() {
   const contenedor = document.getElementById('contenedorCajas');
   const supervisor = document.getElementById('filtroSupervisor').value;
+  const estadoFiltro = document.getElementById('filtroEstado').value;
   const texto = document.getElementById('buscarTexto').value.toLowerCase().trim();
 
   let data = cajasGlobal.slice();
@@ -423,6 +437,10 @@ function pintarTabla() {
 
   if (supervisor) {
     data = data.filter(x => x.supervisor === supervisor);
+  }
+
+  if (estadoFiltro) {
+    data = data.filter(x => (x.estado || '').toUpperCase() === estadoFiltro);
   }
 
   if (texto) {
@@ -459,8 +477,9 @@ function pintarTabla() {
 
         <div class="card-info"><strong>Responsable:</strong><br>${item.responsable || '-'}</div>
         <div class="card-info"><strong>Supervisor:</strong><br>${item.supervisor || '-'}</div>
-        <div class="card-info"><strong>Fecha:</strong> ${item.fecha || '-'}</div>
+        <div class="card-info"><strong>Unidad:</strong> ${item.unidad || '-'}</div>
         <div class="card-info"><strong>Servicio:</strong> ${item.servicio || '-'}</div>
+        <div class="card-info"><strong>Fecha:</strong> ${item.fecha || '-'}</div>
         <div class="card-info"><strong>Turno:</strong> ${item.turno || '-'}</div>
         <div class="card-info"><strong>ID:</strong> ${item.idRegistro || '-'}</div>
 
