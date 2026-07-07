@@ -20,7 +20,7 @@
 .top-header {
   background: linear-gradient(135deg, #111827, #1f2937);
   color: white;
-  padding: 24px 34px;
+  padding: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,8 +30,8 @@
 }
 
 .logo-dimarza {
-  width: 70px;
-  height: 70px;
+  width: 90px;
+  height: 90px;
   object-fit: contain;
   background: white;
   border-radius: 16px;
@@ -259,22 +259,48 @@
   border-left: 8px solid #f59e0b;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+    .card-caja{
+    position:relative;
+}
+
+.card-caja::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:6px;
+    border-radius:22px 22px 0 0;
+    background:#f59e0b;
+}
 
 .card-caja:hover {
   transform: translateY(-3px);
   box-shadow: 0 14px 35px rgba(0,0,0,0.12);
 }
+.card-caja:hover .card-img-box img{
+    transform:scale(1.06);
+}
 
 .card-caja.aprobado {
   border-left-color: #16a34a;
+}
+    .card-caja.aprobado::before{
+    background:#16a34a;
 }
 
 .card-caja.observado {
   border-left-color: #dc2626;
 }
+    .card-caja.observado::before{
+    background:#dc2626;
+}
 
 .card-caja.devuelto {
   border-left-color: #374151;
+}
+    .card-caja.devuelto::before{
+    background:#374151;
 }
 
 .card-head {
@@ -296,10 +322,11 @@
   border: 1px solid #e5e7eb;
 }
 
-.card-img-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.card-img-box img{
+    width:90%;
+    height:90%;
+    object-fit:contain;
+    transition:.25s;
 }
 
 .card-title h3 {
@@ -348,13 +375,13 @@
 
 .card-actions button {
   width: 100%;
-  background: #111827;
+  background:#f97316;
   padding: 13px;
   font-size: 14px;
 }
 
 .card-actions button:hover {
-  background: #374151;
+  background:#ea580c;
 }
     
     @media (max-width: 800px) {
