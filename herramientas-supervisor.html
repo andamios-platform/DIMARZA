@@ -84,13 +84,6 @@
       background: #1d4ed8;
     }
 
-    .stats {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 15px;
-    }
-
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -457,10 +450,6 @@
 
         cajasGlobal = data.cajas || [];
 
-        cargarSupervisores(data.supervisores || []);
-        document.getElementById('totalCajas').textContent = cajasGlobal.length;
-        document.getElementById('totalSupervisores').textContent = (data.supervisores || []).length;
-
         pintarTabla();
 
       } catch (err) {
@@ -494,7 +483,7 @@ function pintarTabla() {
 
   data = data.filter(x => x.idRegistro && x.estado);
 
-  actualizarResumen(data);
+
 
   data.sort((a, b) => {
     const orden = {
@@ -536,7 +525,7 @@ function pintarTabla() {
     contenedor.innerHTML = `<div class="loading">No hay cajas para mostrar</div>`;
     return;
   }
-
+  actualizarResumen(data);
   contenedor.innerHTML = data.map(item => {
     const claseEstado = (item.estado || '').toLowerCase();
     const cajaLimpia = extraerCaja(item.caja);
