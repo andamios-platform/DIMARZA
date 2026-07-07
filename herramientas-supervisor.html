@@ -91,18 +91,47 @@
       margin-bottom: 15px;
     }
 
-    .stat {
-      background: #eef2ff;
-      padding: 14px 18px;
-      border-radius: 14px;
-      min-width: 160px;
-    }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
 
-    .stat strong {
-      display: block;
-      font-size: 24px;
-      color: #1e3a8a;
-    }
+.stat {
+  background: white;
+  padding: 16px 18px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  border-left: 6px solid #2563eb;
+}
+
+.stat strong {
+  display: block;
+  font-size: 26px;
+  color: #111827;
+}
+
+.stat span {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.stat.pendiente {
+  border-left-color: #f59e0b;
+}
+
+.stat.aprobado {
+  border-left-color: #16a34a;
+}
+
+.stat.observado {
+  border-left-color: #dc2626;
+}
+
+.stat.devuelto {
+  border-left-color: #374151;
+}
 
     .badge {
       padding: 5px 10px;
@@ -209,18 +238,24 @@
       font-size: 14px;
     }
 
-    .cards-grid {
+.cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 22px;
 }
 
 .card-caja {
   background: white;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-  border-left: 7px solid #f59e0b;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.09);
+  border-left: 8px solid #f59e0b;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-caja:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 35px rgba(0,0,0,0.12);
 }
 
 .card-caja.aprobado {
@@ -235,33 +270,77 @@
   border-left-color: #374151;
 }
 
-.card-icon {
-  font-size: 42px;
-  margin-bottom: 8px;
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
 }
 
-.card-caja h3 {
-  margin: 0 0 10px;
-  font-size: 22px;
+.card-icon-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+}
+
+.card-title h3 {
+  margin: 0;
+  font-size: 24px;
+  color: #92400e;
+}
+
+.card-title small {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.card-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
 }
 
 .card-info {
-  font-size: 14px;
-  margin: 6px 0;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 13px;
   color: #374151;
 }
 
 .card-info strong {
+  display: block;
   color: #111827;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.card-id {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #6b7280;
+  word-break: break-all;
 }
 
 .card-actions {
-  margin-top: 15px;
+  margin-top: 18px;
 }
 
 .card-actions button {
   width: 100%;
   background: #111827;
+  padding: 13px;
+  font-size: 14px;
+}
+
+.card-actions button:hover {
+  background: #374151;
 }
     
     @media (max-width: 800px) {
@@ -313,15 +392,26 @@
     </div>
 
     <div class="stats">
-      <div class="stat">
-        <strong id="totalCajas">0</strong>
-        Cajas registradas
-      </div>
-      <div class="stat">
-        <strong id="totalSupervisores">0</strong>
-        Supervisores
-      </div>
-    </div>
+  <div class="stat pendiente">
+    <strong id="totalPendientes">0</strong>
+    <span>🟡 Pendientes</span>
+  </div>
+
+  <div class="stat aprobado">
+    <strong id="totalAprobadas">0</strong>
+    <span>🟢 Aprobadas</span>
+  </div>
+
+  <div class="stat observado">
+    <strong id="totalObservadas">0</strong>
+    <span>🔴 Observadas</span>
+  </div>
+
+  <div class="stat devuelto">
+    <strong id="totalDevueltas">0</strong>
+    <span>⚫ Devueltas</span>
+  </div>
+</div>
 
     <div id="contenedorCajas" class="cards-grid">
   <div class="loading">Cargando cajas...</div>
@@ -404,6 +494,22 @@ function pintarTabla() {
 
   data = data.filter(x => x.idRegistro && x.estado);
 
+  actualizarResumen(data);
+
+  data.sort((a, b) => {
+    const orden = {
+      PENDIENTE: 1,
+      OBSERVADO: 2,
+      APROBADO: 3,
+      DEVUELTO: 4
+    };
+
+    const estadoA = (a.estado || '').toUpperCase();
+    const estadoB = (b.estado || '').toUpperCase();
+
+    return (orden[estadoA] || 99) - (orden[estadoB] || 99);
+  });
+
   if (supervisor) {
     data = data.filter(x => x.supervisor === supervisor);
   }
@@ -426,8 +532,6 @@ function pintarTabla() {
     });
   }
 
-  document.getElementById('totalCajas').textContent = data.length;
-
   if (!data.length) {
     contenedor.innerHTML = `<div class="loading">No hay cajas para mostrar</div>`;
     return;
@@ -439,25 +543,65 @@ function pintarTabla() {
 
     return `
       <div class="card-caja ${claseEstado}">
-        <div class="card-icon">📦</div>
-        <h3>CAJA ${cajaLimpia}</h3>
+        <div class="card-head">
+          <div class="card-icon-box">📦</div>
+
+          <div class="card-title">
+            <h3>CAJA ${cajaLimpia}</h3>
+            <small>${item.idRegistro || '-'}</small>
+          </div>
+        </div>
 
         <div>${badgeEstado(item.estado)}</div>
 
-        <div class="card-info"><strong>Responsable:</strong><br>${item.responsable || '-'}</div>
-        <div class="card-info"><strong>Supervisor:</strong><br>${item.supervisor || '-'}</div>
-        <div class="card-info"><strong>Unidad:</strong> ${item.unidad || '-'}</div>
-        <div class="card-info"><strong>Servicio:</strong> ${item.servicio || '-'}</div>
-        <div class="card-info"><strong>Fecha:</strong> ${item.fecha || '-'}</div>
-        <div class="card-info"><strong>Turno:</strong> ${item.turno || '-'}</div>
-        <div class="card-info"><strong>ID:</strong> ${item.idRegistro || '-'}</div>
+        <div class="card-info-grid">
+          <div class="card-info">
+            <strong>👷 Responsable</strong>
+            ${item.responsable || '-'}
+          </div>
+
+          <div class="card-info">
+            <strong>👨‍💼 Supervisor</strong>
+            ${item.supervisor || '-'}
+          </div>
+
+          <div class="card-info">
+            <strong>🏭 Unidad</strong>
+            ${item.unidad || '-'}
+          </div>
+
+          <div class="card-info">
+            <strong>🔧 Servicio</strong>
+            ${item.servicio || '-'}
+          </div>
+
+          <div class="card-info">
+            <strong>📅 Fecha</strong>
+            ${item.fecha || '-'}
+          </div>
+
+          <div class="card-info">
+            <strong>🕒 Turno</strong>
+            ${item.turno || '-'}
+          </div>
+        </div>
 
         <div class="card-actions">
-          <button onclick="verRegistro('${item.idRegistro}')">Abrir caja</button>
+          <button onclick="verRegistro('${item.idRegistro}')">🔍 Revisar caja</button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+
+    function actualizarResumen(data) {
+  const contar = estado => data.filter(x => (x.estado || '').toUpperCase() === estado).length;
+
+  document.getElementById('totalPendientes').textContent = contar('PENDIENTE');
+  document.getElementById('totalAprobadas').textContent = contar('APROBADO');
+  document.getElementById('totalObservadas').textContent = contar('OBSERVADO');
+  document.getElementById('totalDevueltas').textContent = contar('DEVUELTO');
 }
 
     function extraerCaja(textoCaja) {
