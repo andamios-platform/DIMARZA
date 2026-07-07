@@ -434,6 +434,49 @@
 .card-actions button:hover {
   background:#ea580c;
 }
+
+    .revision-actions {
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.revision-actions label {
+  margin-bottom: 8px;
+}
+
+.revision-actions textarea,
+.revision-actions input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.revision-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn-aprobar {
+  background: #16a34a;
+}
+
+.btn-aprobar:hover {
+  background: #15803d;
+}
+
+.btn-observar {
+  background: #dc2626;
+}
+
+.btn-observar:hover {
+  background: #b91c1c;
+}
     
     @media (max-width: 800px) {
       .filters {
@@ -532,6 +575,7 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbze-9nRvim45Fa-Ffl_AVJLIjKO1_H9FL_BFTdsUxZsZuwuT2DVrZC0tBS4cURsGq6l/exec';
 
     let cajasGlobal = [];
+    let idRegistroActual = '';
 
     document.addEventListener('DOMContentLoaded', () => {
       cargarCajas();
@@ -769,6 +813,8 @@ function mostrarDetalle(detalle) {
   const caja = extraerCaja(detalle['Caja Herramientas de pláctico TRUPPER'] || '');
   const id = detalle['ID REGISTRO'] || '';
 
+  idRegistroActual = id;
+
   document.getElementById('tituloModal').textContent = `Revisión de caja ${caja}`;
   document.getElementById('subtituloModal').textContent = id;
 
@@ -824,7 +870,20 @@ function mostrarDetalle(detalle) {
         ${itemDetalle('Documento supervisor', detalle['DOCUMENTO SUPERVISOR:'])}
       </div>
     </div>
-
+    <div class="revision-actions">
+      <h3>Revisión del supervisor</h3>
+    
+      <label>Revisado por</label>
+      <input id="revisadoPor" type="text" placeholder="Nombre del supervisor">
+    
+      <label>Observación</label>
+      <textarea id="observacionSupervisor" rows="4" placeholder="Escribe una observación si corresponde"></textarea>
+    
+      <div class="revision-buttons">
+        <button class="btn-aprobar" onclick="actualizarRevision('aprobarRegistro')">✅ Aprobar</button>
+        <button class="btn-observar" onclick="actualizarRevision('observarRegistro')">⚠️ Observar</button>
+      </div>
+    </div>
     <div class="seccion-detalle">
       <h3>Herramientas registradas</h3>
       ${herramientasHtml || '<div class="loading">No hay herramientas registradas.</div>'}
@@ -842,7 +901,56 @@ function itemDetalle(titulo, valor) {
     </div>
   `;
 }
+async function actualizarRevision(action) {
+  const revisadoPor = document.getElementById('revisadoPor').value.trim();
+  const observacion = document.getElementById('observacionSupervisor').value.trim();
 
+  if (!idRegistroActual) {
+    alert('No se encontró el ID del registro.');
+    return;
+  }
+
+  if (!revisadoPor) {
+    alert('Ingrese el nombre del supervisor que revisa.');
+    return;
+  }
+
+  if (action === 'observarRegistro' && !observacion) {
+    alert('Para observar el registro debes ingresar una observación.');
+    return;
+  }
+
+  const confirmar = confirm(
+    action === 'aprobarRegistro'
+      ? '¿Deseas aprobar este registro?'
+      : '¿Deseas observar este registro?'
+  );
+
+  if (!confirmar) return;
+
+  try {
+    const url =
+      `${API_URL}?action=${action}` +
+      `&idRegistro=${encodeURIComponent(idRegistroActual)}` +
+      `&observacion=${encodeURIComponent(observacion)}` +
+      `&revisadoPor=${encodeURIComponent(revisadoPor)}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(data.message || 'No se pudo actualizar el registro.');
+    }
+
+    alert(data.message);
+
+    cerrarModal();
+    await cargarCajas();
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
     function cerrarModal() {
       document.getElementById('modalDetalle').style.display = 'none';
     }
