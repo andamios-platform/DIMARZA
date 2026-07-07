@@ -185,65 +185,109 @@
       font-weight: bold;
     }
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 1000;
-      padding: 20px;
-    }
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 1000;
+  padding: 24px;
+}
 
-    .modal-content {
-      background: white;
-      max-width: 1000px;
-      margin: auto;
-      border-radius: 16px;
-      padding: 22px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
+.modal-revision {
+  background: #f9fafb;
+  width: min(1200px, 96vw);
+  max-height: 92vh;
+  margin: auto;
+  border-radius: 24px;
+  padding: 24px;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.35);
+}
 
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
+.modal-header {
+  background: #111827;
+  color: white;
+  border-radius: 18px;
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
 
-    .modal-header h2 {
-      margin: 0;
-      font-size: 22px;
-    }
+.modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
 
-    .close {
-      background: #dc2626;
-    }
+.modal-header p {
+  margin: 5px 0 0;
+  color: #d1d5db;
+}
 
-    .detalle-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
+.close {
+  background: #dc2626;
+}
 
-    .detalle-item {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 10px;
-    }
+.seccion-detalle {
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
 
-    .detalle-item strong {
-      display: block;
-      color: #374151;
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
+.seccion-detalle h3 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  color: #111827;
+}
 
-    .detalle-item span {
-      font-size: 14px;
-    }
+.detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.detalle-item {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.detalle-item strong {
+  display: block;
+  font-size: 12px;
+  color: #374151;
+  margin-bottom: 5px;
+}
+
+.detalle-item span {
+  font-size: 14px;
+  color: #111827;
+}
+
+.herramienta-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+}
+
+.herramienta-item strong {
+  color: #111827;
+}
+
+.herramienta-item span {
+  color: #374151;
+  font-size: 13px;
+}
 
 .cards-grid {
   display: grid;
@@ -462,16 +506,19 @@
 </div>
   </div>
 
-  <div id="modalDetalle" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Detalle del registro</h2>
-        <button class="close" onclick="cerrarModal()">Cerrar</button>
+<div id="modalDetalle" class="modal">
+  <div class="modal-content modal-revision">
+    <div class="modal-header">
+      <div>
+        <h2 id="tituloModal">Revisión de caja</h2>
+        <p id="subtituloModal">Detalle del registro seleccionado</p>
       </div>
-
-      <div id="detalleRegistro" class="detalle-grid"></div>
+      <button class="close" onclick="cerrarModal()">Cerrar</button>
     </div>
+
+    <div id="detalleRegistro"></div>
   </div>
+</div>
 
   <script>
 
@@ -709,20 +756,85 @@ function pintarTabla() {
       }
     }
 
-    function mostrarDetalle(detalle) {
-      const contenedor = document.getElementById('detalleRegistro');
+function mostrarDetalle(detalle) {
+  const contenedor = document.getElementById('detalleRegistro');
 
-      contenedor.innerHTML = Object.entries(detalle)
-        .filter(([key, value]) => value !== '')
-        .map(([key, value]) => `
-          <div class="detalle-item">
-            <strong>${key}</strong>
-            <span>${value}</span>
-          </div>
-        `).join('');
+  const caja = extraerCaja(detalle['Caja Herramientas de pláctico TRUPPER'] || '');
+  const id = detalle['ID REGISTRO'] || '';
 
-      document.getElementById('modalDetalle').style.display = 'block';
-    }
+  document.getElementById('tituloModal').textContent = `Revisión de caja ${caja}`;
+  document.getElementById('subtituloModal').textContent = id;
+
+  const herramientas = [
+    'Arnés Mecánico 6 argollas Talla: _______',
+    'Arnés Mecánico 4 argollas Talla: _______',
+    'Balde lainero de lona HAUK',
+    'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69 (1)',
+    'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69 (2)',
+    'Cabo en Y con amortiguador de impacto',
+    'Cabo en Y sin amortiguador de impacto',
+    'Caja Herramientas de pláctico TRUPPER',
+    'Correaje de Andamiero',
+    'Faja Anclaje MSA doble argolla 0.9m',
+    'Faja Anclaje MSAdoble argolla 1.8M',
+    'Flexometro de 5m',
+    'Flexometro de 8m',
+    'Hombrera de cuero',
+    'Kit Antitrauma MSA Model 10063431 (1)',
+    'Kit Antitrauma MSA Model 10063431 (2)',
+    'Llave Carraca ALFMAN QLF-RW 1922',
+    'Llave Francesa 12"',
+    'Llave Francesa 8"',
+    'Llave Mixta 22mm',
+    'Martillo Andamiero ALFMAN ACF H0075',
+    'Nivel de Mano STANLEY 9"',
+    'Rodillera',
+    'Polea con Freno SECURPULLEY'
+  ];
+
+  const herramientasHtml = herramientas
+    .filter(h => detalle[h])
+    .map(h => `
+      <div class="herramienta-item">
+        <strong>${h}</strong>
+        <span>${detalle[h]}</span>
+      </div>
+    `).join('');
+
+  contenedor.innerHTML = `
+    <div class="seccion-detalle">
+      <h3>Datos generales</h3>
+      <div class="detalle-grid">
+        ${itemDetalle('ID Registro', detalle['ID REGISTRO'])}
+        ${itemDetalle('Estado', detalle['ESTADO'])}
+        ${itemDetalle('Fecha', detalle['FECHA:'])}
+        ${itemDetalle('Unidad', detalle['UNIDAD MINERA:'])}
+        ${itemDetalle('Servicio', detalle['SERVICIO'])}
+        ${itemDetalle('Turno', detalle['TURNO:'])}
+        ${itemDetalle('Responsable', detalle['ANDAMIERO RESPONSABLE'])}
+        ${itemDetalle('Documento responsable', detalle['DOCUMENTO RESPONSABLE:'])}
+        ${itemDetalle('Supervisor', detalle['SUPERVISOR A CARGO:'])}
+        ${itemDetalle('Documento supervisor', detalle['DOCUMENTO SUPERVISOR:'])}
+      </div>
+    </div>
+
+    <div class="seccion-detalle">
+      <h3>Herramientas registradas</h3>
+      ${herramientasHtml || '<div class="loading">No hay herramientas registradas.</div>'}
+    </div>
+  `;
+
+  document.getElementById('modalDetalle').style.display = 'block';
+}
+
+function itemDetalle(titulo, valor) {
+  return `
+    <div class="detalle-item">
+      <strong>${titulo}</strong>
+      <span>${valor || '-'}</span>
+    </div>
+  `;
+}
 
     function cerrarModal() {
       document.getElementById('modalDetalle').style.display = 'none';
