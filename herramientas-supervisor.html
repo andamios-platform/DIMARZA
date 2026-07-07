@@ -546,11 +546,12 @@ function pintarTabla() {
     });
   }
 
-  if (!data.length) {
-    contenedor.innerHTML = `<div class="loading">No hay cajas para mostrar</div>`;
-    return;
-  }
-  actualizarResumen(data);
+    actualizarResumen(data);
+    
+    if (!data.length) {
+      contenedor.innerHTML = `<div class="loading">No hay cajas para mostrar</div>`;
+      return;
+    }
   contenedor.innerHTML = data.map(item => {
     const claseEstado = (item.estado || '').toLowerCase();
     const cajaLimpia = extraerCaja(item.caja);
