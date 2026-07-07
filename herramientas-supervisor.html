@@ -237,6 +237,61 @@
       font-size: 14px;
     }
 
+    .cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.card-caja {
+  background: white;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  border-left: 7px solid #f59e0b;
+}
+
+.card-caja.aprobado {
+  border-left-color: #16a34a;
+}
+
+.card-caja.observado {
+  border-left-color: #dc2626;
+}
+
+.card-caja.devuelto {
+  border-left-color: #374151;
+}
+
+.card-icon {
+  font-size: 42px;
+  margin-bottom: 8px;
+}
+
+.card-caja h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.card-info {
+  font-size: 14px;
+  margin: 6px 0;
+  color: #374151;
+}
+
+.card-info strong {
+  color: #111827;
+}
+
+.card-actions {
+  margin-top: 15px;
+}
+
+.card-actions button {
+  width: 100%;
+  background: #111827;
+}
+    
     @media (max-width: 800px) {
       .filters {
         grid-template-columns: 1fr;
@@ -287,30 +342,9 @@
       </div>
     </div>
 
-    <div class="panel">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Caja</th>
-              <th>ID Registro</th>
-              <th>Fecha</th>
-              <th>Responsable</th>
-              <th>Supervisor</th>
-              <th>Servicio</th>
-              <th>Turno</th>
-              <th>Estado</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tablaCajas">
-            <tr>
-              <td colspan="9" class="loading">Cargando información...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <div id="contenedorCajas" class="cards-grid">
+  <div class="loading">Cargando cajas...</div>
+</div>
   </div>
 
   <div id="modalDetalle" class="modal">
@@ -337,9 +371,8 @@
     });
 
     async function cargarCajas() {
-      const tbody = document.getElementById('tablaCajas');
-      tbody.innerHTML = `<tr><td colspan="9" class="loading">Cargando información...</td></tr>`;
-
+      const contenedor = document.getElementById('contenedorCajas');
+      contenedor.innerHTML = `<div class="loading">Cargando cajas...</div>`;
       try {
         const url = `${API_URL}?action=getCajasRegistradas`;
         const res = await fetch(url);
@@ -358,7 +391,7 @@
         pintarTabla();
 
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="9" class="loading">Error: ${err.message}</td></tr>`;
+        contenedor.innerHTML = `<div class="loading">Error: ${err.message}</div>`;
       }
     }
 
@@ -378,57 +411,81 @@
       select.value = valorActual;
     }
 
-    function pintarTabla() {
-      const tbody = document.getElementById('tablaCajas');
-      const supervisor = document.getElementById('filtroSupervisor').value;
-      const texto = document.getElementById('buscarTexto').value.toLowerCase().trim();
+function pintarTabla() {
+  const contenedor = document.getElementById('contenedorCajas');
+  const supervisor = document.getElementById('filtroSupervisor').value;
+  const texto = document.getElementById('buscarTexto').value.toLowerCase().trim();
 
-      let data = cajasGlobal.slice();
+  let data = cajasGlobal.slice();
 
-      if (supervisor) {
-        data = data.filter(x => x.supervisor === supervisor);
-      }
+  data = data.filter(x => x.idRegistro && x.estado);
 
-      if (texto) {
-        data = data.filter(x => {
-          return [
-            x.caja,
-            x.idRegistro,
-            x.responsable,
-            x.supervisor,
-            x.servicio,
-            x.fecha,
-            x.estado
-          ].join(' ').toLowerCase().includes(texto);
-        });
-      }
+  if (supervisor) {
+    data = data.filter(x => x.supervisor === supervisor);
+  }
 
-      document.getElementById('totalCajas').textContent = data.length;
+  if (texto) {
+    data = data.filter(x => {
+      return [
+        x.caja,
+        x.idRegistro,
+        x.responsable,
+        x.supervisor,
+        x.servicio,
+        x.fecha,
+        x.estado
+      ].join(' ').toLowerCase().includes(texto);
+    });
+  }
 
-      if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="9" class="loading">No hay registros para mostrar</td></tr>`;
-        return;
-      }
+  document.getElementById('totalCajas').textContent = data.length;
 
-      tbody.innerHTML = data.map(item => `
-        <tr>
-          <td>${item.caja || '-'}</td>
-          <td>${item.idRegistro || '<span style="color:#9ca3af;">Sin ID</span>'}</td>
-          <td>${item.fecha || '-'}</td>
-          <td>${item.responsable || '-'}</td>
-          <td>${item.supervisor || '-'}</td>
-          <td>${item.servicio || '-'}</td>
-          <td>${item.turno || '-'}</td>
-          <td>${badgeEstado(item.estado)}</td>
-          <td>
-            <button class="btn-ver" onclick="verRegistro('${item.idRegistro}', ${item.fila})">
-              Ver registro
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
+  if (!data.length) {
+    contenedor.innerHTML = `<div class="loading">No hay cajas para mostrar</div>`;
+    return;
+  }
 
+  contenedor.innerHTML = data.map(item => {
+    const claseEstado = (item.estado || '').toLowerCase();
+    const cajaLimpia = extraerCaja(item.caja);
+
+    return `
+      <div class="card-caja ${claseEstado}">
+        <div class="card-icon">📦</div>
+        <h3>CAJA ${cajaLimpia}</h3>
+
+        <div>${badgeEstado(item.estado)}</div>
+
+        <div class="card-info"><strong>Responsable:</strong><br>${item.responsable || '-'}</div>
+        <div class="card-info"><strong>Supervisor:</strong><br>${item.supervisor || '-'}</div>
+        <div class="card-info"><strong>Fecha:</strong> ${item.fecha || '-'}</div>
+        <div class="card-info"><strong>Servicio:</strong> ${item.servicio || '-'}</div>
+        <div class="card-info"><strong>Turno:</strong> ${item.turno || '-'}</div>
+        <div class="card-info"><strong>ID:</strong> ${item.idRegistro || '-'}</div>
+
+        <div class="card-actions">
+          <button onclick="verRegistro('${item.idRegistro}')">Abrir caja</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+    function extraerCaja(textoCaja) {
+  const texto = textoCaja || '';
+
+  const codigo = texto.match(/CODIGO:\s*([^|]+)/i);
+  if (codigo && codigo[1].trim() && codigo[1].trim() !== 'S/C') {
+    return codigo[1].trim();
+  }
+
+  const serie = texto.match(/SERIE:\s*([^|]+)/i);
+  if (serie && serie[1].trim() && serie[1].trim() !== 'S/S') {
+    return serie[1].trim();
+  }
+
+  return texto || '-';
+}
     function badgeEstado(estado) {
       const e = (estado || '').toUpperCase();
 
