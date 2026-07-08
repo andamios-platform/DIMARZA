@@ -923,7 +923,11 @@ const herramientasHtml = herramientas
   .filter(h => detalle[h])
   .map(h => `
     <div class="herramienta-row">
-      <img class="herramienta-img" src="${imagenHerramienta(h)}" alt="${h}">
+      <img
+  class="herramienta-img"
+  src="${imagenHerramienta(h)}"
+  alt="${h}"
+  onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'">
       <div>
         <div class="herramienta-nombre">${h}</div>
         <div class="herramienta-valor">${detalle[h]}</div>
@@ -986,22 +990,89 @@ function itemDetalle(titulo, valor) {
     </div>
   `;
 }
-    function imagenHerramienta(nombre) {
+function imagenHerramienta(nombre) {
   const n = (nombre || '').toLowerCase();
 
-  if (n.includes('caja')) return 'img/CajaHerramientasdeplácticoTRUPPER.JPG';
-  if (n.includes('arnés') || n.includes('arnes')) return 'img/ArnésMecánico6argollas.JPG';
-  if (n.includes('bloque')) return 'img/BloqueRetráctilHALTMIKRONONEBLOCK.JPG';
-  if (n.includes('cabo')) return 'img/CaboenYconamortiguadordeimpacto.JPG';
-  if (n.includes('faja')) return 'img/FajaAnclajeMSAdobleargolla.JPG';
-  if (n.includes('kit')) return 'img/KitAntitraumaMSAModel10063431.JPG';
-  if (n.includes('llave carraca')) return 'img/LlaveCarracaALFMANQLF-RW1922.JPG';
-  if (n.includes('llave francesa')) return 'img/LlaveFrancesa12.JPG';
-  if (n.includes('martillo')) return 'img/MartilloAndamieroALFMANACFH0075.JPG';
-  if (n.includes('nivel')) return 'img/NiveldeManoSTANLEY9.JPG';
-  if (n.includes('rodillera')) return 'img/Rodillera.JPG';
-  if (n.includes('hombrera')) return 'img/Hombreradecuero.JPG';
-  if (n.includes('correaje')) return 'img/CorreajedeAndamiero.JPG';
+  if (n.includes('arnés mecánico 6') || n.includes('arnes mecánico 6'))
+    return 'img/ArnésMecánico6argollas.JPG';
+
+  if (n.includes('arnés mecánico 4') || n.includes('arnes mecánico 4'))
+    return 'img/ArnésMecánico4argollas.jpg';
+
+  if (n.includes('balde'))
+    return 'img/BaldelainerodelonaHAUK.png';
+
+  if (n.includes('bloque'))
+    return 'img/BloqueRetráctilSafewazeDobleLatitude-Pde1.8mGanchoEscala.JPG';
+
+  if (n.includes('cabo en y'))
+    return 'img/CaboenYMSAconamortiguadordeimpacto.png';
+
+  if (n.includes('cabo sin'))
+    return 'img/Cabosinamortiguadordeimpacto.jpg';
+
+  if (n.includes('caja herramientas'))
+    return 'img/CajaHerramientasdeplácticoTRUPPER.JPG';
+
+  if (n.includes('caja metálica') || n.includes('caja metalica'))
+    return 'img/CajaMetalicadeherramientas.JPG';
+
+  if (n.includes('correaje'))
+    return 'img/CorreajedeAndamiero.JPG';
+
+  if (n.includes('driza'))
+    return 'img/DrizaElásticaportaherramientamanual.JPG';
+
+  if (n.includes('faja') && n.includes('0.9'))
+    return 'img/FajaAnclajeMSAdobleargolla0.9m.jpg';
+
+  if (n.includes('faja'))
+    return 'img/FajaAnclajeMSAdobleargolla1.8M.JPG';
+
+  if (n.includes('flexómetro 5') || n.includes('flexometro 5'))
+    return 'img/Flexometrode5m.jpg';
+
+  if (n.includes('flexómetro 8') || n.includes('flexometro 8'))
+    return 'img/Flexometrode8m.JPG';
+
+  if (n.includes('hombrera'))
+    return 'img/Hombreradecuero.JPG';
+
+  if (n.includes('kit'))
+    return 'img/KitAntitraumaMSAModel10063431.JPG';
+
+  if (n.includes('linterna'))
+    return 'img/Linternaparacasco.jpg';
+
+  if (n.includes('llave carraca'))
+    return 'img/LlaveCarracaALFMANQLF-RW1922.jpg';
+
+  if (n.includes('llave francesa 12'))
+    return 'img/LlaveFrancesa12.JPG';
+
+  if (n.includes('llave francesa 8'))
+    return 'img/LlaveFrancesa8.jpg';
+
+  if (n.includes('llave mixta'))
+    return 'img/LlaveMixta22mm.JPG';
+
+  if (n.includes('martillo'))
+    return 'img/MartilloAndamieroALFMANACFH0075.jpg';
+
+  if (n.includes('nivel'))
+    return 'img/NiveldeManoSTANLEY9.JPG';
+
+  if (n.includes('polea'))
+    return 'img/PoleaconFrenoSECURPULLEY.jpg';
+
+  if (n.includes('rodillera'))
+    return 'img/Rodillera.JPG';
+
+  if (n.includes('porta carraca'))
+    return 'img/portacarraca.jpg';
+
+  if (n.includes('porta martillo'))
+    return 'img/portamartillo.jpg';
 
   return 'img/CajaHerramientasdeplácticoTRUPPER.JPG';
 }
