@@ -112,6 +112,17 @@
   box-shadow: 0 6px 18px rgba(0,0,0,0.06);
   border-left: 6px solid #2563eb;
 }
+    .revision-buttons.tres {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.btn-devolver {
+  background: #374151;
+}
+
+.btn-devolver:hover {
+  background: #1f2937;
+}
 
 .stat strong {
   display: block;
@@ -447,7 +458,8 @@
 }
 
 .revision-actions textarea,
-.revision-actions input {
+.revision-actions input,
+.revision-actions select {
   width: 100%;
   padding: 12px;
   border: 1px solid #d1d5db;
@@ -486,6 +498,9 @@
       .detalle-grid {
         grid-template-columns: 1fr;
     }  
+      .revision-buttons.tres {
+      grid-template-columns: 1fr;
+    }
     }
   </style>
 </head>
@@ -572,10 +587,11 @@
 
   <script>
 
-    const API_URL = 'https://script.google.com/macros/s/AKfycbze-9nRvim45Fa-Ffl_AVJLIjKO1_H9FL_BFTdsUxZsZuwuT2DVrZC0tBS4cURsGq6l/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyn0NkQ2TN7CBqgQmPxQDc50L00tFgAx_GtCVT1Z_L1r6y4hoAHea4Wtfx0JtMdId5G/exec';
 
     let cajasGlobal = [];
     let idRegistroActual = '';
+    let supervisoresRevision = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       cargarCajas();
@@ -598,6 +614,7 @@
         }
 
         cajasGlobal = data.cajas || [];
+        await cargarSupervisoresRevision();
         cargarSupervisores(data.supervisores || []);
 
         pintarTabla();
@@ -807,6 +824,20 @@ function pintarTabla() {
       }
     }
 
+async function cargarSupervisoresRevision() {
+  const res = await fetch(`${API_URL}?action=getSupervisoresData`);
+  const data = await res.json();
+
+  if (data.ok) {
+    supervisoresRevision = data.supervisores || [];
+  }
+}
+
+function opcionesSupervisores() {
+  return supervisoresRevision.map(s => `
+    <option value="${s.nombre}">${s.nombre}</option>
+  `).join('');
+}    
 function mostrarDetalle(detalle) {
   const contenedor = document.getElementById('detalleRegistro');
 
@@ -873,15 +904,19 @@ function mostrarDetalle(detalle) {
     <div class="revision-actions">
       <h3>Revisión del supervisor</h3>
     
-      <label>Revisado por</label>
-      <input id="revisadoPor" type="text" placeholder="Nombre del supervisor">
+      <label>Supervisor que revisa / recibe</label>
+      <select id="revisadoPor">
+        <option value="">Seleccionar supervisor</option>
+        ${opcionesSupervisores()}
+      </select>
     
       <label>Observación</label>
       <textarea id="observacionSupervisor" rows="4" placeholder="Escribe una observación si corresponde"></textarea>
     
-      <div class="revision-buttons">
-        <button class="btn-aprobar" onclick="actualizarRevision('aprobarRegistro')">✅ Aprobar</button>
-        <button class="btn-observar" onclick="actualizarRevision('observarRegistro')">⚠️ Observar</button>
+      <div class="revision-buttons tres">
+        <button class="btn-aprobar" onclick="actualizarRevision('aprobarRegistro')">✅ Aprobar entrega</button>
+        <button class="btn-observar" onclick="actualizarRevision('observarRegistro')">⚠️ Observar entrega</button>
+        <button class="btn-devolver" onclick="actualizarRevision('registrarDevolucion')">↩️ Registrar devolución</button>
       </div>
     </div>
     <div class="seccion-detalle">
@@ -911,7 +946,7 @@ async function actualizarRevision(action) {
   }
 
   if (!revisadoPor) {
-    alert('Ingrese el nombre del supervisor que revisa.');
+    alert('Seleccione el supervisor que revisa o recibe.');
     return;
   }
 
@@ -920,20 +955,26 @@ async function actualizarRevision(action) {
     return;
   }
 
-  const confirmar = confirm(
-    action === 'aprobarRegistro'
-      ? '¿Deseas aprobar este registro?'
-      : '¿Deseas observar este registro?'
-  );
+  const textos = {
+    aprobarRegistro: '¿Deseas aprobar esta entrega?',
+    observarRegistro: '¿Deseas observar esta entrega?',
+    registrarDevolucion: '¿Deseas registrar la devolución de esta caja?'
+  };
 
+  const confirmar = confirm(textos[action]);
   if (!confirmar) return;
 
   try {
-    const url =
+    let url =
       `${API_URL}?action=${action}` +
       `&idRegistro=${encodeURIComponent(idRegistroActual)}` +
-      `&observacion=${encodeURIComponent(observacion)}` +
-      `&revisadoPor=${encodeURIComponent(revisadoPor)}`;
+      `&observacion=${encodeURIComponent(observacion)}`;
+
+    if (action === 'registrarDevolucion') {
+      url += `&recibidoPor=${encodeURIComponent(revisadoPor)}`;
+    } else {
+      url += `&revisadoPor=${encodeURIComponent(revisadoPor)}`;
+    }
 
     const res = await fetch(url);
     const data = await res.json();
