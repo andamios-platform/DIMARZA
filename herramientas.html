@@ -718,7 +718,10 @@ async function apiCall(action, payload = null) {
       showLoading(true);
       try {
         const data = await apiCall("getInitialData");
+        const inv = await apiCall("getInventarioHerramientas");
+        
         baseData = data;
+        baseData.items = inv.inventario || [];
         fillResponsables();
         fillSupervisores();
         fillUnidades();
