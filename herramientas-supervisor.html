@@ -735,7 +735,21 @@
         contenedor.innerHTML = `<div class="loading">Error: ${err.message}</div>`;
       }
     }
+function cargarSupervisores(supervisores) {
+  const select = document.getElementById('filtroSupervisor');
+  const valorActual = select.value;
 
+  select.innerHTML = `<option value="">Todos los supervisores</option>`;
+
+  supervisores.forEach(sup => {
+    const option = document.createElement('option');
+    option.value = sup;
+    option.textContent = sup;
+    select.appendChild(option);
+  });
+
+  select.value = valorActual;
+}
 async function cargarSupervisoresRevision() {
   const res = await fetch(`${API_URL}?action=getSupervisoresData`);
   const data = await res.json();
@@ -1232,10 +1246,11 @@ async function ejecutarRevision(action, revisadoPor, observacion) {
 
   } catch (err) {
     mostrarToast(err.message, 'error');
-  } } finally {
-  btn.disabled = false;
-  btn.textContent = 'Confirmar';
-}
+
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirmar';
+  }
 }
 
 function mostrarToast(mensaje, tipo) {
