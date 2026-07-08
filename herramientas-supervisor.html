@@ -533,6 +533,70 @@
   font-weight: bold;
   font-size: 18px;
 }
+
+    .toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #111827;
+  color: white;
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  z-index: 3000;
+  display: none;
+  font-weight: bold;
+}
+
+.toast.ok {
+  background: #16a34a;
+}
+
+.toast.error {
+  background: #dc2626;
+}
+
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 2500;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-box {
+  background: white;
+  width: min(420px, 92vw);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.confirm-box h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.confirm-box p {
+  color: #4b5563;
+  margin-bottom: 20px;
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn-cancelar {
+  background: #6b7280;
+}
+
+.btn-confirmar {
+  background: #f97316;
+}
     @media (max-width: 800px) {
       .filters {
         grid-template-columns: 1fr;
@@ -1076,35 +1140,73 @@ function imagenHerramienta(nombre) {
 
   return 'img/CajaHerramientasdeplácticoTRUPPER.JPG';
 }
-async function actualizarRevision(action) {
+function actualizarRevision(action) {
   const revisadoPor = document.getElementById('revisadoPor').value.trim();
   const observacion = document.getElementById('observacionSupervisor').value.trim();
 
   if (!idRegistroActual) {
-    alert('No se encontró el ID del registro.');
+    mostrarToast('No se encontró el ID del registro.', 'error');
     return;
   }
 
   if (!revisadoPor) {
-    alert('Seleccione el supervisor que revisa o recibe.');
+    mostrarToast('Seleccione el supervisor que revisa o recibe.', 'error');
     return;
   }
 
   if (action === 'observarRegistro' && !observacion) {
-    alert('Para observar el registro debes ingresar una observación.');
+    mostrarToast('Para observar debes ingresar una observación.', 'error');
     return;
   }
 
-  const textos = {
-    aprobarRegistro: '¿Deseas aprobar esta entrega?',
-    observarRegistro: '¿Deseas observar esta entrega?',
-    registrarDevolucion: '¿Deseas registrar la devolución de esta caja?'
+  const config = {
+    aprobarRegistro: {
+      titulo: 'Aprobar entrega',
+      mensaje: 'La caja pasará al estado APROBADO.',
+      textoBoton: 'Aprobar'
+    },
+    observarRegistro: {
+      titulo: 'Observar entrega',
+      mensaje: 'La caja pasará al estado OBSERVADO.',
+      textoBoton: 'Observar'
+    },
+    registrarDevolucion: {
+      titulo: 'Registrar devolución',
+      mensaje: 'La caja pasará al estado DEVUELTO.',
+      textoBoton: 'Registrar'
+    }
   };
 
-  const confirmar = confirm(textos[action]);
-  if (!confirmar) return;
+  abrirConfirmacion(config[action], async () => {
+    await ejecutarRevision(action, revisadoPor, observacion);
+  });
+}
+    function cerrarModal() {
+      document.getElementById('modalDetalle').style.display = 'none';
+    }
+
+    function abrirConfirmacion(config, callback) {
+  document.getElementById('confirmTitulo').textContent = config.titulo;
+  document.getElementById('confirmMensaje').textContent = config.mensaje;
+
+  const btn = document.getElementById('btnConfirmarAccion');
+  btn.textContent = config.textoBoton;
+  btn.onclick = callback;
+
+  document.getElementById('confirmOverlay').style.display = 'flex';
+}
+
+function cerrarConfirmacion() {
+  document.getElementById('confirmOverlay').style.display = 'none';
+}
+
+async function ejecutarRevision(action, revisadoPor, observacion) {
+  const btn = document.getElementById('btnConfirmarAccion');
 
   try {
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+
     let url =
       `${API_URL}?action=${action}` +
       `&idRegistro=${encodeURIComponent(idRegistroActual)}` +
@@ -1123,18 +1225,43 @@ async function actualizarRevision(action) {
       throw new Error(data.message || 'No se pudo actualizar el registro.');
     }
 
-    alert(data.message);
-
+    cerrarConfirmacion();
     cerrarModal();
+    mostrarToast(data.message, 'ok');
     await cargarCajas();
 
   } catch (err) {
-    alert('Error: ' + err.message);
-  }
+    mostrarToast(err.message, 'error');
+  } } finally {
+  btn.disabled = false;
+  btn.textContent = 'Confirmar';
 }
-    function cerrarModal() {
-      document.getElementById('modalDetalle').style.display = 'none';
-    }
+}
+
+function mostrarToast(mensaje, tipo) {
+  const toast = document.getElementById('toast');
+  toast.textContent = mensaje;
+  toast.className = `toast ${tipo}`;
+  toast.style.display = 'block';
+
+  setTimeout(() => {
+    toast.style.display = 'none';
+  }, 2500);
+}
+    
   </script>
+<div id="toast" class="toast"></div>
+
+<div id="confirmOverlay" class="confirm-overlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitulo">Confirmar acción</h3>
+    <p id="confirmMensaje">¿Deseas continuar?</p>
+
+    <div class="confirm-actions">
+      <button class="btn-cancelar" onclick="cerrarConfirmacion()">Cancelar</button>
+      <button class="btn-confirmar" id="btnConfirmarAccion">Confirmar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
