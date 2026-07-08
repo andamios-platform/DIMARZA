@@ -1488,7 +1488,7 @@ async function apiCall(action, payload = null) {
       }
 
       let ocupado = false;
-
+      
       if (!eq.dual) {
         const codigoVal = document.getElementById(`${key}_codigo`).value;
         const serieVal = document.getElementById(`${key}_serie`).value;
@@ -1496,12 +1496,16 @@ async function apiCall(action, payload = null) {
       
         if (valor) {
           const obj = JSON.parse(valor);
-          ocupado = !!obj.cajaOcupada;
+      
+          ocupado =
+            obj.cajaOcupada ||
+            obj.ocupado ||
+            false;
         }
       }
       
       if (ocupado) {
-        status.textContent = '🔒 Caja registrada anteriormente';
+        status.textContent = '🔒 En uso';
         card.classList.add('complete');
         return;
       }
