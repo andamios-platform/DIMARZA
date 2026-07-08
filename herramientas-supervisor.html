@@ -694,7 +694,7 @@
 
   <script>
 
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyn0NkQ2TN7CBqgQmPxQDc50L00tFgAx_GtCVT1Z_L1r6y4hoAHea4Wtfx0JtMdId5G/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwGKY8Z73GIoMkI1lQhTjCYtnvVXpR1YemBu6g7qxCTmmWB85pfPiYvm42tNrrmMTrO/exec';
 
     let cajasGlobal = [];
     let idRegistroActual = '';
@@ -721,9 +721,14 @@
         }
 
         cajasGlobal = data.cajas || [];
-        await cargarSupervisoresRevision();
         cargarSupervisores(data.supervisores || []);
-
+        
+        try {
+          await cargarSupervisoresRevision();
+        } catch (e) {
+          console.warn('No se pudieron cargar supervisores de revisión:', e);
+        }
+        
         pintarTabla();
 
       } catch (err) {
@@ -731,21 +736,16 @@
       }
     }
 
-    function cargarSupervisores(supervisores) {
-      const select = document.getElementById('filtroSupervisor');
-      const valorActual = select.value;
+async function cargarSupervisoresRevision() {
+  const res = await fetch(`${API_URL}?action=getSupervisoresData`);
+  const data = await res.json();
 
-      select.innerHTML = `<option value="">Todos los supervisores</option>`;
+  if (!data.ok) {
+    throw new Error(data.message || 'Error al cargar DATA SUPERVISORES');
+  }
 
-      supervisores.forEach(sup => {
-        const option = document.createElement('option');
-        option.value = sup;
-        option.textContent = sup;
-        select.appendChild(option);
-      });
-
-      select.value = valorActual;
-    }
+  supervisoresRevision = data.supervisores || [];
+}
 
 function pintarTabla() {
   const contenedor = document.getElementById('contenedorCajas');
