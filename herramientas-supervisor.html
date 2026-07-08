@@ -489,7 +489,50 @@
 .btn-observar:hover {
   background: #b91c1c;
 }
-    
+    .herramientas-tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.herramienta-row {
+  display: grid;
+  grid-template-columns: 58px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.herramienta-img {
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  background: white;
+  object-fit: contain;
+  padding: 5px;
+  border: 1px solid #e5e7eb;
+}
+
+.herramienta-nombre {
+  font-weight: bold;
+  color: #111827;
+  font-size: 14px;
+}
+
+.herramienta-valor {
+  color: #374151;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.herramienta-check {
+  color: #16a34a;
+  font-weight: bold;
+  font-size: 18px;
+}
     @media (max-width: 800px) {
       .filters {
         grid-template-columns: 1fr;
@@ -876,14 +919,18 @@ function mostrarDetalle(detalle) {
     'Polea con Freno SECURPULLEY'
   ];
 
-  const herramientasHtml = herramientas
-    .filter(h => detalle[h])
-    .map(h => `
-      <div class="herramienta-item">
-        <strong>${h}</strong>
-        <span>${detalle[h]}</span>
+const herramientasHtml = herramientas
+  .filter(h => detalle[h])
+  .map(h => `
+    <div class="herramienta-row">
+      <img class="herramienta-img" src="${imagenHerramienta(h)}" alt="${h}">
+      <div>
+        <div class="herramienta-nombre">${h}</div>
+        <div class="herramienta-valor">${detalle[h]}</div>
       </div>
-    `).join('');
+      <div class="herramienta-check">✓</div>
+    </div>
+  `).join('');
 
   contenedor.innerHTML = `
     <div class="seccion-detalle">
@@ -899,6 +946,13 @@ function mostrarDetalle(detalle) {
         ${itemDetalle('Documento responsable', detalle['DOCUMENTO RESPONSABLE:'])}
         ${itemDetalle('Supervisor', detalle['SUPERVISOR A CARGO:'])}
         ${itemDetalle('Documento supervisor', detalle['DOCUMENTO SUPERVISOR:'])}
+      </div>
+    </div>
+    
+    <div class="seccion-detalle">
+      <h3>Herramientas registradas</h3>
+      <div class="herramientas-tabla">
+        ${herramientasHtml || '<div class="loading">No hay herramientas registradas.</div>'}
       </div>
     </div>
     <div class="revision-actions">
@@ -919,10 +973,6 @@ function mostrarDetalle(detalle) {
         <button class="btn-devolver" onclick="actualizarRevision('registrarDevolucion')">↩️ Registrar devolución</button>
       </div>
     </div>
-    <div class="seccion-detalle">
-      <h3>Herramientas registradas</h3>
-      ${herramientasHtml || '<div class="loading">No hay herramientas registradas.</div>'}
-    </div>
   `;
 
   document.getElementById('modalDetalle').style.display = 'block';
@@ -935,6 +985,25 @@ function itemDetalle(titulo, valor) {
       <span>${valor || '-'}</span>
     </div>
   `;
+}
+    function imagenHerramienta(nombre) {
+  const n = (nombre || '').toLowerCase();
+
+  if (n.includes('caja')) return 'img/CajaHerramientasdeplácticoTRUPPER.JPG';
+  if (n.includes('arnés') || n.includes('arnes')) return 'img/ArnésMecánico6argollas.JPG';
+  if (n.includes('bloque')) return 'img/BloqueRetráctilHALTMIKRONONEBLOCK.JPG';
+  if (n.includes('cabo')) return 'img/CaboenYconamortiguadordeimpacto.JPG';
+  if (n.includes('faja')) return 'img/FajaAnclajeMSAdobleargolla.JPG';
+  if (n.includes('kit')) return 'img/KitAntitraumaMSAModel10063431.JPG';
+  if (n.includes('llave carraca')) return 'img/LlaveCarracaALFMANQLF-RW1922.JPG';
+  if (n.includes('llave francesa')) return 'img/LlaveFrancesa12.JPG';
+  if (n.includes('martillo')) return 'img/MartilloAndamieroALFMANACFH0075.JPG';
+  if (n.includes('nivel')) return 'img/NiveldeManoSTANLEY9.JPG';
+  if (n.includes('rodillera')) return 'img/Rodillera.JPG';
+  if (n.includes('hombrera')) return 'img/Hombreradecuero.JPG';
+  if (n.includes('correaje')) return 'img/CorreajedeAndamiero.JPG';
+
+  return 'img/CajaHerramientasdeplácticoTRUPPER.JPG';
 }
 async function actualizarRevision(action) {
   const revisadoPor = document.getElementById('revisadoPor').value.trim();
