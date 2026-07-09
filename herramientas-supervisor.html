@@ -628,6 +628,30 @@
   font-size: 18px;
   font-weight: bold;
 }
+.estado-ok{
+    color:#16a34a;
+    font-weight:600;
+}
+
+.estado-codigo{
+    color:#ea580c;
+    font-weight:600;
+}
+
+.estado-serie{
+    color:#ca8a04;
+    font-weight:600;
+}
+
+.estado-error{
+    color:#dc2626;
+    font-weight:600;
+}
+
+.estado-falta{
+    color:#6b7280;
+    font-weight:600;
+}
     @media (max-width: 800px) {
       .filters {
         grid-template-columns: 1fr;
@@ -725,7 +749,7 @@
 
   <script>
 
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzkUQ_6w3eKcA1t8pAHUlGOTDcv0_7TOPQQZxfTQv0TpwGOKM96PpCJUw5m1ltxXmZf/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwbL9jVD3zWZUdrD71aD6rvL-VQy3wYVcvHeunoYF1CjdCDYyNnYw-WsXx52GRlnEn8/exec';
 
     let cajasGlobal = [];
     let idRegistroActual = '';
@@ -1044,17 +1068,50 @@ const herramientasHtml = herramientas
     </div>
   `).join('');
 
-  const comparativoHtml = comparativo.map(x => {
-  const ok = x.estado === 'OK';
+const comparativoHtml = comparativo.map(x => {
+
+  let icono = '';
+  let clase = '';
+
+  switch (x.estado) {
+
+    case 'OK':
+      icono = '✅';
+      clase = 'estado-ok';
+      break;
+
+    case 'CODIGO':
+      icono = '🟠';
+      clase = 'estado-codigo';
+      break;
+
+    case 'SERIE':
+      icono = '🟡';
+      clase = 'estado-serie';
+      break;
+
+    case 'AMBOS':
+      icono = '❌';
+      clase = 'estado-error';
+      break;
+
+    case 'NO_REGISTRADO':
+      icono = '⚪';
+      clase = 'estado-falta';
+      break;
+  }
 
   return `
-    <tr class="${ok ? 'fila-ok' : 'fila-error'}">
+    <tr>
       <td>${x.herramienta}</td>
-      <td>${x.registrado || '-'}</td>
-      <td>${x.esperado || '-'}</td>
-      <td class="estado-comp">${ok ? '✅' : '❌'}</td>
+      <td>${x.registrado}</td>
+      <td>${x.esperado}</td>
+      <td class="${clase}">
+        ${icono} ${x.descripcion}
+      </td>
     </tr>
   `;
+
 }).join('');
   
   contenedor.innerHTML = `
