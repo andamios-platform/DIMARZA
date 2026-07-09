@@ -516,9 +516,9 @@
 }
 
 .herramienta-img {
-  width: 58px;
-  height: 58px;
-  border-radius: 12px;
+  width: 70px;
+  height: 70px;
+  border-radius: 14px;
   background: white;
   object-fit: contain;
   padding: 5px;
@@ -617,6 +617,44 @@
   border: 1px solid #e5e7eb;
   padding: 10px;
   text-align: left;
+}
+.tabla-comparativo td:first-child{
+    text-align:center;
+    vertical-align:middle;
+}
+.estado-ok,
+.estado-codigo,
+.estado-serie,
+.estado-error,
+.estado-falta{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+}
+.estado-ok{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.estado-codigo{
+    background:#ffedd5;
+    color:#c2410c;
+}
+
+.estado-serie{
+    background:#fef9c3;
+    color:#854d0e;
+}
+
+.estado-error{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.estado-falta{
+    background:#e5e7eb;
+    color:#374151;
 }
 
 .tabla-comparativo th {
@@ -1076,8 +1114,8 @@ const comparativoHtml = comparativo.map(x => {
               onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'">
           </td>
           <td>${x.herramienta}</td>
-          <td>${formatoComparativo(x.registrado)}</td>
-          <td>${formatoComparativo(x.esperado)}</td>
+            <td>${formatoComparativo(x.registrado, x.estado, 'registrado')}</td>
+            <td>${formatoComparativo(x.esperado, x.estado, 'esperado')}</td>
           <td class="${clase}">
             ${icono} ${x.descripcion}
           </td>
@@ -1153,7 +1191,7 @@ function itemDetalle(titulo, valor) {
     </div>
   `;
 }
-function formatoComparativo(texto) {
+function formatoComparativo(texto, estado = '', tipo = '') {
 
   const t = texto || '-';
 
@@ -1173,10 +1211,16 @@ function formatoComparativo(texto) {
     return t;
   }
 
+  const cod = codigo ? codigo[1].trim() : 'S/C';
+  const ser = serie ? serie[1].trim() : 'S/S';
+
+  const marcarCodigo = tipo === 'registrado' && (estado === 'CODIGO' || estado === 'AMBOS');
+  const marcarSerie = tipo === 'registrado' && (estado === 'SERIE' || estado === 'AMBOS');
+
   return `
     <div class="dato-comp">
-      <div><strong>Código</strong> ${codigo ? codigo[1].trim() : 'S/C'}</div>
-      <div><strong>Serie</strong> ${serie ? serie[1].trim() : 'S/S'}</div>
+      <div><strong>Código</strong> ${marcarCodigo ? '🔴 ' : ''}${cod}</div>
+      <div><strong>Serie</strong> ${marcarSerie ? '🔴 ' : ''}${ser}</div>
     </div>
   `;
 }
