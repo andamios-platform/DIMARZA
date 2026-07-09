@@ -622,10 +622,6 @@
     text-align:center;
     vertical-align:middle;
 }
-.estado-ok,
-.estado-codigo,
-.estado-serie,
-.estado-error,
 .estado-falta{
     display:inline-block;
     padding:6px 12px;
@@ -1219,8 +1215,18 @@ function formatoComparativo(texto, estado = '', tipo = '') {
 
   return `
     <div class="dato-comp">
-      <div><strong>Código</strong> ${marcarCodigo ? '🔴 ' : ''}${cod}</div>
-      <div><strong>Serie</strong> ${marcarSerie ? '🔴 ' : ''}${ser}</div>
+      <div>
+        <strong>Código</strong>
+        ${marcarCodigo
+          ? `<span style="color:#dc2626;font-weight:bold;">${cod}</span>`
+          : cod}
+      </div>
+      <div>
+        <strong>Serie</strong>
+        ${marcarSerie
+          ? `<span style="color:#dc2626;font-weight:bold;">${ser}</span>`
+          : ser}
+      </div>
     </div>
   `;
 }
