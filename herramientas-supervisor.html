@@ -597,6 +597,37 @@
 .btn-confirmar {
   background: #f97316;
 }
+.tabla-comparativo {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabla-comparativo th,
+.tabla-comparativo td {
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  text-align: left;
+}
+
+.tabla-comparativo th {
+  background: #111827;
+  color: white;
+}
+
+.fila-ok {
+  background: #ecfdf5;
+}
+
+.fila-error {
+  background: #fef2f2;
+}
+
+.estado-comp {
+  text-align: center !important;
+  font-size: 18px;
+  font-weight: bold;
+}
     @media (max-width: 800px) {
       .filters {
         grid-template-columns: 1fr;
@@ -920,30 +951,29 @@ function pintarTabla() {
       return `<span class="badge vacio">SIN ESTADO</span>`;
     }
 
-    async function verRegistro(idRegistro, fila) {
-      try {
-        let url = '';
-
-        if (idRegistro) {
-          url = `${API_URL}?action=getDetalleRegistro&idRegistro=${encodeURIComponent(idRegistro)}`;
-        } else {
-          alert('Este registro antiguo todavía no tiene ID REGISTRO. Luego podemos habilitar búsqueda por fila.');
-          return;
-        }
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (!data.ok) {
-          throw new Error(data.message || 'No se pudo obtener el detalle');
-        }
-
-        mostrarDetalle(data.detalle);
-
-      } catch (err) {
-        alert('Error: ' + err.message);
-      }
+  async function verRegistro(idRegistro, fila) {
+  try {
+    if (!idRegistro) {
+      alert('Este registro antiguo todavía no tiene ID REGISTRO.');
+      return;
     }
+
+    const resDetalle = await fetch(`${API_URL}?action=getDetalleRegistro&idRegistro=${encodeURIComponent(idRegistro)}`);
+    const dataDetalle = await resDetalle.json();
+
+    if (!dataDetalle.ok) {
+      throw new Error(dataDetalle.message || 'No se pudo obtener el detalle');
+    }
+
+    const resComp = await fetch(`${API_URL}?action=getComparativoRegistro&idRegistro=${encodeURIComponent(idRegistro)}`);
+    const dataComp = await resComp.json();
+
+    mostrarDetalle(dataDetalle.detalle, dataComp.comparativo || []);
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
 
 async function cargarSupervisoresRevision() {
   const res = await fetch(`${API_URL}?action=getSupervisoresData`);
@@ -959,7 +989,7 @@ function opcionesSupervisores() {
     <option value="${s.nombre}">${s.nombre}</option>
   `).join('');
 }    
-function mostrarDetalle(detalle) {
+function mostrarDetalle(detalle, comparativo = []) {
   const contenedor = document.getElementById('detalleRegistro');
 
   const caja = extraerCaja(detalle['Caja Herramientas de pláctico TRUPPER'] || '');
@@ -1014,6 +1044,19 @@ const herramientasHtml = herramientas
     </div>
   `).join('');
 
+  const comparativoHtml = comparativo.map(x => {
+  const ok = x.estado === 'OK';
+
+  return `
+    <tr class="${ok ? 'fila-ok' : 'fila-error'}">
+      <td>${x.herramienta}</td>
+      <td>${x.registrado || '-'}</td>
+      <td>${x.esperado || '-'}</td>
+      <td class="estado-comp">${ok ? '✅' : '❌'}</td>
+    </tr>
+  `;
+}).join('');
+  
   contenedor.innerHTML = `
     <div class="seccion-detalle">
       <h3>Datos generales</h3>
@@ -1029,6 +1072,24 @@ const herramientasHtml = herramientas
         ${itemDetalle('Supervisor', detalle['SUPERVISOR A CARGO:'])}
         ${itemDetalle('Documento supervisor', detalle['DOCUMENTO SUPERVISOR:'])}
       </div>
+      </div>
+      <div class="seccion-detalle">
+        <h3>Comparativo de herramientas</h3>
+        <div style="overflow-x:auto;">
+          <table class="tabla-comparativo">
+            <thead>
+              <tr>
+                <th>Herramienta</th>
+                <th>Registrado</th>
+                <th>Esperado</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${comparativoHtml || '<tr><td colspan="4">No hay comparativo disponible.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
     </div>
     
     <div class="seccion-detalle">
