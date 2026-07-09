@@ -1101,16 +1101,23 @@ const comparativoHtml = comparativo.map(x => {
       break;
   }
 
-  return `
-    <tr>
-      <td>${x.herramienta}</td>
-      <td>${x.registrado}</td>
-      <td>${x.esperado}</td>
-      <td class="${clase}">
-        ${icono} ${x.descripcion}
-      </td>
-    </tr>
-  `;
+      return `
+        <tr>
+          <td>
+            <img
+              class="herramienta-img"
+              src="${imagenHerramienta(x.herramienta)}"
+              alt="${x.herramienta}"
+              onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'">
+          </td>
+          <td>${x.herramienta}</td>
+          <td>${formatoComparativo(x.registrado)}</td>
+          <td>${formatoComparativo(x.esperado)}</td>
+          <td class="${clase}">
+            ${icono} ${x.descripcion}
+          </td>
+        </tr>
+      `;
 
 }).join('');
   
@@ -1136,6 +1143,7 @@ const comparativoHtml = comparativo.map(x => {
           <table class="tabla-comparativo">
             <thead>
               <tr>
+                <th>Foto</th>
                 <th>Herramienta</th>
                 <th>Registrado</th>
                 <th>Esperado</th>
@@ -1148,12 +1156,6 @@ const comparativoHtml = comparativo.map(x => {
           </table>
         </div>
     </div>
-    
-    <div class="seccion-detalle">
-      <h3>Herramientas registradas</h3>
-      <div class="herramientas-tabla">
-        ${herramientasHtml || '<div class="loading">No hay herramientas registradas.</div>'}
-      </div>
     </div>
     <div class="revision-actions">
       <h3>Revisión del supervisor</h3>
@@ -1184,6 +1186,25 @@ function itemDetalle(titulo, valor) {
       <strong>${titulo}</strong>
       <span>${valor || '-'}</span>
     </div>
+  `;
+}
+function formatoComparativo(texto) {
+  const t = texto || '-';
+
+  const codigo = t.match(/CODIGO:\s*([^|]+)/i);
+  const serie = t.match(/SERIE:\s*([^|]+)/i);
+
+  if (t === 'S/C') {
+    return `Código: S/C<br>Serie: S/S`;
+  }
+
+  if (!codigo && !serie) {
+    return t;
+  }
+
+  return `
+    Código: ${codigo ? codigo[1].trim() : 'S/C'}<br>
+    Serie: ${serie ? serie[1].trim() : 'S/S'}
   `;
 }
 function imagenHerramienta(nombre) {
