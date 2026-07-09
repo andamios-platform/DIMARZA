@@ -642,7 +642,7 @@
     </section>
   </div>
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycby0d9iCJAG-TD7BJWHRtcJ_nxFSM6hQC4ntpzLsLkOQJixfHzFX_zFuwF1A21pbhePQ4A/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxLYuPUfWpVO-QMNy2m4JNdqp28m41_iMW8hsu4GDbiFj0VsYHmJVneuiPm_thCr7_T/exec";
     
     let baseData = {
       responsables: [],
@@ -993,7 +993,8 @@ async function apiCall(action, payload = null) {
                 opS.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
                 serieSel.appendChild(opS);
               }
-            });
+            }); 
+            agregarOpcionSinCodigo(codigoSel, serieSel, eq);
           });
         } else {
           const codigoSel = document.getElementById(`${eq.key}_codigo`);
@@ -1021,10 +1022,36 @@ async function apiCall(action, payload = null) {
               opS.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
               serieSel.appendChild(opS);
             }
-          });
+          }); 
+          agregarOpcionSinCodigo(codigoSel, serieSel, eq);
         }
       }
 
+function agregarOpcionSinCodigo(codigoSel, serieSel, eq) {
+
+  const obj = {
+    id: "SCSS_" + eq.key,
+    item: eq.itemBase,
+    codigo: "S/C",
+    serie: "S/S",
+    marca: "",
+    ocupado: false
+  };
+
+  const valor = JSON.stringify(obj);
+
+  const opCodigo = document.createElement("option");
+  opCodigo.value = valor;
+  opCodigo.textContent = "S/C";
+  codigoSel.appendChild(opCodigo);
+
+  const opSerie = document.createElement("option");
+  opSerie.value = valor;
+  opSerie.textContent = "S/S";
+  serieSel.appendChild(opSerie);
+
+}
+    
     function toggleEquipoCard(key) {
       const card = document.getElementById(`${key}_card`);
       const status = document.getElementById(`${key}_status`);
