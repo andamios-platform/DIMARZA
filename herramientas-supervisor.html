@@ -467,6 +467,15 @@
   font-size: 14px;
   margin-bottom: 12px;
 }
+.dato-comp{
+    line-height:1.55;
+}
+
+.dato-comp strong{
+    display:inline-block;
+    width:58px;
+    color:#374151;
+}
 
 .revision-buttons {
   display: grid;
@@ -1024,50 +1033,6 @@ function mostrarDetalle(detalle, comparativo = []) {
   document.getElementById('tituloModal').textContent = `Revisión de caja ${caja}`;
   document.getElementById('subtituloModal').textContent = id;
 
-  const herramientas = [
-    'Arnés Mecánico 6 argollas Talla: _______',
-    'Arnés Mecánico 4 argollas Talla: _______',
-    'Balde lainero de lona HAUK',
-    'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69 (1)',
-    'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69 (2)',
-    'Cabo en Y con amortiguador de impacto',
-    'Cabo en Y sin amortiguador de impacto',
-    'Caja Herramientas de pláctico TRUPPER',
-    'Correaje de Andamiero',
-    'Faja Anclaje MSA doble argolla 0.9m',
-    'Faja Anclaje MSAdoble argolla 1.8M',
-    'Flexometro de 5m',
-    'Flexometro de 8m',
-    'Hombrera de cuero',
-    'Kit Antitrauma MSA Model 10063431 (1)',
-    'Kit Antitrauma MSA Model 10063431 (2)',
-    'Llave Carraca ALFMAN QLF-RW 1922',
-    'Llave Francesa 12"',
-    'Llave Francesa 8"',
-    'Llave Mixta 22mm',
-    'Martillo Andamiero ALFMAN ACF H0075',
-    'Nivel de Mano STANLEY 9"',
-    'Rodillera',
-    'Polea con Freno SECURPULLEY'
-  ];
-
-const herramientasHtml = herramientas
-  .filter(h => detalle[h])
-  .map(h => `
-    <div class="herramienta-row">
-      <img
-  class="herramienta-img"
-  src="${imagenHerramienta(h)}"
-  alt="${h}"
-  onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'">
-      <div>
-        <div class="herramienta-nombre">${h}</div>
-        <div class="herramienta-valor">${detalle[h]}</div>
-      </div>
-      <div class="herramienta-check">✓</div>
-    </div>
-  `).join('');
-
 const comparativoHtml = comparativo.map(x => {
 
   let icono = '';
@@ -1151,7 +1116,7 @@ const comparativoHtml = comparativo.map(x => {
               </tr>
             </thead>
             <tbody>
-              ${comparativoHtml || '<tr><td colspan="4">No hay comparativo disponible.</td></tr>'}
+              ${comparativoHtml || '<tr><td colspan="5">No hay comparativo disponible.</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -1189,13 +1154,19 @@ function itemDetalle(titulo, valor) {
   `;
 }
 function formatoComparativo(texto) {
+
   const t = texto || '-';
 
   const codigo = t.match(/CODIGO:\s*([^|]+)/i);
   const serie = t.match(/SERIE:\s*([^|]+)/i);
 
   if (t === 'S/C') {
-    return `Código: S/C<br>Serie: S/S`;
+    return `
+      <div class="dato-comp">
+        <div><strong>Código</strong> S/C</div>
+        <div><strong>Serie</strong> S/S</div>
+      </div>
+    `;
   }
 
   if (!codigo && !serie) {
@@ -1203,8 +1174,10 @@ function formatoComparativo(texto) {
   }
 
   return `
-    Código: ${codigo ? codigo[1].trim() : 'S/C'}<br>
-    Serie: ${serie ? serie[1].trim() : 'S/S'}
+    <div class="dato-comp">
+      <div><strong>Código</strong> ${codigo ? codigo[1].trim() : 'S/C'}</div>
+      <div><strong>Serie</strong> ${serie ? serie[1].trim() : 'S/S'}</div>
+    </div>
   `;
 }
 function imagenHerramienta(nombre) {
