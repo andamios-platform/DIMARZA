@@ -642,7 +642,7 @@
     </section>
   </div>
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbz046C1nQuhTAUTWjEwXePy9gXIIWnoDSfkyr7Iu7MXSsHsHedjFpbzD0p3h7rhC6HZyw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwqUoBSgOdbirfSFJGQq7KjvZbmva4iZ3mHpIUzQz0wN45oQdGIM47u1WYmR2gBCMzg-Q/exec";
     
     let baseData = {
       responsables: [],
@@ -963,55 +963,67 @@ async function apiCall(action, payload = null) {
     }
 
     function loadEquipoOptions(eq) {
-      if (!eq.itemBase) return;
-
-      const options = getItemOptions(eq.itemBase);
-
-      if (eq.dual) {
-        [1, 2].forEach(n => {
-          const codigoSel = document.getElementById(`${eq.key}_${n}_codigo`);
-          const serieSel = document.getElementById(`${eq.key}_${n}_serie`);
-
+        if (!eq.itemBase) return;
+      
+        const options = getItemOptions(eq.itemBase);
+      
+        if (eq.dual) {
+          [1, 2].forEach(n => {
+            const codigoSel = document.getElementById(`${eq.key}_${n}_codigo`);
+            const serieSel = document.getElementById(`${eq.key}_${n}_serie`);
+      
+            codigoSel.innerHTML = '<option value="">Seleccione</option>';
+            serieSel.innerHTML = '<option value="">Seleccione</option>';
+      
+            options.forEach(opt => {
+              if (!opt.codigo && !opt.serie) return;
+      
+              const val = JSON.stringify(opt);
+      
+              if (opt.codigo) {
+                const opC = document.createElement('option');
+                opC.value = val;
+                opC.textContent = (opt.ocupado ? '🔒 ' : '') + opt.codigo;
+                codigoSel.appendChild(opC);
+              }
+      
+              if (opt.serie) {
+                const opS = document.createElement('option');
+                opS.value = val;
+                opS.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
+                serieSel.appendChild(opS);
+              }
+            });
+          });
+        } else {
+          const codigoSel = document.getElementById(`${eq.key}_codigo`);
+          const serieSel = document.getElementById(`${eq.key}_serie`);
+          if (!codigoSel || !serieSel) return;
+      
           codigoSel.innerHTML = '<option value="">Seleccione</option>';
           serieSel.innerHTML = '<option value="">Seleccione</option>';
-
+      
           options.forEach(opt => {
+            if (!opt.codigo && !opt.serie) return;
+      
             const val = JSON.stringify(opt);
-
-            const opC = document.createElement('option');
-            opC.value = val;
-            opC.textContent = (opt.cajaOcupada ? '🔒 ' : '') + (opt.codigo || '(Sin código)');
-            codigoSel.appendChild(opC);
-
-            const opS = document.createElement('option');
-            opS.value = val;
-            opS.textContent = (opt.cajaOcupada ? '🔒 ' : '') + (opt.serie || '(Sin serie)');
-            serieSel.appendChild(opS);
+      
+            if (opt.codigo) {
+              const opC = document.createElement('option');
+              opC.value = val;
+              opC.textContent = (opt.ocupado ? '🔒 ' : '') + opt.codigo;
+              codigoSel.appendChild(opC);
+            }
+      
+            if (opt.serie) {
+              const opS = document.createElement('option');
+              opS.value = val;
+              opS.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
+              serieSel.appendChild(opS);
+            }
           });
-        });
-      } else {
-        const codigoSel = document.getElementById(`${eq.key}_codigo`);
-        const serieSel = document.getElementById(`${eq.key}_serie`);
-        if (!codigoSel || !serieSel) return;
-
-        codigoSel.innerHTML = '<option value="">Seleccione</option>';
-        serieSel.innerHTML = '<option value="">Seleccione</option>';
-
-        options.forEach(opt => {
-          const val = JSON.stringify(opt);
-
-          const opC = document.createElement('option');
-          opC.value = val;
-          opC.textContent = (opt.cajaOcupada ? '🔒 ' : '') + (opt.codigo || '(Sin código)');
-          codigoSel.appendChild(opC);
-
-          const opS = document.createElement('option');
-          opS.value = val;
-          opS.textContent = (opt.cajaOcupada ? '🔒 ' : '') + (opt.serie || '(Sin serie)');
-          serieSel.appendChild(opS);
-        });
+        }
       }
-    }
 
     function toggleEquipoCard(key) {
       const card = document.getElementById(`${key}_card`);
