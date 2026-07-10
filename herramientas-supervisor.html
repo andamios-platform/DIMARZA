@@ -147,9 +147,7 @@
   border-left-color: #dc2626;
 }
 
-.stat.devuelto {
-  border-left-color: #374151;
-}
+
 
     .badge {
       padding: 5px 10px;
@@ -366,12 +364,7 @@
     background:#dc2626;
 }
 
-.card-caja.devuelto {
-  border-left-color: #374151;
-}
-    .card-caja.devuelto::before{
-    background:#374151;
-}
+
 
 .card-head {
   display: flex;
@@ -942,7 +935,6 @@
             <option value="PENDIENTE">Pendiente</option>
             <option value="APROBADO">Aprobado</option>
             <option value="OBSERVADO">Observado</option>
-            <option value="DEVUELTO">Devuelto</option>
           </select>
         </div>
         <div>
@@ -972,10 +964,6 @@
     <span>🔴 Observadas</span>
   </div>
 
-  <div class="stat devuelto">
-    <strong id="totalDevueltas">0</strong>
-    <span>⚫ Devueltas</span>
-  </div>
 </div>
 
     <div id="contenedorCajas" class="cards-grid">
@@ -1066,7 +1054,15 @@ function pintarTabla() {
 
   let data = cajasGlobal.slice();
 
-  data = data.filter(x => x.idRegistro && x.estado);
+  data = data.filter(x => {
+  const estado = (x.estado || '').toUpperCase();
+
+  return (
+    x.idRegistro &&
+    estado &&
+    estado !== 'DEVUELTO'
+  );
+});
 
 
 
@@ -1074,8 +1070,7 @@ function pintarTabla() {
     const orden = {
       PENDIENTE: 1,
       OBSERVADO: 2,
-      APROBADO: 3,
-      DEVUELTO: 4
+      APROBADO: 3
     };
 
     const estadoA = (a.estado || '').toUpperCase();
@@ -1178,7 +1173,6 @@ function pintarTabla() {
   document.getElementById('totalPendientes').textContent = contar('PENDIENTE');
   document.getElementById('totalAprobadas').textContent = contar('APROBADO');
   document.getElementById('totalObservadas').textContent = contar('OBSERVADO');
-  document.getElementById('totalDevueltas').textContent = contar('DEVUELTO');
 }
 
     function extraerCaja(textoCaja) {
@@ -1210,10 +1204,7 @@ function pintarTabla() {
       if (e === 'OBSERVADO') {
         return `<span class="badge observado">OBSERVADO</span>`;
       }
-      if (e === 'DEVUELTO') {
-        return `<span class="badge vacio">DEVUELTO</span>`;
-      }
-
+      
       return `<span class="badge vacio">SIN ESTADO</span>`;
     }
 
@@ -1782,7 +1773,7 @@ function actualizarRevision(action) {
     },
     registrarDevolucion: {
       titulo: 'Registrar devolución',
-      mensaje: 'La caja pasará al estado DEVUELTO.',
+      mensaje: 'Se registrará la devolución de la caja y dejará de aparecer en la lista de revisiones.',
       textoBoton: 'Registrar'
     }
   };
