@@ -467,15 +467,7 @@
   font-size: 14px;
   margin-bottom: 12px;
 }
-.dato-comp{
-    line-height:1.55;
-}
 
-.dato-comp strong{
-    display:inline-block;
-    width:58px;
-    color:#374151;
-}
 
 .revision-buttons {
   display: grid;
@@ -516,13 +508,14 @@
 }
 
 .herramienta-img {
-  width: 70px;
-  height: 70px;
-  border-radius: 14px;
+  width: 90px;
+  height: 90px;
+  border-radius: 16px;
   background: white;
   object-fit: contain;
-  padding: 5px;
+  padding: 6px;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
 
 .herramienta-nombre {
@@ -657,36 +650,13 @@
     color:#6b7280;
 }
 
-.estado-ok{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.estado-codigo{
-    background:#ffedd5;
-    color:#c2410c;
-}
-
-.estado-serie{
-    background:#fef9c3;
-    color:#854d0e;
-}
-
-.estado-error{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.estado-falta{
-    background:#e5e7eb;
-    color:#374151;
-}
-
-
-
 .tabla-comparativo th {
   background: #111827;
   color: white;
+}
+.tabla-comparativo td:nth-child(2){
+    font-weight:600;
+    color:#111827;
 }
 
 .fila-ok {
@@ -703,19 +673,34 @@
   font-weight: bold;
 }
 .dato-comp{
-    display:flex;
+    display:inline-flex;
     flex-direction:column;
-    gap:4px;
+    align-items:flex-start;
+    gap:5px;
+    padding:8px 12px;
+    border-radius:10px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    line-height:1.4;
+    text-align:left;
 }
 
 .dato-comp div{
-    display:flex;
+    display:grid;
+    grid-template-columns:65px auto;
+    align-items:center;
+    column-gap:8px;
+    width:100%;
 }
 
 .dato-comp strong{
-    width:60px;
     color:#374151;
-    flex-shrink:0;
+    font-weight:600;
+    text-align:left;
+}
+
+.dato-comp span{
+    text-align:left;
 }
 .tabla-comparativo td{
     vertical-align:middle;
@@ -725,18 +710,241 @@
     vertical-align:middle;
 }
 
-.tabla-comparativo th:first-child,
-.tabla-comparativo td:first-child{
-    width:110px;
-    text-align:center;
-}
-
 .tabla-comparativo th:last-child,
 .tabla-comparativo td:last-child{
     width:160px;
     text-align:center;
 }
+/* FOTO */
+.tabla-comparativo th:nth-child(1),
+.tabla-comparativo td:nth-child(1){
+    width:140px;
+    text-align:center;
+    vertical-align:middle;
+}
 
+/* HERRAMIENTA */
+.tabla-comparativo th:nth-child(2),
+.tabla-comparativo td:nth-child(2){
+    width:420px;
+    text-align:left;
+    vertical-align:middle;
+}
+
+/* REGISTRADO */
+.tabla-comparativo th:nth-child(3),
+.tabla-comparativo td:nth-child(3){
+    width:210px;
+    text-align:center;
+    vertical-align:middle;
+}
+
+/* ESPERADO */
+.tabla-comparativo th:nth-child(4),
+.tabla-comparativo td:nth-child(4){
+    width:210px;
+    text-align:center;
+    vertical-align:middle;
+}
+
+/* ESTADO */
+.tabla-comparativo th:nth-child(5),
+.tabla-comparativo td:nth-child(5){
+    width:150px;
+    text-align:center;
+    vertical-align:middle;
+}
+.resumen-comparativo{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(150px, 1fr));
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.resumen-item{
+    appearance:none;
+    width:100%;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:14px;
+    text-align:center;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .18s ease;
+}
+
+.resumen-item:hover{
+    transform:translateY(-2px);
+    box-shadow:0 7px 18px rgba(0,0,0,.09);
+}
+
+.resumen-item strong{
+    display:block;
+    font-size:32px;
+    line-height:1;
+    font-weight:700;
+    margin-bottom:7px;
+}
+
+.resumen-item span{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+}
+
+.resumen-item small{
+    display:block;
+    margin-top:5px;
+    color:#6b7280;
+    font-size:11px;
+    font-weight:500;
+}
+
+.resumen-ok{
+    border-top:5px solid #16a34a;
+}
+
+.resumen-diferencia{
+    border-top:5px solid #ea580c;
+}
+
+.resumen-falta{
+    border-top:5px solid #6b7280;
+}
+
+.resumen-ok strong,
+.resumen-ok span{
+    color:#15803d;
+}
+
+.resumen-diferencia strong,
+.resumen-diferencia span{
+    color:#c2410c;
+}
+
+
+.progreso-comparativo{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:14px;
+}
+
+.progreso-cabecera{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:10px;
+}
+
+.progreso-texto{
+    font-size:14px;
+    font-weight:700;
+    color:#111827;
+}
+
+.progreso-porcentaje{
+    font-size:24px;
+    font-weight:800;
+}
+
+.progreso-fondo{
+    width:100%;
+    height:14px;
+    border-radius:999px;
+    overflow:hidden;
+    background:#e5e7eb;
+}
+
+.progreso-barra{
+    height:100%;
+    border-radius:999px;
+    transition:width .4s ease;
+}
+
+.progreso-verde{
+    background:#16a34a;
+    color:#15803d;
+}
+
+.progreso-amarillo{
+    background:#f59e0b;
+    color:#b45309;
+}
+
+.progreso-rojo{
+    background:#dc2626;
+    color:#b91c1c;
+}
+
+.btn-mostrar-todos{
+    margin-top:12px;
+    padding:8px 13px;
+    border-radius:9px;
+    background:#111827;
+    font-size:12px;
+}
+
+.btn-mostrar-todos:hover{
+    background:#374151;
+}
+
+.resumen-ok.activo{
+    background:#ecfdf5;
+    box-shadow:0 0 0 3px rgba(22,163,74,.20);
+}
+
+.resumen-diferencia.activo{
+    background:#fff7ed;
+    box-shadow:0 0 0 3px rgba(234,88,12,.20);
+}
+
+.resumen-falta.activo{
+    background:#f3f4f6;
+    box-shadow:0 0 0 3px rgba(107,114,128,.20);
+}
+.aviso-filtro{
+    display:none;
+    margin-bottom:14px;
+    padding:11px 14px;
+    border-radius:10px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#1e40af;
+    font-size:13px;
+    font-weight:700;
+    text-align:center;
+}
+
+.aviso-filtro.visible{
+    display:block;
+}
+
+
+.texto-progreso-verde{
+    color:#15803d;
+}
+
+.texto-progreso-amarillo{
+    color:#b45309;
+}
+
+.texto-progreso-rojo{
+    color:#b91c1c;
+}
+
+@media (max-width: 650px){
+    .resumen-comparativo{
+        grid-template-columns:1fr;
+    }
+
+    .progreso-cabecera{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+}
 
 
     @media (max-width: 800px) {
@@ -841,6 +1049,9 @@
     let cajasGlobal = [];
     let idRegistroActual = '';
     let supervisoresRevision = [];
+    
+    let comparativoActual = [];
+    let filtroComparativoActual = 'TODOS';
 
     document.addEventListener('DOMContentLoaded', () => {
       cargarCajas();
@@ -1099,63 +1310,37 @@ function mostrarDetalle(detalle, comparativo = []) {
 
   document.getElementById('tituloModal').textContent = `Revisión de caja ${caja}`;
   document.getElementById('subtituloModal').textContent = id;
-
-const comparativoHtml = comparativo.map(x => {
-
-  let icono = '';
-  let clase = '';
-
-  switch (x.estado) {
-
-    case 'OK':
-      icono = '✅';
-      clase = 'estado-ok';
-      break;
-
-    case 'CODIGO':
-      icono = '🟠';
-      clase = 'estado-codigo';
-      break;
-
-    case 'SERIE':
-      icono = '🟡';
-      clase = 'estado-serie';
-      break;
-
-    case 'AMBOS':
-      icono = '❌';
-      clase = 'estado-error';
-      break;
-
-    case 'NO_REGISTRADO':
-      icono = '⚪';
-      clase = 'estado-falta';
-      break;
-  }
-
-      return `
-        <tr>
-          <td>
-            <img
-              class="herramienta-img"
-              src="${imagenHerramienta(x.herramienta)}" 
-              alt="${x.herramienta}"
-              onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'">
-          </td>
-          <td>${x.herramienta}</td>
-            <td>${formatoComparativo(x.registrado, x.estado, 'registrado')}</td>
-            <td>${formatoComparativo(x.esperado, x.estado, 'esperado')}</td>
-          <td class="estado-celda">
-            <span class="estado-badge ${clase}">
-              ${icono} ${x.descripcion}
-            </span>
-          </td>
-        </tr>
-      `;
-
-}).join('');
   
-  contenedor.innerHTML = `
+ comparativoActual = comparativo;
+filtroComparativoActual = 'TODOS';
+
+const totalCoinciden = comparativo.filter(
+  x => x.estado === 'OK'
+).length;
+
+const totalNoRegistradas = comparativo.filter(
+  x => x.estado === 'NO_REGISTRADO'
+).length;
+
+const totalDiferencias = comparativo.filter(
+  x => ['CODIGO', 'SERIE', 'AMBOS'].includes(x.estado)
+).length;
+
+const totalHerramientas = comparativo.length;
+
+const porcentajeCoincidencia = totalHerramientas
+  ? Math.round((totalCoinciden / totalHerramientas) * 100)
+  : 0;
+
+const claseProgreso =
+  porcentajeCoincidencia >= 95
+    ? 'progreso-verde'
+    : porcentajeCoincidencia >= 80
+      ? 'progreso-amarillo'
+      : 'progreso-rojo';
+
+const comparativoHtml = generarFilasComparativo(comparativo); 
+   contenedor.innerHTML = `
     <div class="seccion-detalle">
       <h3>Datos generales</h3>
       <div class="detalle-grid">
@@ -1172,25 +1357,98 @@ const comparativoHtml = comparativo.map(x => {
       </div>
       </div>
       <div class="seccion-detalle">
-        <h3>Comparativo de herramientas</h3>
-        <div style="overflow-x:auto;">
-          <table class="tabla-comparativo">
-            <thead>
-              <tr>
-                <th>Foto</th>
-                <th>Herramienta</th>
-                <th>Registrado</th>
-                <th>Esperado</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${comparativoHtml || '<tr><td colspan="5">No hay comparativo disponible.</td></tr>'}
-            </tbody>
-          </table>
-        </div>
+  <h3>Comparativo de herramientas</h3>
+
+  <div class="progreso-comparativo">
+    <div class="progreso-cabecera">
+      <div>
+      <div class="progreso-texto">
+          ${totalCoinciden} / ${totalHerramientas} herramientas
+      </div>
+
+        <button
+          type="button"
+          class="btn-mostrar-todos"
+          onclick="filtrarComparativo('TODOS')">
+          Mostrar todas
+        </button>
+      </div>
+
+    <div class="progreso-porcentaje texto-${claseProgreso}">
+      ${porcentajeCoincidencia}%
     </div>
-    <div class="revision-actions">
+    </div>
+
+    <div class="progreso-fondo">
+      <div
+        class="progreso-barra ${claseProgreso}"
+        style="width:${porcentajeCoincidencia}%">
+      </div>
+    </div>
+  </div>
+
+ <div class="resumen-comparativo">
+
+  <button
+    type="button"
+    id="resumenOK"
+    class="resumen-item resumen-ok"
+    onclick="filtrarComparativo('OK')">
+
+    <strong>${totalCoinciden}</strong>
+    <span>✅ Coinciden</span>
+    <small>Clic para mostrar</small>
+  </button>
+
+  <button
+    type="button"
+    id="resumenDiferencias"
+    class="resumen-item resumen-diferencia"
+    onclick="filtrarComparativo('DIFERENCIAS')">
+
+    <strong>${totalDiferencias}</strong>
+    <span>⚠️ Diferencias</span>
+    <small>Clic para mostrar</small>
+  </button>
+
+  <button
+    type="button"
+    id="resumenNoRegistradas"
+    class="resumen-item resumen-falta"
+    onclick="filtrarComparativo('NO_REGISTRADO')">
+
+    <strong>${totalNoRegistradas}</strong>
+    <span>⚪ No registradas</span>
+    <small>Clic para mostrar</small>
+  </button>
+
+</div>
+
+<div id="avisoFiltroComparativo" class="aviso-filtro">
+  Mostrando todas las herramientas.
+</div>
+
+<div style="overflow-x:auto;">
+  <table class="tabla-comparativo">
+    <thead>
+      <tr>
+        <th>Foto</th>
+        <th>Herramienta</th>
+        <th>Registrado</th>
+        <th>Esperado</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+
+    <tbody id="tbodyComparativo">
+      ${comparativoHtml}
+    </tbody>
+  </table>
+</div>
+
+</div> <!-- Cierra seccion-detalle del comparativo -->
+
+<div class="revision-actions">
       <h3>Revisión del supervisor</h3>
     
       <label>Supervisor que revisa / recibe</label>
@@ -1209,7 +1467,7 @@ const comparativoHtml = comparativo.map(x => {
       </div>
     </div>
   `;
-
+  marcarResumenActivo('TODOS');
   document.getElementById('modalDetalle').style.display = 'block';
 }
 
@@ -1263,6 +1521,153 @@ function formatoComparativo(texto, estado = '', tipo = '') {
       </div>
     </div>
   `;
+}
+function generarFilasComparativo(lista) {
+  if (!lista || !lista.length) {
+    return `
+      <tr>
+        <td colspan="5" style="text-align:center;padding:25px;">
+          No hay herramientas para mostrar.
+        </td>
+      </tr>
+    `;
+  }
+
+  return lista.map(x => {
+    let icono = '';
+    let clase = '';
+
+    switch (x.estado) {
+      case 'OK':
+        icono = '✅';
+        clase = 'estado-ok';
+        break;
+
+      case 'CODIGO':
+        icono = '🟠';
+        clase = 'estado-codigo';
+        break;
+
+      case 'SERIE':
+        icono = '🟡';
+        clase = 'estado-serie';
+        break;
+
+      case 'AMBOS':
+        icono = '❌';
+        clase = 'estado-error';
+        break;
+
+      case 'NO_REGISTRADO':
+        icono = '⚪';
+        clase = 'estado-falta';
+        break;
+
+      default:
+        icono = '—';
+        clase = 'estado-falta';
+    }
+
+    return `
+      <tr>
+        <td>
+          <img
+            class="herramienta-img"
+            src="${imagenHerramienta(x.herramienta)}"
+            alt="${x.herramienta}"
+            onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'">
+        </td>
+
+        <td>${x.herramienta}</td>
+
+        <td>
+          ${formatoComparativo(
+            x.registrado,
+            x.estado,
+            'registrado'
+          )}
+        </td>
+
+        <td>
+          ${formatoComparativo(
+            x.esperado,
+            x.estado,
+            'esperado'
+          )}
+        </td>
+
+        <td class="estado-celda">
+          <span class="estado-badge ${clase}">
+            ${icono} ${x.descripcion}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+function filtrarComparativo(tipo) {
+  const tbody = document.getElementById('tbodyComparativo');
+  const aviso = document.getElementById('avisoFiltroComparativo');
+
+  if (!tbody) return;
+
+  filtroComparativoActual = tipo;
+
+  let listaFiltrada = comparativoActual;
+  let mensaje = '';
+
+  if (tipo === 'OK') {
+    listaFiltrada = comparativoActual.filter(
+      x => x.estado === 'OK'
+    );
+
+    mensaje = 'Mostrando únicamente herramientas que coinciden.';
+  }
+
+  if (tipo === 'DIFERENCIAS') {
+    listaFiltrada = comparativoActual.filter(
+      x => ['CODIGO', 'SERIE', 'AMBOS'].includes(x.estado)
+    );
+
+    mensaje = 'Mostrando únicamente herramientas con diferencias.';
+  }
+
+  if (tipo === 'NO_REGISTRADO') {
+    listaFiltrada = comparativoActual.filter(
+      x => x.estado === 'NO_REGISTRADO'
+    );
+
+    mensaje = 'Mostrando únicamente herramientas no registradas.';
+  }
+
+  if (tipo === 'TODOS') {
+    listaFiltrada = comparativoActual;
+    mensaje = '';
+  }
+
+  tbody.innerHTML = generarFilasComparativo(listaFiltrada);
+
+  marcarResumenActivo(tipo);
+
+  if (aviso) {
+    aviso.textContent = mensaje;
+    aviso.classList.toggle('visible', tipo !== 'TODOS');
+  }
+}
+function marcarResumenActivo(tipo) {
+  const tarjetas = {
+    OK: document.getElementById('resumenOK'),
+    DIFERENCIAS: document.getElementById('resumenDiferencias'),
+    NO_REGISTRADO: document.getElementById('resumenNoRegistradas')
+  };
+
+  Object.values(tarjetas).forEach(tarjeta => {
+    if (tarjeta) tarjeta.classList.remove('activo');
+  });
+
+  if (tarjetas[tipo]) {
+    tarjetas[tipo].classList.add('activo');
+  }
 }
 function imagenHerramienta(nombre) {
   const n = (nombre || '')
