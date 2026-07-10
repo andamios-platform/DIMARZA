@@ -634,6 +634,16 @@
     font-weight:600;
 }
 
+.estado-ok{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.estado-codigo{
+    background:#ffedd5;
+    color:#c2410c;
+}
+
 .estado-serie{
     background:#fef9c3;
     color:#854d0e;
@@ -643,6 +653,13 @@
     background:#fee2e2;
     color:#991b1b;
 }
+
+.estado-falta{
+    background:#e5e7eb;
+    color:#374151;
+}
+
+
 
 .tabla-comparativo th {
   background: #111827;
@@ -662,34 +679,24 @@
   font-size: 18px;
   font-weight: bold;
 }
-.estado-ok{
-    color:#16a34a;
-    font-weight:600;
-    background:#dcfce7;
-    color:#166534;
+.dato-comp{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
 }
 
-.estado-codigo{
-    color:#ea580c;
-    font-weight:600;
-    background:#ffedd5;
-    color:#c2410c;
+.dato-comp div{
+    display:flex;
 }
 
-.estado-serie{
-    color:#ca8a04;
-    font-weight:600;
+.dato-comp strong{
+    width:60px;
+    color:#374151;
+    flex-shrink:0;
 }
 
-.estado-error{
-    color:#dc2626;
-    font-weight:600;
-}
 
-.estado-falta{
-    color:#6b7280;
-    font-weight:600;
-}
+
     @media (max-width: 800px) {
       .filters {
         grid-template-columns: 1fr;
@@ -843,17 +850,6 @@ function cargarSupervisores(supervisores) {
 
   select.value = valorActual;
 }
-async function cargarSupervisoresRevision() {
-  const res = await fetch(`${API_URL}?action=getSupervisoresData`);
-  const data = await res.json();
-
-  if (!data.ok) {
-    throw new Error(data.message || 'Error al cargar DATA SUPERVISORES');
-  }
-
-  supervisoresRevision = data.supervisores || [];
-}
-
 function pintarTabla() {
   const contenedor = document.getElementById('contenedorCajas');
   const supervisor = document.getElementById('filtroSupervisor').value;
@@ -1149,7 +1145,6 @@ const comparativoHtml = comparativo.map(x => {
             </tbody>
           </table>
         </div>
-    </div>
     </div>
     <div class="revision-actions">
       <h3>Revisión del supervisor</h3>
