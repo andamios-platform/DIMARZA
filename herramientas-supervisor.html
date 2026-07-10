@@ -255,29 +255,37 @@
   color: #111827;
 }
 
-.detalle-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
+.detalle-grid{
+    display:grid;
+    grid-template-columns:repeat(7, minmax(0,1fr));
+    gap:12px;
 }
 
-.detalle-item {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 12px;
-  border: 1px solid #e5e7eb;
+.detalle-item{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:10px;
+    text-align:center;
+    min-width:0;
 }
 
-.detalle-item strong {
-  display: block;
-  font-size: 12px;
-  color: #374151;
-  margin-bottom: 5px;
+.detalle-item strong{
+    display:block;
+    font-size:10px;
+    color:#6b7280;
+    margin-bottom:4px;
+    font-weight:600;
 }
 
-.detalle-item span {
-  font-size: 14px;
-  color: #111827;
+.detalle-item span{
+    display:block;
+    font-size:13px;
+    color:#111827;
+    font-weight:600;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .herramienta-item {
@@ -490,52 +498,6 @@
 .btn-observar:hover {
   background: #b91c1c;
 }
-    .herramientas-tabla {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.herramienta-row {
-  display: grid;
-  grid-template-columns: 58px 1fr auto;
-  gap: 12px;
-  align-items: center;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 10px 12px;
-}
-
-.herramienta-img {
-  width: 90px;
-  height: 90px;
-  border-radius: 16px;
-  background: white;
-  object-fit: contain;
-  padding: 6px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-.herramienta-nombre {
-  font-weight: bold;
-  color: #111827;
-  font-size: 14px;
-}
-
-.herramienta-valor {
-  color: #374151;
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.herramienta-check {
-  color: #16a34a;
-  font-weight: bold;
-  font-size: 18px;
-}
-
     .toast {
   position: fixed;
   top: 20px;
@@ -935,30 +897,23 @@
     color:#b91c1c;
 }
 
-@media (max-width: 650px){
-    .resumen-comparativo{
-        grid-template-columns:1fr;
-    }
-
-    .progreso-cabecera{
-        align-items:flex-start;
-        flex-direction:column;
-    }
+.detalle-item strong{
+    display:block;
+    font-size:10px;
+    color:#6b7280;
+    margin-bottom:4px;
+    font-weight:600;
 }
 
-
-    @media (max-width: 800px) {
-      .filters {
-        grid-template-columns: 1fr;
-      }
-
-      .detalle-grid {
-        grid-template-columns: 1fr;
-    }  
-      .revision-buttons.tres {
-      grid-template-columns: 1fr;
-    }
-    }
+.detalle-item span{
+    display:block;
+    font-size:13px;
+    color:#111827;
+    font-weight:600;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
   </style>
 </head>
 
@@ -1309,7 +1264,10 @@ function mostrarDetalle(detalle, comparativo = []) {
   idRegistroActual = id;
 
   document.getElementById('tituloModal').textContent = `Revisión de caja ${caja}`;
-  document.getElementById('subtituloModal').textContent = id;
+  const estado = detalle['ESTADO'] || '';
+    
+    document.getElementById('subtituloModal').textContent =
+    `${id} | ${estado}`;
   
  comparativoActual = comparativo;
 filtroComparativoActual = 'TODOS';
