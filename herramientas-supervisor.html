@@ -843,8 +843,22 @@
 }
 
 .progreso-porcentaje{
-    font-size:24px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    white-space:nowrap;
+}
+
+.porcentaje-numero{
+    font-size:26px;
     font-weight:800;
+}
+
+.porcentaje-descripcion{
+    font-size:14px;
+    font-weight:700;
+    color:#4b5563;
 }
 
 .progreso-fondo{
@@ -1372,7 +1386,8 @@ const comparativoHtml = generarFilasComparativo(comparativo);
       </div>
 
     <div class="progreso-porcentaje texto-${claseProgreso}">
-      ${porcentajeCoincidencia}%
+      <span class="porcentaje-numero">${porcentajeCoincidencia}%</span>
+      <span class="porcentaje-descripcion">Coincidencia de la caja</span>
     </div>
     </div>
 
