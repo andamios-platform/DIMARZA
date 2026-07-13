@@ -925,7 +925,10 @@
         </div>
         <div>
           <label for="buscarTexto">Buscar</label>
-          <input id="buscarTexto" type="text" placeholder="Caja, responsable, servicio o ID">
+          <input
+            id="buscarTexto"
+            type="text"
+            placeholder="Caja, responsable, supervisor, herramienta, código, serie o ID">
         </div>
 
         <div>
@@ -973,7 +976,7 @@
 
   <script>
 
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwbL9jVD3zWZUdrD71aD6rvL-VQy3wYVcvHeunoYF1CjdCDYyNnYw-WsXx52GRlnEn8/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwOTyRR7ikPUWmSsLGwtNTJ1AUNrPbWjtJC7k-egURoBQseXzVdWIqq6U12jHQgJa6I/exec';
 
     let cajasGlobal = [];
     let idRegistroActual = '';
@@ -1073,19 +1076,25 @@ function pintarTabla() {
     data = data.filter(x => (x.estado || '').toUpperCase() === estadoFiltro);
   }
 
-  if (texto) {
-    data = data.filter(x => {
-      return [
-        x.caja,
-        x.idRegistro,
-        x.responsable,
-        x.supervisor,
-        x.servicio,
-        x.fecha,
-        x.estado
-      ].join(' ').toLowerCase().includes(texto);
-    });
-  }
+if (texto) {
+  data = data.filter(x => {
+    return [
+      x.caja,
+      x.idRegistro,
+      x.responsable,
+      x.supervisor,
+      x.unidad,
+      x.servicio,
+      x.fecha,
+      x.estado,
+      x.herramientas
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(texto);
+  });
+}
 
     actualizarResumen(data);
     
