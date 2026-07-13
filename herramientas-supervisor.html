@@ -255,8 +255,16 @@
 
 .detalle-grid{
     display:grid;
-    grid-template-columns:repeat(7, minmax(0,1fr));
+    grid-template-columns:
+        1.6fr   /* Supervisor */
+        .8fr    /* Estado */
+        .9fr    /* Fecha */
+        .95fr   /* Unidad */
+        .8fr    /* Servicio */
+        .65fr   /* Turno */
+        1.6fr;  /* Responsable */
     gap:12px;
+    align-items:stretch;
 }
 
 .detalle-item{
@@ -269,13 +277,17 @@
 }
 
 .detalle-item span{
-    display:block;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:34px;
     font-size:13px;
+    line-height:1.25;
     color:#111827;
     font-weight:600;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    text-align:center;
 }
 
 .herramienta-item {
@@ -728,6 +740,25 @@
     box-shadow:0 7px 18px rgba(0,0,0,.09);
 }
 
+/* Evita que el hover general de los botones los vuelva azules */
+.resumen-ok:hover{
+    background:#ecfdf5;
+}
+
+.resumen-diferencia:hover{
+    background:#fff7ed;
+}
+
+.resumen-falta:hover{
+    background:#f1f5f9;
+}
+
+.resumen-ok:hover small,
+.resumen-diferencia:hover small,
+.resumen-falta:hover small{
+    color:#374151;
+}
+
 .resumen-item strong{
     display:block;
     font-size:32px;
@@ -760,6 +791,22 @@
 
 .resumen-falta{
     border-top:5px solid #6b7280;
+}
+.resumen-falta strong,
+.resumen-falta span{
+    color:#475569;
+}
+
+.resumen-falta small{
+    color:#64748b;
+}
+
+.resumen-ok small{
+    color:#4b5563;
+}
+
+.resumen-diferencia small{
+    color:#4b5563;
 }
 
 .resumen-ok strong,
@@ -852,8 +899,17 @@
 }
 
 .resumen-falta.activo{
-    background:#f3f4f6;
-    box-shadow:0 0 0 3px rgba(107,114,128,.20);
+    background:#e2e8f0;
+    box-shadow:0 0 0 3px rgba(71,85,105,.22);
+}
+
+.resumen-falta.activo strong,
+.resumen-falta.activo span{
+    color:#334155;
+}
+
+.resumen-falta.activo small{
+    color:#475569;
 }
 .aviso-filtro{
     display:none;
@@ -1307,12 +1363,12 @@ const comparativoHtml = generarFilasComparativo(comparativo);
           ${totalCoinciden} / ${totalHerramientas} herramientas
       </div>
 
-        <button
-          type="button"
-          class="btn-mostrar-todos"
-          onclick="filtrarComparativo('TODOS')">
-          Mostrar todas
-        </button>
+       <button
+        type="button"
+        class="btn-mostrar-todos"
+        onclick="filtrarComparativo('TODOS')">
+        Ver todas las herramientas
+      </button>
       </div>
 
     <div class="progreso-porcentaje texto-${claseProgreso}">
@@ -1338,7 +1394,7 @@ const comparativoHtml = generarFilasComparativo(comparativo);
 
     <strong>${totalCoinciden}</strong>
     <span>✅ Coinciden</span>
-    <small>Clic para mostrar</small>
+    <small>Ver herramientas</small>
   </button>
 
   <button
@@ -1349,7 +1405,7 @@ const comparativoHtml = generarFilasComparativo(comparativo);
 
     <strong>${totalDiferencias}</strong>
     <span>⚠️ Diferencias</span>
-    <small>Clic para mostrar</small>
+    <small>Ver herramientas</small>
   </button>
 
   <button
@@ -1360,7 +1416,7 @@ const comparativoHtml = generarFilasComparativo(comparativo);
 
     <strong>${totalNoRegistradas}</strong>
     <span>⚪ No registradas</span>
-    <small>Clic para mostrar</small>
+    <small>Ver herramientas</small>
   </button>
 
 </div>
