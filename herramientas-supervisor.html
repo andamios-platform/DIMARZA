@@ -1136,6 +1136,19 @@
 .btn-pdf:hover{
   background:#b91c1c;
 }
+.acciones-historial-superior{
+    display:flex;
+    gap:12px;
+    align-items:center;
+}
+
+.btn-exportar{
+    background:#16a34a;
+}
+
+.btn-exportar:hover{
+    background:#15803d;
+}
 
 .btn-pdf-deshabilitado{
   display:inline-flex;
@@ -1254,21 +1267,32 @@
 <div id="vistaHistorial" class="vista-oculta">
 
   <div class="panel">
-    <div class="historial-cabecera">
-      <div>
-        <h2>📚 Historial de devoluciones</h2>
-        <p>
-          Cajas devueltas, responsables, fechas y documentos registrados.
-        </p>
-      </div>
+<div class="historial-cabecera">
 
-      <button
-        class="btn-volver-activas"
-        onclick="mostrarCajasActivas()">
-        ← Volver a cajas activas
-      </button>
+    <div>
+        <h2> Historial de devoluciones →</h2>
+        <p>
+            Cajas devueltas, responsables, fechas y documentos registrados.
+        </p>
     </div>
 
+    <div class="acciones-historial-superior">
+
+        <button
+            class="btn-exportar"
+            onclick="exportarExcel()">
+            📊 Exportar Excel
+        </button>
+
+        <button
+            class="btn-volver-activas"
+            onclick="mostrarCajasActivas()">
+            ← Volver a cajas activas
+        </button>
+
+    </div>
+
+</div>
     <div class="historial-buscador">
       <label for="buscarHistorial">Buscar en historial</label>
       <input
