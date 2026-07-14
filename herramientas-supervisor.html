@@ -69,6 +69,50 @@
     font-weight:700;
     transition:.25s;
     backdrop-filter:blur(6px);
+    min-width:220px;
+    justify-content:center;
+}
+.btn-regresar:hover{
+    background:#2563eb;
+    border-color:#2563eb;
+    color:#fff;
+    transform:translateY(-50%) scale(1.03);
+}
+.btn-historial-header{
+    position:absolute;
+    right:30px;
+    top:50%;
+    transform:translateY(-50%);
+
+    min-width:220px;
+    justify-content:center;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:10px 18px;
+
+    background:rgba(255,255,255,.12);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:12px;
+
+    box-shadow:0 8px 18px rgba(0,0,0,.18);
+
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+
+    transition:
+        background .25s,
+        transform .25s,
+        box-shadow .25s;
+}
+
+.btn-historial-header:hover{
+    background:#2563eb;
+    transform:translateY(-50%) scale(1.03);
 }
 
 .btn-regresar:hover{
@@ -991,21 +1035,6 @@
     margin-bottom:4px;
     font-weight:600;
 }
-.acciones-vista{
-  display:flex;
-  justify-content:flex-end;
-  gap:12px;
-  margin-bottom:20px;
-}
-
-.btn-historial{
-  background:#111827;
-}
-
-.btn-historial:hover{
-  background:#374151;
-}
-
 .btn-volver-activas{
   background:#2563eb;
 }
@@ -1156,18 +1185,15 @@
       <h1>Control Supervisor</h1>
       <p>Sistema de gestión de herramientas</p>
   </div>
-
+ <button
+    id="btnAbrirHistorial"
+    class="btn-historial-header"
+    onclick="mostrarHistorial()">
+    📚 Historial de devoluciones
+</button>
 </header>
 
   <div class="container">
-    <div class="acciones-vista">
-      <button
-        id="btnAbrirHistorial"
-        class="btn-historial"
-        onclick="mostrarHistorial()">
-        📚 Historial de devoluciones
-      </button>
-    </div>
     <div id="vistaActivas">
     <div class="panel">
       <div class="filters">
