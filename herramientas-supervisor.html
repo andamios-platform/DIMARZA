@@ -991,6 +991,152 @@
     margin-bottom:4px;
     font-weight:600;
 }
+.acciones-vista{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.btn-historial{
+  background:#111827;
+}
+
+.btn-historial:hover{
+  background:#374151;
+}
+
+.btn-volver-activas{
+  background:#2563eb;
+}
+
+.vista-oculta{
+  display:none !important;
+}
+
+.historial-cabecera{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:18px;
+}
+
+.historial-cabecera h2{
+  margin:0;
+  font-size:24px;
+}
+
+.historial-cabecera p{
+  margin:5px 0 0;
+  color:#6b7280;
+}
+
+.historial-buscador{
+  margin-bottom:18px;
+}
+
+.tabla-historial-wrapper{
+  overflow-x:auto;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+}
+
+.tabla-historial{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1100px;
+  font-size:13px;
+}
+
+.tabla-historial th{
+  background:#111827;
+  color:white;
+  padding:13px 10px;
+  text-align:left;
+  white-space:nowrap;
+}
+
+.tabla-historial td{
+  padding:12px 10px;
+  border-bottom:1px solid #e5e7eb;
+  vertical-align:middle;
+}
+
+.tabla-historial tbody tr:hover{
+  background:#f8fafc;
+}
+
+.badge-devuelto{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#e0f2fe;
+  color:#075985;
+  font-weight:700;
+  font-size:12px;
+}
+
+.acciones-historial{
+  display:flex;
+  gap:7px;
+  justify-content:center;
+}
+
+.btn-detalle-historial{
+  background:#374151;
+  padding:8px 11px;
+  font-size:12px;
+}
+
+.btn-pdf{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 11px;
+  border-radius:9px;
+  background:#dc2626;
+  color:#fff;
+  text-decoration:none;
+  font-weight:700;
+  font-size:12px;
+}
+
+.btn-pdf:hover{
+  background:#b91c1c;
+}
+
+.btn-pdf-deshabilitado{
+  display:inline-flex;
+  padding:8px 11px;
+  border-radius:9px;
+  background:#e5e7eb;
+  color:#6b7280;
+  font-size:12px;
+  font-weight:700;
+}
+
+.obs-historial{
+  max-width:220px;
+  white-space:normal;
+  line-height:1.35;
+}
+
+@media(max-width:700px){
+  .acciones-vista{
+    flex-direction:column;
+  }
+
+  .acciones-vista button{
+    width:100%;
+  }
+
+  .historial-cabecera{
+    flex-direction:column;
+    align-items:stretch;
+  }
+}
 
   </style>
 </head>
@@ -1014,6 +1160,15 @@
 </header>
 
   <div class="container">
+    <div class="acciones-vista">
+      <button
+        id="btnAbrirHistorial"
+        class="btn-historial"
+        onclick="mostrarHistorial()">
+        📚 Historial de devoluciones
+      </button>
+    </div>
+    <div id="vistaActivas">
     <div class="panel">
       <div class="filters">
         <div>
@@ -1043,7 +1198,8 @@
           <button onclick="cargarCajas()">Actualizar</button>
         </div>
       </div>
-    </div>
+      </div>
+      
 
     <div class="stats">
   <div class="stat pendiente">
@@ -1068,6 +1224,66 @@
 </div>
   </div>
 
+<div id="vistaHistorial" class="vista-oculta">
+
+  <div class="panel">
+    <div class="historial-cabecera">
+      <div>
+        <h2>📚 Historial de devoluciones</h2>
+        <p>
+          Cajas devueltas, responsables, fechas y documentos registrados.
+        </p>
+      </div>
+
+      <button
+        class="btn-volver-activas"
+        onclick="mostrarCajasActivas()">
+        ← Volver a cajas activas
+      </button>
+    </div>
+
+    <div class="historial-buscador">
+      <label for="buscarHistorial">Buscar en historial</label>
+      <input
+        id="buscarHistorial"
+        type="text"
+        placeholder="Caja, responsable, supervisor, herramienta, código, serie o ID">
+    </div>
+
+    <div id="resumenHistorial" class="loading">
+      Cargando historial...
+    </div>
+
+    <div class="tabla-historial-wrapper">
+      <table class="tabla-historial">
+        <thead>
+          <tr>
+            <th>Caja</th>
+            <th>ID registro</th>
+            <th>Responsable</th>
+            <th>Supervisor</th>
+            <th>Entrega</th>
+            <th>Devolución</th>
+            <th>Recibido por</th>
+            <th>Observación</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody id="tbodyHistorial">
+          <tr>
+            <td colspan="10" class="loading">
+              Cargando historial...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+    </div>
 <div id="modalDetalle" class="modal">
   <div class="modal-content modal-revision">
     <div class="modal-header">
@@ -1084,7 +1300,7 @@
 
   <script>
 
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx7BRBnCP16WbOyItAe4nry9nXFtccmbMRcRIvms3KlOTrWAftECu-SRR7i2KzG0osn/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzIwvOSGUdc8kPOYFp--3CPGF1VCVIZsEsB_kxIXooyGfWHyLtpzs3Hddc9KcamwhB-/exec';
 
     let cajasGlobal = [];
     let idRegistroActual = '';
@@ -1092,6 +1308,7 @@
     
     let comparativoActual = [];
     let filtroComparativoActual = 'TODOS';
+    let historialGlobal = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       cargarCajas();
@@ -1099,6 +1316,9 @@
       document.getElementById('filtroSupervisor').addEventListener('change', pintarTabla);
       document.getElementById('filtroEstado').addEventListener('change', pintarTabla);
       document.getElementById('buscarTexto').addEventListener('input', pintarTabla);
+      document
+        .getElementById('buscarHistorial')
+        .addEventListener('input', pintarHistorial);
     });
 
     async function cargarCajas() {
@@ -1944,6 +2164,273 @@ async function ejecutarRevision(action, revisadoPor, observacion) {
   }
 }
 
+    async function mostrarHistorial() {
+  document
+    .getElementById('vistaActivas')
+    .classList.add('vista-oculta');
+
+  document
+    .getElementById('vistaHistorial')
+    .classList.remove('vista-oculta');
+
+  document
+    .getElementById('btnAbrirHistorial')
+    .classList.add('vista-oculta');
+
+  await cargarHistorial();
+}
+
+
+function mostrarCajasActivas() {
+  document
+    .getElementById('vistaHistorial')
+    .classList.add('vista-oculta');
+
+  document
+    .getElementById('vistaActivas')
+    .classList.remove('vista-oculta');
+
+  document
+    .getElementById('btnAbrirHistorial')
+    .classList.remove('vista-oculta');
+}
+
+
+async function cargarHistorial() {
+  const tbody = document.getElementById('tbodyHistorial');
+  const resumen = document.getElementById('resumenHistorial');
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="10" class="loading">
+        Cargando historial...
+      </td>
+    </tr>
+  `;
+
+  resumen.textContent = 'Cargando historial...';
+
+  try {
+    const res = await fetch(
+      `${API_URL}?action=getHistorialDevoluciones`
+    );
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      throw new Error(
+        data.message || 'No se pudo cargar el historial.'
+      );
+    }
+
+    historialGlobal = data.historial || [];
+
+    pintarHistorial();
+
+  } catch (err) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="loading">
+          Error: ${err.message}
+        </td>
+      </tr>
+    `;
+
+    resumen.textContent = 'No se pudo cargar el historial.';
+  }
+}
+
+
+function pintarHistorial() {
+  const tbody = document.getElementById('tbodyHistorial');
+  const resumen = document.getElementById('resumenHistorial');
+
+  const texto = document
+    .getElementById('buscarHistorial')
+    .value
+    .toLowerCase()
+    .trim();
+
+  let data = historialGlobal.slice();
+
+  if (texto) {
+    data = data.filter(item => {
+      return [
+        item.caja,
+        item.idRegistro,
+        item.responsable,
+        item.supervisor,
+        item.recibidoPor,
+        item.unidad,
+        item.servicio,
+        item.fechaEntrega,
+        item.fechaDevolucion,
+        item.observacionDevolucion,
+        item.herramientas
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(texto);
+    });
+  }
+
+  resumen.textContent =
+    `${data.length} devolución${data.length === 1 ? '' : 'es'} encontrada${data.length === 1 ? '' : 's'}`;
+
+  if (!data.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="loading">
+          No hay devoluciones para mostrar.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = data.map(item => {
+    const caja = extraerCaja(item.caja);
+
+    const botonPdf = item.pdf
+      ? `
+        <a
+          href="${item.pdf}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-pdf">
+          📄 PDF
+        </a>
+      `
+      : `
+        <span class="btn-pdf-deshabilitado">
+          Sin PDF
+        </span>
+      `;
+
+    return `
+      <tr>
+        <td><strong>CAJA ${caja}</strong></td>
+
+        <td>${item.idRegistro || '-'}</td>
+
+        <td>${item.responsable || '-'}</td>
+
+        <td>${item.supervisor || '-'}</td>
+
+        <td>${item.fechaEntrega || '-'}</td>
+
+        <td>${item.fechaDevolucion || '-'}</td>
+
+        <td>${item.recibidoPor || '-'}</td>
+
+        <td class="obs-historial">
+          ${item.observacionDevolucion || 'Sin observación'}
+        </td>
+
+        <td>
+          <span class="badge-devuelto">
+            ↩️ DEVUELTO
+          </span>
+        </td>
+
+        <td>
+          <div class="acciones-historial">
+            <button
+              class="btn-detalle-historial"
+              onclick="verRegistroHistorial('${item.idRegistro}')">
+              🔍 Detalle
+            </button>
+
+            ${botonPdf}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+
+async function verRegistroHistorial(idRegistro) {
+  try {
+    const resDetalle = await fetch(
+      `${API_URL}?action=getDetalleRegistro&idRegistro=${encodeURIComponent(idRegistro)}`
+    );
+
+    const dataDetalle = await resDetalle.json();
+
+    if (!dataDetalle.ok) {
+      throw new Error(
+        dataDetalle.message || 'No se pudo cargar el detalle.'
+      );
+    }
+
+    const resComp = await fetch(
+      `${API_URL}?action=getComparativoRegistro&idRegistro=${encodeURIComponent(idRegistro)}`
+    );
+
+    const dataComp = await resComp.json();
+
+    mostrarDetalleHistorial(
+      dataDetalle.detalle,
+      dataComp.comparativo || []
+    );
+
+  } catch (err) {
+    mostrarToast(err.message, 'error');
+  }
+}
+
+
+function mostrarDetalleHistorial(detalle, comparativo) {
+  mostrarDetalle(detalle, comparativo);
+
+  const revision = document.querySelector(
+    '#detalleRegistro .revision-actions'
+  );
+
+  if (revision) {
+    revision.remove();
+  }
+
+  const caja = extraerCaja(
+    detalle['Caja Herramientas de pláctico TRUPPER'] || ''
+  );
+
+  document.getElementById('tituloModal').textContent =
+    `Historial de caja ${caja}`;
+
+  document.getElementById('subtituloModal').textContent =
+    `${detalle['ID REGISTRO'] || '-'} | DEVUELTO`;
+
+  const contenedor = document.getElementById('detalleRegistro');
+
+  contenedor.insertAdjacentHTML(
+    'beforeend',
+    `
+      <div class="seccion-detalle">
+        <h3>Datos de devolución</h3>
+
+        <div class="detalle-grid">
+          ${itemDetalle(
+            '📅 Fecha devolución',
+            detalle['FECHA DEVOLUCIÓN']
+          )}
+
+          ${itemDetalle(
+            '👤 Recibido por',
+            detalle['RECIBIDO POR']
+          )}
+
+          ${itemDetalle(
+            '📝 Observación',
+            detalle['OBSERVACIÓN DEVOLUCIÓN']
+          )}
+        </div>
+      </div>
+    `
+  );
+}
 function mostrarToast(mensaje, tipo) {
   const toast = document.getElementById('toast');
   toast.textContent = mensaje;
