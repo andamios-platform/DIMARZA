@@ -1165,6 +1165,146 @@
   white-space:normal;
   line-height:1.35;
 }
+.modos-historial{
+  display:flex;
+  gap:10px;
+  margin-bottom:18px;
+  padding:6px;
+  background:#f1f5f9;
+  border-radius:14px;
+  width:max-content;
+  max-width:100%;
+}
+
+.btn-modo-historial{
+  background:transparent;
+  color:#475569;
+  border:1px solid transparent;
+  padding:10px 16px;
+}
+
+.btn-modo-historial:hover{
+  background:#e2e8f0;
+  color:#111827;
+}
+
+.btn-modo-historial.activo{
+  background:#111827;
+  color:#fff;
+  box-shadow:0 5px 14px rgba(17,24,39,.18);
+}
+
+.filtros-trazabilidad{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1.3fr auto;
+  gap:12px;
+  align-items:end;
+  margin-bottom:18px;
+}
+
+.tabla-trazabilidad-wrapper{
+  overflow-x:auto;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+}
+
+.tabla-trazabilidad{
+  width:100%;
+  min-width:1250px;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+.tabla-trazabilidad th{
+  background:#111827;
+  color:#fff;
+  text-align:left;
+  padding:13px 10px;
+  white-space:nowrap;
+}
+
+.tabla-trazabilidad td{
+  padding:11px 10px;
+  border-bottom:1px solid #e5e7eb;
+  vertical-align:middle;
+}
+
+.tabla-trazabilidad tbody tr:hover{
+  background:#f8fafc;
+}
+
+.trazabilidad-herramienta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:280px;
+}
+
+.trazabilidad-herramienta img{
+  width:48px;
+  height:48px;
+  object-fit:contain;
+  border:1px solid #e5e7eb;
+  border-radius:9px;
+  background:#fff;
+  padding:4px;
+}
+
+.codigo-trazabilidad{
+  font-weight:700;
+  color:#1d4ed8;
+  white-space:nowrap;
+}
+
+.serie-trazabilidad{
+  font-weight:700;
+  color:#7c3aed;
+  white-space:nowrap;
+}
+
+.btn-limpiar-trazabilidad{
+  background:#64748b;
+}
+
+.btn-limpiar-trazabilidad:hover{
+  background:#475569;
+}
+
+.resumen-trazabilidad{
+  padding:12px 15px;
+  margin-bottom:15px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  border-radius:11px;
+  color:#1e40af;
+  font-weight:700;
+  text-align:center;
+}
+
+@media(max-width:900px){
+  .filtros-trazabilidad{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .modos-historial{
+    width:100%;
+  }
+
+  .btn-modo-historial{
+    flex:1;
+  }
+}
+
+@media(max-width:600px){
+  .filtros-trazabilidad{
+    grid-template-columns:1fr;
+  }
+
+  .modos-historial{
+    flex-direction:column;
+  }
+}
+
 
 @media(max-width:700px){
   .acciones-vista{
@@ -1293,6 +1433,26 @@
     </div>
 
 </div>
+    <div class="modos-historial">
+
+  <button
+    id="btnModoCajas"
+    type="button"
+    class="btn-modo-historial activo"
+    onclick="cambiarModoHistorial('CAJAS')">
+    📦 Historial por cajas
+  </button>
+
+  <button
+    id="btnModoHerramientas"
+    type="button"
+    class="btn-modo-historial"
+    onclick="cambiarModoHistorial('HERRAMIENTAS')">
+    🔧 Trazabilidad por herramientas
+  </button>
+
+</div>
+    <div id="vistaHistorialCajas">
     <div class="historial-buscador">
       <label for="buscarHistorial">Buscar en historial</label>
       <input
@@ -1331,6 +1491,100 @@
         </tbody>
       </table>
     </div>
+   </div>
+    <div id="vistaHistorialHerramientas" class="vista-oculta">
+
+  <div class="filtros-trazabilidad">
+
+    <div>
+      <label for="filtroNombreHerramienta">
+        Herramienta
+      </label>
+
+      <select id="filtroNombreHerramienta">
+        <option value="">Todas las herramientas</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="filtroCodigoHerramienta">
+        Código
+      </label>
+
+      <input
+        id="filtroCodigoHerramienta"
+        type="text"
+        placeholder="Ejemplo: 7777">
+    </div>
+
+    <div>
+      <label for="filtroSerieHerramienta">
+        Serie
+      </label>
+
+      <input
+        id="filtroSerieHerramienta"
+        type="text"
+        placeholder="Ejemplo: ABC123">
+    </div>
+
+    <div>
+      <label for="filtroResponsableHerramienta">
+        Responsable
+      </label>
+
+      <select id="filtroResponsableHerramienta">
+        <option value="">Todos los responsables</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="btn-limpiar-trazabilidad"
+      onclick="limpiarFiltrosTrazabilidad()">
+      Limpiar
+    </button>
+
+  </div>
+
+  <div
+    id="resumenTrazabilidad"
+    class="resumen-trazabilidad">
+    Preparando trazabilidad...
+  </div>
+
+  <div class="tabla-trazabilidad-wrapper">
+
+    <table class="tabla-trazabilidad">
+
+      <thead>
+        <tr>
+          <th>Herramienta</th>
+          <th>Código</th>
+          <th>Serie</th>
+          <th>Caja</th>
+          <th>Responsable</th>
+          <th>Supervisor</th>
+          <th>Entrega</th>
+          <th>Devolución</th>
+          <th>ID registro</th>
+          <th>PDF</th>
+        </tr>
+      </thead>
+
+      <tbody id="tbodyTrazabilidad">
+        <tr>
+          <td colspan="10" class="loading">
+            Preparando trazabilidad...
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
   </div>
 
 </div>
@@ -1360,6 +1614,8 @@
     let comparativoActual = [];
     let filtroComparativoActual = 'TODOS';
     let historialGlobal = [];
+    let trazabilidadGlobal = [];
+    let modoHistorialActual = 'CAJAS';
 
     document.addEventListener('DOMContentLoaded', () => {
       cargarCajas();
@@ -1370,6 +1626,33 @@
       document
         .getElementById('buscarHistorial')
         .addEventListener('input', pintarHistorial);
+      document
+        .getElementById('filtroNombreHerramienta')
+        .addEventListener(
+          'change',
+          pintarTrazabilidad
+        );
+      
+      document
+        .getElementById('filtroCodigoHerramienta')
+        .addEventListener(
+          'input',
+          pintarTrazabilidad
+        );
+      
+      document
+        .getElementById('filtroSerieHerramienta')
+        .addEventListener(
+          'input',
+          pintarTrazabilidad
+        );
+      
+      document
+        .getElementById('filtroResponsableHerramienta')
+        .addEventListener(
+          'change',
+          pintarTrazabilidad
+        );
     });
 
     async function cargarCajas() {
@@ -2275,8 +2558,12 @@ async function cargarHistorial() {
     }
 
     historialGlobal = data.historial || [];
-
+    
+    construirTrazabilidad();
+    cargarFiltrosTrazabilidad();
+    
     pintarHistorial();
+    pintarTrazabilidad();
 
   } catch (err) {
     tbody.innerHTML = `
@@ -2401,7 +2688,377 @@ function pintarHistorial() {
   }).join('');
 }
 
+function cambiarModoHistorial(modo) {
+  modoHistorialActual = modo;
 
+  const vistaCajas = document.getElementById(
+    'vistaHistorialCajas'
+  );
+
+  const vistaHerramientas = document.getElementById(
+    'vistaHistorialHerramientas'
+  );
+
+  const btnCajas = document.getElementById(
+    'btnModoCajas'
+  );
+
+  const btnHerramientas = document.getElementById(
+    'btnModoHerramientas'
+  );
+
+  const esCajas = modo === 'CAJAS';
+
+  vistaCajas.classList.toggle(
+    'vista-oculta',
+    !esCajas
+  );
+
+  vistaHerramientas.classList.toggle(
+    'vista-oculta',
+    esCajas
+  );
+
+  btnCajas.classList.toggle(
+    'activo',
+    esCajas
+  );
+
+  btnHerramientas.classList.toggle(
+    'activo',
+    !esCajas
+  );
+}
+
+
+function construirTrazabilidad() {
+  const resultado = [];
+
+  historialGlobal.forEach(registro => {
+    const herramientas =
+      registro.herramientasDetalle || [];
+
+    herramientas.forEach(herramienta => {
+      resultado.push({
+        herramienta:
+          herramienta.herramienta || '',
+
+        codigo:
+          herramienta.codigo || '',
+
+        serie:
+          herramienta.serie || '',
+
+        valorRegistrado:
+          herramienta.valorRegistrado || '',
+
+        caja:
+          registro.caja || '',
+
+        idRegistro:
+          registro.idRegistro || '',
+
+        responsable:
+          registro.responsable || '',
+
+        supervisor:
+          registro.supervisor || '',
+
+        unidad:
+          registro.unidad || '',
+
+        servicio:
+          registro.servicio || '',
+
+        turno:
+          registro.turno || '',
+
+        fechaEntrega:
+          registro.fechaEntrega || '',
+
+        fechaDevolucion:
+          registro.fechaDevolucion || '',
+
+        recibidoPor:
+          registro.recibidoPor || '',
+
+        estado:
+          registro.estado || 'DEVUELTO',
+
+        pdf:
+          registro.pdf || ''
+      });
+    });
+  });
+
+  trazabilidadGlobal = resultado;
+}
+
+
+function cargarFiltrosTrazabilidad() {
+  const selectHerramienta = document.getElementById(
+    'filtroNombreHerramienta'
+  );
+
+  const selectResponsable = document.getElementById(
+    'filtroResponsableHerramienta'
+  );
+
+  const herramientaActual =
+    selectHerramienta.value;
+
+  const responsableActual =
+    selectResponsable.value;
+
+  const herramientas = [
+    ...new Set(
+      trazabilidadGlobal
+        .map(x => x.herramienta)
+        .filter(Boolean)
+    )
+  ].sort((a, b) =>
+    a.localeCompare(b, 'es')
+  );
+
+  const responsables = [
+    ...new Set(
+      trazabilidadGlobal
+        .map(x => x.responsable)
+        .filter(Boolean)
+    )
+  ].sort((a, b) =>
+    a.localeCompare(b, 'es')
+  );
+
+  selectHerramienta.innerHTML =
+    `<option value="">Todas las herramientas</option>` +
+    herramientas.map(nombre => `
+      <option value="${escaparHtml(nombre)}">
+        ${escaparHtml(nombre)}
+      </option>
+    `).join('');
+
+  selectResponsable.innerHTML =
+    `<option value="">Todos los responsables</option>` +
+    responsables.map(nombre => `
+      <option value="${escaparHtml(nombre)}">
+        ${escaparHtml(nombre)}
+      </option>
+    `).join('');
+
+  selectHerramienta.value =
+    herramientaActual;
+
+  selectResponsable.value =
+    responsableActual;
+}
+
+
+function obtenerTrazabilidadFiltrada() {
+  const herramienta = document
+    .getElementById('filtroNombreHerramienta')
+    .value
+    .toLowerCase()
+    .trim();
+
+  const codigo = document
+    .getElementById('filtroCodigoHerramienta')
+    .value
+    .toLowerCase()
+    .trim();
+
+  const serie = document
+    .getElementById('filtroSerieHerramienta')
+    .value
+    .toLowerCase()
+    .trim();
+
+  const responsable = document
+    .getElementById('filtroResponsableHerramienta')
+    .value
+    .toLowerCase()
+    .trim();
+
+  return trazabilidadGlobal.filter(item => {
+    const coincideHerramienta =
+      !herramienta ||
+      (item.herramienta || '')
+        .toLowerCase() === herramienta;
+
+    const coincideCodigo =
+      !codigo ||
+      (item.codigo || '')
+        .toLowerCase()
+        .includes(codigo);
+
+    const coincideSerie =
+      !serie ||
+      (item.serie || '')
+        .toLowerCase()
+        .includes(serie);
+
+    const coincideResponsable =
+      !responsable ||
+      (item.responsable || '')
+        .toLowerCase() === responsable;
+
+    return (
+      coincideHerramienta &&
+      coincideCodigo &&
+      coincideSerie &&
+      coincideResponsable
+    );
+  });
+}
+
+
+function pintarTrazabilidad() {
+  const tbody = document.getElementById(
+    'tbodyTrazabilidad'
+  );
+
+  const resumen = document.getElementById(
+    'resumenTrazabilidad'
+  );
+
+  const data = obtenerTrazabilidadFiltrada();
+
+  resumen.textContent =
+    `${data.length} movimiento` +
+    `${data.length === 1 ? '' : 's'} ` +
+    `de herramienta` +
+    `${data.length === 1 ? '' : 's'} encontrado` +
+    `${data.length === 1 ? '' : 's'}`;
+
+  if (!data.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="loading">
+          No se encontraron herramientas con esos filtros.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  tbody.innerHTML = data.map(item => {
+    const caja = extraerCaja(item.caja);
+
+    const pdf = item.pdf
+      ? `
+        <a
+          href="${escaparAtributo(item.pdf)}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-pdf">
+          📄 PDF
+        </a>
+      `
+      : `
+        <span class="btn-pdf-deshabilitado">
+          Sin PDF
+        </span>
+      `;
+
+    return `
+      <tr>
+
+        <td>
+          <div class="trazabilidad-herramienta">
+            <img
+              src="${imagenHerramienta(
+                item.herramienta
+              )}"
+              alt="${escaparAtributo(
+                item.herramienta
+              )}"
+              onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'">
+
+            <strong>
+              ${escaparHtml(
+                item.herramienta || '-'
+              )}
+            </strong>
+          </div>
+        </td>
+
+        <td class="codigo-trazabilidad">
+          ${escaparHtml(item.codigo || 'S/C')}
+        </td>
+
+        <td class="serie-trazabilidad">
+          ${escaparHtml(item.serie || 'S/S')}
+        </td>
+
+        <td>
+          <strong>CAJA ${escaparHtml(caja)}</strong>
+        </td>
+
+        <td>
+          ${escaparHtml(item.responsable || '-')}
+        </td>
+
+        <td>
+          ${escaparHtml(item.supervisor || '-')}
+        </td>
+
+        <td>
+          ${escaparHtml(item.fechaEntrega || '-')}
+        </td>
+
+        <td>
+          ${escaparHtml(item.fechaDevolucion || '-')}
+        </td>
+
+        <td>
+          ${escaparHtml(item.idRegistro || '-')}
+        </td>
+
+        <td>
+          ${pdf}
+        </td>
+
+      </tr>
+    `;
+  }).join('');
+}
+
+
+function limpiarFiltrosTrazabilidad() {
+  document.getElementById(
+    'filtroNombreHerramienta'
+  ).value = '';
+
+  document.getElementById(
+    'filtroCodigoHerramienta'
+  ).value = '';
+
+  document.getElementById(
+    'filtroSerieHerramienta'
+  ).value = '';
+
+  document.getElementById(
+    'filtroResponsableHerramienta'
+  ).value = '';
+
+  pintarTrazabilidad();
+}
+
+
+function escaparHtml(valor) {
+  return String(valor || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+
+function escaparAtributo(valor) {
+  return escaparHtml(valor);
+}
 async function verRegistroHistorial(idRegistro) {
   try {
     const resDetalle = await fetch(
