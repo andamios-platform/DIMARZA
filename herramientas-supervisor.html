@@ -1419,9 +1419,10 @@
     <div class="acciones-historial-superior">
 
         <button
+            id="btnExportarExcel"
             class="btn-exportar"
             onclick="exportarExcel()">
-            📊 Exportar Excel
+            📊 Exportar Historial
         </button>
 
         <button
@@ -2512,6 +2513,7 @@ async function ejecutarRevision(action, revisadoPor, observacion) {
     .classList.add('vista-oculta');
 
   await cargarHistorial();
+  actualizarTextoBotonExportar();
 }
 
 
@@ -2728,6 +2730,7 @@ function cambiarModoHistorial(modo) {
     'activo',
     !esCajas
   );
+  actualizarTextoBotonExportar();
 }
 
 
@@ -3140,50 +3143,14 @@ function mostrarDetalleHistorial(detalle, comparativo) {
   );
 }
 
-async function exportarExcel() {
-  const boton = document.querySelector('.btn-exportar');
+async function exportarExcel(){
 
-  const busqueda = document
-    .getElementById('buscarHistorial')
-    .value
-    .trim();
-
-  try {
-    boton.disabled = true;
-    boton.textContent = '⏳ Generando Excel...';
-
-    const url =
-      `${API_URL}?action=exportarHistorialExcel` +
-      `&busqueda=${encodeURIComponent(busqueda)}`;
-
-    const respuesta = await fetch(url);
-    const data = await respuesta.json();
-
-    if (!data.ok) {
-      throw new Error(
-        data.message ||
-        'No se pudo generar el archivo Excel.'
-      );
+    if(modoHistorialActual==="HERRAMIENTAS"){
+        return exportarExcelHerramientas();
     }
 
-    descargarBase64_(
-      data.base64,
-      data.nombreArchivo,
-      data.mimeType
-    );
+    return exportarExcelCajas();
 
-    mostrarToast(
-      `Excel generado con ${data.total} registro(s).`,
-      'ok'
-    );
-
-  } catch (err) {
-    mostrarToast(err.message, 'error');
-
-  } finally {
-    boton.disabled = false;
-    boton.textContent = '📊 Exportar Excel';
-  }
 }
 
 
@@ -3253,7 +3220,17 @@ function mostrarToast(mensaje, tipo) {
     toast.style.display = 'none';
   }, 2500);
 }
-    
+    async function exportarExcelCajas(){
+   ...
+}
+
+async function exportarExcelHerramientas(){
+   ...
+}
+
+function actualizarTextoBotonExportar(){
+   ...
+}
   </script>
 <div id="toast" class="toast"></div>
 
