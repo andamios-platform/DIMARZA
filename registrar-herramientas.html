@@ -925,158 +925,112 @@ function obtenerNombreCorto(item){
 
   const nombre = normalizarTexto(item);
 
-  const nombres = [
+  if(nombre.includes('ARNES') && nombre.includes('6 ARGOLLAS')){
+    return 'Arnés Mecánico 6 argollas';
+  }
 
-    {
-      palabras:['ARNES MECANICO 6 ARGOLLAS'],
-      texto:'Arnés Mecánico 6 argollas'
-    },
+  if(nombre.includes('ARNES') && nombre.includes('4 ARGOLLAS')){
+    return 'Arnés Mecánico 4 argollas';
+  }
 
-    {
-      palabras:['ARNES MECANICO 4 ARGOLLAS'],
-      texto:'Arnés Mecánico 4 argollas'
-    },
+  if(nombre.includes('BALDE') && nombre.includes('LAINERO')){
+    return 'Balde Lainero';
+  }
 
-    {
-      palabras:['BALDE LAINERO'],
-      texto:'Balde Lainero'
-    },
+  if(nombre.includes('BLOQUE') && nombre.includes('RETRACTIL')){
+    return 'Bloque Retráctil';
+  }
 
-    {
-      palabras:['BLOQUE RETRACTIL'],
-      texto:'Bloque Retráctil'
-    },
+  if(nombre.includes('CABO') && nombre.includes('SIN AMORTIGUADOR')){
+    return 'Cabo en Y sin amortiguador';
+  }
 
-    {
-      palabras:['CABO EN Y','SIN AMORTIGUADOR'],
-      texto:'Cabo en Y sin amortiguador'
-    },
+  if(nombre.includes('CABO') && nombre.includes('CON AMORTIGUADOR')){
+    return 'Cabo en Y con amortiguador';
+  }
 
-    {
-      palabras:['CABO EN Y','CON AMORTIGUADOR'],
-      texto:'Cabo en Y con amortiguador'
-    },
+  if(nombre.includes('CAJA') && nombre.includes('TRUPPER')){
+    return 'Caja de Herramientas TRUPPER';
+  }
 
-    {
-      palabras:['CAJA HERRAMIENTAS','TRUPPER'],
-      texto:'Caja de Herramientas TRUPPER'
-    },
+  if(nombre.includes('CAJA') && nombre.includes('METALICA')){
+    return 'Caja Metálica de Herramientas';
+  }
 
-    {
-      palabras:['CAJA METALICA'],
-      texto:'Caja Metálica de Herramientas'
-    },
+  if(nombre.includes('CORREAJE')){
+    return 'Correaje de Andamiero';
+  }
 
-    {
-      palabras:['CORREAJE'],
-      texto:'Correaje de Andamiero'
-    },
+  if(nombre.includes('DRIZA')){
+    return 'Driza Elástica';
+  }
 
-    {
-      palabras:['DRIZA ELASTICA'],
-      texto:'Driza Elástica'
-    },
+  if(nombre.includes('FAJA') && nombre.includes('0.9')){
+    return 'Faja de Anclaje 0.9 m';
+  }
 
-    {
-      palabras:['FAJA ANCLAJE','0.9M'],
-      texto:'Faja de Anclaje 0.9 m'
-    },
+  if(nombre.includes('FAJA') && nombre.includes('1.8')){
+    return 'Faja de Anclaje 1.8 m';
+  }
 
-    {
-      palabras:['FAJA ANCLAJE','1.8M'],
-      texto:'Faja de Anclaje 1.8 m'
-    },
+  if(nombre.includes('FLEXOMETRO') && nombre.includes('5M')){
+    return 'Flexómetro de 5 m';
+  }
 
-    {
-      palabras:['FLEXOMETRO','5M'],
-      texto:'Flexómetro de 5 m'
-    },
+  if(nombre.includes('FLEXOMETRO') && nombre.includes('8M')){
+    return 'Flexómetro de 8 m';
+  }
 
-    {
-      palabras:['FLEXOMETRO','8M'],
-      texto:'Flexómetro de 8 m'
-    },
+  if(nombre.includes('HOMBRERA')){
+    return 'Hombrera de Cuero';
+  }
 
-    {
-      palabras:['HOMBRERA'],
-      texto:'Hombrera de Cuero'
-    },
+  if(nombre.includes('KIT') && nombre.includes('ANTITRAUMA')){
+    return 'Kit Antitrauma';
+  }
 
-    {
-      palabras:['KIT ANTITRAUMA'],
-      texto:'Kit Antitrauma'
-    },
+  if(nombre.includes('LINTERNA')){
+    return 'Linterna para Casco';
+  }
 
-    {
-      palabras:['LINTERNA','CASCO'],
-      texto:'Linterna para Casco'
-    },
+  if(nombre.includes('LLAVE') && nombre.includes('CARRACA')){
+    return 'Llave Carraca';
+  }
 
-    {
-      palabras:['LLAVE CARRACA'],
-      texto:'Llave Carraca'
-    },
+  if(nombre.includes('LLAVE FRANCESA') && nombre.includes('12')){
+    return 'Llave Francesa 12"';
+  }
 
-    {
-      palabras:['LLAVE FRANCESA','12'],
-      texto:'Llave Francesa 12"'
-    },
+  if(nombre.includes('LLAVE FRANCESA') && nombre.includes('8')){
+    return 'Llave Francesa 8"';
+  }
 
-    {
-      palabras:['LLAVE FRANCESA','8'],
-      texto:'Llave Francesa 8"'
-    },
+  if(nombre.includes('LLAVE') && nombre.includes('MIXTA')){
+    return 'Llave Mixta 22 mm';
+  }
 
-    {
-      palabras:['LLAVE MIXTA'],
-      texto:'Llave Mixta 22 mm'
-    },
+  if(nombre.includes('MARTILLO')){
+    return 'Martillo Andamiero';
+  }
 
-    {
-      palabras:['MARTILLO ANDAMIERO'],
-      texto:'Martillo Andamiero'
-    },
+  if(nombre.includes('NIVEL')){
+    return 'Nivel de Mano';
+  }
 
-    {
-      palabras:['NIVEL DE MANO'],
-      texto:'Nivel de Mano'
-    },
+  if(nombre.includes('POLEA')){
+    return 'Polea con Freno';
+  }
 
-    {
-      palabras:['POLEA'],
-      texto:'Polea con Freno'
-    },
+  if(nombre.includes('PORTA') && nombre.includes('CARRACA')){
+    return 'Porta Carraca';
+  }
 
-    {
-      palabras:['PORTA CARRACA'],
-      texto:'Porta Carraca'
-    },
+  if(nombre.includes('PORTA') && nombre.includes('MARTILLO')){
+    return 'Porta Martillo';
+  }
 
-    {
-      palabras:['PORTA MARTILLO'],
-      texto:'Porta Martillo'
-    },
-
-    {
-      palabras:['RODILLERA'],
-      texto:'Rodillera'
-    }
-
-  ];
-
-  for(const config of nombres){
-
-    const coincide = config.palabras.every(
-      palabra =>
-        nombre.includes(
-          normalizarTexto(palabra)
-        )
-    );
-
-    if(coincide){
-      return config.texto;
-    }
-
+  if(nombre.includes('RODILLERA')){
+    return 'Rodillera';
   }
 
   return limpiarTexto(item);
