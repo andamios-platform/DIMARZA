@@ -1,1 +1,1502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Registrar Herramientas | DIMARZA</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  padding:25px;
+
+  font-family:Arial,sans-serif;
+
+  background-image:
+    linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.70)),
+    url("img/fondo.png");
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+}
+
+.contenedor{
+  width:100%;
+  max-width:1050px;
+  margin:auto;
+
+  background-image:url("img/fondoclaro.png");
+  background-size:cover;
+  background-position:center;
+
+  background-color:rgba(255,255,255,.94);
+  background-blend-mode:soft-light;
+
+  border-radius:28px;
+  padding:35px;
+
+  box-shadow:0 20px 50px rgba(0,0,0,.40);
+}
+
+.encabezado{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:25px;
+
+  margin-bottom:30px;
+}
+
+.logo{
+  width:135px;
+}
+
+.empresa{
+  color:#0d3f8f;
+  font-size:25px;
+  font-weight:800;
+  letter-spacing:5px;
+}
+
+h1{
+  margin:4px 0 0;
+  color:#6d28d9;
+  font-size:45px;
+}
+
+.subtitulo{
+  margin-top:7px;
+  color:#6b7280;
+  font-size:16px;
+}
+
+.mensaje{
+  display:none;
+  margin-bottom:22px;
+  padding:16px 18px;
+
+  border-radius:14px;
+  font-size:15px;
+  font-weight:bold;
+}
+
+.mensaje.info{
+  display:block;
+  color:#1e40af;
+  background:#dbeafe;
+  border:1px solid #93c5fd;
+}
+
+.mensaje.exito{
+  display:block;
+  color:#166534;
+  background:#dcfce7;
+  border:1px solid #86efac;
+}
+
+.mensaje.error{
+  display:block;
+  color:#991b1b;
+  background:#fee2e2;
+  border:1px solid #fca5a5;
+}
+
+.contenido{
+  display:grid;
+  grid-template-columns:1fr 1.25fr;
+  gap:25px;
+}
+
+.tarjeta{
+  background:rgba(255,255,255,.92);
+
+  border:1px solid rgba(148,163,184,.35);
+  border-radius:20px;
+
+  padding:24px;
+
+  box-shadow:0 8px 25px rgba(15,23,42,.10);
+}
+
+.titulo-tarjeta{
+  margin:0 0 20px;
+
+  color:#1f2937;
+  font-size:21px;
+  font-weight:800;
+}
+
+.campo{
+  margin-bottom:18px;
+}
+
+.campo label{
+  display:block;
+  margin-bottom:7px;
+
+  color:#374151;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.campo input,
+.campo select,
+.campo textarea{
+  width:100%;
+  min-height:48px;
+
+  padding:12px 14px;
+
+  border:1px solid #cbd5e1;
+  border-radius:11px;
+
+  background:#fff;
+  color:#111827;
+
+  font-size:15px;
+  outline:none;
+
+  transition:.2s;
+}
+
+.campo textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus{
+  border-color:#7c3aed;
+  box-shadow:0 0 0 3px rgba(124,58,237,.14);
+}
+
+.campo input:disabled,
+.campo select:disabled{
+  background:#f3f4f6;
+  color:#6b7280;
+  cursor:not-allowed;
+}
+
+.fila{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.opcion-especial{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  margin-top:9px;
+
+  color:#4b5563;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.opcion-especial input{
+  width:18px;
+  height:18px;
+  min-height:auto;
+  accent-color:#7c3aed;
+}
+
+.vista-herramienta{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  min-height:315px;
+
+  padding:22px;
+
+  text-align:center;
+
+  border:2px dashed #c4b5fd;
+  border-radius:18px;
+
+  background:linear-gradient(
+    145deg,
+    rgba(245,243,255,.96),
+    rgba(255,255,255,.96)
+  );
+}
+
+.imagen-herramienta{
+  width:190px;
+  height:165px;
+
+  object-fit:contain;
+
+  margin-bottom:18px;
+
+  display:none;
+}
+
+.icono-vacio{
+  width:100px;
+  height:100px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  margin-bottom:18px;
+
+  border-radius:50%;
+
+  background:#ede9fe;
+  color:#7c3aed;
+
+  font-size:52px;
+  font-weight:bold;
+}
+
+.nombre-herramienta{
+  color:#1f2937;
+  font-size:20px;
+  font-weight:800;
+}
+
+.marca-herramienta{
+  margin-top:7px;
+  color:#6b7280;
+  font-size:15px;
+}
+
+.detalle{
+  width:100%;
+  margin-top:20px;
+
+  overflow:hidden;
+
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+
+  background:white;
+}
+
+.detalle-fila{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+
+  padding:12px 15px;
+
+  border-bottom:1px solid #e5e7eb;
+}
+
+.detalle-fila:last-child{
+  border-bottom:none;
+}
+
+.detalle-etiqueta{
+  color:#6b7280;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.detalle-valor{
+  color:#111827;
+  font-size:14px;
+  font-weight:bold;
+  text-align:right;
+}
+
+.acciones{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+
+  margin-top:28px;
+}
+
+.boton{
+  min-width:190px;
+
+  padding:15px 22px;
+
+  border:none;
+  border-radius:13px;
+
+  color:white;
+
+  font-size:15px;
+  font-weight:bold;
+
+  cursor:pointer;
+
+  transition:.22s;
+}
+
+.boton:hover{
+  transform:translateY(-3px);
+}
+
+.boton:disabled{
+  opacity:.60;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.boton-registrar{
+  background:linear-gradient(135deg,#7c3aed,#5b21b6);
+  box-shadow:0 8px 18px rgba(91,33,182,.30);
+}
+
+.boton-limpiar{
+  background:linear-gradient(135deg,#64748b,#475569);
+}
+
+.volver{
+  display:inline-block;
+
+  margin-top:30px;
+  padding:14px 22px;
+
+  border-radius:13px;
+
+  background:#374151;
+  color:white;
+
+  text-decoration:none;
+  font-weight:bold;
+
+  transition:.2s;
+}
+
+.volver:hover{
+  transform:translateY(-2px);
+  background:#1f2937;
+}
+
+.cargando{
+  display:inline-block;
+
+  width:17px;
+  height:17px;
+
+  margin-right:8px;
+
+  border:3px solid rgba(255,255,255,.4);
+  border-top-color:white;
+  border-radius:50%;
+
+  animation:girar .8s linear infinite;
+  vertical-align:middle;
+}
+
+@keyframes girar{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+@media(max-width:820px){
+
+  .contenido{
+    grid-template-columns:1fr;
+  }
+
+  .encabezado{
+    flex-direction:column;
+    text-align:center;
+  }
+
+  .logo{
+    width:100px;
+  }
+
+  h1{
+    font-size:34px;
+  }
+
+  .fila{
+    grid-template-columns:1fr;
+  }
+
+  .acciones{
+    flex-direction:column;
+  }
+
+  .boton{
+    width:100%;
+  }
+
+}
+
+@media(max-width:500px){
+
+  body{
+    padding:12px;
+  }
+
+  .contenedor{
+    padding:22px 15px;
+    border-radius:20px;
+  }
+
+  h1{
+    font-size:29px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+  <div class="encabezado">
+
+    <img
+      src="img/mini-logo.png"
+      class="logo"
+      alt="DIMARZA"
+    >
+
+    <div>
+
+      <div class="empresa">
+        DIMARZA
+      </div>
+
+      <h1>
+        REGISTRAR HERRAMIENTAS
+      </h1>
+
+      <div class="subtitulo">
+        Ingreso de nuevas unidades al Maestro de Herramientas
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    id="mensaje"
+    class="mensaje"
+  ></div>
+
+  <div class="contenido">
+
+    <!-- INFORMACIÓN DE REFERENCIA -->
+
+    <div class="tarjeta">
+
+      <h2 class="titulo-tarjeta">
+        Herramienta seleccionada
+      </h2>
+
+      <div class="vista-herramienta">
+
+        <div
+          id="iconoVacio"
+          class="icono-vacio"
+        >
+          +
+        </div>
+
+        <img
+          id="imagenHerramienta"
+          class="imagen-herramienta"
+          alt="Herramienta"
+        >
+
+        <div
+          id="nombreHerramienta"
+          class="nombre-herramienta"
+        >
+          Selecciona una herramienta
+        </div>
+
+        <div
+          id="marcaHerramienta"
+          class="marca-herramienta"
+        >
+          Solo podrás agregar unidades de tipos existentes
+        </div>
+
+        <div class="detalle">
+
+          <div class="detalle-fila">
+
+            <span class="detalle-etiqueta">
+              Control por código
+            </span>
+
+            <span
+              id="detalleCodigo"
+              class="detalle-valor"
+            >
+              —
+            </span>
+
+          </div>
+
+          <div class="detalle-fila">
+
+            <span class="detalle-etiqueta">
+              Control por serie
+            </span>
+
+            <span
+              id="detalleSerie"
+              class="detalle-valor"
+            >
+              —
+            </span>
+
+          </div>
+
+          <div class="detalle-fila">
+
+            <span class="detalle-etiqueta">
+              Estado inicial
+            </span>
+
+            <span class="detalle-valor">
+              DISPONIBLE
+            </span>
+
+          </div>
+
+          <div class="detalle-fila">
+
+            <span class="detalle-etiqueta">
+              Registro activo
+            </span>
+
+            <span class="detalle-valor">
+              SI
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FORMULARIO -->
+
+    <div class="tarjeta">
+
+      <h2 class="titulo-tarjeta">
+        Datos de la nueva unidad
+      </h2>
+
+      <form id="formRegistro">
+
+        <div class="campo">
+
+          <label for="tipoHerramienta">
+            Tipo de herramienta *
+          </label>
+
+          <select
+            id="tipoHerramienta"
+            required
+          >
+
+            <option value="">
+              Cargando herramientas...
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="item">
+              Ítem
+            </label>
+
+            <input
+              id="item"
+              type="text"
+              disabled
+            >
+
+          </div>
+
+          <div class="campo">
+
+            <label for="marca">
+              Marca
+            </label>
+
+            <input
+              id="marca"
+              type="text"
+              disabled
+            >
+
+          </div>
+
+        </div>
+
+        <div class="fila">
+
+          <div class="campo">
+
+            <label for="codigo">
+              Código
+            </label>
+
+            <input
+              id="codigo"
+              type="text"
+              autocomplete="off"
+              placeholder="Ingrese el código"
+            >
+
+            <label class="opcion-especial">
+
+              <input
+                id="sinCodigo"
+                type="checkbox"
+              >
+
+              Registrar como S/C
+
+            </label>
+
+          </div>
+
+          <div class="campo">
+
+            <label for="serie">
+              Serie
+            </label>
+
+            <input
+              id="serie"
+              type="text"
+              autocomplete="off"
+              placeholder="Ingrese la serie"
+            >
+
+            <label class="opcion-especial">
+
+              <input
+                id="sinSerie"
+                type="checkbox"
+              >
+
+              Registrar como S/S
+
+            </label>
+
+          </div>
+
+        </div>
+
+        <div class="campo">
+
+          <label for="caja">
+            Caja
+          </label>
+
+          <select id="caja">
+
+            <option value="SIN ASIGNAR">
+              SIN ASIGNAR
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="acciones">
+
+          <button
+            type="button"
+            class="boton boton-limpiar"
+            onclick="limpiarFormulario()"
+          >
+            Limpiar
+          </button>
+
+          <button
+            id="btnRegistrar"
+            type="submit"
+            class="boton boton-registrar"
+          >
+            Registrar herramienta
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <a
+    class="volver"
+    href="visualizacion.html"
+  >
+    ← Volver a Visualización
+  </a>
+
+</div>
+
+<script>
+
+/*
+  Cuando tengamos desplegado el nuevo Apps Script,
+  reemplazaremos este texto por la URL terminada en /exec.
+*/
+
+const WEB_APP_URL = 'PEGAR_AQUI_URL_DEL_NUEVO_APPS_SCRIPT';
+
+let tiposHerramientas = [];
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', function(){
+
+  configurarEventos();
+  cargarDatosIniciales();
+
+});
+
+/* =========================================================
+   EVENTOS
+========================================================= */
+
+function configurarEventos(){
+
+  document
+    .getElementById('tipoHerramienta')
+    .addEventListener(
+      'change',
+      mostrarHerramientaSeleccionada
+    );
+
+  document
+    .getElementById('sinCodigo')
+    .addEventListener(
+      'change',
+      actualizarCampoCodigo
+    );
+
+  document
+    .getElementById('sinSerie')
+    .addEventListener(
+      'change',
+      actualizarCampoSerie
+    );
+
+  document
+    .getElementById('formRegistro')
+    .addEventListener(
+      'submit',
+      enviarFormulario
+    );
+
+}
+
+/* =========================================================
+   CARGAR DATOS
+========================================================= */
+
+async function cargarDatosIniciales(){
+
+  const selector = document.getElementById(
+    'tipoHerramienta'
+  );
+
+  if(
+    !WEB_APP_URL ||
+    WEB_APP_URL.includes('PEGAR_AQUI')
+  ){
+
+    selector.innerHTML = `
+      <option value="">
+        Apps Script aún no conectado
+      </option>
+    `;
+
+    mostrarMensaje(
+      'El diseño está listo. Después colocaremos aquí la URL del nuevo Apps Script.',
+      'info'
+    );
+
+    return;
+  }
+
+  try{
+
+    mostrarMensaje(
+      'Cargando herramientas disponibles...',
+      'info'
+    );
+
+    const url =
+      WEB_APP_URL +
+      '?action=getDatosRegistroHerramientas' +
+      '&t=' + Date.now();
+
+    const respuesta = await fetch(url);
+
+    if(!respuesta.ok){
+      throw new Error(
+        'No se pudo conectar con el servidor.'
+      );
+    }
+
+    const resultado = await respuesta.json();
+
+    if(!resultado.ok){
+      throw new Error(
+        resultado.message ||
+        'No se pudieron cargar los datos.'
+      );
+    }
+
+    tiposHerramientas =
+      Array.isArray(resultado.tipos)
+        ? resultado.tipos
+        : [];
+
+    llenarTiposHerramientas(
+      tiposHerramientas
+    );
+
+    llenarCajas(
+      Array.isArray(resultado.cajas)
+        ? resultado.cajas
+        : []
+    );
+
+    ocultarMensaje();
+
+  }catch(error){
+
+    console.error(error);
+
+    selector.innerHTML = `
+      <option value="">
+        No se pudieron cargar las herramientas
+      </option>
+    `;
+
+    mostrarMensaje(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+/* =========================================================
+   LLENAR SELECTORES
+========================================================= */
+
+function llenarTiposHerramientas(tipos){
+
+  const selector = document.getElementById(
+    'tipoHerramienta'
+  );
+
+  selector.innerHTML = `
+    <option value="">
+      Seleccione una herramienta
+    </option>
+  `;
+
+  tipos.forEach((tipo,index)=>{
+
+    const opcion = document.createElement(
+      'option'
+    );
+
+    opcion.value = index;
+
+    opcion.textContent =
+      tipo.item +
+      (
+        tipo.marca
+          ? ' — ' + tipo.marca
+          : ''
+      );
+
+    selector.appendChild(opcion);
+
+  });
+
+}
+
+function llenarCajas(cajas){
+
+  const selector = document.getElementById(
+    'caja'
+  );
+
+  selector.innerHTML = '';
+
+  const lista = cajas.length
+    ? cajas
+    : ['SIN ASIGNAR'];
+
+  if(
+    !lista.some(
+      caja =>
+        normalizarTexto(caja) ===
+        normalizarTexto('SIN ASIGNAR')
+    )
+  ){
+    lista.unshift('SIN ASIGNAR');
+  }
+
+  lista.forEach(caja=>{
+
+    const opcion = document.createElement(
+      'option'
+    );
+
+    opcion.value = caja;
+    opcion.textContent = caja;
+
+    selector.appendChild(opcion);
+
+  });
+
+}
+
+/* =========================================================
+   MOSTRAR HERRAMIENTA
+========================================================= */
+
+function mostrarHerramientaSeleccionada(){
+
+  const valor = document
+    .getElementById('tipoHerramienta')
+    .value;
+
+  if(valor === ''){
+
+    reiniciarVistaHerramienta();
+    return;
+
+  }
+
+  const tipo = tiposHerramientas[
+    Number(valor)
+  ];
+
+  if(!tipo){
+
+    reiniciarVistaHerramienta();
+    return;
+
+  }
+
+  document.getElementById(
+    'item'
+  ).value = tipo.item || '';
+
+  document.getElementById(
+    'marca'
+  ).value = tipo.marca || '';
+
+  document.getElementById(
+    'nombreHerramienta'
+  ).textContent = tipo.item || '';
+
+  document.getElementById(
+    'marcaHerramienta'
+  ).textContent = tipo.marca
+    ? 'Marca: ' + tipo.marca
+    : 'Sin marca registrada';
+
+  document.getElementById(
+    'detalleCodigo'
+  ).textContent = tipo.usaCodigo
+    ? 'SÍ'
+    : 'NO / S/C';
+
+  document.getElementById(
+    'detalleSerie'
+  ).textContent = tipo.usaSerie
+    ? 'SÍ'
+    : 'NO / S/S';
+
+  configurarControlCodigoSerie(tipo);
+  mostrarImagenHerramienta(tipo);
+
+}
+
+/* =========================================================
+   CONFIGURAR CÓDIGO Y SERIE
+========================================================= */
+
+function configurarControlCodigoSerie(tipo){
+
+  const sinCodigo =
+    document.getElementById('sinCodigo');
+
+  const sinSerie =
+    document.getElementById('sinSerie');
+
+  const codigo =
+    document.getElementById('codigo');
+
+  const serie =
+    document.getElementById('serie');
+
+  codigo.value = '';
+  serie.value = '';
+
+  sinCodigo.checked = !tipo.usaCodigo;
+  sinSerie.checked = !tipo.usaSerie;
+
+  actualizarCampoCodigo();
+  actualizarCampoSerie();
+
+}
+
+function actualizarCampoCodigo(){
+
+  const checkbox =
+    document.getElementById('sinCodigo');
+
+  const campo =
+    document.getElementById('codigo');
+
+  campo.disabled = checkbox.checked;
+
+  if(checkbox.checked){
+    campo.value = 'S/C';
+  }else if(campo.value === 'S/C'){
+    campo.value = '';
+  }
+
+}
+
+function actualizarCampoSerie(){
+
+  const checkbox =
+    document.getElementById('sinSerie');
+
+  const campo =
+    document.getElementById('serie');
+
+  campo.disabled = checkbox.checked;
+
+  if(checkbox.checked){
+    campo.value = 'S/S';
+  }else if(campo.value === 'S/S'){
+    campo.value = '';
+  }
+
+}
+
+/* =========================================================
+   IMAGEN DE REFERENCIA
+========================================================= */
+
+function mostrarImagenHerramienta(tipo){
+
+  const imagen =
+    document.getElementById(
+      'imagenHerramienta'
+    );
+
+  const icono =
+    document.getElementById(
+      'iconoVacio'
+    );
+
+  /*
+    El Apps Script podrá devolver posteriormente:
+    imagen: "img/Martillo Andamiero.jpg"
+  */
+
+  if(tipo.imagen){
+
+    imagen.src = tipo.imagen;
+    imagen.style.display = 'block';
+    icono.style.display = 'none';
+
+    imagen.onerror = function(){
+
+      imagen.style.display = 'none';
+      icono.style.display = 'flex';
+
+    };
+
+  }else{
+
+    imagen.removeAttribute('src');
+    imagen.style.display = 'none';
+    icono.style.display = 'flex';
+
+  }
+
+}
+
+/* =========================================================
+   ENVIAR FORMULARIO
+========================================================= */
+
+async function enviarFormulario(event){
+
+  event.preventDefault();
+
+  const tipoIndex = document
+    .getElementById('tipoHerramienta')
+    .value;
+
+  if(tipoIndex === ''){
+
+    mostrarMensaje(
+      'Selecciona el tipo de herramienta.',
+      'error'
+    );
+
+    return;
+
+  }
+
+  const tipo =
+    tiposHerramientas[Number(tipoIndex)];
+
+  if(!tipo){
+
+    mostrarMensaje(
+      'La herramienta seleccionada no es válida.',
+      'error'
+    );
+
+    return;
+
+  }
+
+  const sinCodigo = document
+    .getElementById('sinCodigo')
+    .checked;
+
+  const sinSerie = document
+    .getElementById('sinSerie')
+    .checked;
+
+  const codigo = sinCodigo
+    ? 'S/C'
+    : limpiarTexto(
+        document.getElementById('codigo').value
+      );
+
+  const serie = sinSerie
+    ? 'S/S'
+    : limpiarTexto(
+        document.getElementById('serie').value
+      );
+
+  const caja = limpiarTexto(
+    document.getElementById('caja').value
+  ) || 'SIN ASIGNAR';
+
+  if(!sinCodigo && !codigo){
+
+    mostrarMensaje(
+      'Ingresa el código o marca la opción S/C.',
+      'error'
+    );
+
+    document
+      .getElementById('codigo')
+      .focus();
+
+    return;
+
+  }
+
+  if(!sinSerie && !serie){
+
+    mostrarMensaje(
+      'Ingresa la serie o marca la opción S/S.',
+      'error'
+    );
+
+    document
+      .getElementById('serie')
+      .focus();
+
+    return;
+
+  }
+
+  const confirmado = confirm(
+    'Se registrará la siguiente herramienta:\n\n' +
+    'Ítem: ' + tipo.item + '\n' +
+    'Marca: ' + (tipo.marca || '-') + '\n' +
+    'Código: ' + codigo + '\n' +
+    'Serie: ' + serie + '\n' +
+    'Caja: ' + caja + '\n' +
+    'Estado: DISPONIBLE\n\n' +
+    '¿Desea continuar?'
+  );
+
+  if(!confirmado){
+    return;
+  }
+
+  const payload = {
+    item: tipo.item,
+    marca: tipo.marca || '',
+    codigo: codigo,
+    serie: serie,
+    caja: caja
+  };
+
+  await registrarHerramienta(payload);
+
+}
+
+/* =========================================================
+   REGISTRAR HERRAMIENTA
+========================================================= */
+
+async function registrarHerramienta(payload){
+
+  if(
+    !WEB_APP_URL ||
+    WEB_APP_URL.includes('PEGAR_AQUI')
+  ){
+
+    mostrarMensaje(
+      'Todavía falta conectar este HTML con el nuevo Apps Script.',
+      'info'
+    );
+
+    return;
+
+  }
+
+  const boton =
+    document.getElementById('btnRegistrar');
+
+  const textoOriginal =
+    boton.innerHTML;
+
+  try{
+
+    boton.disabled = true;
+
+    boton.innerHTML = `
+      <span class="cargando"></span>
+      Registrando...
+    `;
+
+    mostrarMensaje(
+      'Validando y registrando la herramienta...',
+      'info'
+    );
+
+    const url =
+      WEB_APP_URL +
+      '?action=registrarNuevaHerramienta' +
+      '&payload=' +
+      encodeURIComponent(
+        JSON.stringify(payload)
+      ) +
+      '&t=' + Date.now();
+
+    const respuesta = await fetch(url);
+
+    if(!respuesta.ok){
+      throw new Error(
+        'No se pudo conectar con el servidor.'
+      );
+    }
+
+    const resultado = await respuesta.json();
+
+    if(!resultado.ok){
+      throw new Error(
+        resultado.message ||
+        'No se pudo registrar la herramienta.'
+      );
+    }
+
+    mostrarMensaje(
+      '✅ Herramienta registrada correctamente. ' +
+      'ID generado: ' +
+      (
+        resultado.id ||
+        'No informado'
+      ),
+      'exito'
+    );
+
+    limpiarFormulario(false);
+
+  }catch(error){
+
+    console.error(error);
+
+    mostrarMensaje(
+      error.message,
+      'error'
+    );
+
+  }finally{
+
+    boton.disabled = false;
+    boton.innerHTML = textoOriginal;
+
+  }
+
+}
+
+/* =========================================================
+   LIMPIAR FORMULARIO
+========================================================= */
+
+function limpiarFormulario(
+  limpiarMensaje = true
+){
+
+  document
+    .getElementById('formRegistro')
+    .reset();
+
+  document.getElementById(
+    'item'
+  ).value = '';
+
+  document.getElementById(
+    'marca'
+  ).value = '';
+
+  document.getElementById(
+    'codigo'
+  ).disabled = false;
+
+  document.getElementById(
+    'serie'
+  ).disabled = false;
+
+  reiniciarVistaHerramienta();
+
+  if(limpiarMensaje){
+    ocultarMensaje();
+  }
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+}
+
+function reiniciarVistaHerramienta(){
+
+  document.getElementById(
+    'nombreHerramienta'
+  ).textContent =
+    'Selecciona una herramienta';
+
+  document.getElementById(
+    'marcaHerramienta'
+  ).textContent =
+    'Solo podrás agregar unidades de tipos existentes';
+
+  document.getElementById(
+    'detalleCodigo'
+  ).textContent = '—';
+
+  document.getElementById(
+    'detalleSerie'
+  ).textContent = '—';
+
+  const imagen =
+    document.getElementById(
+      'imagenHerramienta'
+    );
+
+  imagen.style.display = 'none';
+  imagen.removeAttribute('src');
+
+  document.getElementById(
+    'iconoVacio'
+  ).style.display = 'flex';
+
+}
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+function mostrarMensaje(texto,tipo){
+
+  const mensaje =
+    document.getElementById('mensaje');
+
+  mensaje.className =
+    'mensaje ' + tipo;
+
+  mensaje.textContent = texto;
+
+}
+
+function ocultarMensaje(){
+
+  const mensaje =
+    document.getElementById('mensaje');
+
+  mensaje.className = 'mensaje';
+  mensaje.textContent = '';
+
+}
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function limpiarTexto(valor){
+
+  return String(valor || '')
+    .replace(/\s+/g,' ')
+    .trim();
+
+}
+
+function normalizarTexto(valor){
+
+  return limpiarTexto(valor)
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'');
+
+}
+
+</script>
+
+</body>
+</html>
