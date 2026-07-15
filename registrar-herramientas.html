@@ -461,6 +461,172 @@ h1{
 
 }
 
+
+.modal-fondo{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+
+  background:rgba(15,23,42,.68);
+  backdrop-filter:blur(4px);
+
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+}
+
+.modal-fondo.activo{
+  display:flex;
+}
+
+.modal{
+  width:100%;
+  max-width:520px;
+
+  background:white;
+  border-radius:22px;
+
+  box-shadow:0 25px 60px rgba(0,0,0,.35);
+
+  overflow:hidden;
+
+  animation:aparecerModal .22s ease;
+}
+
+.modal-encabezado{
+  padding:24px 26px 18px;
+
+  background:linear-gradient(135deg,#7c3aed,#5b21b6);
+  color:white;
+}
+
+.modal-encabezado h3{
+  margin:0;
+  font-size:23px;
+}
+
+.modal-encabezado p{
+  margin:7px 0 0;
+  opacity:.9;
+  font-size:14px;
+}
+
+.modal-contenido{
+  padding:24px 26px;
+}
+
+.modal-resumen{
+  border:1px solid #e5e7eb;
+  border-radius:15px;
+  overflow:hidden;
+}
+
+.modal-fila{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+
+  padding:13px 16px;
+
+  border-bottom:1px solid #e5e7eb;
+}
+
+.modal-fila:last-child{
+  border-bottom:none;
+}
+
+.modal-etiqueta{
+  color:#6b7280;
+  font-weight:bold;
+  font-size:14px;
+}
+
+.modal-valor{
+  color:#111827;
+  font-weight:bold;
+  font-size:14px;
+  text-align:right;
+  word-break:break-word;
+}
+
+.modal-acciones{
+  display:flex;
+  gap:12px;
+  justify-content:flex-end;
+
+  padding:0 26px 24px;
+}
+
+.modal-boton{
+  min-width:125px;
+
+  padding:13px 18px;
+
+  border:none;
+  border-radius:12px;
+
+  font-size:14px;
+  font-weight:bold;
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.modal-boton:hover{
+  transform:translateY(-2px);
+}
+
+.modal-cancelar{
+  background:#e5e7eb;
+  color:#374151;
+}
+
+.modal-confirmar{
+  background:linear-gradient(135deg,#7c3aed,#5b21b6);
+  color:white;
+}
+
+.modal-boton:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
+@keyframes aparecerModal{
+  from{
+    opacity:0;
+    transform:scale(.95) translateY(8px);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
+}
+
+@media(max-width:550px){
+
+  .modal-fila{
+    flex-direction:column;
+    gap:5px;
+  }
+
+  .modal-valor{
+    text-align:left;
+  }
+
+  .modal-acciones{
+    flex-direction:column-reverse;
+  }
+
+  .modal-boton{
+    width:100%;
+  }
+
+}
+  
 </style>
 </head>
 
@@ -768,6 +934,121 @@ h1{
 
 </div>
 
+
+<div
+  id="modalConfirmacion"
+  class="modal-fondo"
+>
+  <div class="modal">
+
+    <div class="modal-encabezado">
+
+      <h3>Confirmar registro</h3>
+
+      <p>
+        Verifica la información antes de guardar
+      </p>
+
+    </div>
+
+    <div class="modal-contenido">
+
+      <div class="modal-resumen">
+
+        <div class="modal-fila">
+          <span class="modal-etiqueta">
+            Herramienta
+          </span>
+
+          <span
+            id="modalItem"
+            class="modal-valor"
+          ></span>
+        </div>
+
+        <div class="modal-fila">
+          <span class="modal-etiqueta">
+            Marca
+          </span>
+
+          <span
+            id="modalMarca"
+            class="modal-valor"
+          ></span>
+        </div>
+
+        <div class="modal-fila">
+          <span class="modal-etiqueta">
+            Código
+          </span>
+
+          <span
+            id="modalCodigo"
+            class="modal-valor"
+          ></span>
+        </div>
+
+        <div class="modal-fila">
+          <span class="modal-etiqueta">
+            Serie
+          </span>
+
+          <span
+            id="modalSerie"
+            class="modal-valor"
+          ></span>
+        </div>
+
+        <div class="modal-fila">
+          <span class="modal-etiqueta">
+            Caja
+          </span>
+
+          <span
+            id="modalCaja"
+            class="modal-valor"
+          ></span>
+        </div>
+
+        <div class="modal-fila">
+          <span class="modal-etiqueta">
+            Estado inicial
+          </span>
+
+          <span class="modal-valor">
+            DISPONIBLE
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-acciones">
+
+      <button
+        type="button"
+        class="modal-boton modal-cancelar"
+        onclick="cerrarModalConfirmacion()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        id="btnConfirmarModal"
+        type="button"
+        class="modal-boton modal-confirmar"
+        onclick="confirmarRegistroHerramienta()"
+      >
+        Confirmar registro
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+  
 <script>
 
 /*
@@ -778,6 +1059,7 @@ h1{
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz65wE7T8kDf6DNGX1O3oBlgKdELgZZ1XYDuMXo2xqvZcoNCE0roQqiniMveVQt_lVyDw/exec';
 
 let tiposHerramientas = [];
+let payloadPendiente = null;
 
 /* =========================================================
    INICIO
@@ -823,6 +1105,15 @@ function configurarEventos(){
       'submit',
       enviarFormulario
     );
+  document
+  .getElementById('modalConfirmacion')
+  .addEventListener('click', function(event){
+
+    if(event.target === this){
+      cerrarModalConfirmacion();
+    }
+
+  });
 
 }
 
@@ -1541,37 +1832,112 @@ async function enviarFormulario(event){
 
   }
 
-  const confirmado = confirm(
-    'Se registrará la siguiente herramienta:\n\n' +
-    'Ítem: ' + tipo.item + '\n' +
-    'Marca: ' + (tipo.marca || '-') + '\n' +
-    'Código: ' + codigo + '\n' +
-    'Serie: ' + serie + '\n' +
-    'Caja: ' + caja + '\n' +
-    'Estado: DISPONIBLE\n\n' +
-    '¿Desea continuar?'
-  );
+const payload = {
+  item: tipo.item,
+  marca: tipo.marca || '',
+  codigo: codigo,
+  serie: serie,
+  caja: caja
+};
 
-  if(!confirmado){
-    return;
-  }
-
-  const payload = {
-    item: tipo.item,
-    marca: tipo.marca || '',
-    codigo: codigo,
-    serie: serie,
-    caja: caja
-  };
-
-  await registrarHerramienta(payload);
+abrirModalConfirmacion(
+  payload,
+  obtenerNombreCorto(tipo.item)
+);
 
 }
 
 /* =========================================================
    REGISTRAR HERRAMIENTA
 ========================================================= */
+function abrirModalConfirmacion(
+  payload,
+  nombreVisible
+){
 
+  payloadPendiente = payload;
+
+  document.getElementById(
+    'modalItem'
+  ).textContent =
+    nombreVisible || payload.item || '-';
+
+  document.getElementById(
+    'modalMarca'
+  ).textContent =
+    payload.marca || 'Sin marca';
+
+  document.getElementById(
+    'modalCodigo'
+  ).textContent =
+    payload.codigo || 'S/C';
+
+  document.getElementById(
+    'modalSerie'
+  ).textContent =
+    payload.serie || 'S/S';
+
+  document.getElementById(
+    'modalCaja'
+  ).textContent =
+    payload.caja || 'SIN ASIGNAR';
+
+  document.getElementById(
+    'modalConfirmacion'
+  ).classList.add('activo');
+
+}
+
+
+function cerrarModalConfirmacion(){
+
+  document.getElementById(
+    'modalConfirmacion'
+  ).classList.remove('activo');
+
+  payloadPendiente = null;
+
+}
+
+
+async function confirmarRegistroHerramienta(){
+
+  if(!payloadPendiente){
+    return;
+  }
+
+  const boton =
+    document.getElementById('btnConfirmarModal');
+
+  const textoOriginal =
+    boton.textContent;
+
+  const payload = {
+    ...payloadPendiente
+  };
+
+  try{
+
+    boton.disabled = true;
+    boton.textContent = 'Procesando...';
+
+    document
+      .getElementById('modalConfirmacion')
+      .classList.remove('activo');
+
+    payloadPendiente = null;
+
+    await registrarHerramienta(payload);
+
+  }finally{
+
+    boton.disabled = false;
+    boton.textContent = textoOriginal;
+
+  }
+
+}
+  
 async function registrarHerramienta(payload){
 
   if(
