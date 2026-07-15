@@ -3220,17 +3220,139 @@ function mostrarToast(mensaje, tipo) {
     toast.style.display = 'none';
   }, 2500);
 }
-    async function exportarExcelCajas(){
-   ...
+async function exportarExcelCajas() {
+  const boton = document.getElementById('btnExportarExcel');
+
+  const busqueda = document
+    .getElementById('buscarHistorial')
+    .value
+    .trim();
+
+  try {
+    boton.disabled = true;
+    boton.textContent = '⏳ Generando historial...';
+
+    const url =
+      `${API_URL}?action=exportarHistorialExcel` +
+      `&busqueda=${encodeURIComponent(busqueda)}`;
+
+    const respuesta = await fetch(url);
+    const data = await respuesta.json();
+
+    if (!data.ok) {
+      throw new Error(
+        data.message ||
+        'No se pudo generar el historial.'
+      );
+    }
+
+    descargarBase64_(
+      data.base64,
+      data.nombreArchivo,
+      data.mimeType
+    );
+
+    mostrarToast(
+      `Historial generado con ${data.total} registro(s).`,
+      'ok'
+    );
+
+  } catch (err) {
+    mostrarToast(err.message, 'error');
+
+  } finally {
+    boton.disabled = false;
+    actualizarTextoBotonExportar();
+  }
 }
 
-async function exportarExcelHerramientas(){
-   ...
+
+async function exportarExcelHerramientas() {
+  const boton = document.getElementById('btnExportarExcel');
+
+  const herramienta = document
+    .getElementById('filtroNombreHerramienta')
+    .value
+    .trim();
+
+  const codigo = document
+    .getElementById('filtroCodigoHerramienta')
+    .value
+    .trim();
+
+  const serie = document
+    .getElementById('filtroSerieHerramienta')
+    .value
+    .trim();
+
+  const responsable = document
+    .getElementById('filtroResponsableHerramienta')
+    .value
+    .trim();
+
+  const visibles = obtenerTrazabilidadFiltrada();
+
+  if (!visibles.length) {
+    mostrarToast(
+      'No hay herramientas para exportar.',
+      'error'
+    );
+    return;
+  }
+
+  try {
+    boton.disabled = true;
+    boton.textContent = '⏳ Generando trazabilidad...';
+
+    const url =
+      `${API_URL}?action=exportarTrazabilidadExcel` +
+      `&herramienta=${encodeURIComponent(herramienta)}` +
+      `&codigo=${encodeURIComponent(codigo)}` +
+      `&serie=${encodeURIComponent(serie)}` +
+      `&responsable=${encodeURIComponent(responsable)}`;
+
+    const respuesta = await fetch(url);
+    const data = await respuesta.json();
+
+    if (!data.ok) {
+      throw new Error(
+        data.message ||
+        'No se pudo generar la trazabilidad.'
+      );
+    }
+
+    descargarBase64_(
+      data.base64,
+      data.nombreArchivo,
+      data.mimeType
+    );
+
+    mostrarToast(
+      `Trazabilidad generada con ${data.total} herramienta(s).`,
+      'ok'
+    );
+
+  } catch (err) {
+    mostrarToast(err.message, 'error');
+
+  } finally {
+    boton.disabled = false;
+    actualizarTextoBotonExportar();
+  }
 }
 
-function actualizarTextoBotonExportar(){
-   ...
+
+function actualizarTextoBotonExportar() {
+  const boton = document.getElementById('btnExportarExcel');
+
+  if (!boton) return;
+
+  boton.textContent =
+    modoHistorialActual === 'HERRAMIENTAS'
+      ? '📊 Exportar Trazabilidad'
+      : '📊 Exportar Historial';
 }
+
   </script>
 <div id="toast" class="toast"></div>
 
