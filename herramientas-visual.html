@@ -508,7 +508,7 @@ function pintarResumen(data){
 
   const disponibles = activos.filter(x => normal(x.estado) === "DISPONIBLE").length;
 
-  const entregadas = activos.filter(x => normal(x.estado) === "ENTREGADO").length;
+  const entregadas = activos.filter(x => normal(x.estado) === "ASIGNADO").length;
 
   const cajas = new Set(activos.map(x => x.caja).filter(Boolean));
 
@@ -537,7 +537,7 @@ function pintarInventario(data){
     if (normal(nombre).includes("DRIZA")) return;
     const lista = agrupado[nombre].filter(x => (x.codigo || "").trim() !== "");
     const disponibles = lista.filter(x => normal(x.estado) === "DISPONIBLE").length;
-    const entregadas = lista.filter(x => normal(x.estado) === "ENTREGADO").length;
+    const entregadas = lista.filter(x => normal(x.estado) === "ASIGNADO").length;
     const imagen = obtenerImagen(nombre);
 
     const card = document.createElement("div");
@@ -648,7 +648,7 @@ function normal(v){
 
 const disponibles=lista.filter(x=>normal(x.estado)=="DISPONIBLE").length;
 
-const entregadas=lista.filter(x=>normal(x.estado)=="ENTREGADO").length;
+const entregadas=lista.filter(x=>normal(x.estado)=="ASIGNADO").length;
 
 document.getElementById("contenidoModal").innerHTML=`
 
