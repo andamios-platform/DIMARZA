@@ -235,12 +235,19 @@ h1{
 }
 
 .imagen-herramienta{
-  width:190px;
-  height:165px;
+  width:100%;
+  max-width:260px;
+  height:220px;
 
   object-fit:contain;
 
   margin-bottom:18px;
+
+  padding:10px;
+
+  border-radius:15px;
+
+  background:rgba(255,255,255,.75);
 
   display:none;
 }
@@ -1117,52 +1124,219 @@ function actualizarCampoSerie(){
 }
 
 /* =========================================================
-   IMAGEN DE REFERENCIA
+   IMÁGENES DE LAS HERRAMIENTAS
 ========================================================= */
+
+function obtenerImagenHerramienta(item){
+
+  const nombre = normalizarTexto(item);
+
+  const imagenes = [
+
+    {
+      palabras: ['ARNES MECANICO 6 ARGOLLAS'],
+      archivo: 'img/ArnésMecánico6argollas.JPG'
+    },
+
+    {
+      palabras: ['ARNES MECANICO 4 ARGOLLAS'],
+      archivo: 'img/ArnésMecánico4argollas.jpg'
+    },
+
+    {
+      palabras: ['BALDE LAINERO'],
+      archivo: 'img/BaldelainerodelonaHAUK.png'
+    },
+
+    {
+      palabras: ['BLOQUE RETRACTIL'],
+      archivo: 'img/BloqueRetráctilSafewazeDobleLatitude-Pde1.8mGanchoEscala.JPG'
+    },
+
+    {
+      palabras: ['CABO EN Y', 'SIN AMORTIGUADOR'],
+      archivo: 'img/Cabosinamortiguadordeimpacto.jpg'
+    },
+
+    {
+      palabras: ['CABO EN Y', 'CON AMORTIGUADOR'],
+      archivo: 'img/CaboenYMSAconamortiguadordeimpacto.png'
+    },
+
+    {
+      palabras: ['CAJA HERRAMIENTAS', 'TRUPPER'],
+      archivo: 'img/CajaHerramientasdeplácticoTRUPPER.JPG'
+    },
+
+    {
+      palabras: ['CAJA METALICA'],
+      archivo: 'img/CajaMetalicadeherramientas.JPG'
+    },
+
+    {
+      palabras: ['CORREAJE'],
+      archivo: 'img/CorreajedeAndamiero.JPG'
+    },
+
+    {
+      palabras: ['DRIZA ELASTICA'],
+      archivo: 'img/DrizaElásticaportaherramientamanual.JPG'
+    },
+
+    {
+      palabras: ['FAJA ANCLAJE', '0.9M'],
+      archivo: 'img/FajaAnclajeMSAdobleargolla0.9m.jpg'
+    },
+
+    {
+      palabras: ['FAJA ANCLAJE', '1.8M'],
+      archivo: 'img/FajaAnclajeMSAdobleargolla1.8M.JPG'
+    },
+
+    {
+      palabras: ['FLEXOMETRO', '5M'],
+      archivo: 'img/Flexometrode5m.jpg'
+    },
+
+    {
+      palabras: ['FLEXOMETRO', '8M'],
+      archivo: 'img/Flexometrode8m.JPG'
+    },
+
+    {
+      palabras: ['HOMBRERA'],
+      archivo: 'img/Hombreradecuero.JPG'
+    },
+
+    {
+      palabras: ['KIT ANTITRAUMA'],
+      archivo: 'img/KitAntitraumaMSAModel10063431.JPG'
+    },
+
+    {
+      palabras: ['LINTERNA', 'CASCO'],
+      archivo: 'img/Linternaparacasco.jpg'
+    },
+
+    {
+      palabras: ['LLAVE CARRACA'],
+      archivo: 'img/LlaveCarracaALFMANQLF-RW1922.jpg'
+    },
+
+    {
+      palabras: ['LLAVE FRANCESA', '12'],
+      archivo: 'img/LlaveFrancesa12.JPG'
+    },
+
+    {
+      palabras: ['LLAVE FRANCESA', '8'],
+      archivo: 'img/LlaveFrancesa8.jpg'
+    },
+
+    {
+      palabras: ['LLAVE MIXTA'],
+      archivo: 'img/LlaveMixta22mm.JPG'
+    },
+
+    {
+      palabras: ['MARTILLO ANDAMIERO'],
+      archivo: 'img/MartilloAndamieroALFMANACFH0075.jpg'
+    },
+
+    {
+      palabras: ['NIVEL DE MANO'],
+      archivo: 'img/NiveldeManoSTANLEY9.JPG'
+    },
+
+    {
+      palabras: ['POLEA'],
+      archivo: 'img/PoleaconFrenoSECURPULLEY.jpg'
+    },
+
+    {
+      palabras: ['PORTA CARRACA'],
+      archivo: 'img/portacarraca.jpg'
+    },
+
+    {
+      palabras: ['PORTA MARTILLO'],
+      archivo: 'img/portamartillo.jpg'
+    },
+
+    {
+      palabras: ['RODILLERA'],
+      archivo: 'img/Rodillera.JPG'
+    }
+
+  ];
+
+  for(const configuracion of imagenes){
+
+    const coincide = configuracion.palabras.every(
+      palabra =>
+        nombre.includes(
+          normalizarTexto(palabra)
+        )
+    );
+
+    if(coincide){
+      return configuracion.archivo;
+    }
+
+  }
+
+  return '';
+}
+
 
 function mostrarImagenHerramienta(tipo){
 
   const imagen =
-    document.getElementById(
-      'imagenHerramienta'
-    );
+    document.getElementById('imagenHerramienta');
 
   const icono =
-    document.getElementById(
-      'iconoVacio'
+    document.getElementById('iconoVacio');
+
+  const rutaImagen =
+    obtenerImagenHerramienta(
+      tipo.item || ''
     );
 
-  /*
-    El Apps Script podrá devolver posteriormente:
-    imagen: "img/Martillo Andamiero.jpg"
-  */
+  if(!rutaImagen){
 
-  if(tipo.imagen){
+    imagen.style.display = 'none';
+    imagen.removeAttribute('src');
 
-    imagen.src = tipo.imagen;
+    icono.style.display = 'flex';
+    icono.textContent = '?';
+
+    return;
+  }
+
+  imagen.onload = function(){
+
     imagen.style.display = 'block';
     icono.style.display = 'none';
 
-    imagen.onerror = function(){
+  };
 
-      imagen.style.display = 'none';
-      icono.style.display = 'flex';
+  imagen.onerror = function(){
 
-    };
+    console.warn(
+      'No se encontró la imagen:',
+      rutaImagen
+    );
 
-  }else{
-
-    imagen.removeAttribute('src');
     imagen.style.display = 'none';
+    imagen.removeAttribute('src');
+
     icono.style.display = 'flex';
+    icono.textContent = '?';
 
-  }
+  };
 
+  imagen.src = rutaImagen;
 }
-
-/* =========================================================
-   ENVIAR FORMULARIO
-========================================================= */
 
 async function enviarFormulario(event){
 
@@ -1443,9 +1617,11 @@ function reiniciarVistaHerramienta(){
   imagen.style.display = 'none';
   imagen.removeAttribute('src');
 
-  document.getElementById(
-    'iconoVacio'
-  ).style.display = 'flex';
+const icono =
+  document.getElementById('iconoVacio');
+
+icono.style.display = 'flex';
+icono.textContent = '+';
 
 }
 
