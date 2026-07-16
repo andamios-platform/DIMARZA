@@ -203,6 +203,9 @@ td.nombre{
 }
 
 .grupo-marca{
+  display:flex;
+  align-items:center;
+  gap:16px;
   margin-bottom:12px;
 }
 
@@ -211,10 +214,16 @@ td.nombre{
 }
 
 .marca-titulo{
+  flex:0 0 130px;
   font-weight:900;
   color:#115e59;
-  margin-bottom:8px;
   text-align:left;
+  white-space:nowrap;
+}
+
+.grupo-marca .chips{
+  flex:1;
+  justify-content:flex-start;
 }
 
 .loading{
@@ -258,6 +267,20 @@ td.nombre{
   
   .acciones-derecha .btn{
     width:100%;
+  }
+  .grupo-marca{
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+  }
+  
+  .marca-titulo{
+    flex:auto;
+    width:100%;
+  }
+  
+  .grupo-marca .chips{
+    justify-content:flex-start;
   }
 }
 </style>
