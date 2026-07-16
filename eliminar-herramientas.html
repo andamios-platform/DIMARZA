@@ -383,6 +383,30 @@ h1{
   background:#1f2937;
 }
 
+.volver-superior{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+
+  margin-bottom:22px;
+  padding:12px 18px;
+
+  border-radius:13px;
+
+  background:#374151;
+  color:white;
+
+  text-decoration:none;
+  font-size:14px;
+  font-weight:bold;
+
+  transition:.2s;
+}
+
+.volver-superior:hover{
+  transform:translateY(-2px);
+  background:#1f2937;
+}
 .cargando{
   display:inline-block;
 
@@ -645,7 +669,12 @@ h1{
 <body>
 
 <div class="contenedor">
-
+<a
+  class="volver-superior"
+  href="visualizacion.html"
+>
+  ← Volver a Visualización
+</a>
   <div class="encabezado">
 
     <img
@@ -728,12 +757,7 @@ h1{
 
   </div>
 
-  <a
-    class="volver"
-    href="visualizacion.html"
-  >
-    ← Volver a Visualización
-  </a>
+
 
 </div>
 
