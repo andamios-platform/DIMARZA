@@ -77,7 +77,20 @@ body{
 
 .btn-primary{ background:var(--primary); color:#fff; }
 .btn-secondary{ background:#e5e7eb; color:#111827; }
+.acciones-derecha{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
 
+.btn-excel{
+  background:#15803d;
+  color:white;
+}
+
+.btn-excel:hover{
+  background:#166534;
+}
 .stats{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -279,6 +292,14 @@ th,td{
     width:100%;
     text-align:center;
   }
+ .acciones-derecha{
+  width:100%;
+  flex-direction:column;
+  }
+  
+  .acciones-derecha .btn{
+    width:100%;
+  }
 }
 
   .modal{
@@ -402,10 +423,25 @@ font-size:18px;
     <p>Consulta visual del maestro de herramientas</p>
   </div>
 
-  <div class="actions">
-    <a class="btn btn-secondary" href="visualizacion.html">⬅ Volver a visualización</a>
-    <a class="btn btn-primary" href="herramientas.html">Registrar entrega</a>
+<div class="actions">
+
+  <a class="btn btn-secondary" href="visualizacion.html">
+    ⬅ Volver a visualización
+  </a>
+
+  <div class="acciones-derecha">
+
+    <button class="btn btn-excel" type="button" onclick="exportarExcel()">
+      📊 Exportar Excel
+    </button>
+
+    <a class="btn btn-primary" href="herramientas.html">
+      Registrar entrega
+    </a>
+
   </div>
+
+</div>
 
   <div class="stats">
     <div class="stat">
@@ -438,9 +474,10 @@ font-size:18px;
 
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+ 
 <script>
-
-
   
 const API_URL = "https://script.google.com/macros/s/AKfycbzeGyXppcnE2oomHXbmbDkUBLAFMgwNG13lAerVBxtP_kxNUdy5vtrDf9Oh5cJxr6nLqg/exec";
 
@@ -736,6 +773,174 @@ cerrarModal();
 
 }
 }
+
+function exportarExcel(){
+
+  if(!inventarioOriginal.length){
+    alert("El inventario todavía no ha terminado de cargar.");
+    return;
+  }
+
+  const activos = inventarioOriginal.filter(x =>
+    String(x.codigo || "").trim() !== "" &&
+    !normal(x.item).includes("DRIZA")
+  );
+
+  if(!activos.length){
+    alert("No existen herramientas para exportar.");
+    return;
+  }
+
+  const disponibles = activos.filter(
+    x => normal(x.estado) === "DISPONIBLE"
+  ).length;
+
+  const entregadas = activos.filter(
+    x => normal(x.estado) === "ASIGNADO"
+  ).length;
+
+  const cajas = new Set(
+    activos
+      .map(x => String(x.caja || "").trim())
+      .filter(Boolean)
+  );
+
+  const fechaExportacion = new Date();
+
+  const resumen = [
+    ["RESUMEN DE INVENTARIO DE HERRAMIENTAS"],
+    [],
+    ["Fecha de exportación", fechaExportacion.toLocaleString("es-PE")],
+    ["Total de herramientas", activos.length],
+    ["Disponibles", disponibles],
+    ["Entregadas", entregadas],
+    ["Total de cajas", cajas.size]
+  ];
+
+  const detalle = activos
+    .slice()
+    .sort((a,b) =>
+      String(a.item || "").localeCompare(
+        String(b.item || ""),
+        "es"
+      )
+    )
+    .map(x => ({
+      "HERRAMIENTA": x.item || "",
+      "CÓDIGO": x.codigo || "",
+      "SERIE": x.serie || "",
+      "MARCA": x.marca || "",
+      "CAJA": x.caja || "",
+      "ESTADO": x.estado || ""
+    }));
+
+  const resumenPorHerramienta = construirResumenHerramientas(activos);
+
+  const libro = XLSX.utils.book_new();
+
+  const hojaResumen = XLSX.utils.aoa_to_sheet(resumen);
+
+  hojaResumen["!cols"] = [
+    { wch: 28 },
+    { wch: 24 }
+  ];
+
+  const hojaResumenHerramientas =
+    XLSX.utils.json_to_sheet(resumenPorHerramienta);
+
+  hojaResumenHerramientas["!cols"] = [
+    { wch: 48 },
+    { wch: 12 },
+    { wch: 14 },
+    { wch: 14 }
+  ];
+
+  const hojaDetalle = XLSX.utils.json_to_sheet(detalle);
+
+  hojaDetalle["!cols"] = [
+    { wch: 48 },
+    { wch: 18 },
+    { wch: 22 },
+    { wch: 20 },
+    { wch: 18 },
+    { wch: 16 }
+  ];
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    hojaResumen,
+    "Resumen general"
+  );
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    hojaResumenHerramientas,
+    "Resumen herramientas"
+  );
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    hojaDetalle,
+    "Detalle inventario"
+  );
+
+  const fechaArchivo = obtenerFechaArchivo();
+
+  XLSX.writeFile(
+    libro,
+    `Inventario_Herramientas_${fechaArchivo}.xlsx`,
+    { compression:true }
+  );
+}
+function construirResumenHerramientas(data){
+
+  const agrupado = {};
+
+  data.forEach(x => {
+
+    const nombre = String(x.item || "SIN NOMBRE").trim();
+
+    if(!agrupado[nombre]){
+      agrupado[nombre] = {
+        total:0,
+        disponibles:0,
+        entregadas:0
+      };
+    }
+
+    agrupado[nombre].total++;
+
+    if(normal(x.estado) === "DISPONIBLE"){
+      agrupado[nombre].disponibles++;
+    }
+
+    if(normal(x.estado) === "ASIGNADO"){
+      agrupado[nombre].entregadas++;
+    }
+
+  });
+
+  return Object.keys(agrupado)
+    .sort((a,b) => a.localeCompare(b,"es"))
+    .map(nombre => ({
+      "HERRAMIENTA": nombre,
+      "TOTAL": agrupado[nombre].total,
+      "DISPONIBLES": agrupado[nombre].disponibles,
+      "ENTREGADAS": agrupado[nombre].entregadas
+    }));
+}
+
+function obtenerFechaArchivo(){
+
+  const fecha = new Date();
+
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2,"0");
+  const dia = String(fecha.getDate()).padStart(2,"0");
+
+  return `${anio}-${mes}-${dia}`;
+}
+ 
 </script>
 
 <div id="modal" class="modal">
