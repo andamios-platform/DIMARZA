@@ -91,6 +91,20 @@ body{
 .btn-excel:hover{
   background:#166534;
 }
+.btn-pdf{
+  background:#dc2626;
+  color:white;
+}
+
+.btn-pdf:hover{
+  background:#b91c1c;
+}
+
+.btn-excel:disabled,
+.btn-pdf:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+}
 .stats{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -434,6 +448,9 @@ font-size:18px;
     <button class="btn btn-excel" type="button" onclick="exportarExcel()">
       📊 Exportar Excel
     </button>
+    <button class="btn btn-pdf" type="button" onclick="exportarPDF()">
+      📄 Exportar PDF
+    </button>
 
     <a class="btn btn-primary" href="herramientas.html">
       Registrar entrega
@@ -475,6 +492,8 @@ font-size:18px;
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@4.0.0/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@5.0.8/dist/jspdf.plugin.autotable.min.js"></script>
 
  
 <script>
@@ -1551,7 +1570,592 @@ function obtenerFechaArchivo(){
 
   return `${anio}-${mes}-${dia}_${hora}-${minuto}`;
 }
- 
+
+
+
+async function exportarPDF(){
+
+  if(!inventarioOriginal.length){
+    alert("El inventario todavía no ha terminado de cargar.");
+    return;
+  }
+
+  const activos = inventarioOriginal.filter(x =>
+    String(x.codigo || "").trim() !== "" &&
+    !normal(x.item).includes("DRIZA")
+  );
+
+  if(!activos.length){
+    alert("No existen herramientas para exportar.");
+    return;
+  }
+
+  const boton = document.querySelector(".btn-pdf");
+  const textoOriginal = boton.innerHTML;
+
+  try{
+
+    boton.disabled = true;
+    boton.innerHTML = "⏳ Generando PDF...";
+
+    const disponibles = activos.filter(
+      x => normal(x.estado) === "DISPONIBLE"
+    ).length;
+
+    const entregadas = activos.filter(
+      x => normal(x.estado) === "ASIGNADO"
+    ).length;
+
+    const cajas = new Set(
+      activos
+        .map(x => String(x.caja || "").trim())
+        .filter(Boolean)
+    );
+
+    const resumenHerramientas =
+      construirResumenHerramientas(activos);
+
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4"
+    });
+
+    doc.setProperties({
+      title:"Reporte de Inventario de Herramientas",
+      subject:"Inventario de herramientas DIMARZA",
+      author:"Sistema DIMARZA",
+      creator:"Sistema DIMARZA"
+    });
+
+    crearPortadaPDF(
+      doc,
+      activos.length,
+      disponibles,
+      entregadas,
+      cajas.size
+    );
+
+    crearResumenHerramientasPDF(
+      doc,
+      resumenHerramientas
+    );
+
+    crearDetalleInventarioPDF(
+      doc,
+      activos
+    );
+
+    agregarNumeracionPaginasPDF(doc);
+
+    doc.save(
+      `Inventario_Herramientas_${obtenerFechaArchivo()}.pdf`
+    );
+
+  }catch(error){
+
+    console.error("Error al exportar PDF:", error);
+
+    alert(
+      "No se pudo generar el archivo PDF. " +
+      "Revisa la consola del navegador."
+    );
+
+  }finally{
+
+    boton.disabled = false;
+    boton.innerHTML = textoOriginal;
+
+  }
+}
+function crearPortadaPDF(
+  doc,
+  total,
+  disponibles,
+  entregadas,
+  totalCajas
+){
+
+  const anchoPagina =
+    doc.internal.pageSize.getWidth();
+
+  doc.setFillColor(30,64,175);
+  doc.roundedRect(
+    12,
+    12,
+    anchoPagina - 24,
+    36,
+    5,
+    5,
+    "F"
+  );
+
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(21);
+
+  doc.text(
+    "DIMARZA",
+    anchoPagina / 2,
+    26,
+    { align:"center" }
+  );
+
+  doc.setFontSize(15);
+
+  doc.text(
+    "REPORTE DE INVENTARIO DE HERRAMIENTAS",
+    anchoPagina / 2,
+    38,
+    { align:"center" }
+  );
+
+  doc.setTextColor(71,85,105);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(10);
+
+  doc.text(
+    `Fecha de exportación: ${new Date().toLocaleString("es-PE")}`,
+    anchoPagina / 2,
+    56,
+    { align:"center" }
+  );
+
+  const tarjetas = [
+    {
+      x:18,
+      titulo:"TOTAL",
+      valor:total,
+      color:[37,99,235]
+    },
+    {
+      x:87,
+      titulo:"DISPONIBLES",
+      valor:disponibles,
+      color:[22,163,74]
+    },
+    {
+      x:156,
+      titulo:"ENTREGADAS",
+      valor:entregadas,
+      color:[220,38,38]
+    },
+    {
+      x:225,
+      titulo:"CAJAS",
+      valor:totalCajas,
+      color:[245,158,11]
+    }
+  ];
+
+  tarjetas.forEach(tarjeta => {
+
+    doc.setFillColor(
+      tarjeta.color[0],
+      tarjeta.color[1],
+      tarjeta.color[2]
+    );
+
+    doc.roundedRect(
+      tarjeta.x,
+      67,
+      58,
+      35,
+      4,
+      4,
+      "F"
+    );
+
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(19);
+
+    doc.text(
+      String(tarjeta.valor),
+      tarjeta.x + 29,
+      84,
+      { align:"center" }
+    );
+
+    doc.setFontSize(9);
+
+    doc.text(
+      tarjeta.titulo,
+      tarjeta.x + 29,
+      95,
+      { align:"center" }
+    );
+
+  });
+
+  doc.setFillColor(241,245,249);
+  doc.roundedRect(
+    18,
+    113,
+    anchoPagina - 36,
+    16,
+    3,
+    3,
+    "F"
+  );
+
+  doc.setTextColor(100,116,139);
+  doc.setFont("helvetica","italic");
+  doc.setFontSize(9);
+
+  doc.text(
+    "El reporte excluye las drizas y los registros cuyo código está vacío.",
+    anchoPagina / 2,
+    123,
+    { align:"center" }
+  );
+}
+function crearResumenHerramientasPDF(
+  doc,
+  resumen
+){
+
+  doc.addPage("a4","landscape");
+
+  agregarTituloSeccionPDF(
+    doc,
+    "RESUMEN POR TIPO DE HERRAMIENTA",
+    [15,118,110]
+  );
+
+  const filas = resumen.map(item => [
+    item.herramienta,
+    item.total,
+    item.disponibles,
+    item.entregadas
+  ]);
+
+  doc.autoTable({
+
+    startY:32,
+
+    head:[[
+      "HERRAMIENTA",
+      "TOTAL",
+      "DISPONIBLES",
+      "ENTREGADAS"
+    ]],
+
+    body:filas,
+
+    theme:"grid",
+
+    styles:{
+      font:"helvetica",
+      fontSize:9,
+      cellPadding:3,
+      valign:"middle",
+      lineColor:[203,213,225],
+      lineWidth:.2
+    },
+
+    headStyles:{
+      fillColor:[15,118,110],
+      textColor:[255,255,255],
+      fontStyle:"bold",
+      halign:"center"
+    },
+
+    alternateRowStyles:{
+      fillColor:[248,250,252]
+    },
+
+    columnStyles:{
+      0:{
+        cellWidth:165,
+        halign:"left"
+      },
+      1:{
+        cellWidth:32,
+        halign:"center",
+        textColor:[37,99,235],
+        fontStyle:"bold"
+      },
+      2:{
+        cellWidth:38,
+        halign:"center",
+        textColor:[22,163,74],
+        fontStyle:"bold"
+      },
+      3:{
+        cellWidth:38,
+        halign:"center",
+        textColor:[220,38,38],
+        fontStyle:"bold"
+      }
+    },
+
+    margin:{
+      left:12,
+      right:12,
+      top:32,
+      bottom:14
+    },
+
+    didDrawPage:function(){
+      agregarEncabezadoPequenoPDF(
+        doc,
+        "Resumen de herramientas"
+      );
+    }
+
+  });
+}
+function crearDetalleInventarioPDF(
+  doc,
+  activos
+){
+
+  doc.addPage("a4","landscape");
+
+  agregarTituloSeccionPDF(
+    doc,
+    "DETALLE GENERAL DEL INVENTARIO",
+    [30,64,175]
+  );
+
+  const ordenados = activos.slice().sort((a,b) => {
+
+    const comparacionItem =
+      String(a.item || "").localeCompare(
+        String(b.item || ""),
+        "es"
+      );
+
+    if(comparacionItem !== 0){
+      return comparacionItem;
+    }
+
+    return String(a.codigo || "").localeCompare(
+      String(b.codigo || ""),
+      "es",
+      { numeric:true }
+    );
+
+  });
+
+  const filas = ordenados.map(x => [
+    x.item || "",
+    x.codigo || "",
+    x.serie || "",
+    x.marca || "",
+    x.caja || "",
+    x.estado || ""
+  ]);
+
+  doc.autoTable({
+
+    startY:32,
+
+    head:[[
+      "HERRAMIENTA",
+      "CÓDIGO",
+      "SERIE",
+      "MARCA",
+      "CAJA",
+      "ESTADO"
+    ]],
+
+    body:filas,
+
+    theme:"grid",
+
+    styles:{
+      font:"helvetica",
+      fontSize:7.5,
+      cellPadding:2.4,
+      valign:"middle",
+      lineColor:[203,213,225],
+      lineWidth:.15,
+      overflow:"linebreak"
+    },
+
+    headStyles:{
+      fillColor:[30,64,175],
+      textColor:[255,255,255],
+      fontStyle:"bold",
+      halign:"center"
+    },
+
+    alternateRowStyles:{
+      fillColor:[248,250,252]
+    },
+
+    columnStyles:{
+      0:{
+        cellWidth:90,
+        halign:"left"
+      },
+      1:{
+        cellWidth:35,
+        halign:"center"
+      },
+      2:{
+        cellWidth:42,
+        halign:"center"
+      },
+      3:{
+        cellWidth:37,
+        halign:"center"
+      },
+      4:{
+        cellWidth:34,
+        halign:"center"
+      },
+      5:{
+        cellWidth:34,
+        halign:"center",
+        fontStyle:"bold"
+      }
+    },
+
+    margin:{
+      left:12,
+      right:12,
+      top:32,
+      bottom:14
+    },
+
+    didParseCell:function(data){
+
+      if(
+        data.section === "body" &&
+        data.column.index === 5
+      ){
+
+        const estado = normal(data.cell.raw);
+
+        data.cell.styles.textColor =
+          [255,255,255];
+
+        data.cell.styles.fillColor =
+          estado === "DISPONIBLE"
+            ? [22,163,74]
+            : estado === "ASIGNADO"
+              ? [220,38,38]
+              : [100,116,139];
+
+      }
+
+    },
+
+    didDrawPage:function(){
+      agregarEncabezadoPequenoPDF(
+        doc,
+        "Detalle de inventario"
+      );
+    }
+
+  });
+}
+function agregarTituloSeccionPDF(
+  doc,
+  titulo,
+  color
+){
+
+  const anchoPagina =
+    doc.internal.pageSize.getWidth();
+
+  doc.setFillColor(
+    color[0],
+    color[1],
+    color[2]
+  );
+
+  doc.roundedRect(
+    12,
+    12,
+    anchoPagina - 24,
+    14,
+    3,
+    3,
+    "F"
+  );
+
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(13);
+
+  doc.text(
+    titulo,
+    anchoPagina / 2,
+    21,
+    { align:"center" }
+  );
+}
+
+function agregarEncabezadoPequenoPDF(
+  doc,
+  texto
+){
+
+  const anchoPagina =
+    doc.internal.pageSize.getWidth();
+
+  doc.setTextColor(100,116,139);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(8);
+
+  doc.text(
+    `DIMARZA · ${texto}`,
+    12,
+    8
+  );
+
+  doc.text(
+    new Date().toLocaleDateString("es-PE"),
+    anchoPagina - 12,
+    8,
+    { align:"right" }
+  );
+}
+
+function agregarNumeracionPaginasPDF(doc){
+
+  const totalPaginas =
+    doc.internal.getNumberOfPages();
+
+  for(
+    let pagina = 1;
+    pagina <= totalPaginas;
+    pagina++
+  ){
+
+    doc.setPage(pagina);
+
+    const anchoPagina =
+      doc.internal.pageSize.getWidth();
+
+    const altoPagina =
+      doc.internal.pageSize.getHeight();
+
+    doc.setTextColor(100,116,139);
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(8);
+
+    doc.text(
+      `Página ${pagina} de ${totalPaginas}`,
+      anchoPagina - 12,
+      altoPagina - 7,
+      { align:"right" }
+    );
+
+    doc.text(
+      "Sistema de Gestión de Herramientas DIMARZA",
+      12,
+      altoPagina - 7
+    );
+
+  }
+}
 </script>
 
 <div id="modal" class="modal">
