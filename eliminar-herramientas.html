@@ -1,1 +1,1918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Eliminar Herramientas | DIMARZA</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  padding:25px;
+
+  font-family:Arial,sans-serif;
+
+  background-image:
+    linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.70)),
+    url("img/fondo.png");
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+}
+
+.contenedor{
+  width:100%;
+  max-width:1150px;
+  margin:auto;
+
+  background-image:url("img/fondoclaro.png");
+  background-size:cover;
+  background-position:center;
+
+  background-color:rgba(255,255,255,.94);
+  background-blend-mode:soft-light;
+
+  border-radius:28px;
+  padding:35px;
+
+  box-shadow:0 20px 50px rgba(0,0,0,.40);
+}
+
+.encabezado{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:25px;
+
+  margin-bottom:30px;
+}
+
+.logo{
+  width:135px;
+}
+
+.empresa{
+  color:#0d3f8f;
+  font-size:25px;
+  font-weight:800;
+  letter-spacing:5px;
+}
+
+h1{
+  margin:4px 0 0;
+  color:#b91c1c;
+  font-size:45px;
+}
+
+.subtitulo{
+  margin-top:7px;
+  color:#6b7280;
+  font-size:16px;
+}
+
+.panel-busqueda{
+  display:flex;
+  gap:12px;
+
+  margin-bottom:25px;
+}
+
+.buscador{
+  flex:1;
+  min-height:50px;
+
+  padding:13px 16px;
+
+  border:1px solid #cbd5e1;
+  border-radius:13px;
+
+  font-size:15px;
+  outline:none;
+
+  transition:.2s;
+}
+
+.buscador:focus{
+  border-color:#dc2626;
+  box-shadow:0 0 0 3px rgba(220,38,38,.14);
+}
+
+.boton{
+  min-width:150px;
+
+  padding:14px 20px;
+
+  border:none;
+  border-radius:13px;
+
+  color:white;
+
+  font-size:15px;
+  font-weight:bold;
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.boton:hover{
+  transform:translateY(-2px);
+}
+
+.boton:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.boton-buscar{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+}
+
+.boton-todas{
+  background:linear-gradient(135deg,#64748b,#475569);
+}
+
+.mensaje{
+  display:none;
+  margin-bottom:22px;
+  padding:16px 18px;
+
+  border-radius:14px;
+  font-size:15px;
+  font-weight:bold;
+}
+
+.mensaje.info{
+  display:block;
+  color:#1e40af;
+  background:#dbeafe;
+  border:1px solid #93c5fd;
+}
+
+.mensaje.exito{
+  display:block;
+  color:#166534;
+  background:#dcfce7;
+  border:1px solid #86efac;
+}
+
+.mensaje.error{
+  display:block;
+  color:#991b1b;
+  background:#fee2e2;
+  border:1px solid #fca5a5;
+}
+
+.contador{
+  margin-bottom:15px;
+
+  color:#374151;
+  font-size:15px;
+  font-weight:bold;
+}
+
+.lista{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.tarjeta{
+  display:flex;
+  flex-direction:column;
+
+  background:rgba(255,255,255,.95);
+
+  border:1px solid rgba(148,163,184,.35);
+  border-radius:18px;
+
+  overflow:hidden;
+
+  box-shadow:0 8px 22px rgba(15,23,42,.12);
+
+  transition:.22s;
+}
+
+.tarjeta:hover{
+  transform:translateY(-4px);
+  box-shadow:0 14px 28px rgba(15,23,42,.17);
+}
+
+.tarjeta-imagen{
+  min-height:190px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:18px;
+
+  background:linear-gradient(
+    145deg,
+    rgba(254,242,242,.95),
+    rgba(255,255,255,.97)
+  );
+}
+
+.tarjeta-imagen img{
+  width:100%;
+  max-width:190px;
+  height:160px;
+
+  object-fit:contain;
+}
+
+.sin-imagen{
+  width:82px;
+  height:82px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+
+  background:#fee2e2;
+  color:#b91c1c;
+
+  font-size:40px;
+  font-weight:bold;
+}
+
+.tarjeta-contenido{
+  flex:1;
+  padding:18px;
+}
+
+.tarjeta-titulo{
+  margin:0 0 7px;
+
+  color:#1f2937;
+  font-size:18px;
+  font-weight:800;
+}
+
+.tarjeta-marca{
+  margin-bottom:15px;
+
+  color:#6b7280;
+  font-size:14px;
+}
+
+.datos{
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.dato{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+
+  padding:10px 12px;
+
+  border-bottom:1px solid #e5e7eb;
+
+  font-size:13px;
+}
+
+.dato:last-child{
+  border-bottom:none;
+}
+
+.dato-etiqueta{
+  color:#6b7280;
+  font-weight:bold;
+}
+
+.dato-valor{
+  color:#111827;
+  font-weight:bold;
+  text-align:right;
+  word-break:break-word;
+}
+
+.estado{
+  display:inline-block;
+
+  padding:5px 9px;
+  border-radius:999px;
+
+  font-size:12px;
+  font-weight:bold;
+}
+
+.estado-disponible{
+  color:#166534;
+  background:#dcfce7;
+}
+
+.estado-asignado{
+  color:#92400e;
+  background:#fef3c7;
+}
+
+.estado-otro{
+  color:#374151;
+  background:#e5e7eb;
+}
+
+.tarjeta-acciones{
+  padding:0 18px 18px;
+}
+
+.boton-eliminar{
+  width:100%;
+  min-width:auto;
+
+  background:linear-gradient(135deg,#dc2626,#991b1b);
+}
+
+.boton-eliminar:disabled{
+  background:#9ca3af;
+}
+
+.vacio{
+  grid-column:1/-1;
+
+  padding:45px 20px;
+
+  border:2px dashed #cbd5e1;
+  border-radius:18px;
+
+  text-align:center;
+
+  color:#6b7280;
+  background:rgba(255,255,255,.75);
+}
+
+.vacio-icono{
+  margin-bottom:10px;
+  font-size:48px;
+}
+
+.volver{
+  display:inline-block;
+
+  margin-top:30px;
+  padding:14px 22px;
+
+  border-radius:13px;
+
+  background:#374151;
+  color:white;
+
+  text-decoration:none;
+  font-weight:bold;
+
+  transition:.2s;
+}
+
+.volver:hover{
+  transform:translateY(-2px);
+  background:#1f2937;
+}
+
+.cargando{
+  display:inline-block;
+
+  width:17px;
+  height:17px;
+
+  margin-right:8px;
+
+  border:3px solid rgba(255,255,255,.4);
+  border-top-color:white;
+  border-radius:50%;
+
+  animation:girar .8s linear infinite;
+  vertical-align:middle;
+}
+
+@keyframes girar{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+/* MODAL */
+
+.modal-fondo{
+  display:none;
+
+  position:fixed;
+  inset:0;
+  z-index:9999;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+
+  background:rgba(15,23,42,.70);
+  backdrop-filter:blur(4px);
+}
+
+.modal-fondo.activo{
+  display:flex;
+}
+
+.modal{
+  width:100%;
+  max-width:520px;
+
+  background:white;
+  border-radius:22px;
+
+  overflow:hidden;
+
+  box-shadow:0 25px 60px rgba(0,0,0,.38);
+
+  animation:aparecerModal .22s ease;
+}
+
+.modal-encabezado{
+  padding:24px 26px 18px;
+
+  color:white;
+
+  background:linear-gradient(135deg,#dc2626,#991b1b);
+}
+
+.modal-encabezado h3{
+  margin:0;
+  font-size:23px;
+}
+
+.modal-encabezado p{
+  margin:7px 0 0;
+  opacity:.92;
+  font-size:14px;
+}
+
+.modal-contenido{
+  padding:24px 26px;
+}
+
+.advertencia{
+  margin-bottom:18px;
+  padding:14px 16px;
+
+  border:1px solid #fca5a5;
+  border-radius:13px;
+
+  color:#991b1b;
+  background:#fee2e2;
+
+  font-size:14px;
+  font-weight:bold;
+  line-height:1.45;
+}
+
+.modal-resumen{
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.modal-fila{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+
+  padding:12px 15px;
+
+  border-bottom:1px solid #e5e7eb;
+}
+
+.modal-fila:last-child{
+  border-bottom:none;
+}
+
+.modal-etiqueta{
+  color:#6b7280;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.modal-valor{
+  color:#111827;
+  font-size:14px;
+  font-weight:bold;
+  text-align:right;
+  word-break:break-word;
+}
+
+.modal-acciones{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+
+  padding:0 26px 24px;
+}
+
+.modal-boton{
+  min-width:130px;
+
+  padding:13px 18px;
+
+  border:none;
+  border-radius:12px;
+
+  font-size:14px;
+  font-weight:bold;
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.modal-boton:hover{
+  transform:translateY(-2px);
+}
+
+.modal-boton:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.modal-cancelar{
+  color:#374151;
+  background:#e5e7eb;
+}
+
+.modal-eliminar{
+  color:white;
+  background:linear-gradient(135deg,#dc2626,#991b1b);
+}
+
+@keyframes aparecerModal{
+  from{
+    opacity:0;
+    transform:scale(.95) translateY(8px);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
+}
+
+@media(max-width:950px){
+
+  .lista{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+@media(max-width:700px){
+
+  .encabezado{
+    flex-direction:column;
+    text-align:center;
+  }
+
+  .logo{
+    width:100px;
+  }
+
+  h1{
+    font-size:34px;
+  }
+
+  .panel-busqueda{
+    flex-direction:column;
+  }
+
+  .boton{
+    width:100%;
+  }
+
+  .lista{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:500px){
+
+  body{
+    padding:12px;
+  }
+
+  .contenedor{
+    padding:22px 15px;
+    border-radius:20px;
+  }
+
+  h1{
+    font-size:29px;
+  }
+
+  .modal-fila{
+    flex-direction:column;
+    gap:5px;
+  }
+
+  .modal-valor{
+    text-align:left;
+  }
+
+  .modal-acciones{
+    flex-direction:column-reverse;
+  }
+
+  .modal-boton{
+    width:100%;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+  <div class="encabezado">
+
+    <img
+      src="img/mini-logo.png"
+      class="logo"
+      alt="DIMARZA"
+    >
+
+    <div>
+
+      <div class="empresa">
+        DIMARZA
+      </div>
+
+      <h1>
+        ELIMINAR HERRAMIENTAS
+      </h1>
+
+      <div class="subtitulo">
+        Búsqueda y eliminación definitiva de unidades registradas
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    id="mensaje"
+    class="mensaje"
+  ></div>
+
+  <div class="panel-busqueda">
+
+    <input
+      id="terminoBusqueda"
+      class="buscador"
+      type="search"
+      autocomplete="off"
+      placeholder="Buscar por ítem, código, serie, marca, caja o ID"
+    >
+
+    <button
+      id="btnBuscar"
+      type="button"
+      class="boton boton-buscar"
+      onclick="buscarDesdeFormulario()"
+    >
+      Buscar
+    </button>
+
+    <button
+      type="button"
+      class="boton boton-todas"
+      onclick="mostrarTodas()"
+    >
+      Mostrar todas
+    </button>
+
+  </div>
+
+  <div
+    id="contador"
+    class="contador"
+  ></div>
+
+  <div
+    id="listaHerramientas"
+    class="lista"
+  >
+
+    <div class="vacio">
+
+      <div class="vacio-icono">
+        🔎
+      </div>
+
+      Busca una herramienta para comenzar.
+
+    </div>
+
+  </div>
+
+  <a
+    class="volver"
+    href="visualizacion.html"
+  >
+    ← Volver a Visualización
+  </a>
+
+</div>
+
+
+<div
+  id="modalEliminar"
+  class="modal-fondo"
+>
+
+  <div class="modal">
+
+    <div class="modal-encabezado">
+
+      <h3>
+        Eliminar herramienta
+      </h3>
+
+      <p>
+        Confirma la eliminación definitiva de esta fila
+      </p>
+
+    </div>
+
+    <div class="modal-contenido">
+
+      <div class="advertencia">
+        Esta acción eliminará definitivamente la herramienta de
+        MAESTRO_HERRAMIENTAS. La fila no podrá recuperarse desde este módulo.
+      </div>
+
+      <div class="modal-resumen">
+
+        <div class="modal-fila">
+
+          <span class="modal-etiqueta">
+            ID
+          </span>
+
+          <span
+            id="modalId"
+            class="modal-valor"
+          ></span>
+
+        </div>
+
+        <div class="modal-fila">
+
+          <span class="modal-etiqueta">
+            Herramienta
+          </span>
+
+          <span
+            id="modalItem"
+            class="modal-valor"
+          ></span>
+
+        </div>
+
+        <div class="modal-fila">
+
+          <span class="modal-etiqueta">
+            Marca
+          </span>
+
+          <span
+            id="modalMarca"
+            class="modal-valor"
+          ></span>
+
+        </div>
+
+        <div class="modal-fila">
+
+          <span class="modal-etiqueta">
+            Código
+          </span>
+
+          <span
+            id="modalCodigo"
+            class="modal-valor"
+          ></span>
+
+        </div>
+
+        <div class="modal-fila">
+
+          <span class="modal-etiqueta">
+            Serie
+          </span>
+
+          <span
+            id="modalSerie"
+            class="modal-valor"
+          ></span>
+
+        </div>
+
+        <div class="modal-fila">
+
+          <span class="modal-etiqueta">
+            Caja
+          </span>
+
+          <span
+            id="modalCaja"
+            class="modal-valor"
+          ></span>
+
+        </div>
+
+        <div class="modal-fila">
+
+          <span class="modal-etiqueta">
+            Estado
+          </span>
+
+          <span
+            id="modalEstado"
+            class="modal-valor"
+          ></span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-acciones">
+
+      <button
+        type="button"
+        class="modal-boton modal-cancelar"
+        onclick="cerrarModalEliminar()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        id="btnConfirmarEliminar"
+        type="button"
+        class="modal-boton modal-eliminar"
+        onclick="confirmarEliminacion()"
+      >
+        Eliminar definitivamente
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/*
+  Reemplaza este texto por la URL /exec
+  de tu Apps Script de eliminación.
+*/
+
+const WEB_APP_URL =
+  'https://script.google.com/macros/s/AKfycbzzmdHpiOT9NYvtap33KmhAOjvayBhzWwfxVphC3dv-mJTPy1ZiFWx-LZoUEq6H-Mth/exec';
+
+let herramientasActuales = [];
+let herramientaPendiente = null;
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  function(){
+
+    configurarEventos();
+
+  }
+);
+
+
+/* =========================================================
+   EVENTOS
+========================================================= */
+
+function configurarEventos(){
+
+  document
+    .getElementById('terminoBusqueda')
+    .addEventListener(
+      'keydown',
+      function(event){
+
+        if(event.key === 'Enter'){
+          event.preventDefault();
+          buscarDesdeFormulario();
+        }
+
+      }
+    );
+
+  document
+    .getElementById('modalEliminar')
+    .addEventListener(
+      'click',
+      function(event){
+
+        if(event.target === this){
+          cerrarModalEliminar();
+        }
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   BUSCAR
+========================================================= */
+
+function buscarDesdeFormulario(){
+
+  const termino = limpiarTexto(
+    document.getElementById(
+      'terminoBusqueda'
+    ).value
+  );
+
+  if(!termino){
+
+    mostrarMensaje(
+      'Ingresa un término de búsqueda.',
+      'error'
+    );
+
+    document
+      .getElementById('terminoBusqueda')
+      .focus();
+
+    return;
+  }
+
+  buscarHerramientas(termino);
+
+}
+
+
+function mostrarTodas(){
+
+  document.getElementById(
+    'terminoBusqueda'
+  ).value = '';
+
+  buscarHerramientas('');
+
+}
+
+
+async function buscarHerramientas(termino){
+
+  if(
+    !WEB_APP_URL ||
+    WEB_APP_URL.includes('PEGAR_AQUI')
+  ){
+
+    mostrarMensaje(
+      'Falta colocar la URL del Apps Script de eliminación.',
+      'error'
+    );
+
+    return;
+  }
+
+  const boton =
+    document.getElementById('btnBuscar');
+
+  const textoOriginal =
+    boton.innerHTML;
+
+  try{
+
+    boton.disabled = true;
+
+    boton.innerHTML = `
+      <span class="cargando"></span>
+      Buscando...
+    `;
+
+    mostrarMensaje(
+      'Buscando herramientas...',
+      'info'
+    );
+
+    const url =
+      WEB_APP_URL +
+      '?action=buscarHerramientas' +
+      '&termino=' +
+      encodeURIComponent(termino) +
+      '&t=' +
+      Date.now();
+
+    const respuesta = await fetch(url);
+
+    if(!respuesta.ok){
+      throw new Error(
+        'No se pudo conectar con el servidor.'
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if(!resultado.ok){
+      throw new Error(
+        resultado.message ||
+        'No se pudo realizar la búsqueda.'
+      );
+    }
+
+    herramientasActuales =
+      Array.isArray(resultado.herramientas)
+        ? resultado.herramientas
+        : [];
+
+    renderizarHerramientas(
+      herramientasActuales
+    );
+
+    ocultarMensaje();
+
+  }catch(error){
+
+    console.error(error);
+
+    mostrarMensaje(
+      error.message,
+      'error'
+    );
+
+  }finally{
+
+    boton.disabled = false;
+    boton.innerHTML = textoOriginal;
+
+  }
+
+}
+
+
+/* =========================================================
+   MOSTRAR RESULTADOS
+========================================================= */
+
+function renderizarHerramientas(herramientas){
+
+  const lista =
+    document.getElementById(
+      'listaHerramientas'
+    );
+
+  const contador =
+    document.getElementById(
+      'contador'
+    );
+
+  lista.innerHTML = '';
+
+  contador.textContent =
+    herramientas.length === 1
+      ? '1 herramienta encontrada'
+      : herramientas.length +
+        ' herramientas encontradas';
+
+  if(!herramientas.length){
+
+    lista.innerHTML = `
+      <div class="vacio">
+
+        <div class="vacio-icono">
+          📭
+        </div>
+
+        No se encontraron herramientas.
+
+      </div>
+    `;
+
+    return;
+  }
+
+  herramientas.forEach(
+    (herramienta,index)=>{
+
+      const tarjeta =
+        document.createElement('div');
+
+      tarjeta.className = 'tarjeta';
+
+      const imagen =
+        obtenerImagenHerramienta(
+          herramienta.item
+        );
+
+      const estadoNormalizado =
+        normalizarTexto(
+          herramienta.estado
+        );
+
+      const estaAsignada =
+        estadoNormalizado === 'ASIGNADO';
+
+      const claseEstado =
+        obtenerClaseEstado(
+          herramienta.estado
+        );
+
+      tarjeta.innerHTML = `
+
+        <div class="tarjeta-imagen">
+
+          ${
+            imagen
+              ? `
+                <img
+                  src="${escaparHtml(imagen)}"
+                  alt="${escaparHtml(
+                    obtenerNombreCorto(
+                      herramienta.item
+                    )
+                  )}"
+                  onerror="
+                    this.style.display='none';
+                    this.nextElementSibling.style.display='flex';
+                  "
+                >
+
+                <div
+                  class="sin-imagen"
+                  style="display:none"
+                >
+                  ?
+                </div>
+              `
+              : `
+                <div class="sin-imagen">
+                  ?
+                </div>
+              `
+          }
+
+        </div>
+
+        <div class="tarjeta-contenido">
+
+          <h3 class="tarjeta-titulo">
+            ${escaparHtml(
+              obtenerNombreCorto(
+                herramienta.item
+              )
+            )}
+          </h3>
+
+          <div class="tarjeta-marca">
+            ${
+              escaparHtml(
+                herramienta.marca ||
+                'Sin marca'
+              )
+            }
+          </div>
+
+          <div class="datos">
+
+            ${crearDato(
+              'ID',
+              herramienta.id || '-'
+            )}
+
+            ${crearDato(
+              'Código',
+              herramienta.codigo || 'S/C'
+            )}
+
+            ${crearDato(
+              'Serie',
+              herramienta.serie || 'S/S'
+            )}
+
+            ${crearDato(
+              'Caja',
+              herramienta.caja || 'SIN ASIGNAR'
+            )}
+
+            <div class="dato">
+
+              <span class="dato-etiqueta">
+                Estado
+              </span>
+
+              <span
+                class="estado ${claseEstado}"
+              >
+                ${escaparHtml(
+                  herramienta.estado || '-'
+                )}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="tarjeta-acciones">
+
+          <button
+            type="button"
+            class="boton boton-eliminar"
+            onclick="abrirModalEliminar(${index})"
+            ${estaAsignada ? 'disabled' : ''}
+          >
+            ${
+              estaAsignada
+                ? 'No se puede eliminar'
+                : 'Eliminar herramienta'
+            }
+          </button>
+
+        </div>
+
+      `;
+
+      lista.appendChild(tarjeta);
+
+    }
+  );
+
+}
+
+
+function crearDato(etiqueta,valor){
+
+  return `
+
+    <div class="dato">
+
+      <span class="dato-etiqueta">
+        ${escaparHtml(etiqueta)}
+      </span>
+
+      <span class="dato-valor">
+        ${escaparHtml(valor)}
+      </span>
+
+    </div>
+
+  `;
+
+}
+
+
+function obtenerClaseEstado(estado){
+
+  const normalizado =
+    normalizarTexto(estado);
+
+  if(normalizado === 'DISPONIBLE'){
+    return 'estado-disponible';
+  }
+
+  if(normalizado === 'ASIGNADO'){
+    return 'estado-asignado';
+  }
+
+  return 'estado-otro';
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function abrirModalEliminar(index){
+
+  const herramienta =
+    herramientasActuales[index];
+
+  if(!herramienta){
+    return;
+  }
+
+  if(
+    normalizarTexto(
+      herramienta.estado
+    ) === 'ASIGNADO'
+  ){
+
+    mostrarMensaje(
+      'No se puede eliminar una herramienta asignada.',
+      'error'
+    );
+
+    return;
+  }
+
+  herramientaPendiente = {
+    ...herramienta
+  };
+
+  document.getElementById(
+    'modalId'
+  ).textContent =
+    herramienta.id || '-';
+
+  document.getElementById(
+    'modalItem'
+  ).textContent =
+    obtenerNombreCorto(
+      herramienta.item
+    );
+
+  document.getElementById(
+    'modalMarca'
+  ).textContent =
+    herramienta.marca || 'Sin marca';
+
+  document.getElementById(
+    'modalCodigo'
+  ).textContent =
+    herramienta.codigo || 'S/C';
+
+  document.getElementById(
+    'modalSerie'
+  ).textContent =
+    herramienta.serie || 'S/S';
+
+  document.getElementById(
+    'modalCaja'
+  ).textContent =
+    herramienta.caja || 'SIN ASIGNAR';
+
+  document.getElementById(
+    'modalEstado'
+  ).textContent =
+    herramienta.estado || '-';
+
+  document.getElementById(
+    'modalEliminar'
+  ).classList.add('activo');
+
+}
+
+
+function cerrarModalEliminar(){
+
+  document.getElementById(
+    'modalEliminar'
+  ).classList.remove('activo');
+
+  herramientaPendiente = null;
+
+}
+
+
+/* =========================================================
+   ELIMINAR
+========================================================= */
+
+async function confirmarEliminacion(){
+
+  if(!herramientaPendiente){
+    return;
+  }
+
+  const herramienta = {
+    ...herramientaPendiente
+  };
+
+  const boton =
+    document.getElementById(
+      'btnConfirmarEliminar'
+    );
+
+  const textoOriginal =
+    boton.textContent;
+
+  try{
+
+    boton.disabled = true;
+    boton.textContent = 'Eliminando...';
+
+    const url =
+      WEB_APP_URL +
+      '?action=eliminarHerramienta' +
+      '&id=' +
+      encodeURIComponent(
+        herramienta.id
+      ) +
+      '&t=' +
+      Date.now();
+
+    const respuesta = await fetch(url);
+
+    if(!respuesta.ok){
+      throw new Error(
+        'No se pudo conectar con el servidor.'
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if(!resultado.ok){
+      throw new Error(
+        resultado.message ||
+        'No se pudo eliminar la herramienta.'
+      );
+    }
+
+    document.getElementById(
+      'modalEliminar'
+    ).classList.remove('activo');
+
+    herramientaPendiente = null;
+
+    mostrarMensaje(
+      '✅ Herramienta eliminada correctamente: ' +
+      obtenerNombreCorto(
+        herramienta.item
+      ) +
+      ' | ' +
+      (
+        herramienta.codigo ||
+        herramienta.serie ||
+        herramienta.id
+      ),
+      'exito'
+    );
+
+    const termino = limpiarTexto(
+      document.getElementById(
+        'terminoBusqueda'
+      ).value
+    );
+
+    await buscarHerramientas(termino);
+
+  }catch(error){
+
+    console.error(error);
+
+    mostrarMensaje(
+      error.message,
+      'error'
+    );
+
+  }finally{
+
+    boton.disabled = false;
+    boton.textContent = textoOriginal;
+
+  }
+
+}
+
+
+/* =========================================================
+   NOMBRES CORTOS
+========================================================= */
+
+function obtenerNombreCorto(item){
+
+  const nombre =
+    normalizarTexto(item);
+
+  if(
+    nombre.includes('ARNES') &&
+    nombre.includes('6 ARGOLLAS')
+  ){
+    return 'Arnés Mecánico 6 argollas';
+  }
+
+  if(
+    nombre.includes('ARNES') &&
+    nombre.includes('4 ARGOLLAS')
+  ){
+    return 'Arnés Mecánico 4 argollas';
+  }
+
+  if(
+    nombre.includes('BALDE') &&
+    nombre.includes('LAINERO')
+  ){
+    return 'Balde Lainero';
+  }
+
+  if(
+    nombre.includes('BLOQUE') &&
+    nombre.includes('RETRACTIL')
+  ){
+    return 'Bloque Retráctil';
+  }
+
+  if(
+    nombre.includes('CABO') &&
+    nombre.includes('SIN AMORTIGUADOR')
+  ){
+    return 'Cabo en Y sin amortiguador';
+  }
+
+  if(
+    nombre.includes('CABO') &&
+    nombre.includes('CON AMORTIGUADOR')
+  ){
+    return 'Cabo en Y con amortiguador';
+  }
+
+  if(
+    nombre.includes('CAJA') &&
+    nombre.includes('TRUPPER')
+  ){
+    return 'Caja de Herramientas TRUPPER';
+  }
+
+  if(
+    nombre.includes('CAJA') &&
+    nombre.includes('METALICA')
+  ){
+    return 'Caja Metálica de Herramientas';
+  }
+
+  if(nombre.includes('CORREAJE')){
+    return 'Correaje de Andamiero';
+  }
+
+  if(nombre.includes('DRIZA')){
+    return 'Driza Elástica';
+  }
+
+  if(
+    nombre.includes('FAJA') &&
+    nombre.includes('0.9')
+  ){
+    return 'Faja de Anclaje 0.9 m';
+  }
+
+  if(
+    nombre.includes('FAJA') &&
+    nombre.includes('1.8')
+  ){
+    return 'Faja de Anclaje 1.8 m';
+  }
+
+  if(
+    nombre.includes('FLEXOMETRO') &&
+    nombre.includes('5M')
+  ){
+    return 'Flexómetro de 5 m';
+  }
+
+  if(
+    nombre.includes('FLEXOMETRO') &&
+    nombre.includes('8M')
+  ){
+    return 'Flexómetro de 8 m';
+  }
+
+  if(nombre.includes('HOMBRERA')){
+    return 'Hombrera de Cuero';
+  }
+
+  if(
+    nombre.includes('KIT') &&
+    nombre.includes('ANTITRAUMA')
+  ){
+    return 'Kit Antitrauma';
+  }
+
+  if(nombre.includes('LINTERNA')){
+    return 'Linterna para Casco';
+  }
+
+  if(
+    nombre.includes('LLAVE') &&
+    nombre.includes('CARRACA')
+  ){
+    return 'Llave Carraca';
+  }
+
+  if(
+    nombre.includes('LLAVE FRANCESA') &&
+    nombre.includes('12')
+  ){
+    return 'Llave Francesa 12"';
+  }
+
+  if(
+    nombre.includes('LLAVE FRANCESA') &&
+    nombre.includes('8')
+  ){
+    return 'Llave Francesa 8"';
+  }
+
+  if(
+    nombre.includes('LLAVE') &&
+    nombre.includes('MIXTA')
+  ){
+    return 'Llave Mixta 22 mm';
+  }
+
+  if(nombre.includes('MARTILLO')){
+    return 'Martillo Andamiero';
+  }
+
+  if(nombre.includes('NIVEL')){
+    return 'Nivel de Mano';
+  }
+
+  if(nombre.includes('POLEA')){
+    return 'Polea con Freno';
+  }
+
+  if(
+    nombre.includes('PORTA') &&
+    nombre.includes('CARRACA')
+  ){
+    return 'Porta Carraca';
+  }
+
+  if(
+    nombre.includes('PORTA') &&
+    nombre.includes('MARTILLO')
+  ){
+    return 'Porta Martillo';
+  }
+
+  if(nombre.includes('RODILLERA')){
+    return 'Rodillera';
+  }
+
+  return limpiarTexto(item);
+
+}
+
+
+/* =========================================================
+   IMÁGENES
+========================================================= */
+
+function obtenerImagenHerramienta(item){
+
+  const nombre =
+    normalizarTexto(item);
+
+  const imagenes = [
+
+    {
+      palabras:['ARNES MECANICO 6 ARGOLLAS'],
+      archivo:'img/ArnésMecánico6argollas.JPG'
+    },
+
+    {
+      palabras:['ARNES MECANICO 4 ARGOLLAS'],
+      archivo:'img/ArnésMecánico4argollas.jpg'
+    },
+
+    {
+      palabras:['BALDE LAINERO'],
+      archivo:'img/BaldelainerodelonaHAUK.png'
+    },
+
+    {
+      palabras:['BLOQUE RETRACTIL'],
+      archivo:'img/BloqueRetráctilSafewazeDobleLatitude-Pde1.8mGanchoEscala.JPG'
+    },
+
+    {
+      palabras:['CABO EN Y','SIN AMORTIGUADOR'],
+      archivo:'img/Cabosinamortiguadordeimpacto.jpg'
+    },
+
+    {
+      palabras:['CABO EN Y','CON AMORTIGUADOR'],
+      archivo:'img/CaboenYMSAconamortiguadordeimpacto.png'
+    },
+
+    {
+      palabras:['CAJA HERRAMIENTAS','TRUPPER'],
+      archivo:'img/CajaHerramientasdeplácticoTRUPPER.JPG'
+    },
+
+    {
+      palabras:['CAJA METALICA'],
+      archivo:'img/CajaMetalicadeherramientas.JPG'
+    },
+
+    {
+      palabras:['CORREAJE'],
+      archivo:'img/CorreajedeAndamiero.JPG'
+    },
+
+    {
+      palabras:['DRIZA ELASTICA'],
+      archivo:'img/DrizaElásticaportaherramientamanual.JPG'
+    },
+
+    {
+      palabras:['FAJA ANCLAJE','0.9M'],
+      archivo:'img/FajaAnclajeMSAdobleargolla0.9m.jpg'
+    },
+
+    {
+      palabras:['FAJA ANCLAJE','1.8M'],
+      archivo:'img/FajaAnclajeMSAdobleargolla1.8M.JPG'
+    },
+
+    {
+      palabras:['FLEXOMETRO','5M'],
+      archivo:'img/Flexometrode5m.jpg'
+    },
+
+    {
+      palabras:['FLEXOMETRO','8M'],
+      archivo:'img/Flexometrode8m.JPG'
+    },
+
+    {
+      palabras:['HOMBRERA'],
+      archivo:'img/Hombreradecuero.JPG'
+    },
+
+    {
+      palabras:['KIT ANTITRAUMA'],
+      archivo:'img/KitAntitraumaMSAModel10063431.JPG'
+    },
+
+    {
+      palabras:['LINTERNA','CASCO'],
+      archivo:'img/Linternaparacasco.jpg'
+    },
+
+    {
+      palabras:['LLAVE CARRACA'],
+      archivo:'img/LlaveCarracaALFMANQLF-RW1922.jpg'
+    },
+
+    {
+      palabras:['LLAVE FRANCESA','12'],
+      archivo:'img/LlaveFrancesa12.JPG'
+    },
+
+    {
+      palabras:['LLAVE FRANCESA','8'],
+      archivo:'img/LlaveFrancesa8.jpg'
+    },
+
+    {
+      palabras:['LLAVE MIXTA'],
+      archivo:'img/LlaveMixta22mm.JPG'
+    },
+
+    {
+      palabras:['MARTILLO ANDAMIERO'],
+      archivo:'img/MartilloAndamieroALFMANACFH0075.jpg'
+    },
+
+    {
+      palabras:['NIVEL DE MANO'],
+      archivo:'img/NiveldeManoSTANLEY9.JPG'
+    },
+
+    {
+      palabras:['POLEA'],
+      archivo:'img/PoleaconFrenoSECURPULLEY.jpg'
+    },
+
+    {
+      palabras:['PORTA CARRACA'],
+      archivo:'img/portacarraca.jpg'
+    },
+
+    {
+      palabras:['PORTA MARTILLO'],
+      archivo:'img/portamartillo.jpg'
+    },
+
+    {
+      palabras:['RODILLERA'],
+      archivo:'img/Rodillera.JPG'
+    }
+
+  ];
+
+  for(const configuracion of imagenes){
+
+    const coincide =
+      configuracion.palabras.every(
+        palabra =>
+          nombre.includes(
+            normalizarTexto(palabra)
+          )
+      );
+
+    if(coincide){
+      return configuracion.archivo;
+    }
+
+  }
+
+  return '';
+
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+function mostrarMensaje(texto,tipo){
+
+  const mensaje =
+    document.getElementById('mensaje');
+
+  mensaje.className =
+    'mensaje ' + tipo;
+
+  mensaje.textContent = texto;
+
+}
+
+
+function ocultarMensaje(){
+
+  const mensaje =
+    document.getElementById('mensaje');
+
+  mensaje.className = 'mensaje';
+  mensaje.textContent = '';
+
+}
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function limpiarTexto(valor){
+
+  return String(valor || '')
+    .replace(/\s+/g,' ')
+    .trim();
+
+}
+
+
+function normalizarTexto(valor){
+
+  return limpiarTexto(valor)
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'');
+
+}
+
+
+function escaparHtml(valor){
+
+  return String(valor || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+
+}
+
+</script>
+
+</body>
+</html>
