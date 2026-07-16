@@ -101,6 +101,20 @@ body{
   cursor:not-allowed;
 }
 
+.btn-pdf{
+  background:#dc2626;
+  color:white;
+}
+
+.btn-pdf:hover{
+  background:#b91c1c;
+}
+
+.btn-pdf:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+}
+
 .search-card{
   background:white;
   border:1px solid var(--border);
@@ -273,6 +287,13 @@ td.nombre{
     >
       📊 Exportar Excel
     </button>
+    <button
+        class="btn btn-pdf"
+        type="button"
+        onclick="exportarCatalogoPDF()"
+      >
+        📄 Exportar PDF
+      </button>
 
     <a class="btn btn-primary" href="herramientas.html">
       Registrar entrega
@@ -306,6 +327,9 @@ td.nombre{
 
 
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@4.0.0/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@5.0.8/dist/jspdf.plugin.autotable.min.js"></script>
+
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxzoRJ6iPz4ivS75kgUWg5vaK2OkcGE2WPmM-fDpQF-ztpnFmrSSBH3MStUsWEnmyHcvA/exec";
@@ -1087,6 +1111,305 @@ function obtenerFechaCatalogo(){
       .padStart(2,"0");
 
   return `${anio}-${mes}-${dia}_${hora}-${minuto}`;
+}
+async function exportarCatalogoPDF(){
+
+  if(!catalogoOriginal.length){
+    alert("El catálogo todavía no ha terminado de cargar.");
+    return;
+  }
+
+  if(!catalogoVisible.length){
+    alert("No existen resultados visibles para exportar.");
+    return;
+  }
+
+  const boton = document.querySelector(".btn-pdf");
+  const textoOriginal = boton.innerHTML;
+
+  try{
+
+    boton.disabled = true;
+    boton.innerHTML = "⏳ Generando PDF...";
+
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4"
+    });
+
+    doc.setProperties({
+      title:"Catálogo Maestro de Herramientas",
+      subject:"Catálogo de herramientas y códigos",
+      author:"Sistema DIMARZA",
+      creator:"Sistema DIMARZA"
+    });
+
+    const anchoPagina = doc.internal.pageSize.getWidth();
+
+    // Encabezado principal
+    doc.setFillColor(15,118,110);
+
+    doc.roundedRect(
+      12,
+      12,
+      anchoPagina - 24,
+      28,
+      4,
+      4,
+      "F"
+    );
+
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(19);
+
+    doc.text(
+      "DIMARZA",
+      anchoPagina / 2,
+      24,
+      { align:"center" }
+    );
+
+    doc.setFontSize(13);
+
+    doc.text(
+      "CATÁLOGO MAESTRO DE HERRAMIENTAS",
+      anchoPagina / 2,
+      33,
+      { align:"center" }
+    );
+
+    // Fecha
+    doc.setTextColor(71,85,105);
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+
+    doc.text(
+      `Fecha de exportación: ${new Date().toLocaleString("es-PE")}`,
+      anchoPagina / 2,
+      48,
+      { align:"center" }
+    );
+
+    // Resumen
+    const totalUnidades = catalogoVisible.reduce(
+      (suma,item) => suma + Number(item.total || 0),
+      0
+    );
+
+    const hayFiltro =
+      catalogoVisible.length !== catalogoOriginal.length;
+
+    doc.setFillColor(236,253,245);
+
+    doc.roundedRect(
+      12,
+      54,
+      anchoPagina - 24,
+      14,
+      3,
+      3,
+      "F"
+    );
+
+    doc.setTextColor(17,94,89);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(9);
+
+    const textoResumen = hayFiltro
+      ? `Resultados exportados: ${catalogoVisible.length} de ${catalogoOriginal.length} tipos de herramienta · Unidades visibles: ${totalUnidades}`
+      : `Tipos de herramienta: ${catalogoOriginal.length} · Total de unidades: ${totalUnidades}`;
+
+    doc.text(
+      textoResumen,
+      anchoPagina / 2,
+      63,
+      { align:"center" }
+    );
+
+    const filas = catalogoVisible.map(
+      (item,indice) => [
+        indice + 1,
+        item.item,
+        item.total,
+        item.codigosTexto
+      ]
+    );
+
+    doc.autoTable({
+
+      startY:74,
+
+      head:[[
+        "N.°",
+        "HERRAMIENTA",
+        "TOTAL",
+        "CÓDIGOS"
+      ]],
+
+      body:filas,
+
+      theme:"grid",
+
+      styles:{
+        font:"helvetica",
+        fontSize:8,
+        cellPadding:3,
+        valign:"middle",
+        lineColor:[203,213,225],
+        lineWidth:.2,
+        overflow:"linebreak"
+      },
+
+      headStyles:{
+        fillColor:[17,94,89],
+        textColor:[255,255,255],
+        fontStyle:"bold",
+        halign:"center"
+      },
+
+      columnStyles:{
+        0:{
+          cellWidth:15,
+          halign:"center"
+        },
+
+        1:{
+          cellWidth:83,
+          halign:"left",
+          fontStyle:"bold",
+          textColor:[31,41,55]
+        },
+
+        2:{
+          cellWidth:25,
+          halign:"center",
+          fontStyle:"bold",
+          fontSize:11,
+          fillColor:[220,252,231],
+          textColor:[22,101,52]
+        },
+
+        3:{
+          cellWidth:150,
+          halign:"left",
+          fillColor:[239,246,255],
+          textColor:[7,89,133]
+        }
+      },
+
+      margin:{
+        left:12,
+        right:12,
+        top:25,
+        bottom:16
+      },
+
+      didDrawPage:function(){
+
+        const paginaActual =
+          doc.internal.getCurrentPageInfo().pageNumber;
+
+        // Encabezado pequeño en páginas siguientes
+        if(paginaActual > 1){
+
+          doc.setTextColor(100,116,139);
+          doc.setFont("helvetica","normal");
+          doc.setFontSize(8);
+
+          doc.text(
+            "DIMARZA · Catálogo Maestro de Herramientas",
+            12,
+            9
+          );
+
+          doc.text(
+            new Date().toLocaleDateString("es-PE"),
+            anchoPagina - 12,
+            9,
+            { align:"right" }
+          );
+
+        }
+
+      }
+
+    });
+
+    agregarNumeracionCatalogoPDF(doc);
+
+    doc.save(
+      `Catalogo_Herramientas_${obtenerFechaCatalogo()}.pdf`
+    );
+
+  }catch(error){
+
+    console.error(
+      "Error al exportar catálogo PDF:",
+      error
+    );
+
+    alert(
+      "No se pudo generar el archivo PDF. " +
+      "Revisa la consola del navegador."
+    );
+
+  }finally{
+
+    boton.disabled = false;
+    boton.innerHTML = textoOriginal;
+
+  }
+}
+function agregarNumeracionCatalogoPDF(doc){
+
+  const totalPaginas =
+    doc.internal.getNumberOfPages();
+
+  for(
+    let pagina = 1;
+    pagina <= totalPaginas;
+    pagina++
+  ){
+
+    doc.setPage(pagina);
+
+    const anchoPagina =
+      doc.internal.pageSize.getWidth();
+
+    const altoPagina =
+      doc.internal.pageSize.getHeight();
+
+    doc.setDrawColor(203,213,225);
+
+    doc.line(
+      12,
+      altoPagina - 12,
+      anchoPagina - 12,
+      altoPagina - 12
+    );
+
+    doc.setTextColor(100,116,139);
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(8);
+
+    doc.text(
+      "Sistema de Gestión de Herramientas DIMARZA",
+      12,
+      altoPagina - 7
+    );
+
+    doc.text(
+      `Página ${pagina} de ${totalPaginas}`,
+      anchoPagina - 12,
+      altoPagina - 7,
+      { align:"right" }
+    );
+
+  }
 }
 </script>
 
