@@ -965,6 +965,7 @@ function aplicarSesion(rol){
     'rolActivo'
   ).textContent = rolNormalizado;
 
+    mostrarMensajeAcceso('', '');
   document
     .querySelectorAll('.modulo-protegido')
     .forEach(modulo=>{
