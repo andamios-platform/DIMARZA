@@ -81,6 +81,25 @@ body{
   background:#e5e7eb;
   color:#111827;
 }
+.acciones-derecha{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.btn-excel{
+  background:#15803d;
+  color:white;
+}
+
+.btn-excel:hover{
+  background:#166534;
+}
+
+.btn-excel:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+}
 
 .search-card{
   background:white;
@@ -203,14 +222,28 @@ td.nombre{
   .topbar h1{
     font-size:20px;
   }
-
+  
   .actions{
-    flex-direction:column;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      flex-wrap:wrap;
   }
 
   .btn{
     width:100%;
     text-align:center;
+  }
+  .acciones-derecha{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  
+  .acciones-derecha .btn{
+    width:100%;
   }
 }
 </style>
@@ -225,10 +258,29 @@ td.nombre{
     <p>Resumen general por herramienta, total y códigos registrados</p>
   </div>
 
-  <div class="actions">
-    <a class="btn btn-secondary" href="visualizacion.html">⬅ Volver a visualización</a>
-    <a class="btn btn-primary" href="herramientas.html">Registrar entrega</a>
+<div class="actions">
+
+  <a class="btn btn-secondary" href="visualizacion.html">
+    ⬅ Volver a visualización
+  </a>
+
+  <div class="acciones-derecha">
+
+    <button
+      class="btn btn-excel"
+      type="button"
+      onclick="exportarCatalogoExcel()"
+    >
+      📊 Exportar Excel
+    </button>
+
+    <a class="btn btn-primary" href="herramientas.html">
+      Registrar entrega
+    </a>
+
   </div>
+
+</div>
 
   <div class="search-card">
     <input type="text" id="buscar" placeholder="🔍 Buscar herramienta, código o marca...">
@@ -251,6 +303,9 @@ td.nombre{
   </div>
 
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxzoRJ6iPz4ivS75kgUWg5vaK2OkcGE2WPmM-fDpQF-ztpnFmrSSBH3MStUsWEnmyHcvA/exec";
@@ -286,6 +341,7 @@ const IMAGENES = {
 };
 
 let catalogoOriginal = [];
+let catalogoVisible = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarCatalogo();
@@ -332,17 +388,23 @@ function construirCatalogo(data){
     .map(item => {
       const lista = agrupado[item];
 
-      return {
+  return {
+      item,
+      total: lista.length,
+      imagen: obtenerImagen(item),
+    
+      codigosHTML:
+        construirCodigos(item, lista),
+    
+      codigosTexto:
+        construirCodigosTexto(item, lista),
+    
+      textoBusqueda: normal([
         item,
-        total: lista.length,
-        imagen: obtenerImagen(item),
-        codigosHTML: construirCodigos(item, lista),
-        textoBusqueda: normal([
-          item,
-          lista.map(x => x.codigo).join(" "),
-          lista.map(x => x.marca).join(" ")
-        ].join(" "))
-      };
+        lista.map(x => x.codigo).join(" "),
+        lista.map(x => x.marca).join(" ")
+      ].join(" "))
+    };
     });
 }
 
@@ -390,8 +452,64 @@ function construirCodigosPorMarca(lista){
     })
     .join("");
 }
+function construirCodigosTexto(item, lista){
+
+  if(normal(item).includes("ARNES")){
+
+    const marcas = {};
+
+    lista.forEach(x => {
+
+      const marca =
+        String(x.marca || "SIN MARCA").trim() ||
+        "SIN MARCA";
+
+      if(!marcas[marca]){
+        marcas[marca] = [];
+      }
+
+      marcas[marca].push(
+        String(x.codigo || "").trim()
+      );
+
+    });
+
+    return Object.keys(marcas)
+      .sort((a,b) => a.localeCompare(b,"es"))
+      .map(marca => {
+
+        const codigos = marcas[marca]
+          .filter(Boolean)
+          .sort((a,b) =>
+            a.localeCompare(
+              b,
+              "es",
+              { numeric:true }
+            )
+          );
+
+        return `${marca} (${codigos.length}): ${codigos.join(" - ")}`;
+
+      })
+      .join("\n");
+  }
+
+  return lista
+    .map(x => String(x.codigo || "").trim())
+    .filter(Boolean)
+    .sort((a,b) =>
+      a.localeCompare(
+        b,
+        "es",
+        { numeric:true }
+      )
+    )
+    .join(" - ");
+}
+  
 
 function pintarCatalogo(data){
+  catalogoVisible = data;
   const loading = document.getElementById("loading");
   const tabla = document.getElementById("tablaCatalogo");
   const tbody = document.getElementById("tbodyCatalogo");
@@ -464,6 +582,511 @@ function normal(v){
     .replace(/[\u0300-\u036f]/g,"")
     .replace(/\s+/g," ")
     .trim();
+}
+
+async function exportarCatalogoExcel(){
+
+  if(!catalogoOriginal.length){
+
+    alert(
+      "El catálogo todavía no ha terminado de cargar."
+    );
+
+    return;
+  }
+
+  if(!catalogoVisible.length){
+
+    alert(
+      "No existen resultados visibles para exportar."
+    );
+
+    return;
+  }
+
+  const boton =
+    document.querySelector(".btn-excel");
+
+  const textoOriginal =
+    boton.innerHTML;
+
+  try{
+
+    boton.disabled = true;
+    boton.innerHTML =
+      "⏳ Generando Excel...";
+
+    const workbook =
+      new ExcelJS.Workbook();
+
+    workbook.creator =
+      "Sistema DIMARZA";
+
+    workbook.lastModifiedBy =
+      "Sistema DIMARZA";
+
+    workbook.created =
+      new Date();
+
+    workbook.modified =
+      new Date();
+
+    workbook.title =
+      "Catálogo Maestro de Herramientas";
+
+    workbook.subject =
+      "Resumen de herramientas y códigos";
+
+    workbook.company =
+      "DIMARZA";
+
+    const hoja = workbook.addWorksheet(
+      "Catálogo de herramientas",
+      {
+        views:[
+          {
+            state:"frozen",
+            ySplit:5,
+            showGridLines:false
+          }
+        ]
+      }
+    );
+
+    hoja.columns = [
+      {
+        key:"numero",
+        width:10
+      },
+      {
+        key:"herramienta",
+        width:55
+      },
+      {
+        key:"total",
+        width:15
+      },
+      {
+        key:"codigos",
+        width:100
+      }
+    ];
+
+    // Título principal
+    hoja.mergeCells("A1:D2");
+
+    const titulo =
+      hoja.getCell("A1");
+
+    titulo.value =
+      "DIMARZA\nCATÁLOGO MAESTRO DE HERRAMIENTAS";
+
+    titulo.font = {
+      name:"Arial",
+      size:20,
+      bold:true,
+      color:{
+        argb:"FFFFFFFF"
+      }
+    };
+
+    titulo.fill = {
+      type:"pattern",
+      pattern:"solid",
+      fgColor:{
+        argb:"FF0F766E"
+      }
+    };
+
+    titulo.alignment = {
+      horizontal:"center",
+      vertical:"middle",
+      wrapText:true
+    };
+
+    hoja.getRow(1).height = 30;
+    hoja.getRow(2).height = 30;
+
+    // Fecha de exportación
+    hoja.mergeCells("A3:D3");
+
+    const fecha =
+      hoja.getCell("A3");
+
+    fecha.value =
+      `Fecha de exportación: ${new Date().toLocaleString("es-PE")}`;
+
+    fecha.font = {
+      name:"Arial",
+      size:10,
+      italic:true,
+      color:{
+        argb:"FF475569"
+      }
+    };
+
+    fecha.alignment = {
+      horizontal:"center",
+      vertical:"middle"
+    };
+
+    hoja.getRow(3).height = 22;
+
+    // Información del filtro
+    hoja.mergeCells("A4:D4");
+
+    const informacion =
+      hoja.getCell("A4");
+
+    const hayFiltro =
+      catalogoVisible.length !==
+      catalogoOriginal.length;
+
+    informacion.value = hayFiltro
+      ? `Resultados exportados: ${catalogoVisible.length} de ${catalogoOriginal.length} herramientas`
+      : `Total de tipos de herramienta: ${catalogoOriginal.length}`;
+
+    informacion.font = {
+      name:"Arial",
+      size:10,
+      bold:true,
+      color:{
+        argb:"FF115E59"
+      }
+    };
+
+    informacion.fill = {
+      type:"pattern",
+      pattern:"solid",
+      fgColor:{
+        argb:"FFECFDF5"
+      }
+    };
+
+    informacion.alignment = {
+      horizontal:"center",
+      vertical:"middle"
+    };
+
+    hoja.getRow(4).height = 23;
+
+    // Encabezados
+    const encabezado =
+      hoja.addRow([
+        "N.°",
+        "HERRAMIENTA",
+        "TOTAL",
+        "CÓDIGOS"
+      ]);
+
+    encabezado.height = 30;
+
+    encabezado.eachCell(celda => {
+
+      celda.font = {
+        name:"Arial",
+        size:11,
+        bold:true,
+        color:{
+          argb:"FFFFFFFF"
+        }
+      };
+
+      celda.fill = {
+        type:"pattern",
+        pattern:"solid",
+        fgColor:{
+          argb:"FF115E59"
+        }
+      };
+
+      celda.alignment = {
+        horizontal:"center",
+        vertical:"middle"
+      };
+
+      celda.border =
+        crearBordeCatalogo();
+
+    });
+
+    // Datos
+    catalogoVisible.forEach(
+      (item, indice) => {
+
+        const fila =
+          hoja.addRow([
+            indice + 1,
+            item.item,
+            item.total,
+            item.codigosTexto
+          ]);
+
+        fila.height =
+          calcularAlturaCatalogo(
+            item.codigosTexto
+          );
+
+        fila.getCell(1).alignment = {
+          horizontal:"center",
+          vertical:"middle"
+        };
+
+        fila.getCell(2).alignment = {
+          horizontal:"left",
+          vertical:"middle",
+          wrapText:true
+        };
+
+        fila.getCell(2).font = {
+          name:"Arial",
+          size:10,
+          bold:true,
+          color:{
+            argb:"FF1F2937"
+          }
+        };
+
+        fila.getCell(3).alignment = {
+          horizontal:"center",
+          vertical:"middle"
+        };
+
+        fila.getCell(3).font = {
+          name:"Arial",
+          size:14,
+          bold:true,
+          color:{
+            argb:"FF0F766E"
+          }
+        };
+
+        fila.getCell(4).alignment = {
+          horizontal:"left",
+          vertical:"middle",
+          wrapText:true
+        };
+
+        fila.getCell(4).font = {
+          name:"Arial",
+          size:9,
+          color:{
+            argb:"FF075985"
+          }
+        };
+
+// Color alternado únicamente en N.° y Herramienta
+if(indice % 2 !== 0){
+
+  fila.getCell(1).fill = {
+    type:"pattern",
+    pattern:"solid",
+    fgColor:{
+      argb:"FFF8FAFC"
+    }
+  };
+
+  fila.getCell(2).fill = {
+    type:"pattern",
+    pattern:"solid",
+    fgColor:{
+      argb:"FFF8FAFC"
+    }
+  };
+
+}
+
+// Fondo verde claro para TOTAL
+fila.getCell(3).fill = {
+  type:"pattern",
+  pattern:"solid",
+  fgColor:{
+    argb:"FFDCFCE7"
+  }
+};
+
+fila.getCell(3).font = {
+  name:"Arial",
+  size:14,
+  bold:true,
+  color:{
+    argb:"FF166534"
+  }
+};
+
+// Fondo azul claro para CÓDIGOS
+fila.getCell(4).fill = {
+  type:"pattern",
+  pattern:"solid",
+  fgColor:{
+    argb:"FFEFF6FF"
+  }
+};
+
+fila.getCell(4).font = {
+  name:"Arial",
+  size:9,
+  color:{
+    argb:"FF075985"
+  }
+};
+
+// Bordes en todas las celdas
+// Bordes en todas las celdas
+fila.eachCell(celda => {
+  celda.border = crearBordeCatalogo();
+});
+
+      }
+    );
+
+// Filtro después de terminar de crear todas las filas
+hoja.autoFilter = {
+  from:"A5",
+  to:`D${hoja.rowCount}`
+};
+    hoja.pageSetup = {
+      orientation:"landscape",
+      paperSize:9,
+      fitToPage:true,
+      fitToWidth:1,
+      fitToHeight:0,
+      margins:{
+        left:0.25,
+        right:0.25,
+        top:0.5,
+        bottom:0.5,
+        header:0.2,
+        footer:0.2
+      }
+    };
+
+    hoja.headerFooter.oddHeader =
+      "&CDIMARZA - Catálogo de Herramientas";
+
+    hoja.headerFooter.oddFooter =
+      "&LSistema de Gestión de Herramientas" +
+      "&RPágina &P de &N";
+
+    const buffer =
+      await workbook.xlsx.writeBuffer();
+
+    const blob = new Blob(
+      [buffer],
+      {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const enlace =
+      document.createElement("a");
+
+    enlace.href = url;
+
+    enlace.download =
+      `Catalogo_Herramientas_${obtenerFechaCatalogo()}.xlsx`;
+
+    document.body.appendChild(enlace);
+
+    enlace.click();
+
+    enlace.remove();
+
+    setTimeout(
+      () => URL.revokeObjectURL(url),
+      1000
+    );
+
+  }catch(error){
+
+    console.error(
+      "Error al exportar catálogo:",
+      error
+    );
+
+    alert(
+      "No se pudo generar el archivo Excel. " +
+      "Revisa la consola del navegador."
+    );
+
+  }finally{
+
+    boton.disabled = false;
+    boton.innerHTML =
+      textoOriginal;
+
+  }
+}
+function crearBordeCatalogo(){
+
+  return {
+    top:{
+      style:"thin",
+      color:{
+        argb:"FFCBD5E1"
+      }
+    },
+    left:{
+      style:"thin",
+      color:{
+        argb:"FFCBD5E1"
+      }
+    },
+    bottom:{
+      style:"thin",
+      color:{
+        argb:"FFCBD5E1"
+      }
+    },
+    right:{
+      style:"thin",
+      color:{
+        argb:"FFCBD5E1"
+      }
+    }
+  };
+}
+
+function calcularAlturaCatalogo(texto){
+
+  const lineas =
+    String(texto || "").split("\n").length;
+
+  return Math.max(
+    28,
+    lineas * 18
+  );
+}
+
+function obtenerFechaCatalogo(){
+
+  const fecha =
+    new Date();
+
+  const anio =
+    fecha.getFullYear();
+
+  const mes =
+    String(fecha.getMonth() + 1)
+      .padStart(2,"0");
+
+  const dia =
+    String(fecha.getDate())
+      .padStart(2,"0");
+
+  const hora =
+    String(fecha.getHours())
+      .padStart(2,"0");
+
+  const minuto =
+    String(fecha.getMinutes())
+      .padStart(2,"0");
+
+  return `${anio}-${mes}-${dia}_${hora}-${minuto}`;
 }
 </script>
 
