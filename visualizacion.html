@@ -216,7 +216,231 @@ font-weight:bold;
 .icono-ajustado_2{
     transform:translateX(5px);
 }
+/* =========================================================
+   CONTROL DE ACCESO
+========================================================= */
 
+.panel-acceso{
+  width:100%;
+  max-width:570px;
+
+  margin:28px auto 0;
+  padding:22px 24px;
+
+  border:1px solid rgba(148,163,184,.35);
+  border-radius:18px;
+
+  background:rgba(255,255,255,.92);
+
+  box-shadow:0 8px 22px rgba(15,23,42,.12);
+}
+
+.acceso-icono{
+  margin-bottom:7px;
+  font-size:32px;
+}
+
+.acceso-titulo{
+  color:#1f2937;
+  font-size:20px;
+  font-weight:800;
+}
+
+.acceso-texto{
+  margin-top:7px;
+
+  color:#6b7280;
+  font-size:14px;
+}
+
+.acceso-formulario{
+  display:flex;
+  gap:10px;
+
+  margin-top:17px;
+}
+
+.acceso-formulario input{
+  flex:1;
+  min-width:0;
+
+  padding:13px 15px;
+
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+
+  font-size:15px;
+  text-align:center;
+  letter-spacing:4px;
+
+  outline:none;
+}
+
+.acceso-formulario input:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+
+.acceso-formulario button{
+  min-width:125px;
+
+  padding:13px 20px;
+
+  border:none;
+  border-radius:12px;
+
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+
+  font-size:15px;
+  font-weight:bold;
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.acceso-formulario button:hover{
+  transform:translateY(-2px);
+}
+
+.acceso-formulario button:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.mensaje-acceso{
+  min-height:18px;
+  margin-top:12px;
+
+  font-size:14px;
+  font-weight:bold;
+}
+
+.mensaje-acceso.error{
+  color:#b91c1c;
+}
+
+.mensaje-acceso.exito{
+  color:#15803d;
+}
+
+
+/* SESIÓN ACTIVA */
+
+.vista-sesion{
+  display:none;
+
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+
+  text-align:left;
+}
+
+.vista-sesion.activa{
+  display:flex;
+}
+
+.sesion-etiqueta{
+  color:#6b7280;
+  font-size:13px;
+  font-weight:bold;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.sesion-rol{
+  margin-top:3px;
+
+  color:#0d3f8f;
+  font-size:24px;
+  font-weight:900;
+}
+
+.sesion-confirmacion{
+  margin-top:4px;
+
+  color:#15803d;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.btn-cerrar-sesion{
+  padding:12px 18px;
+
+  border:none;
+  border-radius:12px;
+
+  background:#374151;
+  color:white;
+
+  font-size:14px;
+  font-weight:bold;
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn-cerrar-sesion:hover{
+  background:#1f2937;
+  transform:translateY(-2px);
+}
+
+
+/* MÓDULOS BLOQUEADOS */
+
+.modulo-protegido{
+  position:relative;
+}
+
+.modulo-protegido.bloqueado{
+  opacity:.38;
+  filter:grayscale(.65);
+
+  cursor:not-allowed;
+  transform:scale(.97);
+}
+
+.modulo-protegido.bloqueado:hover{
+  transform:scale(.97);
+}
+
+.etiqueta-bloqueo{
+  display:none;
+
+  position:absolute;
+  top:12px;
+  left:50%;
+
+  width:max-content;
+  max-width:90%;
+
+  transform:translateX(-50%);
+
+  padding:6px 9px;
+
+  border-radius:999px;
+
+  background:rgba(17,24,39,.88);
+  color:white;
+
+  font-size:11px;
+  font-weight:bold;
+
+  z-index:5;
+}
+
+.modulo-protegido.bloqueado .etiqueta-bloqueo{
+  display:block;
+}
+
+.modulo-protegido{
+  transition:
+    opacity .25s,
+    filter .25s,
+    transform .25s;
+}
 @media(max-width:768px){
 
 .botones{
@@ -241,6 +465,26 @@ font-size:42px;
 
 font-size:20px;
 
+}
+.panel-acceso{
+  padding:20px 16px;
+}
+
+.acceso-formulario{
+  flex-direction:column;
+}
+
+.acceso-formulario button{
+  width:100%;
+}
+
+.vista-sesion{
+  flex-direction:column;
+  text-align:center;
+}
+
+.btn-cerrar-sesion{
+  width:100%;
 }
 
 }
@@ -272,39 +516,182 @@ Centro de consultas y visualización
 </div>
 
 </div>
+<div id="panelAcceso" class="panel-acceso">
 
-<div class="botones">
+  <div id="vistaLogin">
 
-<a class="btn inventario" href="herramientas-visual.html">
+    <div class="acceso-icono">🔐</div>
 
-<img src="img/lista-herramientas.png" class="icono">
+    <div class="acceso-titulo">
+      Acceso a Visualización
+    </div>
 
-<span>Vista General</span>
+    <div class="acceso-texto">
+      Ingrese la clave correspondiente para habilitar los módulos
+    </div>
 
-</a>
+    <div class="acceso-formulario">
 
-<a class="btn catalogo" href="herramientas-tabla.html">
-  <img src="img/tabla-herramientas.png" class="icono icono-ajustado">
-  <span>Catálogo Maestro</span>
-</a>
+      <input
+        id="claveAcceso"
+        type="password"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="Ingrese su clave"
+      >
 
-<a class="btn supervisor" href="herramientas-supervisor.html">
-  <img src="img/supervisor.png" class="icono icono-ajustado_2">
-  <span>Control Supervisor</span>
-</a>
+      <button
+        id="btnIngresar"
+        type="button"
+        onclick="iniciarSesion()"
+      >
+        Ingresar
+      </button>
 
-<a class="btn registrar" href="registrar-herramientas.html">
-  <img src="img/registrar-herramientas.png" class="icono icono-ajustado_1">
-  <span>Registrar Herramientas</span>
-</a>
+    </div>
 
-<a class="btn eliminar" href="eliminar-herramientas.html">
-  <img src="img/eliminar-herramientas.png" class="icono icono-ajustado_2">
-  <span>Eliminar Herramientas</span>
-</a>
+    <div
+      id="mensajeAcceso"
+      class="mensaje-acceso"
+    ></div>
+
+  </div>
+
+
+  <div
+    id="vistaSesion"
+    class="vista-sesion"
+  >
+
+    <div>
+
+      <div class="sesion-etiqueta">
+        Sesión activa
+      </div>
+
+      <div id="rolActivo" class="sesion-rol">
+        —
+      </div>
+
+      <div class="sesion-confirmacion">
+        ✓ Acceso concedido
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-cerrar-sesion"
+      onclick="cerrarSesion()"
+    >
+      Cerrar sesión
+    </button>
+
+  </div>
 
 </div>
+<div class="botones">
 
+  <a
+    class="btn inventario modulo-protegido"
+    data-permiso="RESIDENTE"
+    href="herramientas-visual.html"
+  >
+
+    <div class="etiqueta-bloqueo">
+      🔒 Solo residente
+    </div>
+
+    <img
+      src="img/lista-herramientas.png"
+      class="icono"
+    >
+
+    <span>Vista General</span>
+
+  </a>
+
+
+  <a
+    class="btn catalogo modulo-protegido"
+    data-permiso="RESIDENTE"
+    href="herramientas-tabla.html"
+  >
+
+    <div class="etiqueta-bloqueo">
+      🔒 Solo residente
+    </div>
+
+    <img
+      src="img/tabla-herramientas.png"
+      class="icono icono-ajustado"
+    >
+
+    <span>Catálogo Maestro</span>
+
+  </a>
+
+
+  <a
+    class="btn supervisor modulo-protegido"
+    data-permiso="AMBOS"
+    href="herramientas-supervisor.html"
+  >
+
+    <div class="etiqueta-bloqueo">
+      🔒 Residente / Supervisor
+    </div>
+
+    <img
+      src="img/supervisor.png"
+      class="icono icono-ajustado"
+    >
+
+    <span>Control Supervisor</span>
+
+  </a>
+
+
+  <a
+    class="btn registrar modulo-protegido"
+    data-permiso="RESIDENTE"
+    href="registrar-herramientas.html"
+  >
+
+    <div class="etiqueta-bloqueo">
+      🔒 Solo residente
+    </div>
+
+    <img
+      src="img/registrar-herramientas.png"
+      class="icono icono-ajustado"
+    >
+
+    <span>Registrar Herramientas</span>
+
+  </a>
+
+
+  <a
+    class="btn eliminar modulo-protegido"
+    data-permiso="RESIDENTE"
+    href="eliminar-herramientas.html"
+  >
+
+    <div class="etiqueta-bloqueo">
+      🔒 Solo residente
+    </div>
+
+    <img
+      src="img/eliminar-herramientas.png"
+      class="icono icono-ajustado"
+    >
+
+    <span>Eliminar Herramientas</span>
+
+  </a>
+
+</div>
 <a class="volver" href="index.html">
 
 ← Volver al menú principal
@@ -312,7 +699,421 @@ Centro de consultas y visualización
 </a>
 
 </div>
+<script>
 
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+/*
+  Pega aquí la URL /exec del Apps Script donde agregaste
+  la función validarClaveVisualizacion_.
+*/
+
+const WEB_APP_ACCESO =
+  'https://script.google.com/macros/s/AKfycbwvueeUnXA1khv-qj-xxZnPi8jq_MzBygE__2TI3w7GMK3-4ev5pMNQ5KIam8mMMlQb/exec';
+
+
+const CLAVE_ROL =
+  'dimarzaRolVisualizacion';
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  function(){
+
+    configurarControlAcceso();
+
+    const rolGuardado =
+      sessionStorage.getItem(CLAVE_ROL);
+
+    if(rolGuardado){
+      aplicarSesion(rolGuardado);
+    }else{
+      mostrarLogin();
+      bloquearTodosLosModulos();
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CONFIGURAR EVENTOS
+========================================================= */
+
+function configurarControlAcceso(){
+
+  document
+    .getElementById('claveAcceso')
+    .addEventListener(
+      'keydown',
+      function(event){
+
+        if(event.key === 'Enter'){
+          event.preventDefault();
+          iniciarSesion();
+        }
+
+      }
+    );
+
+
+  document
+    .querySelectorAll('.modulo-protegido')
+    .forEach(modulo=>{
+
+      modulo.addEventListener(
+        'click',
+        function(event){
+
+          if(
+            this.classList.contains('bloqueado')
+          ){
+
+            event.preventDefault();
+
+            const rol =
+              sessionStorage.getItem(CLAVE_ROL);
+
+            if(!rol){
+
+              mostrarMensajeAcceso(
+                'Ingrese su clave para continuar.',
+                'error'
+              );
+
+              document
+                .getElementById('claveAcceso')
+                .focus();
+
+            }else{
+
+              mostrarMensajeAcceso(
+                'Su rol no tiene permiso para ingresar a este módulo.',
+                'error'
+              );
+
+            }
+
+          }
+
+        }
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   INICIAR SESIÓN
+========================================================= */
+
+async function iniciarSesion(){
+
+  const campo =
+    document.getElementById('claveAcceso');
+
+  const boton =
+    document.getElementById('btnIngresar');
+
+  const clave =
+    String(campo.value || '').trim();
+
+  if(!clave){
+
+    mostrarMensajeAcceso(
+      'Ingrese una clave de acceso.',
+      'error'
+    );
+
+    campo.focus();
+    return;
+  }
+
+  if(
+    !WEB_APP_ACCESO ||
+    WEB_APP_ACCESO.includes('PEGA_AQUI')
+  ){
+
+    mostrarMensajeAcceso(
+      'Falta configurar la URL del Apps Script.',
+      'error'
+    );
+
+    return;
+  }
+
+  const textoOriginal =
+    boton.textContent;
+
+  try{
+
+    boton.disabled = true;
+    boton.textContent = 'Validando...';
+
+    mostrarMensajeAcceso(
+      'Comprobando clave...',
+      ''
+    );
+
+    const url =
+      WEB_APP_ACCESO +
+      '?action=validarClave' +
+      '&clave=' +
+      encodeURIComponent(clave) +
+      '&t=' +
+      Date.now();
+
+    const respuesta =
+      await fetch(url);
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        'No se pudo conectar con el servidor.'
+      );
+
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if(
+      !resultado.ok ||
+      !resultado.autorizado
+    ){
+
+      throw new Error(
+        resultado.message ||
+        'La clave ingresada no es válida.'
+      );
+
+    }
+
+    const rol =
+      normalizarRol(resultado.rol);
+
+    if(
+      rol !== 'RESIDENTE' &&
+      rol !== 'SUPERVISOR'
+    ){
+
+      throw new Error(
+        'El servidor devolvió un rol no válido.'
+      );
+
+    }
+
+    sessionStorage.setItem(
+      CLAVE_ROL,
+      rol
+    );
+
+    aplicarSesion(rol);
+
+    campo.value = '';
+
+  }catch(error){
+
+    console.error(error);
+
+    sessionStorage.removeItem(CLAVE_ROL);
+
+    bloquearTodosLosModulos();
+
+    mostrarMensajeAcceso(
+      error.message,
+      'error'
+    );
+
+    campo.select();
+
+  }finally{
+
+    boton.disabled = false;
+    boton.textContent = textoOriginal;
+
+  }
+
+}
+
+
+/* =========================================================
+   APLICAR PERMISOS
+========================================================= */
+
+function aplicarSesion(rol){
+
+  const rolNormalizado =
+    normalizarRol(rol);
+
+  document.getElementById(
+    'vistaLogin'
+  ).style.display = 'none';
+
+  document.getElementById(
+    'vistaSesion'
+  ).classList.add('activa');
+
+  document.getElementById(
+    'rolActivo'
+  ).textContent = rolNormalizado;
+
+  document
+    .querySelectorAll('.modulo-protegido')
+    .forEach(modulo=>{
+
+      const permiso =
+        normalizarRol(
+          modulo.dataset.permiso
+        );
+
+      let autorizado = false;
+
+      if(rolNormalizado === 'RESIDENTE'){
+
+        autorizado = true;
+
+      }else if(
+        rolNormalizado === 'SUPERVISOR' &&
+        permiso === 'AMBOS'
+      ){
+
+        autorizado = true;
+
+      }
+
+      modulo.classList.toggle(
+        'bloqueado',
+        !autorizado
+      );
+
+      modulo.setAttribute(
+        'aria-disabled',
+        autorizado
+          ? 'false'
+          : 'true'
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   CERRAR SESIÓN
+========================================================= */
+
+function cerrarSesion(){
+
+  sessionStorage.removeItem(CLAVE_ROL);
+
+  bloquearTodosLosModulos();
+
+  mostrarLogin();
+
+  document.getElementById(
+    'claveAcceso'
+  ).value = '';
+
+  mostrarMensajeAcceso(
+    'Sesión cerrada correctamente.',
+    'exito'
+  );
+
+  document.getElementById(
+    'claveAcceso'
+  ).focus();
+
+}
+
+
+/* =========================================================
+   ESTADOS VISUALES
+========================================================= */
+
+function bloquearTodosLosModulos(){
+
+  document
+    .querySelectorAll('.modulo-protegido')
+    .forEach(modulo=>{
+
+      modulo.classList.add('bloqueado');
+
+      modulo.setAttribute(
+        'aria-disabled',
+        'true'
+      );
+
+    });
+
+}
+
+
+function mostrarLogin(){
+
+  document.getElementById(
+    'vistaLogin'
+  ).style.display = 'block';
+
+  document.getElementById(
+    'vistaSesion'
+  ).classList.remove('activa');
+
+  document.getElementById(
+    'rolActivo'
+  ).textContent = '—';
+
+}
+
+
+function mostrarMensajeAcceso(
+  texto,
+  tipo
+){
+
+  const mensaje =
+    document.getElementById(
+      'mensajeAcceso'
+    );
+
+  mensaje.className =
+    'mensaje-acceso' +
+    (
+      tipo
+        ? ' ' + tipo
+        : ''
+    );
+
+  mensaje.textContent = texto;
+
+}
+
+
+/* =========================================================
+   UTILIDAD
+========================================================= */
+
+function normalizarRol(valor){
+
+  return String(valor || '')
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    );
+
+}
+
+</script>
 </body>
 
 </html>
