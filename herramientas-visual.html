@@ -1255,7 +1255,6 @@ function crearHojaDetalle(
   );
 
   hoja.columns = [
-    { key:"id", width:18 },
     { key:"herramienta", width:45 },
     { key:"codigo", width:20 },
     { key:"serie", width:24 },
@@ -1267,7 +1266,7 @@ function crearHojaDetalle(
     { key:"fechaEliminacion", width:20 }
   ];
 
-  hoja.mergeCells("A1:F2");
+  hoja.mergeCells("A1:I2");
 
   const titulo = hoja.getCell("A1");
 
@@ -1298,12 +1297,15 @@ function crearHojaDetalle(
   hoja.addRow([]);
 
   const encabezado = hoja.addRow([
-    "HERRAMIENTA",
+    "ITEM",
     "CÓDIGO",
     "SERIE",
     "MARCA",
     "CAJA",
-    "ESTADO"
+    "ESTADO",
+    "ACTIVO",
+    "FECHA DE REGISTRO",
+    "FECHA DE ELIMINACIÓN"
   ]);
 
   aplicarEstiloEncabezado(
@@ -1334,12 +1336,15 @@ function crearHojaDetalle(
   ordenados.forEach((item, indice) => {
 
     const fila = hoja.addRow([
-      item.item || "",
-      item.codigo || "",
-      item.serie || "",
-      item.marca || "",
-      item.caja || "",
-      item.estado || ""
+     item.item || "",
+     item.codigo || "",
+     item.serie || "",
+     item.marca || "",
+     item.caja || "",
+     item.estado || "",
+     item.activo || "",
+     item.fechaRegistro || "",
+     item.fechaEliminacion || ""
     ]);
 
     fila.height = 24;
@@ -1398,7 +1403,7 @@ function crearHojaDetalle(
 
   hoja.autoFilter = {
     from:"A4",
-    to:`F${hoja.rowCount}`
+    to:`I${hoja.rowCount}`
   };
 }
 function construirResumenHerramientas(data){
