@@ -536,6 +536,19 @@ h1{
   text-align:right;
   word-break:break-word;
 }
+.estado-masivo-permitido{
+  display:inline-block;
+
+  padding:6px 10px;
+
+  border-radius:999px;
+
+  color:#166534;
+  background:#dcfce7;
+
+  font-size:12px;
+  font-weight:bold;
+}
 
 .modal-acciones{
   display:flex;
@@ -731,43 +744,140 @@ h1{
   display:block;
 }
 
-.resumen-fecha{
+
+/* RESUMEN VISUAL POR FECHA */
+
+.resumen-fecha-nuevo{
+  display:block;
+
+  padding:20px;
+
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+
+  background:linear-gradient(
+    145deg,
+    #ffffff,
+    #f8fafc
+  );
+}
+
+.resumen-fecha-titulo{
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  gap:15px;
+  gap:13px;
 
-  margin-bottom:14px;
-
-  color:#374151;
+  margin-bottom:18px;
 }
 
-.resumen-fecha-contadores{
+.resumen-calendario{
   display:flex;
-  flex-wrap:wrap;
-  gap:8px;
+  align-items:center;
+  justify-content:center;
+
+  width:48px;
+  height:48px;
+
+  border-radius:14px;
+
+  background:#fee2e2;
+
+  font-size:24px;
 }
 
-.contador-fecha{
-  padding:7px 11px;
+.resumen-etiqueta{
+  margin-bottom:3px;
 
-  border-radius:999px;
-
-  background:#e5e7eb;
-  color:#374151;
+  color:#6b7280;
 
   font-size:12px;
   font-weight:bold;
+  letter-spacing:.5px;
+  text-transform:uppercase;
 }
 
-.contador-fecha.eliminables{
+.resumen-fecha-titulo strong{
+  color:#111827;
+  font-size:20px;
+}
+
+.resumen-tarjetas{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.resumen-tarjeta{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  min-height:92px;
+  padding:14px;
+
+  border-radius:14px;
+  border:1px solid transparent;
+}
+
+.resumen-tarjeta.total{
+  color:#1e3a8a;
+  background:#dbeafe;
+  border-color:#93c5fd;
+}
+
+.resumen-tarjeta.disponibles{
   color:#166534;
   background:#dcfce7;
+  border-color:#86efac;
 }
 
-.contador-fecha.bloqueadas{
+.resumen-tarjeta.asignadas{
   color:#991b1b;
   background:#fee2e2;
+  border-color:#fca5a5;
+}
+
+.resumen-numero{
+  font-size:28px;
+  font-weight:900;
+}
+
+.resumen-descripcion{
+  margin-top:3px;
+
+  font-size:12px;
+  font-weight:bold;
+  text-transform:uppercase;
+}
+
+.advertencia-resumen-fecha{
+  display:none;
+
+  margin-top:15px;
+  padding:13px 15px;
+
+  border-radius:12px;
+
+  font-size:13px;
+  font-weight:bold;
+  line-height:1.45;
+}
+
+.advertencia-resumen-fecha.bloqueada{
+  display:block;
+
+  color:#991b1b;
+  background:#fee2e2;
+  border:1px solid #fca5a5;
+}
+
+.advertencia-resumen-fecha.permitida{
+  display:block;
+
+  color:#166534;
+  background:#dcfce7;
+  border:1px solid #86efac;
 }
 
 .tabla-fecha-contenedor{
@@ -817,6 +927,7 @@ h1{
 
   background:linear-gradient(135deg,#dc2626,#991b1b);
 }
+
 @media(max-width:950px){
 
   .lista{
@@ -855,9 +966,9 @@ h1{
   grid-template-columns:1fr;
 }
 
-.resumen-fecha{
-  flex-direction:column;
-  align-items:flex-start;
+
+.resumen-tarjetas{
+  grid-template-columns:1fr;
 }
 
 }
@@ -959,15 +1070,38 @@ h1{
     </button>
 
     <button
-      type="button"
-      class="boton boton-todas"
-      onclick="mostrarTodas()"
-    >
-      Mostrar todas
-    </button>
+  type="button"
+  class="boton boton-todas"
+  onclick="mostrarTodas()"
+>
+  Mostrar todas
+</button>
+
+</div>
+
+<div
+  id="contador"
+  class="contador"
+></div>
+
+<div
+  id="listaHerramientas"
+  class="lista"
+>
+
+    <div class="vacio">
+
+      <div class="vacio-icono">
+        🔎
+      </div>
+
+      Busca una herramienta para comenzar.
+
+    </div>
 
   </div>
-  <!-- ELIMINACIÓN POR FECHA -->
+
+   <!-- ELIMINACIÓN POR FECHA -->
 
   <div class="eliminacion-fecha">
 
@@ -1027,40 +1161,72 @@ h1{
       class="resultado-fecha"
     >
 
-      <div class="resumen-fecha">
+<div class="resumen-fecha resumen-fecha-nuevo">
 
-        <div>
-          Herramientas registradas el
-          <strong id="fechaSeleccionadaTexto"></strong>
-        </div>
+  <div class="resumen-fecha-titulo">
 
-        <div class="resumen-fecha-contadores">
+    <span class="resumen-calendario">
+      📅
+    </span>
 
-          <span
-            id="totalFecha"
-            class="contador-fecha"
-          >
-            0 encontradas
-          </span>
-
-          <span
-            id="eliminablesFecha"
-            class="contador-fecha eliminables"
-          >
-            0 eliminables
-          </span>
-
-          <span
-            id="bloqueadasFecha"
-            class="contador-fecha bloqueadas"
-          >
-            0 bloqueadas
-          </span>
-
-        </div>
-
+    <div>
+      <div class="resumen-etiqueta">
+        Fecha consultada
       </div>
 
+      <strong id="fechaSeleccionadaTexto">
+        —
+      </strong>
+    </div>
+
+  </div>
+
+  <div class="resumen-tarjetas">
+
+    <div class="resumen-tarjeta total">
+
+      <span class="resumen-numero" id="totalFechaNumero">
+        0
+      </span>
+
+      <span class="resumen-descripcion">
+        Registradas
+      </span>
+
+    </div>
+
+    <div class="resumen-tarjeta disponibles">
+
+      <span class="resumen-numero" id="eliminablesFechaNumero">
+        0
+      </span>
+
+      <span class="resumen-descripcion">
+        Disponibles
+      </span>
+
+    </div>
+
+    <div class="resumen-tarjeta asignadas">
+
+      <span class="resumen-numero" id="bloqueadasFechaNumero">
+        0
+      </span>
+
+      <span class="resumen-descripcion">
+        Asignadas
+      </span>
+
+    </div>
+
+  </div>
+
+  <div
+    id="advertenciaResumenFecha"
+    class="advertencia-resumen-fecha"
+  ></div>
+
+</div>
       <div class="tabla-fecha-contenedor">
 
         <table class="tabla-fecha">
@@ -1092,27 +1258,6 @@ h1{
       >
         Eliminar herramientas de esta fecha
       </button>
-
-    </div>
-
-  </div>
-  <div
-    id="contador"
-    class="contador"
-  ></div>
-
-  <div
-    id="listaHerramientas"
-    class="lista"
-  >
-
-    <div class="vacio">
-
-      <div class="vacio-icono">
-        🔎
-      </div>
-
-      Busca una herramienta para comenzar.
 
     </div>
 
@@ -1241,7 +1386,7 @@ h1{
           ></span>
 
         </div>
-
+  
       </div>
 
     </div>
@@ -1271,7 +1416,117 @@ h1{
 
 </div>
 
+<!-- =========================================================
+     MODAL ELIMINAR HERRAMIENTAS POR FECHA
+========================================================= -->
 
+<div
+  id="modalEliminarFecha"
+  class="modal-fondo"
+>
+
+  <div class="modal">
+
+    <div class="modal-encabezado">
+
+      <h3>
+        Eliminar herramientas por fecha
+      </h3>
+
+      <p>
+        Confirma la eliminación definitiva de todas las filas
+      </p>
+
+    </div>
+
+    <div class="modal-contenido">
+
+      <div class="advertencia">
+        Esta acción eliminará definitivamente todas las herramientas
+        registradas en la fecha seleccionada. Esta operación no se puede deshacer.
+      </div>
+
+<div class="modal-resumen">
+
+  <div class="modal-fila">
+
+    <span class="modal-etiqueta">
+      Fecha de registro
+    </span>
+
+    <span
+      id="modalFechaMasiva"
+      class="modal-valor"
+    ></span>
+
+  </div>
+
+  <div class="modal-fila">
+
+    <span class="modal-etiqueta">
+      Cantidad a eliminar
+    </span>
+
+    <span
+      id="modalCantidadMasiva"
+      class="modal-valor"
+    ></span>
+
+  </div>
+
+  <div class="modal-fila">
+
+    <span class="modal-etiqueta">
+      Estado
+    </span>
+
+    <span
+      id="modalEstadoMasivo"
+      class="modal-valor estado-masivo-permitido"
+    >
+      ✓ Todas disponibles para eliminar
+    </span>
+
+  </div>
+
+  <div class="modal-fila">
+
+    <span class="modal-etiqueta">
+      Acción
+    </span>
+
+    <span class="modal-valor">
+      🗑️ Eliminación masiva
+    </span>
+
+  </div>
+
+</div>
+
+    <div class="modal-acciones">
+
+      <button
+        type="button"
+        class="modal-boton modal-cancelar"
+        onclick="cerrarModalEliminarFecha()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        id="btnConfirmarEliminarFecha"
+        type="button"
+        class="modal-boton modal-eliminar"
+        onclick="confirmarEliminarPorFecha()"
+      >
+        Eliminar definitivamente
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 <script>
 
 /*
@@ -1337,6 +1592,18 @@ function configurarEventos(){
       }
     );
 
+  document
+  .getElementById('modalEliminarFecha')
+  .addEventListener(
+    'click',
+    function(event){
+
+      if(event.target === this){
+        cerrarModalEliminarFecha();
+      }
+
+    }
+  );
 }
 
 
@@ -2394,23 +2661,20 @@ function renderizarResultadosFecha(
     'fechaSeleccionadaTexto'
   ).textContent = fecha;
 
-  document.getElementById(
-    'totalFecha'
-  ).textContent =
-    herramientas.length +
-    ' encontradas';
+ document.getElementById(
+  'totalFechaNumero'
+).textContent =
+  herramientas.length;
 
-  document.getElementById(
-    'eliminablesFecha'
-  ).textContent =
-    eliminables +
-    ' eliminables';
+document.getElementById(
+  'eliminablesFechaNumero'
+).textContent =
+  eliminables;
 
-  document.getElementById(
-    'bloqueadasFecha'
-  ).textContent =
-    bloqueadas +
-    ' bloqueadas';
+document.getElementById(
+  'bloqueadasFechaNumero'
+).textContent =
+  bloqueadas;
 
   if(!herramientas.length){
 
@@ -2490,6 +2754,30 @@ function renderizarResultadosFecha(
         eliminables +
         ' herramientas';
 
+    const advertenciaResumen =
+  document.getElementById(
+    'advertenciaResumenFecha'
+  );
+
+if(bloqueadas > 0){
+
+  advertenciaResumen.className =
+    'advertencia-resumen-fecha bloqueada';
+
+  advertenciaResumen.textContent =
+    '⚠ Existen ' +
+    bloqueadas +
+    ' herramienta(s) asignada(s). No es posible realizar la eliminación masiva.';
+
+}else{
+
+  advertenciaResumen.className =
+    'advertencia-resumen-fecha permitida';
+
+  advertenciaResumen.textContent =
+    '✓ Todas las herramientas encontradas están disponibles para eliminación.';
+
+}
   ocultarMensajeFecha();
 
   resultado.classList.add('activo');
@@ -2547,6 +2835,212 @@ function formatearFechaISO(fechaISO){
   );
 
 }
+
+/* =========================================================
+   MODAL ELIMINAR POR FECHA
+========================================================= */
+
+function abrirModalEliminarFecha(){
+
+  if(
+    !fechaMasivaActual ||
+    totalEliminablesFecha <= 0
+  ){
+    return;
+  }
+
+  if(totalBloqueadasFecha > 0){
+
+    mostrarMensajeFecha(
+      'No se puede eliminar porque existen herramientas asignadas.',
+      'error'
+    );
+
+    return;
+  }
+
+  document.getElementById(
+    'modalFechaMasiva'
+  ).textContent =
+    formatearFechaISO(
+      fechaMasivaActual
+    );
+
+  document.getElementById(
+    'modalCantidadMasiva'
+  ).textContent =
+    totalEliminablesFecha +
+    ' herramienta(s)';
+      
+    document.getElementById(
+      'modalEstadoMasivo'
+    ).textContent =
+      '✓ Validado: todas las herramientas están disponibles';
+    
+    document.getElementById(
+      'modalEliminarFecha'
+    ).classList.add('activo');
+
+}
+
+function cerrarModalEliminarFecha(){
+
+  document
+    .getElementById(
+      "modalEliminarFecha"
+    )
+    .classList.remove(
+      "activo"
+    );
+
+}
+async function confirmarEliminarPorFecha(){
+
+  const boton=
+    document.getElementById(
+      "btnConfirmarEliminarFecha"
+    );
+
+  const textoOriginal=
+    boton.innerHTML;
+
+  try{
+
+    boton.disabled=true;
+
+    boton.innerHTML=
+      "Eliminando...";
+
+    const respuesta=
+      await fetch(
+
+        WEB_APP_URL+
+
+        "?action=eliminarHerramientasPorFecha"+
+
+        "&fecha="+
+
+        encodeURIComponent(
+          fechaMasivaActual
+        )+
+
+        "&t="+
+
+        Date.now()
+
+      );
+
+    if(!respuesta.ok){
+  throw new Error(
+    'No se pudo conectar con el servidor.'
+  );
+}
+
+    const datos=
+      await respuesta.json();
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.message
+      );
+
+    }
+
+    cerrarModalEliminarFecha();
+
+    mostrarMensaje(
+      "✅ Se eliminaron correctamente " +
+      datos.totalEliminadas +
+      " herramienta(s) registradas el " +
+      datos.fecha +
+      ".",
+      "exito"
+    );
+    document.getElementById(
+      "resultadoFecha"
+    ).classList.remove(
+      "activo"
+    );
+
+    document.getElementById(
+      "tablaFechaBody"
+    ).innerHTML="";
+
+    document.getElementById(
+      "fechaEliminar"
+    ).value="";
+
+    document.getElementById(
+  "btnEliminarFecha"
+).textContent =
+  "Eliminar herramientas de esta fecha";
+
+document.getElementById(
+  "btnEliminarFecha"
+).disabled = true;
+
+document.getElementById(
+  'totalFechaNumero'
+).textContent = '0';
+
+document.getElementById(
+  'eliminablesFechaNumero'
+).textContent = '0';
+
+document.getElementById(
+  'bloqueadasFechaNumero'
+).textContent = '0';
+
+document.getElementById(
+  'fechaSeleccionadaTexto'
+).textContent = '—';
+
+const advertenciaResumen =
+  document.getElementById(
+    'advertenciaResumenFecha'
+  );
+
+advertenciaResumen.className =
+  'advertencia-resumen-fecha';
+
+advertenciaResumen.textContent = '';
+
+document.getElementById(
+  'modalEstadoMasivo'
+).textContent =
+    '✓ Validado: todas las herramientas están disponibles';
+
+ocultarMensajeFecha();
+
+    totalEliminablesFecha=0;
+    totalBloqueadasFecha=0;
+    herramientasFechaActuales=[];
+    fechaMasivaActual="";
+
+  }
+
+  catch(error){
+
+    mostrarMensajeFecha(
+      error.message,
+      "error"
+    );
+
+  }
+
+  finally{
+
+    boton.disabled=false;
+
+    boton.innerHTML=
+      textoOriginal;
+
+  }
+
+}
+
+
 /* =========================================================
    MENSAJES
 ========================================================= */
