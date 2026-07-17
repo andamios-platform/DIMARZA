@@ -498,7 +498,7 @@ font-size:18px;
  
 <script>
   
-const API_URL = "https://script.google.com/macros/s/AKfycbzeGyXppcnE2oomHXbmbDkUBLAFMgwNG13lAerVBxtP_kxNUdy5vtrDf9Oh5cJxr6nLqg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz0xoHKYvxKOtT8EEOyeJTQKEcWfHK4M-ky5ZDdQ_tbxqqfQAOEQUm1vNQOQXZvg5pvDA/exec";
 
 const IMAGENES = {
   "ARNES MECANICO 6": "img/ArnésMecánico6argollas.JPG",
@@ -1255,12 +1255,16 @@ function crearHojaDetalle(
   );
 
   hoja.columns = [
-    { key:"herramienta", width:55 },
+    { key:"id", width:18 },
+    { key:"herramienta", width:45 },
     { key:"codigo", width:20 },
     { key:"serie", width:24 },
     { key:"marca", width:22 },
-    { key:"caja", width:20 },
-    { key:"estado", width:18 }
+    { key:"caja", width:18 },
+    { key:"estado", width:18 },
+    { key:"activo", width:12 },
+    { key:"fechaRegistro", width:20 },
+    { key:"fechaEliminacion", width:20 }
   ];
 
   hoja.mergeCells("A1:F2");
