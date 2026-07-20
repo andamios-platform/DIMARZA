@@ -216,6 +216,9 @@ font-weight:bold;
 .icono-ajustado_2{
     transform:translateX(5px);
 }
+.icono-ajustado_3{
+    transform:translateX(3px);
+}
 /* =========================================================
    CONTROL DE ACCESO
 ========================================================= */
@@ -440,6 +443,9 @@ font-weight:bold;
     opacity .25s,
     filter .25s,
     transform .25s;
+}
+.actualizar{
+background:linear-gradient(135deg,#0891b2,#0e7490);
 }
 @media(max-width:768px){
 
@@ -669,16 +675,30 @@ Centro de consultas y visualización
 
   </a>
 
+<a
+  class="btn actualizar modulo-protegido"
+  data-permiso="RESIDENTE"
+  href="herramientas-actualizar.html"
+>
 
+  <div class="etiqueta-bloqueo">
+    🔒 Solo residente
+  </div>
+
+<img
+    src="img/actualizar-herramienta.png"
+    class="icono icono-ajustado_3"
+>
+
+  <span>Actualizar Herramienta</span>
+
+</a>
   <a
     class="btn eliminar modulo-protegido"
     data-permiso="RESIDENTE"
     href="eliminar-herramientas.html"
   >
-    <a class="btn actualizar" href="herramientas-actualizar.html">
-      <img src="img/actualizar-herramienta.png" class="icono">
-      <span>Actualizar Herramienta</span>
-    </a>
+
 
     <div class="etiqueta-bloqueo">
       🔒 Solo residente
