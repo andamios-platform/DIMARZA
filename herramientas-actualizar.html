@@ -1,1 +1,3028 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Actualizar Herramienta</title>
+
+<style>
+
+:root{
+  --fondo:#f5f7fb;
+  --blanco:#ffffff;
+
+  --primario:#0891b2;
+  --primario-oscuro:#0e7490;
+
+  --azul:#2563eb;
+  --verde:#16a34a;
+  --rojo:#dc2626;
+  --naranja:#f59e0b;
+
+  --texto:#1f2937;
+  --muted:#64748b;
+  --borde:#dbe3ef;
+
+  --sombra:
+    0 10px 30px rgba(15,23,42,.10);
+
+  --radio:18px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+
+  min-height:100vh;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  color:var(--texto);
+
+  background:
+    linear-gradient(
+      rgba(15,23,42,.58),
+      rgba(15,23,42,.68)
+    ),
+    url("img/fondo.png");
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+
+  padding:20px;
+}
+
+button,
+input,
+select,
+textarea{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+.app{
+  width:100%;
+  max-width:1250px;
+  margin:0 auto;
+}
+
+/* =========================================================
+   CABECERA
+========================================================= */
+
+.cabecera{
+  padding:24px;
+
+  border-radius:24px;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primario),
+      var(--primario-oscuro)
+    );
+
+  box-shadow:var(--sombra);
+
+  margin-bottom:18px;
+}
+
+.cabecera-contenido{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.cabecera-icono{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:78px;
+  height:78px;
+
+  flex-shrink:0;
+
+  border-radius:20px;
+
+  background:
+    rgba(255,255,255,.16);
+
+  font-size:39px;
+}
+
+.cabecera h1{
+  margin:0 0 7px;
+
+  font-size:30px;
+  font-weight:900;
+}
+
+.cabecera p{
+  margin:0;
+
+  font-size:15px;
+  opacity:.94;
+}
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:18px;
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+
+  min-height:46px;
+
+  padding:12px 18px;
+
+  border:none;
+  border-radius:13px;
+
+  font-size:14px;
+  font-weight:800;
+
+  text-decoration:none;
+
+  transition:.2s;
+
+  box-shadow:
+    0 5px 16px rgba(15,23,42,.12);
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+}
+
+.btn-volver{
+  color:#111827;
+  background:#e5e7eb;
+}
+
+.btn-primario{
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primario),
+      var(--primario-oscuro)
+    );
+}
+
+.btn-secundario{
+  color:#1f2937;
+  background:#e2e8f0;
+}
+
+.btn-cancelar{
+  color:white;
+  background:#64748b;
+}
+
+.btn-confirmar{
+  color:white;
+  background:#16a34a;
+}
+
+/* =========================================================
+   TARJETAS GENERALES
+========================================================= */
+
+.panel{
+  padding:22px;
+
+  border:1px solid
+    rgba(219,227,239,.92);
+
+  border-radius:var(--radio);
+
+  background:
+    rgba(255,255,255,.97);
+
+  box-shadow:var(--sombra);
+
+  margin-bottom:18px;
+}
+
+.panel-titulo{
+  margin:0;
+
+  color:#0f172a;
+
+  font-size:21px;
+  font-weight:900;
+}
+
+.panel-subtitulo{
+  margin:7px 0 0;
+
+  color:var(--muted);
+
+  font-size:14px;
+}
+
+/* =========================================================
+   BUSCADOR
+========================================================= */
+
+.buscador-fila{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  margin-top:18px;
+}
+
+.buscador-contenedor{
+  position:relative;
+  flex:1;
+}
+
+.buscador-icono{
+  position:absolute;
+
+  left:16px;
+  top:50%;
+
+  transform:translateY(-50%);
+
+  font-size:20px;
+
+  pointer-events:none;
+}
+
+.buscador{
+  width:100%;
+  min-height:52px;
+
+  padding:
+    14px
+    15px
+    14px
+    48px;
+
+  border:
+    1px solid
+    #cbd5e1;
+
+  border-radius:14px;
+
+  font-size:16px;
+
+  outline:none;
+
+  transition:.2s;
+}
+
+.buscador:focus{
+  border-color:var(--primario);
+
+  box-shadow:
+    0 0 0 4px
+    rgba(8,145,178,.13);
+}
+
+.ayuda-busqueda{
+  margin-top:11px;
+
+  color:#64748b;
+
+  font-size:13px;
+}
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.mensaje{
+  display:none;
+
+  padding:14px 16px;
+
+  margin-bottom:18px;
+
+  border-radius:14px;
+
+  font-size:14px;
+  font-weight:800;
+
+  box-shadow:var(--sombra);
+}
+
+.mensaje.visible{
+  display:block;
+}
+
+.mensaje.exito{
+  color:#166534;
+
+  border:1px solid #86efac;
+  background:#dcfce7;
+}
+
+.mensaje.error{
+  color:#991b1b;
+
+  border:1px solid #fca5a5;
+  background:#fee2e2;
+}
+
+.mensaje.info{
+  color:#075985;
+
+  border:1px solid #7dd3fc;
+  background:#e0f2fe;
+}
+
+/* =========================================================
+   RESULTADOS
+========================================================= */
+
+.encabezado-resultados{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+
+  margin-bottom:15px;
+}
+
+.total-resultados{
+  padding:7px 11px;
+
+  border-radius:999px;
+
+  color:#0e7490;
+  background:#cffafe;
+
+  font-size:13px;
+  font-weight:900;
+}
+
+.resultados{
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(295px,1fr)
+    );
+
+  gap:16px;
+}
+
+.resultado-card{
+  display:flex;
+  flex-direction:column;
+
+  min-height:250px;
+
+  padding:18px;
+
+  border:1px solid var(--borde);
+  border-radius:16px;
+
+  background:white;
+
+  box-shadow:
+    0 7px 20px rgba(15,23,42,.07);
+
+  transition:.2s;
+}
+
+.resultado-card:hover{
+  transform:translateY(-4px);
+
+  box-shadow:
+    0 13px 27px rgba(15,23,42,.13);
+}
+
+.resultado-cabecera{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.resultado-icono{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:46px;
+  height:46px;
+
+  flex-shrink:0;
+
+  border-radius:13px;
+
+  background:#cffafe;
+
+  font-size:24px;
+}
+
+.resultado-item{
+  color:#0f172a;
+
+  font-size:16px;
+  font-weight:900;
+
+  line-height:1.3;
+}
+
+.resultado-id{
+  margin-top:4px;
+
+  color:#64748b;
+
+  font-size:12px;
+  font-weight:700;
+}
+
+.resultado-datos{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+
+  margin-top:17px;
+}
+
+.dato{
+  padding:10px;
+
+  border-radius:11px;
+
+  background:#f8fafc;
+}
+
+.dato-etiqueta{
+  color:#64748b;
+
+  font-size:11px;
+  font-weight:900;
+
+  text-transform:uppercase;
+}
+
+.dato-valor{
+  margin-top:4px;
+
+  color:#1f2937;
+
+  font-size:13px;
+  font-weight:800;
+
+  overflow-wrap:anywhere;
+}
+
+.resultado-pie{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+
+  margin-top:auto;
+  padding-top:17px;
+}
+
+.estado{
+  display:inline-flex;
+  align-items:center;
+
+  min-height:30px;
+
+  padding:6px 10px;
+
+  border-radius:999px;
+
+  font-size:12px;
+  font-weight:900;
+}
+
+.estado.disponible{
+  color:#166534;
+  background:#dcfce7;
+}
+
+.estado.asignado{
+  color:#991b1b;
+  background:#fee2e2;
+}
+
+.estado.inactivo{
+  color:#475569;
+  background:#e2e8f0;
+}
+
+.estado.otro{
+  color:#92400e;
+  background:#fef3c7;
+}
+
+.btn-editar{
+  padding:10px 14px;
+
+  border:none;
+  border-radius:11px;
+
+  color:white;
+  background:var(--primario);
+
+  font-size:13px;
+  font-weight:900;
+}
+
+.sin-resultados{
+  grid-column:1/-1;
+
+  padding:35px 20px;
+
+  border:
+    2px dashed
+    #cbd5e1;
+
+  border-radius:16px;
+
+  color:#64748b;
+
+  text-align:center;
+
+  background:#f8fafc;
+}
+
+.sin-resultados-icono{
+  margin-bottom:10px;
+
+  font-size:40px;
+}
+
+/* =========================================================
+   CARGANDO
+========================================================= */
+
+.cargando{
+  display:none;
+
+  padding:30px;
+
+  color:#475569;
+
+  text-align:center;
+
+  font-weight:800;
+}
+
+.cargando.visible{
+  display:block;
+}
+
+.spinner{
+  width:34px;
+  height:34px;
+
+  margin:0 auto 12px;
+
+  border:
+    4px solid
+    #cbd5e1;
+
+  border-top-color:
+    var(--primario);
+
+  border-radius:50%;
+
+  animation:girar .8s linear infinite;
+}
+
+@keyframes girar{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+/* =========================================================
+   FORMULARIO
+========================================================= */
+
+#panelFormulario{
+  display:none;
+}
+
+#panelFormulario.visible{
+  display:block;
+}
+
+.resumen-herramienta{
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,minmax(0,1fr));
+
+  gap:12px;
+
+  margin-top:18px;
+  margin-bottom:21px;
+}
+
+.resumen-celda{
+  min-height:82px;
+
+  padding:14px;
+
+  border-radius:14px;
+
+  background:#f8fafc;
+
+  border:1px solid #e2e8f0;
+}
+
+.resumen-etiqueta{
+  color:#64748b;
+
+  font-size:11px;
+  font-weight:900;
+
+  letter-spacing:.5px;
+
+  text-transform:uppercase;
+}
+
+.resumen-valor{
+  margin-top:7px;
+
+  color:#0f172a;
+
+  font-size:15px;
+  font-weight:900;
+
+  overflow-wrap:anywhere;
+}
+
+.form-grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:17px;
+}
+
+.campo{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.campo.completo{
+  grid-column:1/-1;
+}
+
+.campo label{
+  color:#334155;
+
+  font-size:13px;
+  font-weight:900;
+}
+
+.campo input,
+.campo select,
+.campo textarea{
+  width:100%;
+
+  padding:13px 14px;
+
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+
+  color:#1f2937;
+  background:white;
+
+  font-size:15px;
+
+  outline:none;
+
+  transition:.2s;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus{
+  border-color:var(--primario);
+
+  box-shadow:
+    0 0 0 4px
+    rgba(8,145,178,.12);
+}
+
+.campo input:disabled{
+  color:#475569;
+  background:#f1f5f9;
+}
+
+.campo textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+.campo-ayuda{
+  color:#64748b;
+
+  font-size:12px;
+}
+
+.alerta-baja{
+  display:none;
+
+  grid-column:1/-1;
+
+  padding:14px;
+
+  border:1px solid #fdba74;
+  border-radius:13px;
+
+  color:#9a3412;
+  background:#ffedd5;
+
+  font-size:13px;
+  font-weight:800;
+}
+
+.alerta-baja.visible{
+  display:block;
+}
+
+.acciones-formulario{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+
+  flex-wrap:wrap;
+
+  margin-top:23px;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal{
+  display:none;
+
+  position:fixed;
+  inset:0;
+
+  z-index:9999;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+
+  background:
+    rgba(15,23,42,.72);
+}
+
+.modal.visible{
+  display:flex;
+}
+
+.modal-contenido{
+  width:100%;
+  max-width:680px;
+
+  max-height:90vh;
+  overflow:auto;
+
+  padding:24px;
+
+  border-radius:20px;
+
+  background:white;
+
+  box-shadow:
+    0 25px 70px rgba(0,0,0,.32);
+
+  animation:aparecer .23s ease;
+}
+
+@keyframes aparecer{
+  from{
+    opacity:0;
+    transform:scale(.94);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+.modal-cabecera{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.modal-titulo{
+  margin:0;
+
+  color:#0f172a;
+
+  font-size:22px;
+  font-weight:900;
+}
+
+.modal-texto{
+  margin:7px 0 0;
+
+  color:#64748b;
+
+  font-size:14px;
+}
+
+.cerrar-modal{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:38px;
+  height:38px;
+
+  flex-shrink:0;
+
+  border:none;
+  border-radius:50%;
+
+  color:#475569;
+  background:#e2e8f0;
+
+  font-size:22px;
+  font-weight:900;
+}
+
+.lista-cambios{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+
+  margin-top:20px;
+}
+
+.cambio{
+  display:grid;
+
+  grid-template-columns:
+    minmax(100px,130px)
+    1fr
+    36px
+    1fr;
+
+  align-items:center;
+  gap:10px;
+
+  padding:12px;
+
+  border:1px solid #e2e8f0;
+  border-radius:13px;
+
+  background:#f8fafc;
+}
+
+.cambio-campo{
+  color:#334155;
+
+  font-size:12px;
+  font-weight:900;
+
+  text-transform:uppercase;
+}
+
+.cambio-anterior{
+  padding:8px;
+
+  border-radius:9px;
+
+  color:#991b1b;
+  background:#fee2e2;
+
+  font-size:13px;
+  font-weight:800;
+
+  overflow-wrap:anywhere;
+}
+
+.cambio-flecha{
+  color:#64748b;
+
+  text-align:center;
+
+  font-size:19px;
+  font-weight:900;
+}
+
+.cambio-nuevo{
+  padding:8px;
+
+  border-radius:9px;
+
+  color:#166534;
+  background:#dcfce7;
+
+  font-size:13px;
+  font-weight:800;
+
+  overflow-wrap:anywhere;
+}
+
+.modal-motivo{
+  margin-top:17px;
+  padding:13px;
+
+  border-radius:12px;
+
+  color:#075985;
+  background:#e0f2fe;
+
+  font-size:13px;
+  font-weight:800;
+}
+
+.modal-acciones{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+
+  flex-wrap:wrap;
+
+  margin-top:22px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:900px){
+
+  .resumen-herramienta{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
+
+}
+
+@media(max-width:700px){
+
+  body{
+    padding:10px;
+  }
+
+  .cabecera{
+    padding:18px;
+    border-radius:18px;
+  }
+
+  .cabecera-contenido{
+    align-items:flex-start;
+  }
+
+  .cabecera-icono{
+    width:60px;
+    height:60px;
+
+    font-size:31px;
+  }
+
+  .cabecera h1{
+    font-size:22px;
+  }
+
+  .buscador-fila{
+    flex-direction:column;
+  }
+
+  .buscador-contenedor,
+  .buscador-fila .btn{
+    width:100%;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .campo.completo,
+  .alerta-baja{
+    grid-column:auto;
+  }
+
+  .acciones-formulario{
+    flex-direction:column-reverse;
+  }
+
+  .acciones-formulario .btn{
+    width:100%;
+  }
+
+  .cambio{
+    grid-template-columns:1fr;
+  }
+
+  .cambio-flecha{
+    transform:rotate(90deg);
+  }
+
+}
+
+@media(max-width:480px){
+
+  .resumen-herramienta{
+    grid-template-columns:1fr;
+  }
+
+  .resultado-datos{
+    grid-template-columns:1fr;
+  }
+
+  .modal-acciones{
+    flex-direction:column-reverse;
+  }
+
+  .modal-acciones .btn{
+    width:100%;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- CABECERA -->
+  <header class="cabecera">
+
+    <div class="cabecera-contenido">
+
+      <div class="cabecera-icono">
+        ✏️
+      </div>
+
+      <div>
+
+        <h1>
+          Actualizar Herramienta
+        </h1>
+
+        <p>
+          Modifique códigos, series, marcas, cajas o la condición activa de una herramienta.
+        </p>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- ACCIONES -->
+  <div class="acciones">
+
+    <a
+      class="btn btn-volver"
+      href="visualizacion.html"
+    >
+      ← Volver a visualización
+    </a>
+
+  </div>
+
+
+  <!-- MENSAJES -->
+  <div
+    id="mensajeGeneral"
+    class="mensaje"
+  ></div>
+
+
+  <!-- BUSCADOR -->
+  <section
+    id="panelBusqueda"
+    class="panel"
+  >
+
+    <h2 class="panel-titulo">
+      Buscar herramienta
+    </h2>
+
+    <p class="panel-subtitulo">
+      Busque por código, serie, nombre, marca, caja o identificador interno.
+    </p>
+
+    <div class="buscador-fila">
+
+      <div class="buscador-contenedor">
+
+        <span class="buscador-icono">
+          🔍
+        </span>
+
+        <input
+          id="campoBusqueda"
+          class="buscador"
+          type="text"
+          autocomplete="off"
+          placeholder="Ejemplo: 4902, martillo, MSA, Caja 7..."
+        >
+
+      </div>
+
+      <button
+        id="btnBuscar"
+        class="btn btn-primario"
+        type="button"
+        onclick="buscarHerramientas()"
+      >
+        Buscar
+      </button>
+
+    </div>
+
+    <div class="ayuda-busqueda">
+      Escriba al menos dos caracteres para iniciar la búsqueda.
+    </div>
+
+  </section>
+
+
+  <!-- RESULTADOS -->
+  <section
+    id="panelResultados"
+    class="panel"
+  >
+
+    <div class="encabezado-resultados">
+
+      <div>
+
+        <h2 class="panel-titulo">
+          Resultados
+        </h2>
+
+        <p class="panel-subtitulo">
+          Seleccione la herramienta que desea actualizar.
+        </p>
+
+      </div>
+
+      <div
+        id="totalResultados"
+        class="total-resultados"
+      >
+        0 resultados
+      </div>
+
+    </div>
+
+    <div
+      id="cargandoBusqueda"
+      class="cargando"
+    >
+
+      <div class="spinner"></div>
+
+      Buscando herramientas...
+
+    </div>
+
+    <div
+      id="contenedorResultados"
+      class="resultados"
+    >
+
+      <div class="sin-resultados">
+
+        <div class="sin-resultados-icono">
+          🔎
+        </div>
+
+        Realice una búsqueda para mostrar herramientas.
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FORMULARIO -->
+  <section
+    id="panelFormulario"
+    class="panel"
+  >
+
+    <h2 class="panel-titulo">
+      Datos de la herramienta
+    </h2>
+
+    <p class="panel-subtitulo">
+      La fecha de registro y el identificador interno no serán modificados.
+    </p>
+
+
+    <div class="resumen-herramienta">
+
+      <div class="resumen-celda">
+
+        <div class="resumen-etiqueta">
+          ID
+        </div>
+
+        <div
+          id="resumenId"
+          class="resumen-valor"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="resumen-celda">
+
+        <div class="resumen-etiqueta">
+          Item
+        </div>
+
+        <div
+          id="resumenItem"
+          class="resumen-valor"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="resumen-celda">
+
+        <div class="resumen-etiqueta">
+          Estado
+        </div>
+
+        <div
+          id="resumenEstado"
+          class="resumen-valor"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="resumen-celda">
+
+        <div class="resumen-etiqueta">
+          Fecha de registro
+        </div>
+
+        <div
+          id="resumenFechaRegistro"
+          class="resumen-valor"
+        >
+          —
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <form
+      id="formActualizar"
+      onsubmit="prepararConfirmacion(event)"
+    >
+
+      <input
+        id="herramientaId"
+        type="hidden"
+      >
+
+
+      <div class="form-grid">
+
+        <div class="campo">
+
+          <label for="codigo">
+            Código
+          </label>
+
+          <input
+            id="codigo"
+            type="text"
+            maxlength="80"
+            placeholder="Código o S/C"
+          >
+
+          <div class="campo-ayuda">
+            Si no corresponde, utilice S/C.
+          </div>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="serie">
+            Serie
+          </label>
+
+          <input
+            id="serie"
+            type="text"
+            maxlength="100"
+            placeholder="Serie o S/S"
+          >
+
+          <div class="campo-ayuda">
+            Si no corresponde, utilice S/S.
+          </div>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="marca">
+            Marca
+          </label>
+
+          <input
+            id="marca"
+            type="text"
+            maxlength="100"
+            placeholder="Marca de la herramienta"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="caja">
+            Caja
+          </label>
+
+          <input
+            id="caja"
+            type="text"
+            list="listaCajas"
+            maxlength="100"
+            placeholder="Caja o SIN ASIGNAR"
+          >
+
+          <datalist id="listaCajas"></datalist>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="activo">
+            Activo
+          </label>
+
+          <select id="activo">
+
+            <option value="SI">
+              SI — Herramienta vigente
+            </option>
+
+            <option value="NO">
+              NO — Herramienta dada de baja
+            </option>
+
+          </select>
+
+          <div class="campo-ayuda">
+            Una herramienta asignada no podrá darse de baja.
+          </div>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="motivo">
+            Motivo de modificación
+          </label>
+
+          <select
+            id="motivo"
+            onchange="controlarMotivoOtro()"
+          >
+
+            <option value="">
+              Seleccione un motivo
+            </option>
+
+            <option value="Cambio de código">
+              Cambio de código
+            </option>
+
+            <option value="Cambio de serie">
+              Cambio de serie
+            </option>
+
+            <option value="Cambio de marca">
+              Cambio de marca
+            </option>
+
+            <option value="Cambio de caja">
+              Cambio de caja
+            </option>
+
+            <option value="Corrección de datos">
+              Corrección de datos
+            </option>
+
+            <option value="Herramienta dada de baja">
+              Herramienta dada de baja
+            </option>
+
+            <option value="Reactivación de herramienta">
+              Reactivación de herramienta
+            </option>
+
+            <option value="Otro">
+              Otro
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div
+          id="campoMotivoOtro"
+          class="campo completo"
+          style="display:none;"
+        >
+
+          <label for="motivoOtro">
+            Describa el motivo
+          </label>
+
+          <textarea
+            id="motivoOtro"
+            maxlength="500"
+            placeholder="Explique brevemente el motivo de la modificación..."
+          ></textarea>
+
+        </div>
+
+
+        <div
+          id="alertaBaja"
+          class="alerta-baja"
+        >
+          ⚠️ Está por dar de baja esta herramienta. La fecha de eliminación será registrada automáticamente.
+        </div>
+
+      </div>
+
+
+      <div class="acciones-formulario">
+
+        <button
+          class="btn btn-cancelar"
+          type="button"
+          onclick="cancelarEdicion()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          id="btnGuardar"
+          class="btn btn-confirmar"
+          type="submit"
+        >
+          Revisar cambios
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+</div>
+
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div
+  id="modalConfirmacion"
+  class="modal"
+>
+
+  <div class="modal-contenido">
+
+    <div class="modal-cabecera">
+
+      <div>
+
+        <h2 class="modal-titulo">
+          Confirmar actualización
+        </h2>
+
+        <p class="modal-texto">
+          Revise los cambios antes de actualizar la herramienta.
+        </p>
+
+      </div>
+
+      <button
+        class="cerrar-modal"
+        type="button"
+        onclick="cerrarModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      id="listaCambios"
+      class="lista-cambios"
+    ></div>
+
+
+    <div
+      id="resumenMotivo"
+      class="modal-motivo"
+    ></div>
+
+
+    <div class="modal-acciones">
+
+      <button
+        class="btn btn-secundario"
+        type="button"
+        onclick="cerrarModal()"
+      >
+        Volver
+      </button>
+
+      <button
+        id="btnConfirmar"
+        class="btn btn-confirmar"
+        type="button"
+        onclick="confirmarActualizacion()"
+      >
+        Confirmar y guardar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwTfRRELvUg1yVCBNTrAfI9c2Bznffdfk5_M9C_jsoNO0lT2k2jScU8qVp6w4OpSnH/exec";
+
+const CLAVE_ROL =
+  "dimarzaRolVisualizacion";
+
+let herramientaOriginal = null;
+
+let payloadPendiente = null;
+
+let temporizadorBusqueda = null;
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function(){
+
+    verificarAcceso();
+
+    cargarCajas();
+
+    configurarEventos();
+
+  }
+);
+
+
+/* =========================================================
+   SEGURIDAD DE SESIÓN
+========================================================= */
+
+function verificarAcceso(){
+
+  const rol =
+    normalizar(
+      sessionStorage.getItem(
+        CLAVE_ROL
+      )
+    );
+
+  if(rol !== "RESIDENTE"){
+
+    alert(
+      "Este módulo está disponible únicamente para el residente."
+    );
+
+    window.location.href =
+      "visualizacion.html";
+
+  }
+
+}
+
+
+/* =========================================================
+   EVENTOS
+========================================================= */
+
+function configurarEventos(){
+
+  const campoBusqueda =
+    document.getElementById(
+      "campoBusqueda"
+    );
+
+  campoBusqueda.addEventListener(
+    "keydown",
+    function(event){
+
+      if(event.key === "Enter"){
+
+        event.preventDefault();
+
+        buscarHerramientas();
+
+      }
+
+    }
+  );
+
+
+  campoBusqueda.addEventListener(
+    "input",
+    function(){
+
+      clearTimeout(
+        temporizadorBusqueda
+      );
+
+      const texto =
+        String(
+          campoBusqueda.value || ""
+        ).trim();
+
+      if(texto.length < 2){
+
+        if(!texto){
+          limpiarResultados();
+        }
+
+        return;
+
+      }
+
+      temporizadorBusqueda =
+        setTimeout(
+          buscarHerramientas,
+          500
+        );
+
+    }
+  );
+
+
+  document
+    .getElementById("activo")
+    .addEventListener(
+      "change",
+      controlarEstadoActivo
+    );
+
+
+  document
+    .getElementById(
+      "modalConfirmacion"
+    )
+    .addEventListener(
+      "click",
+      function(event){
+
+        if(
+          event.target === this
+        ){
+          cerrarModal();
+        }
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   CARGAR CAJAS EXISTENTES
+========================================================= */
+
+async function cargarCajas(){
+
+  try{
+
+    const url =
+      API_URL +
+      "?action=getDatosRegistroHerramientas" +
+      "&t=" +
+      Date.now();
+
+    const respuesta =
+      await fetch(url);
+
+    const resultado =
+      await respuesta.json();
+
+    if(!resultado.ok){
+      return;
+    }
+
+    const lista =
+      document.getElementById(
+        "listaCajas"
+      );
+
+    lista.innerHTML = "";
+
+    const cajas =
+      Array.isArray(resultado.cajas)
+        ? resultado.cajas
+        : [];
+
+    cajas.forEach(caja => {
+
+      const opcion =
+        document.createElement(
+          "option"
+        );
+
+      opcion.value = caja;
+
+      lista.appendChild(opcion);
+
+    });
+
+  }catch(error){
+
+    console.warn(
+      "No se pudieron cargar las cajas:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   BUSCAR HERRAMIENTAS
+========================================================= */
+
+async function buscarHerramientas(){
+
+  const campo =
+    document.getElementById(
+      "campoBusqueda"
+    );
+
+  const boton =
+    document.getElementById(
+      "btnBuscar"
+    );
+
+  const busqueda =
+    String(
+      campo.value || ""
+    ).trim();
+
+  ocultarMensaje();
+
+  if(busqueda.length < 2){
+
+    mostrarMensaje(
+      "Escriba al menos dos caracteres para buscar.",
+      "error"
+    );
+
+    campo.focus();
+
+    return;
+  }
+
+  try{
+
+    boton.disabled = true;
+    boton.textContent =
+      "Buscando...";
+
+    mostrarCargando(true);
+
+    document.getElementById(
+      "contenedorResultados"
+    ).innerHTML = "";
+
+    const url =
+      API_URL +
+      "?action=buscarHerramientasActualizar" +
+      "&busqueda=" +
+      encodeURIComponent(busqueda) +
+      "&t=" +
+      Date.now();
+
+    const respuesta =
+      await fetch(url);
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        "No se pudo conectar con el servidor."
+      );
+
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.message ||
+        "No se pudo completar la búsqueda."
+      );
+
+    }
+
+    pintarResultados(
+      resultado.herramientas || []
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    pintarResultados([]);
+
+    mostrarMensaje(
+      error.message,
+      "error"
+    );
+
+  }finally{
+
+    boton.disabled = false;
+    boton.textContent = "Buscar";
+
+    mostrarCargando(false);
+
+  }
+
+}
+
+
+/* =========================================================
+   PINTAR RESULTADOS
+========================================================= */
+
+function pintarResultados(
+  herramientas
+){
+
+  const contenedor =
+    document.getElementById(
+      "contenedorResultados"
+    );
+
+  const total =
+    document.getElementById(
+      "totalResultados"
+    );
+
+  total.textContent =
+    herramientas.length +
+    (
+      herramientas.length === 1
+        ? " resultado"
+        : " resultados"
+    );
+
+  contenedor.innerHTML = "";
+
+  if(!herramientas.length){
+
+    contenedor.innerHTML = `
+      <div class="sin-resultados">
+
+        <div class="sin-resultados-icono">
+          🔍
+        </div>
+
+        No se encontraron herramientas con ese criterio.
+
+      </div>
+    `;
+
+    return;
+  }
+
+  herramientas.forEach(
+    herramienta => {
+
+      const card =
+        document.createElement(
+          "article"
+        );
+
+      card.className =
+        "resultado-card";
+
+      card.innerHTML = `
+        <div class="resultado-cabecera">
+
+          <div class="resultado-icono">
+            🛠️
+          </div>
+
+          <div>
+
+            <div class="resultado-item">
+              ${escaparHTML(
+                herramienta.item
+              )}
+            </div>
+
+            <div class="resultado-id">
+              ${escaparHTML(
+                herramienta.id
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="resultado-datos">
+
+          <div class="dato">
+
+            <div class="dato-etiqueta">
+              Código
+            </div>
+
+            <div class="dato-valor">
+              ${escaparHTML(
+                herramienta.codigo || "S/C"
+              )}
+            </div>
+
+          </div>
+
+
+          <div class="dato">
+
+            <div class="dato-etiqueta">
+              Serie
+            </div>
+
+            <div class="dato-valor">
+              ${escaparHTML(
+                herramienta.serie || "S/S"
+              )}
+            </div>
+
+          </div>
+
+
+          <div class="dato">
+
+            <div class="dato-etiqueta">
+              Marca
+            </div>
+
+            <div class="dato-valor">
+              ${escaparHTML(
+                herramienta.marca || "-"
+              )}
+            </div>
+
+          </div>
+
+
+          <div class="dato">
+
+            <div class="dato-etiqueta">
+              Caja
+            </div>
+
+            <div class="dato-valor">
+              ${escaparHTML(
+                herramienta.caja ||
+                "SIN ASIGNAR"
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="resultado-pie">
+
+          ${crearEstadoHTML(
+            herramienta
+          )}
+
+          <button
+            class="btn-editar"
+            type="button"
+            onclick="seleccionarHerramienta(
+              '${escaparJS(
+                herramienta.id
+              )}'
+            )"
+          >
+            Actualizar
+          </button>
+
+        </div>
+      `;
+
+      contenedor.appendChild(card);
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   ESTADO VISUAL
+========================================================= */
+
+function crearEstadoHTML(
+  herramienta
+){
+
+  const activo =
+    normalizar(
+      herramienta.activo
+    );
+
+  const estado =
+    normalizar(
+      herramienta.estado
+    );
+
+  if(activo === "NO"){
+
+    return `
+      <span class="estado inactivo">
+        INACTIVO
+      </span>
+    `;
+
+  }
+
+  if(estado === "DISPONIBLE"){
+
+    return `
+      <span class="estado disponible">
+        DISPONIBLE
+      </span>
+    `;
+
+  }
+
+  if(estado === "ASIGNADO"){
+
+    return `
+      <span class="estado asignado">
+        ASIGNADO
+      </span>
+    `;
+
+  }
+
+  return `
+    <span class="estado otro">
+      ${escaparHTML(
+        herramienta.estado || "SIN ESTADO"
+      )}
+    </span>
+  `;
+
+}
+
+
+/* =========================================================
+   SELECCIONAR HERRAMIENTA
+========================================================= */
+
+async function seleccionarHerramienta(
+  id
+){
+
+  mostrarMensaje(
+    "Cargando información de la herramienta...",
+    "info"
+  );
+
+  try{
+
+    const url =
+      API_URL +
+      "?action=obtenerHerramientaActualizar" +
+      "&id=" +
+      encodeURIComponent(id) +
+      "&t=" +
+      Date.now();
+
+    const respuesta =
+      await fetch(url);
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        "No se pudo conectar con el servidor."
+      );
+
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if(
+      !resultado.ok ||
+      !resultado.herramienta
+    ){
+
+      throw new Error(
+        resultado.message ||
+        "No se pudo cargar la herramienta."
+      );
+
+    }
+
+    cargarFormulario(
+      resultado.herramienta
+    );
+
+    ocultarMensaje();
+
+  }catch(error){
+
+    console.error(error);
+
+    mostrarMensaje(
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CARGAR FORMULARIO
+========================================================= */
+
+function cargarFormulario(
+  herramienta
+){
+
+  herramientaOriginal = {
+    ...herramienta
+  };
+
+  payloadPendiente = null;
+
+
+  document.getElementById(
+    "herramientaId"
+  ).value =
+    herramienta.id || "";
+
+
+  document.getElementById(
+    "resumenId"
+  ).textContent =
+    herramienta.id || "—";
+
+
+  document.getElementById(
+    "resumenItem"
+  ).textContent =
+    herramienta.item || "—";
+
+
+  document.getElementById(
+    "resumenEstado"
+  ).textContent =
+    herramienta.estado || "—";
+
+
+  document.getElementById(
+    "resumenFechaRegistro"
+  ).textContent =
+    herramienta.fechaRegistro || "—";
+
+
+  document.getElementById(
+    "codigo"
+  ).value =
+    herramienta.codigo || "S/C";
+
+
+  document.getElementById(
+    "serie"
+  ).value =
+    herramienta.serie || "S/S";
+
+
+  document.getElementById(
+    "marca"
+  ).value =
+    herramienta.marca || "";
+
+
+  document.getElementById(
+    "caja"
+  ).value =
+    herramienta.caja ||
+    "SIN ASIGNAR";
+
+
+  document.getElementById(
+    "activo"
+  ).value =
+    normalizar(
+      herramienta.activo
+    ) === "NO"
+      ? "NO"
+      : "SI";
+
+
+  document.getElementById(
+    "motivo"
+  ).value = "";
+
+
+  document.getElementById(
+    "motivoOtro"
+  ).value = "";
+
+
+  controlarMotivoOtro();
+
+  controlarEstadoActivo();
+
+
+  const panel =
+    document.getElementById(
+      "panelFormulario"
+    );
+
+  panel.classList.add(
+    "visible"
+  );
+
+  panel.scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+
+}
+
+
+/* =========================================================
+   MOTIVO OTRO
+========================================================= */
+
+function controlarMotivoOtro(){
+
+  const motivo =
+    document.getElementById(
+      "motivo"
+    ).value;
+
+  const contenedor =
+    document.getElementById(
+      "campoMotivoOtro"
+    );
+
+  contenedor.style.display =
+    motivo === "Otro"
+      ? "flex"
+      : "none";
+
+  if(motivo !== "Otro"){
+
+    document.getElementById(
+      "motivoOtro"
+    ).value = "";
+
+  }
+
+}
+
+
+/* =========================================================
+   CONTROL ACTIVO
+========================================================= */
+
+function controlarEstadoActivo(){
+
+  const activo =
+    document.getElementById(
+      "activo"
+    ).value;
+
+  const alerta =
+    document.getElementById(
+      "alertaBaja"
+    );
+
+  alerta.classList.toggle(
+    "visible",
+    activo === "NO"
+  );
+
+}
+
+
+/* =========================================================
+   PREPARAR CONFIRMACIÓN
+========================================================= */
+
+function prepararConfirmacion(
+  event
+){
+
+  event.preventDefault();
+
+  ocultarMensaje();
+
+  if(!herramientaOriginal){
+
+    mostrarMensaje(
+      "Seleccione primero una herramienta.",
+      "error"
+    );
+
+    return;
+  }
+
+  const codigo =
+    String(
+      document.getElementById(
+        "codigo"
+      ).value || ""
+    ).trim() || "S/C";
+
+  const serie =
+    String(
+      document.getElementById(
+        "serie"
+      ).value || ""
+    ).trim() || "S/S";
+
+  const marca =
+    String(
+      document.getElementById(
+        "marca"
+      ).value || ""
+    ).trim();
+
+  const caja =
+    String(
+      document.getElementById(
+        "caja"
+      ).value || ""
+    ).trim() || "SIN ASIGNAR";
+
+  const activo =
+    document.getElementById(
+      "activo"
+    ).value;
+
+  const motivoSeleccionado =
+    document.getElementById(
+      "motivo"
+    ).value;
+
+  const motivoOtro =
+    String(
+      document.getElementById(
+        "motivoOtro"
+      ).value || ""
+    ).trim();
+
+  let motivoFinal =
+    motivoSeleccionado;
+
+  if(
+    motivoSeleccionado === "Otro"
+  ){
+
+    motivoFinal =
+      motivoOtro;
+
+  }
+
+
+  if(!motivoFinal){
+
+    mostrarMensaje(
+      "Seleccione o describa el motivo de la modificación.",
+      "error"
+    );
+
+    document.getElementById(
+      "motivo"
+    ).focus();
+
+    return;
+  }
+
+
+  if(
+    activo === "NO" &&
+    normalizar(
+      herramientaOriginal.estado
+    ) === "ASIGNADO"
+  ){
+
+    mostrarMensaje(
+      "No puede dar de baja una herramienta asignada. Primero debe registrarse su devolución.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  payloadPendiente = {
+    id:
+      herramientaOriginal.id,
+
+    codigo:codigo,
+    serie:serie,
+    marca:marca,
+    caja:caja,
+    activo:activo,
+    motivo:motivoFinal
+  };
+
+
+  const cambios =
+    detectarCambios(
+      herramientaOriginal,
+      payloadPendiente
+    );
+
+
+  if(!cambios.length){
+
+    payloadPendiente = null;
+
+    mostrarMensaje(
+      "No se detectaron cambios en la herramienta.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  pintarCambios(
+    cambios,
+    motivoFinal
+  );
+
+  abrirModal();
+
+}
+
+
+/* =========================================================
+   DETECTAR CAMBIOS
+========================================================= */
+
+function detectarCambios(
+  original,
+  nuevo
+){
+
+  const cambios = [];
+
+  compararCampo(
+    cambios,
+    "Código",
+    original.codigo || "S/C",
+    nuevo.codigo || "S/C"
+  );
+
+  compararCampo(
+    cambios,
+    "Serie",
+    original.serie || "S/S",
+    nuevo.serie || "S/S"
+  );
+
+  compararCampo(
+    cambios,
+    "Marca",
+    original.marca || "",
+    nuevo.marca || ""
+  );
+
+  compararCampo(
+    cambios,
+    "Caja",
+    original.caja || "SIN ASIGNAR",
+    nuevo.caja || "SIN ASIGNAR"
+  );
+
+  compararCampo(
+    cambios,
+    "Activo",
+    original.activo || "SI",
+    nuevo.activo || "SI"
+  );
+
+  return cambios;
+
+}
+
+
+function compararCampo(
+  cambios,
+  nombre,
+  anterior,
+  nuevo
+){
+
+  if(
+    normalizar(anterior) ===
+    normalizar(nuevo)
+  ){
+    return;
+  }
+
+  cambios.push({
+    nombre:nombre,
+    anterior:
+      anterior || "Vacío",
+    nuevo:
+      nuevo || "Vacío"
+  });
+
+}
+
+
+/* =========================================================
+   PINTAR CAMBIOS
+========================================================= */
+
+function pintarCambios(
+  cambios,
+  motivo
+){
+
+  const contenedor =
+    document.getElementById(
+      "listaCambios"
+    );
+
+  contenedor.innerHTML =
+    cambios.map(cambio => `
+      <div class="cambio">
+
+        <div class="cambio-campo">
+          ${escaparHTML(
+            cambio.nombre
+          )}
+        </div>
+
+        <div class="cambio-anterior">
+          ${escaparHTML(
+            cambio.anterior
+          )}
+        </div>
+
+        <div class="cambio-flecha">
+          →
+        </div>
+
+        <div class="cambio-nuevo">
+          ${escaparHTML(
+            cambio.nuevo
+          )}
+        </div>
+
+      </div>
+    `).join("");
+
+
+  document.getElementById(
+    "resumenMotivo"
+  ).innerHTML =
+    "<strong>Motivo:</strong> " +
+    escaparHTML(motivo);
+
+}
+
+
+/* =========================================================
+   CONFIRMAR ACTUALIZACIÓN
+========================================================= */
+
+async function confirmarActualizacion(){
+
+  if(!payloadPendiente){
+
+    cerrarModal();
+
+    mostrarMensaje(
+      "No existen cambios pendientes.",
+      "error"
+    );
+
+    return;
+  }
+
+  const boton =
+    document.getElementById(
+      "btnConfirmar"
+    );
+
+  const textoOriginal =
+    boton.textContent;
+
+  try{
+
+    boton.disabled = true;
+
+    boton.textContent =
+      "Guardando...";
+
+
+    const url =
+      API_URL +
+      "?action=actualizarHerramienta" +
+      "&payload=" +
+      encodeURIComponent(
+        JSON.stringify(
+          payloadPendiente
+        )
+      ) +
+      "&t=" +
+      Date.now();
+
+
+    const respuesta =
+      await fetch(url);
+
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        "No se pudo conectar con el servidor."
+      );
+
+    }
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.message ||
+        "No se pudo actualizar la herramienta."
+      );
+
+    }
+
+
+    cerrarModal();
+
+    mostrarMensaje(
+      resultado.message ||
+      "Herramienta actualizada correctamente.",
+      "exito"
+    );
+
+
+    const idActualizado =
+      payloadPendiente.id;
+
+
+    herramientaOriginal = null;
+
+    payloadPendiente = null;
+
+
+    document.getElementById(
+      "panelFormulario"
+    ).classList.remove(
+      "visible"
+    );
+
+
+    await buscarHerramientas();
+
+
+    setTimeout(
+      function(){
+
+        seleccionarHerramienta(
+          idActualizado
+        );
+
+      },
+      450
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+    mostrarMensaje(
+      error.message,
+      "error"
+    );
+
+    cerrarModal();
+
+  }finally{
+
+    boton.disabled = false;
+
+    boton.textContent =
+      textoOriginal;
+
+  }
+
+}
+
+
+/* =========================================================
+   CANCELAR EDICIÓN
+========================================================= */
+
+function cancelarEdicion(){
+
+  herramientaOriginal = null;
+
+  payloadPendiente = null;
+
+  document.getElementById(
+    "panelFormulario"
+  ).classList.remove(
+    "visible"
+  );
+
+  ocultarMensaje();
+
+  document.getElementById(
+    "panelResultados"
+  ).scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function abrirModal(){
+
+  document.getElementById(
+    "modalConfirmacion"
+  ).classList.add(
+    "visible"
+  );
+
+  document.body.style.overflow =
+    "hidden";
+
+}
+
+
+function cerrarModal(){
+
+  document.getElementById(
+    "modalConfirmacion"
+  ).classList.remove(
+    "visible"
+  );
+
+  document.body.style.overflow =
+    "";
+
+}
+
+
+/* =========================================================
+   RESULTADOS VACÍOS
+========================================================= */
+
+function limpiarResultados(){
+
+  document.getElementById(
+    "totalResultados"
+  ).textContent =
+    "0 resultados";
+
+  document.getElementById(
+    "contenedorResultados"
+  ).innerHTML = `
+    <div class="sin-resultados">
+
+      <div class="sin-resultados-icono">
+        🔎
+      </div>
+
+      Realice una búsqueda para mostrar herramientas.
+
+    </div>
+  `;
+
+}
+
+
+/* =========================================================
+   CARGANDO
+========================================================= */
+
+function mostrarCargando(
+  visible
+){
+
+  document.getElementById(
+    "cargandoBusqueda"
+  ).classList.toggle(
+    "visible",
+    visible
+  );
+
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+function mostrarMensaje(
+  texto,
+  tipo
+){
+
+  const mensaje =
+    document.getElementById(
+      "mensajeGeneral"
+    );
+
+  mensaje.className =
+    "mensaje visible " +
+    tipo;
+
+  mensaje.textContent =
+    texto;
+
+  mensaje.scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+
+}
+
+
+function ocultarMensaje(){
+
+  const mensaje =
+    document.getElementById(
+      "mensajeGeneral"
+    );
+
+  mensaje.className =
+    "mensaje";
+
+  mensaje.textContent = "";
+
+}
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function normalizar(valor){
+
+  return String(valor || "")
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    )
+    .replace(/\s+/g," ");
+
+}
+
+
+function escaparHTML(valor){
+
+  return String(valor || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function escaparJS(valor){
+
+  return String(valor || "")
+    .replace(/\\/g,"\\\\")
+    .replace(/'/g,"\\'");
+}
+
+</script>
+
+</body>
+</html>
