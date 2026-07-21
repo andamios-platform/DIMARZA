@@ -566,12 +566,14 @@ function pintarResumen(data){
 
   const entregadas = activos.filter(x => normal(x.estado) === "ASIGNADO").length;
 
-  const cajas = new Set(activos.map(x => x.caja).filter(Boolean));
+  const cajas = activos.filter(x =>
+     normal(x.item).includes("CAJA HERRAMIENTAS")
+   );
 
   document.getElementById("totalHerramientas").textContent = activos.length;
   document.getElementById("totalDisponibles").textContent = disponibles;
   document.getElementById("totalEntregadas").textContent = entregadas;
-  document.getElementById("totalCajas").textContent = cajas.size;
+  document.getElementById("totalCajas").textContent = cajas.length;
 }
 
 function pintarInventario(data){
@@ -826,11 +828,9 @@ async function exportarExcel(){
       x => normal(x.estado) === "ASIGNADO"
     ).length;
 
-    const cajas = new Set(
-      activos
-        .map(x => String(x.caja || "").trim())
-        .filter(Boolean)
-    );
+   const cajas = activos.filter(x =>
+     normal(x.item).includes("CAJA HERRAMIENTAS")
+   );
 
     const resumenHerramientas =
       construirResumenHerramientas(activos);
@@ -850,7 +850,7 @@ async function exportarExcel(){
       activos.length,
       disponibles,
       entregadas,
-      cajas.size
+      cajas.length
     );
 
     crearHojaResumenHerramientas(
@@ -1615,10 +1615,8 @@ async function exportarPDF(){
       x => normal(x.estado) === "ASIGNADO"
     ).length;
 
-    const cajas = new Set(
-      activos
-        .map(x => String(x.caja || "").trim())
-        .filter(Boolean)
+    const cajas = activos.filter(x =>
+      normal(x.item).includes("CAJA HERRAMIENTAS")
     );
 
     const resumenHerramientas =
@@ -1644,7 +1642,7 @@ async function exportarPDF(){
       activos.length,
       disponibles,
       entregadas,
-      cajas.size
+      cajas.length
     );
 
     crearResumenHerramientasPDF(
