@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Previos | DIMARZA</title>
+
+  <style>
+    :root {
+      --azul: #123b5d;
+      --azul-claro: #1f5f8b;
+      --naranja: #f28c28;
+      --naranja-oscuro: #d96c0f;
+      --fondo: #f3f6f9;
+      --blanco: #ffffff;
+      --texto: #24313d;
+      --gris: #6d7a86;
+      --borde: #dce4ea;
+      --verde: #198754;
+      --rojo: #dc3545;
+      --sombra: 0 8px 24px rgba(18, 59, 93, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    .encabezado {
+      padding: 20px;
+      color: white;
+      background:
+        linear-gradient(
+          135deg,
+          var(--azul),
+          var(--azul-claro)
+        );
+      box-shadow: var(--sombra);
+    }
+
+    .encabezado-contenido {
+      width: min(1200px, 100%);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .marca h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .marca p {
+      margin: 5px 0 0;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    .boton-volver {
+      padding: 11px 17px;
+      color: white;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .contenedor {
+      width: min(1200px, calc(100% - 30px));
+      margin: 25px auto 50px;
+    }
+
+    .cargando,
+    .error-general {
+      padding: 35px 20px;
+      text-align: center;
+      color: var(--gris);
+      background: white;
+      border: 1px dashed var(--borde);
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+    }
+
+    .error-general {
+      color: var(--rojo);
+      border-color: rgba(220, 53, 69, 0.35);
+    }
+
+    .cabecera-servicio {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      margin-bottom: 20px;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 15px;
+      box-shadow: var(--sombra);
+    }
+
+    .cabecera-servicio::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: var(--naranja);
+    }
+
+    .cabecera-superior {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .tag {
+      margin: 0;
+      color: var(--azul);
+      font-size: 38px;
+      font-weight: 900;
+    }
+
+    .descripcion {
+      margin: 7px 0 0;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .estado {
+      padding: 8px 13px;
+      color: #8a6700;
+      font-size: 12px;
+      font-weight: bold;
+      background: #fff3cd;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .resumen-item {
+      padding: 13px;
+      background: #f7f9fb;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+    }
+
+    .resumen-label {
+      margin-bottom: 5px;
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .resumen-valor {
+      color: var(--azul);
+      font-size: 14px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .aviso-bloqueado {
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #755400;
+      background: #fff3cd;
+      border: 1px solid #eed18a;
+      border-radius: 12px;
+    }
+
+    .paneles {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 21px;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 15px;
+      box-shadow: var(--sombra);
+    }
+
+    .panel h2 {
+      margin: 0 0 18px;
+      color: var(--azul);
+      font-size: 19px;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 15px;
+    }
+
+    .campo label {
+      color: var(--azul);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+      width: 100%;
+      padding: 12px;
+      color: var(--texto);
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 9px;
+      outline: none;
+    }
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(31, 95, 139, 0.12);
+    }
+
+    .campo textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .detalle-material {
+      padding: 12px;
+      margin-bottom: 15px;
+      color: var(--gris);
+      font-size: 13px;
+      background: #f7f9fb;
+      border: 1px solid var(--borde);
+      border-radius: 9px;
+    }
+
+    .boton-agregar {
+      width: 100%;
+      padding: 13px;
+      color: white;
+      font-weight: bold;
+      background:
+        linear-gradient(
+          135deg,
+          var(--naranja),
+          var(--naranja-oscuro)
+        );
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .lista-vacia {
+      padding: 35px 15px;
+      color: var(--gris);
+      text-align: center;
+      border: 1px dashed var(--borde);
+      border-radius: 12px;
+    }
+
+    .lista-materiales {
+      display: grid;
+      gap: 12px;
+    }
+
+    .material {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 15px;
+      padding: 16px;
+      background: #f9fbfc;
+      border: 1px solid var(--borde);
+      border-left: 5px solid var(--naranja);
+      border-radius: 12px;
+    }
+
+    .material-grupo {
+      margin-bottom: 5px;
+      color: var(--naranja-oscuro);
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .material-nombre {
+      margin-bottom: 7px;
+      color: var(--azul);
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .material-codigo,
+    .material-observacion {
+      margin-top: 5px;
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .material-controles {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cantidad-material {
+      min-width: 42px;
+      color: var(--azul);
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .boton-cantidad,
+    .boton-eliminar {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .boton-cantidad {
+      color: var(--azul);
+      font-weight: bold;
+      background: white;
+      border: 1px solid var(--borde);
+    }
+
+    .boton-eliminar {
+      color: white;
+      background: var(--rojo);
+      border: none;
+    }
+
+    .totales {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 16px;
+      margin-top: 18px;
+      color: var(--azul);
+      font-weight: bold;
+      background: #eef5fa;
+      border-radius: 11px;
+    }
+
+    .acciones {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .boton-finalizar {
+      padding: 14px 22px;
+      color: white;
+      font-weight: bold;
+      background: var(--verde);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .mensaje {
+      display: none;
+      padding: 13px;
+      margin-top: 16px;
+      border-radius: 9px;
+    }
+
+    .mensaje.exito {
+      display: block;
+      color: #166b3b;
+      background: #dff3e7;
+      border: 1px solid #b8dfc8;
+    }
+
+    .mensaje.error {
+      display: block;
+      color: #a62835;
+      background: #fde5e7;
+      border: 1px solid #f4bcc2;
+    }
+
+    @media (max-width: 850px) {
+      .resumen {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .paneles {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .encabezado-contenido,
+      .cabecera-superior {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .boton-volver,
+      .estado {
+        width: 100%;
+        text-align: center;
+      }
+
+      .tag {
+        font-size: 32px;
+      }
+
+      .resumen {
+        grid-template-columns: 1fr;
+      }
+
+      .material {
+        grid-template-columns: 1fr;
+      }
+
+      .material-controles {
+        justify-content: flex-end;
+      }
+
+      .acciones,
+      .boton-finalizar {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="encabezado">
+    <div class="encabezado-contenido">
+
+      <div class="marca">
+        <h1>DIMARZA</h1>
+        <p>Previos del Servicio de Andamios</p>
+      </div>
+
+      <button
+        type="button"
+        class="boton-volver"
+        onclick="volverDetalle()"
+      >
+        ← Volver al servicio
+      </button>
+
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <div id="estadoCarga" class="cargando">
+      Cargando servicio y catálogo...
+    </div>
+
+    <div id="errorGeneral" class="error-general oculto">
+    </div>
+
+    <div id="contenido" class="oculto">
+
+      <section class="cabecera-servicio">
+
+        <div class="cabecera-superior">
+
+          <div>
+            <h2 id="tagServicio" class="tag">TAG</h2>
+
+            <p id="descripcionServicio" class="descripcion">
+              Descripción
+            </p>
+          </div>
+
+          <span id="estadoServicio" class="estado">
+            ESTADO
+          </span>
+
+        </div>
+
+        <div class="resumen">
+
+          <div class="resumen-item">
+            <div class="resumen-label">OT</div>
+            <div id="otServicio" class="resumen-valor">-</div>
+          </div>
+
+          <div class="resumen-item">
+            <div class="resumen-label">Faena</div>
+            <div id="faenaServicio" class="resumen-valor">-</div>
+          </div>
+
+          <div class="resumen-item">
+            <div class="resumen-label">Área</div>
+            <div id="areaServicio" class="resumen-valor">-</div>
+          </div>
+
+          <div class="resumen-item">
+            <div class="resumen-label">Responsable de Previos</div>
+            <div id="responsableServicio" class="resumen-valor">-</div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <div id="avisoBloqueado" class="aviso-bloqueado oculto">
+        Previos ya fue finalizado. Los materiales se muestran
+        únicamente para consulta.
+      </div>
+
+      <section class="paneles">
+
+        <div id="panelAgregar" class="panel">
+
+          <h2>Agregar material</h2>
+
+          <div class="campo">
+            <label for="grupoMaterial">Grupo</label>
+
+            <select
+              id="grupoMaterial"
+              onchange="cargarSubgrupos()"
+            >
+              <option value="">Seleccionar grupo</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="subgrupoMaterial">Subgrupo</label>
+
+            <select
+              id="subgrupoMaterial"
+              onchange="mostrarDetalleSeleccionado()"
+              disabled
+            >
+              <option value="">Seleccionar subgrupo</option>
+            </select>
+          </div>
+
+          <div id="detalleSeleccionado" class="detalle-material">
+            Selecciona un material.
+          </div>
+
+          <div class="campo">
+            <label for="cantidadMaterial">Cantidad</label>
+
+            <input
+              id="cantidadMaterial"
+              type="number"
+              min="1"
+              step="1"
+              value="1"
+            >
+          </div>
+
+          <div class="campo">
+            <label for="observacionMaterial">
+              Observación
+            </label>
+
+            <textarea
+              id="observacionMaterial"
+              placeholder="Opcional"
+            ></textarea>
+          </div>
+
+          <button
+            type="button"
+            class="boton-agregar"
+            onclick="agregarMaterial()"
+          >
+            ＋ Agregar material
+          </button>
+
+        </div>
+
+        <div class="panel">
+
+          <h2>Materiales preparados</h2>
+
+          <div id="listaMateriales" class="lista-materiales">
+          </div>
+
+          <div id="listaVacia" class="lista-vacia">
+            Todavía no agregaste materiales.
+          </div>
+
+          <div id="totales" class="totales oculto">
+            <span id="totalTipos">0 materiales</span>
+            <span id="totalPiezas">0 unidades</span>
+          </div>
+
+          <div id="mensaje" class="mensaje"></div>
+
+          <div class="acciones">
+
+            <button
+              id="btnFinalizar"
+              type="button"
+              class="boton-finalizar"
+              onclick="finalizarPrevios()"
+            >
+              Finalizar Previos
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <script>
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+    let idServicioActual = '';
+    let servicioActual = null;
+    let catalogoMateriales = [];
+    let materialesPrevios = [];
+    let modoSoloLectura = false;
+
+
+    document.addEventListener('DOMContentLoaded', iniciarPagina);
+
+
+    async function iniciarPagina() {
+      const parametros =
+        new URLSearchParams(window.location.search);
+
+      idServicioActual =
+        String(parametros.get('id') || '')
+          .trim()
+          .toUpperCase();
+
+      if (!idServicioActual) {
+        mostrarErrorGeneral(
+          'No se indicó el servicio que se desea abrir.'
+        );
+        return;
+      }
+
+      try {
+        const timestamp = Date.now();
+
+        const [
+          respuestaServicio,
+          respuestaCatalogo,
+          respuestaPrevios
+        ] = await Promise.all([
+          fetch(
+            `${API_URL}?accion=obtenerServicio&idServicio=${
+              encodeURIComponent(idServicioActual)
+            }&t=${timestamp}`
+          ),
+          fetch(
+            `${API_URL}?accion=catalogoPrevios&t=${timestamp}`
+          ),
+          fetch(
+            `${API_URL}?accion=obtenerPrevios&idServicio=${
+              encodeURIComponent(idServicioActual)
+            }&t=${timestamp}`
+          )
+        ]);
+
+        const resultadoServicio =
+          await respuestaServicio.json();
+
+        const resultadoCatalogo =
+          await respuestaCatalogo.json();
+
+        const resultadoPrevios =
+          await respuestaPrevios.json();
+
+        if (
+          !resultadoServicio.ok ||
+          !resultadoServicio.servicio
+        ) {
+          throw new Error(
+            resultadoServicio.mensaje ||
+            'No se encontró el servicio.'
+          );
+        }
+
+        if (!resultadoCatalogo.ok) {
+          throw new Error(
+            resultadoCatalogo.mensaje ||
+            'No se pudo cargar el catálogo.'
+          );
+        }
+
+        if (!resultadoPrevios.ok) {
+          throw new Error(
+            resultadoPrevios.mensaje ||
+            'No se pudo cargar Previos.'
+          );
+        }
+
+        servicioActual = resultadoServicio.servicio;
+
+        catalogoMateriales =
+          Array.isArray(
+            resultadoCatalogo.catalogo.materiales
+          )
+            ? resultadoCatalogo.catalogo.materiales
+            : [];
+
+        materialesPrevios =
+          Array.isArray(resultadoPrevios.materiales)
+            ? resultadoPrevios.materiales.map(material => ({
+                grupo: material.grupo,
+                subgrupo: material.subgrupo,
+                codigo: material.codigo,
+                cantidad:
+                  Number(material.cantidadAlistada) || 0,
+                observacion:
+                  material.observacionPrevios || ''
+              }))
+            : [];
+
+        determinarModoEdicion();
+        mostrarServicio();
+        cargarGrupos();
+        renderizarMateriales();
+
+        document
+          .getElementById('estadoCarga')
+          .classList.add('oculto');
+
+        document
+          .getElementById('contenido')
+          .classList.remove('oculto');
+
+      } catch (error) {
+        console.error(error);
+        mostrarErrorGeneral(error.message);
+      }
+    }
+
+
+    function determinarModoEdicion() {
+      const estadosEditables = [
+        'SOLICITADO',
+        'EN PLANIFICACION',
+        'EN PREPARACION'
+      ];
+
+      const estado = normalizarTexto(
+        servicioActual.estado
+      );
+
+      modoSoloLectura =
+        !estadosEditables.includes(estado);
+
+      if (modoSoloLectura) {
+        document
+          .getElementById('panelAgregar')
+          .classList.add('oculto');
+
+        document
+          .getElementById('btnFinalizar')
+          .classList.add('oculto');
+
+        document
+          .getElementById('avisoBloqueado')
+          .classList.remove('oculto');
+      }
+    }
+
+
+    function mostrarServicio() {
+      asignarTexto(
+        'tagServicio',
+        servicioActual.tag || 'SIN TAG'
+      );
+
+      asignarTexto(
+        'descripcionServicio',
+        servicioActual.descripcion || 'Sin descripción'
+      );
+
+      asignarTexto(
+        'estadoServicio',
+        servicioActual.estado || 'SIN ESTADO'
+      );
+
+      asignarTexto(
+        'otServicio',
+        servicioActual.ot || 'No registrada'
+      );
+
+      asignarTexto(
+        'faenaServicio',
+        servicioActual.faena || 'No registrada'
+      );
+
+      asignarTexto(
+        'areaServicio',
+        servicioActual.area || 'No registrada'
+      );
+
+      asignarTexto(
+        'responsableServicio',
+        servicioActual.responsablePrevios ||
+        'No asignado'
+      );
+
+      document.title =
+        `Previos ${servicioActual.tag || ''} | DIMARZA`;
+    }
+
+
+    function cargarGrupos() {
+      const selector =
+        document.getElementById('grupoMaterial');
+
+      const grupos = [...new Set(
+        catalogoMateriales
+          .map(material => material.grupo)
+          .filter(Boolean)
+      )].sort((a, b) =>
+        a.localeCompare(b, 'es', { numeric: true })
+      );
+
+      selector.innerHTML =
+        '<option value="">Seleccionar grupo</option>';
+
+      grupos.forEach(grupo => {
+        const opcion = document.createElement('option');
+        opcion.value = grupo;
+        opcion.textContent = grupo;
+        selector.appendChild(opcion);
+      });
+    }
+
+
+    function cargarSubgrupos() {
+      const grupo =
+        document.getElementById('grupoMaterial').value;
+
+      const selector =
+        document.getElementById('subgrupoMaterial');
+
+      selector.innerHTML =
+        '<option value="">Seleccionar subgrupo</option>';
+
+      if (!grupo) {
+        selector.disabled = true;
+        mostrarDetalleSeleccionado();
+        return;
+      }
+
+      const subgrupos = catalogoMateriales
+        .filter(material => material.grupo === grupo)
+        .sort((a, b) =>
+          a.subgrupo.localeCompare(
+            b.subgrupo,
+            'es',
+            { numeric: true }
+          )
+        );
+
+      subgrupos.forEach((material, indice) => {
+        const opcion = document.createElement('option');
+
+        opcion.value = String(indice);
+
+        opcion.dataset.grupo = material.grupo;
+        opcion.dataset.subgrupo = material.subgrupo;
+        opcion.dataset.codigo = material.codigo;
+
+        opcion.textContent = material.subgrupo;
+
+        selector.appendChild(opcion);
+      });
+
+      selector.disabled = false;
+      mostrarDetalleSeleccionado();
+    }
+
+
+    function obtenerMaterialSeleccionado() {
+      const selector =
+        document.getElementById('subgrupoMaterial');
+
+      const opcion =
+        selector.options[selector.selectedIndex];
+
+      if (!opcion || !opcion.dataset.subgrupo) {
+        return null;
+      }
+
+      return {
+        grupo: opcion.dataset.grupo || '',
+        subgrupo: opcion.dataset.subgrupo || '',
+        codigo: opcion.dataset.codigo || ''
+      };
+    }
+
+
+    function mostrarDetalleSeleccionado() {
+      const contenedor =
+        document.getElementById('detalleSeleccionado');
+
+      const material = obtenerMaterialSeleccionado();
+
+      if (!material) {
+        contenedor.textContent =
+          'Selecciona un material.';
+        return;
+      }
+
+      contenedor.innerHTML = `
+        <strong>${escaparHTML(material.subgrupo)}</strong><br>
+        Grupo: ${escaparHTML(material.grupo)}<br>
+        Código: ${escaparHTML(material.codigo || 'Sin código')}
+      `;
+    }
+
+
+    function agregarMaterial() {
+      if (modoSoloLectura) {
+        return;
+      }
+
+      const material = obtenerMaterialSeleccionado();
+
+      const cantidad = Number(
+        document.getElementById('cantidadMaterial').value
+      );
+
+      const observacion =
+        document
+          .getElementById('observacionMaterial')
+          .value
+          .trim();
+
+      if (!material) {
+        mostrarMensaje(
+          'Selecciona un grupo y un subgrupo.',
+          'error'
+        );
+        return;
+      }
+
+      if (!Number.isFinite(cantidad) || cantidad <= 0) {
+        mostrarMensaje(
+          'La cantidad debe ser mayor que cero.',
+          'error'
+        );
+        return;
+      }
+
+      const indiceExistente = materialesPrevios.findIndex(
+        item =>
+          String(item.codigo || '') ===
+          String(material.codigo || '') &&
+          item.subgrupo === material.subgrupo
+      );
+
+      if (indiceExistente >= 0) {
+        materialesPrevios[indiceExistente].cantidad += cantidad;
+
+        if (observacion) {
+          materialesPrevios[indiceExistente].observacion =
+            observacion;
+        }
+      } else {
+        materialesPrevios.push({
+          ...material,
+          cantidad,
+          observacion
+        });
+      }
+
+      document.getElementById(
+        'cantidadMaterial'
+      ).value = 1;
+
+      document.getElementById(
+        'observacionMaterial'
+      ).value = '';
+
+      renderizarMateriales();
+
+      mostrarMensaje(
+        `${material.subgrupo} agregado correctamente.`,
+        'exito'
+      );
+    }
+
+
+    function renderizarMateriales() {
+      const lista =
+        document.getElementById('listaMateriales');
+
+      const vacia =
+        document.getElementById('listaVacia');
+
+      const totales =
+        document.getElementById('totales');
+
+      if (materialesPrevios.length === 0) {
+        lista.innerHTML = '';
+        vacia.classList.remove('oculto');
+        totales.classList.add('oculto');
+        actualizarTotales();
+        return;
+      }
+
+      vacia.classList.add('oculto');
+      totales.classList.remove('oculto');
+
+      lista.innerHTML = materialesPrevios
+        .map((material, indice) => `
+          <article class="material">
+
+            <div>
+              <div class="material-grupo">
+                ${escaparHTML(material.grupo)}
+              </div>
+
+              <div class="material-nombre">
+                ${escaparHTML(material.subgrupo)}
+              </div>
+
+              <div class="material-codigo">
+                Código:
+                ${escaparHTML(material.codigo || 'Sin código')}
+              </div>
+
+              ${
+                material.observacion
+                  ? `
+                    <div class="material-observacion">
+                      ${escaparHTML(material.observacion)}
+                    </div>
+                  `
+                  : ''
+              }
+            </div>
+
+            <div class="material-controles">
+
+              ${
+                !modoSoloLectura
+                  ? `
+                    <button
+                      type="button"
+                      class="boton-cantidad"
+                      onclick="cambiarCantidad(${indice}, -1)"
+                    >
+                      −
+                    </button>
+                  `
+                  : ''
+              }
+
+              <span class="cantidad-material">
+                ${material.cantidad}
+              </span>
+
+              ${
+                !modoSoloLectura
+                  ? `
+                    <button
+                      type="button"
+                      class="boton-cantidad"
+                      onclick="cambiarCantidad(${indice}, 1)"
+                    >
+                      +
+                    </button>
+
+                    <button
+                      type="button"
+                      class="boton-eliminar"
+                      onclick="eliminarMaterial(${indice})"
+                      title="Eliminar"
+                    >
+                      ×
+                    </button>
+                  `
+                  : ''
+              }
+
+            </div>
+
+          </article>
+        `)
+        .join('');
+
+      actualizarTotales();
+    }
+
+
+    function cambiarCantidad(indice, cambio) {
+      if (modoSoloLectura) {
+        return;
+      }
+
+      const nuevaCantidad =
+        Number(materialesPrevios[indice].cantidad) + cambio;
+
+      if (nuevaCantidad <= 0) {
+        eliminarMaterial(indice);
+        return;
+      }
+
+      materialesPrevios[indice].cantidad =
+        nuevaCantidad;
+
+      renderizarMateriales();
+    }
+
+
+    function eliminarMaterial(indice) {
+      if (modoSoloLectura) {
+        return;
+      }
+
+      materialesPrevios.splice(indice, 1);
+      renderizarMateriales();
+    }
+
+
+    function actualizarTotales() {
+      const totalPiezas = materialesPrevios.reduce(
+        (acumulado, material) =>
+          acumulado + Number(material.cantidad || 0),
+        0
+      );
+
+      asignarTexto(
+        'totalTipos',
+        `${materialesPrevios.length} material(es)`
+      );
+
+      asignarTexto(
+        'totalPiezas',
+        `${totalPiezas} unidades`
+      );
+    }
+
+
+    async function finalizarPrevios() {
+      if (modoSoloLectura) {
+        return;
+      }
+
+      if (materialesPrevios.length === 0) {
+        mostrarMensaje(
+          'Debes agregar al menos un material.',
+          'error'
+        );
+        return;
+      }
+
+      const confirmar = window.confirm(
+        '¿Deseas finalizar Previos? Después de guardar, la lista quedará bloqueada.'
+      );
+
+      if (!confirmar) {
+        return;
+      }
+
+      const boton =
+        document.getElementById('btnFinalizar');
+
+      boton.disabled = true;
+      boton.textContent = 'Guardando...';
+
+      try {
+        const respuesta = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            accion: 'finalizarPrevios',
+            idServicio: idServicioActual,
+            materiales: materialesPrevios,
+            usuario:
+              servicioActual.responsablePrevios ||
+              'USUARIO WEB'
+          })
+        });
+
+        const resultado = await respuesta.json();
+
+        if (!resultado.ok) {
+          throw new Error(
+            resultado.mensaje ||
+            'No se pudo finalizar Previos.'
+          );
+        }
+
+        mostrarMensaje(
+          resultado.mensaje,
+          'exito'
+        );
+
+        servicioActual.estado = 'DESPACHADO';
+        modoSoloLectura = true;
+
+        asignarTexto(
+          'estadoServicio',
+          'DESPACHADO'
+        );
+
+        document
+          .getElementById('panelAgregar')
+          .classList.add('oculto');
+
+        boton.classList.add('oculto');
+
+        document
+          .getElementById('avisoBloqueado')
+          .classList.remove('oculto');
+
+        renderizarMateriales();
+
+      } catch (error) {
+        console.error(error);
+
+        mostrarMensaje(
+          error.message,
+          'error'
+        );
+
+        boton.disabled = false;
+        boton.textContent = 'Finalizar Previos';
+      }
+    }
+
+
+    function volverDetalle() {
+      window.location.href =
+        `detalle-servicio.html?id=${
+          encodeURIComponent(idServicioActual)
+        }`;
+    }
+
+
+    function mostrarMensaje(texto, tipo) {
+      const mensaje =
+        document.getElementById('mensaje');
+
+      mensaje.textContent = texto;
+      mensaje.className = `mensaje ${tipo}`;
+    }
+
+
+    function mostrarErrorGeneral(mensaje) {
+      document
+        .getElementById('estadoCarga')
+        .classList.add('oculto');
+
+      const error =
+        document.getElementById('errorGeneral');
+
+      error.textContent = mensaje;
+      error.classList.remove('oculto');
+    }
+
+
+    function asignarTexto(id, valor) {
+      document.getElementById(id).textContent = valor;
+    }
+
+
+    function normalizarTexto(valor) {
+      return String(valor || '')
+        .trim()
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+
+    function escaparHTML(valor) {
+      return String(valor ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
+
+</body>
+</html>
