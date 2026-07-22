@@ -471,6 +471,111 @@
         grid-template-columns: 85px 1fr;
       }
     }
+  .modal-formulario {
+  width: min(850px, 100%);
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 17px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-completo {
+  grid-column: 1 / -1;
+}
+
+.campo label {
+  color: var(--azul);
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--borde);
+  border-radius: 9px;
+  outline: none;
+  background: white;
+  color: var(--texto);
+  font: inherit;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  border-color: var(--azul-claro);
+  box-shadow: 0 0 0 3px rgba(31, 95, 139, 0.12);
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.acciones-formulario {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 5px;
+}
+
+.boton-cancelar {
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 13px 19px;
+  background: white;
+  color: var(--gris);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.mensaje-formulario {
+  display: none;
+  padding: 12px 14px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+.mensaje-formulario.exito {
+  display: block;
+  background: #dff3e7;
+  color: #166b3b;
+  border: 1px solid #b8dfc8;
+}
+
+.mensaje-formulario.error-formulario {
+  display: block;
+  background: #fde5e7;
+  color: #a62835;
+  border: 1px solid #f4bcc2;
+}
+
+@media (max-width: 620px) {
+  .formulario {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+  .acciones-formulario {
+    flex-direction: column-reverse;
+  }
+
+  .acciones-formulario button {
+    width: 100%;
+  }
+}
   </style>
 </head>
 
@@ -1023,7 +1128,7 @@
 
 
     function irNuevoServicio() {
-      window.location.href = 'nuevo-servicio.html';
+      abrirModalNuevoServicio();
     }
 
 
@@ -1068,7 +1173,166 @@
       return 'estado-general';
     }
 
+    function abrirModalNuevoServicio() {
+  const modal =
+    document.getElementById('modalNuevoServicio');
 
+  const fecha =
+    document.getElementById('fechaProgramada');
+
+  document.getElementById(
+    'mensajeNuevoServicio'
+  ).className = 'mensaje-formulario campo-completo';
+
+  document.getElementById(
+    'mensajeNuevoServicio'
+  ).textContent = '';
+
+  if (!fecha.value) {
+    fecha.value = obtenerFechaActualISO();
+  }
+
+  modal.classList.add('activo');
+
+  setTimeout(() => {
+    document.getElementById('tag').focus();
+  }, 100);
+}
+
+
+function cerrarModalNuevoServicio() {
+  document
+    .getElementById('modalNuevoServicio')
+    .classList.remove('activo');
+}
+
+
+function cerrarModalNuevoDesdeFondo(evento) {
+  if (evento.target.id === 'modalNuevoServicio') {
+    cerrarModalNuevoServicio();
+  }
+}
+
+
+async function guardarNuevoServicio(evento) {
+  evento.preventDefault();
+
+  const boton =
+    document.getElementById('btnGuardarServicio');
+
+  const mensaje =
+    document.getElementById('mensajeNuevoServicio');
+
+  const datos = {
+    faena: document.getElementById('faena').value,
+    area: document.getElementById('area').value.trim(),
+    tag: document
+      .getElementById('tag')
+      .value
+      .trim()
+      .toUpperCase(),
+    ot: document.getElementById('ot').value.trim(),
+    descripcion: document
+      .getElementById('descripcion')
+      .value
+      .trim(),
+    fechaProgramada:
+      document.getElementById('fechaProgramada').value,
+    responsablePrevios: document
+      .getElementById('responsablePrevios')
+      .value
+      .trim(),
+    responsableArmado: document
+      .getElementById('responsableArmado')
+      .value
+      .trim(),
+    responsablePostparada: document
+      .getElementById('responsablePostparada')
+      .value
+      .trim(),
+    supervisor: document
+      .getElementById('supervisor')
+      .value
+      .trim(),
+    servicioReferencia: '',
+    observaciones: document
+      .getElementById('observaciones')
+      .value
+      .trim()
+  };
+
+  boton.disabled = true;
+  boton.textContent = 'Guardando...';
+
+  mensaje.className =
+    'mensaje-formulario campo-completo';
+
+  mensaje.textContent = '';
+
+  try {
+    const respuesta = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        accion: 'crearServicio',
+        datos
+      })
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo registrar el servicio.'
+      );
+    }
+
+    mensaje.className =
+      'mensaje-formulario campo-completo exito';
+
+    mensaje.textContent =
+      `${datos.tag} fue registrado correctamente.`;
+
+    document
+      .getElementById('formNuevoServicio')
+      .reset();
+
+    document.getElementById(
+      'fechaProgramada'
+    ).value = obtenerFechaActualISO();
+
+    await cargarServicios();
+
+    setTimeout(() => {
+      cerrarModalNuevoServicio();
+    }, 1400);
+
+  } catch (error) {
+    console.error(error);
+
+    mensaje.className =
+      'mensaje-formulario campo-completo error-formulario';
+
+    mensaje.textContent = error.message;
+
+  } finally {
+    boton.disabled = false;
+    boton.textContent = 'Guardar servicio';
+  }
+}
+
+
+function obtenerFechaActualISO() {
+  const fecha = new Date();
+  const ajuste = fecha.getTimezoneOffset() * 60000;
+
+  return new Date(fecha.getTime() - ajuste)
+    .toISOString()
+    .slice(0, 10);
+}
     function normalizarTexto(valor) {
       return String(valor || '')
         .trim()
@@ -1094,6 +1358,178 @@
         .replaceAll("'", "\\'");
     }
   </script>
+<div
+  id="modalNuevoServicio"
+  class="modal-fondo"
+  onclick="cerrarModalNuevoDesdeFondo(event)"
+>
+  <div class="modal modal-formulario">
 
+    <div class="modal-cabecera">
+      <div>
+        <h3>Nuevo servicio</h3>
+        <p>Registro inicial del trabajo por TAG</p>
+      </div>
+
+      <button
+        type="button"
+        class="cerrar-modal"
+        onclick="cerrarModalNuevoServicio()"
+        aria-label="Cerrar"
+      >
+        ×
+      </button>
+    </div>
+
+    <form
+      id="formNuevoServicio"
+      class="modal-contenido formulario"
+      onsubmit="guardarNuevoServicio(event)"
+    >
+
+      <div class="campo">
+        <label for="faena">Faena *</label>
+
+        <select id="faena" required>
+          <option value="">Seleccionar</option>
+          <option value="CENTINELA">CENTINELA</option>
+          <option value="SIERRA GORDA">SIERRA GORDA</option>
+          <option value="CALAMA">CALAMA</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="area">Área *</label>
+        <input
+          id="area"
+          type="text"
+          required
+          placeholder="Ejemplo: Chancado"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="tag">TAG *</label>
+        <input
+          id="tag"
+          type="text"
+          required
+          placeholder="Ejemplo: CV001"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="ot">OT</label>
+        <input
+          id="ot"
+          type="text"
+          placeholder="Número de orden de trabajo"
+        >
+      </div>
+
+      <div class="campo campo-completo">
+        <label for="descripcion">Descripción del trabajo *</label>
+        <textarea
+          id="descripcion"
+          required
+          rows="3"
+          placeholder="Describa el trabajo que se realizará"
+        ></textarea>
+      </div>
+
+      <div class="campo">
+        <label for="fechaProgramada">Fecha programada *</label>
+        <input
+          id="fechaProgramada"
+          type="date"
+          required
+        >
+      </div>
+
+      <div class="campo">
+        <label for="supervisor">Supervisor *</label>
+        <input
+          id="supervisor"
+          type="text"
+          required
+          placeholder="Nombre del supervisor"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="responsablePrevios">
+          Responsable de previos *
+        </label>
+
+        <input
+          id="responsablePrevios"
+          type="text"
+          required
+          placeholder="Nombre del responsable"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="responsableArmado">
+          Responsable de armado
+        </label>
+
+        <input
+          id="responsableArmado"
+          type="text"
+          placeholder="Puede asignarse después"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="responsablePostparada">
+          Responsable de postparada
+        </label>
+
+        <input
+          id="responsablePostparada"
+          type="text"
+          placeholder="Puede asignarse después"
+        >
+      </div>
+
+      <div class="campo campo-completo">
+        <label for="observaciones">Observaciones</label>
+
+        <textarea
+          id="observaciones"
+          rows="3"
+          placeholder="Información adicional"
+        ></textarea>
+      </div>
+
+      <div
+        id="mensajeNuevoServicio"
+        class="mensaje-formulario campo-completo"
+      ></div>
+
+      <div class="acciones-formulario campo-completo">
+
+        <button
+          type="button"
+          class="boton-cancelar"
+          onclick="cerrarModalNuevoServicio()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          id="btnGuardarServicio"
+          type="submit"
+          class="boton-principal"
+        >
+          Guardar servicio
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+</div>
 </body>
 </html>
