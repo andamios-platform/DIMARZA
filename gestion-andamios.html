@@ -931,9 +931,9 @@
           <button
             type="button"
             class="boton-abrir"
-            onclick="abrirHistorialTag('${escaparAtributo(servicio.tag)}')"
+            onclick="abrirServicio('${escaparAtributo(servicio.idServicio)}')"
           >
-            Abrir TAG
+            Abrir Servicio (TAG)
           </button>
 
         </article>
@@ -1357,6 +1357,10 @@ function obtenerFechaActualISO() {
         .replaceAll('\\', '\\\\')
         .replaceAll("'", "\\'");
     }
+    function abrirServicio(idServicio) {
+  window.location.href =
+    `detalle-servicio.html?id=${encodeURIComponent(idServicio)}`;
+}
   </script>
 <div
   id="modalNuevoServicio"
