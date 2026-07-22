@@ -1,1 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>DIMARZA | Gestión de Andamios</title>
+
+  <style>
+    :root {
+      --azul: #123b5d;
+      --azul-claro: #1f5f8b;
+      --naranja: #f28c28;
+      --fondo: #f3f6f9;
+      --blanco: #ffffff;
+      --texto: #24313d;
+      --gris: #6d7a86;
+      --borde: #dce4ea;
+      --verde: #198754;
+      --rojo: #dc3545;
+      --amarillo: #f3b600;
+      --sombra: 0 8px 24px rgba(18, 59, 93, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .encabezado {
+      background:
+        linear-gradient(
+          135deg,
+          rgba(18, 59, 93, 0.98),
+          rgba(31, 95, 139, 0.94)
+        );
+      color: white;
+      padding: 22px 20px;
+      box-shadow: var(--sombra);
+    }
+
+    .encabezado-contenido {
+      width: min(1200px, 100%);
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .marca h1 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: 0.5px;
+    }
+
+    .marca p {
+      margin: 6px 0 0;
+      opacity: 0.85;
+      font-size: 14px;
+    }
+
+    .boton-principal {
+      border: none;
+      border-radius: 10px;
+      padding: 13px 19px;
+      background: var(--naranja);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .boton-principal:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .contenedor {
+      width: min(1200px, calc(100% - 32px));
+      margin: 28px auto 50px;
+    }
+
+    .panel-superior {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .buscador {
+      position: relative;
+    }
+
+    .buscador input {
+      width: 100%;
+      padding: 15px 18px 15px 46px;
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      background: white;
+      outline: none;
+      box-shadow: 0 4px 15px rgba(18, 59, 93, 0.05);
+    }
+
+    .buscador input:focus {
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(31, 95, 139, 0.12);
+    }
+
+    .buscador-icono {
+      position: absolute;
+      top: 50%;
+      left: 17px;
+      transform: translateY(-50%);
+      color: var(--gris);
+      font-size: 18px;
+    }
+
+    .boton-secundario {
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 13px 16px;
+      background: white;
+      color: var(--azul);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 26px;
+    }
+
+    .indicador {
+      background: white;
+      border-radius: 13px;
+      padding: 18px;
+      box-shadow: var(--sombra);
+      border: 1px solid rgba(220, 228, 234, 0.75);
+    }
+
+    .indicador .numero {
+      font-size: 27px;
+      font-weight: bold;
+      color: var(--azul);
+    }
+
+    .indicador .nombre {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--gris);
+    }
+
+    .titulo-seccion {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 15px;
+      margin-bottom: 14px;
+    }
+
+    .titulo-seccion h2 {
+      margin: 0;
+      color: var(--azul);
+      font-size: 21px;
+    }
+
+    .titulo-seccion span {
+      color: var(--gris);
+      font-size: 13px;
+    }
+
+    .rejilla {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fill, minmax(285px, 1fr));
+      gap: 18px;
+    }
+
+    .tarjeta {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid var(--borde);
+      box-shadow: var(--sombra);
+      transition: 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tarjeta::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--azul-claro);
+    }
+
+    .tarjeta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(18, 59, 93, 0.15);
+    }
+
+    .tarjeta-cabecera {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .tag {
+      margin: 0;
+      font-size: 28px;
+      color: var(--azul);
+      font-weight: 800;
+      letter-spacing: 0.6px;
+    }
+
+    .estado {
+      border-radius: 20px;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .estado-solicitado {
+      background: #e8f1fb;
+      color: #145a91;
+    }
+
+    .estado-preparacion {
+      background: #fff3cd;
+      color: #8a6700;
+    }
+
+    .estado-armado {
+      background: #dff2ff;
+      color: #006a9e;
+    }
+
+    .estado-operativo {
+      background: #dff3e7;
+      color: #166b3b;
+    }
+
+    .estado-retorno {
+      background: #f4e6ff;
+      color: #6f2b90;
+    }
+
+    .estado-observado {
+      background: #fde5e7;
+      color: #a62835;
+    }
+
+    .estado-general {
+      background: #edf0f2;
+      color: #4c5963;
+    }
+
+    .descripcion {
+      margin: 16px 0;
+      min-height: 42px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--texto);
+    }
+
+    .datos {
+      display: grid;
+      gap: 9px;
+      margin: 15px 0 18px;
+    }
+
+    .dato {
+      display: grid;
+      grid-template-columns: 95px 1fr;
+      gap: 9px;
+      font-size: 13px;
+    }
+
+    .dato-label {
+      color: var(--gris);
+    }
+
+    .dato-valor {
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .boton-abrir {
+      width: 100%;
+      border: none;
+      border-radius: 9px;
+      padding: 12px;
+      background: var(--azul);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .boton-abrir:hover {
+      background: var(--azul-claro);
+    }
+
+    .cargando,
+    .sin-resultados,
+    .error {
+      grid-column: 1 / -1;
+      padding: 36px 20px;
+      text-align: center;
+      border-radius: 14px;
+      background: white;
+      border: 1px dashed var(--borde);
+      color: var(--gris);
+    }
+
+    .error {
+      color: var(--rojo);
+      border-color: rgba(220, 53, 69, 0.35);
+    }
+
+    .modal-fondo {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(12, 27, 39, 0.65);
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal-fondo.activo {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      margin: 30px auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-cabecera {
+      padding: 20px;
+      background: var(--azul);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .modal-cabecera h3 {
+      margin: 0;
+      font-size: 27px;
+    }
+
+    .modal-cabecera p {
+      margin: 5px 0 0;
+      opacity: 0.85;
+      font-size: 13px;
+    }
+
+    .cerrar-modal {
+      border: none;
+      background: transparent;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-contenido {
+      padding: 22px;
+    }
+
+    .historial-item {
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 13px;
+    }
+
+    .historial-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .historial-fecha {
+      color: var(--gris);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .historial-descripcion {
+      font-weight: bold;
+      color: var(--azul);
+      margin-bottom: 10px;
+    }
+
+    .historial-detalles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      font-size: 12px;
+      color: var(--gris);
+    }
+
+    @media (max-width: 850px) {
+      .resumen {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .encabezado-contenido {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .boton-principal {
+        width: 100%;
+      }
+
+      .panel-superior {
+        grid-template-columns: 1fr;
+      }
+
+      .boton-secundario {
+        width: 100%;
+      }
+
+      .resumen {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .contenedor {
+        width: min(100% - 20px, 1200px);
+        margin-top: 18px;
+      }
+
+      .dato {
+        grid-template-columns: 85px 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="encabezado">
+    <div class="encabezado-contenido">
+
+      <div class="marca">
+        <h1>DIMARZA</h1>
+        <p>Biblioteca Técnica y Gestión de Andamios</p>
+      </div>
+
+      <button
+        class="boton-principal"
+        type="button"
+        onclick="irNuevoServicio()"
+      >
+        ＋ Nuevo servicio
+      </button>
+
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <section class="panel-superior">
+
+      <div class="buscador">
+        <span class="buscador-icono">⌕</span>
+
+        <input
+          id="buscador"
+          type="search"
+          placeholder="Buscar por TAG, OT, área o trabajo..."
+          autocomplete="off"
+        >
+      </div>
+
+      <button
+        type="button"
+        class="boton-secundario"
+        onclick="cargarServicios()"
+      >
+        Actualizar
+      </button>
+
+    </section>
+
+    <section class="resumen">
+
+      <article class="indicador">
+        <div class="numero" id="totalActivos">0</div>
+        <div class="nombre">Andamios activos</div>
+      </article>
+
+      <article class="indicador">
+        <div class="numero" id="totalTags">0</div>
+        <div class="nombre">TAG diferentes</div>
+      </article>
+
+      <article class="indicador">
+        <div class="numero" id="totalArmado">0</div>
+        <div class="nombre">En armado</div>
+      </article>
+
+      <article class="indicador">
+        <div class="numero" id="totalOperativos">0</div>
+        <div class="nombre">Operativos</div>
+      </article>
+
+    </section>
+
+    <section>
+
+      <div class="titulo-seccion">
+        <h2>Andamios activos</h2>
+
+        <span id="contadorResultados">
+          Cargando información...
+        </span>
+      </div>
+
+      <div id="contenedorTarjetas" class="rejilla">
+
+        <div class="cargando">
+          Consultando servicios...
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <div
+    id="modalHistorial"
+    class="modal-fondo"
+    onclick="cerrarModalDesdeFondo(event)"
+  >
+    <div class="modal">
+
+      <div class="modal-cabecera">
+
+        <div>
+          <h3 id="modalTag">TAG</h3>
+          <p id="modalCantidad">Historial del TAG</p>
+        </div>
+
+        <button
+          type="button"
+          class="cerrar-modal"
+          onclick="cerrarModal()"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div id="modalContenido" class="modal-contenido">
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+    let serviciosActivos = [];
+    let serviciosMostrados = [];
+
+    const estadosCerrados = [
+      'CERRADO',
+      'CANCELADO'
+    ];
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document
+        .getElementById('buscador')
+        .addEventListener('input', filtrarServicios);
+
+      cargarServicios();
+    });
+
+
+    async function cargarServicios() {
+      const contenedor =
+        document.getElementById('contenedorTarjetas');
+
+      contenedor.innerHTML = `
+        <div class="cargando">
+          Consultando servicios...
+        </div>
+      `;
+
+      try {
+        const url =
+          `${API_URL}?accion=listarServicios&t=${Date.now()}`;
+
+        const respuesta = await fetch(url, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+
+        if (!respuesta.ok) {
+          throw new Error(
+            `Error HTTP ${respuesta.status}`
+          );
+        }
+
+        const resultado = await respuesta.json();
+
+        if (!resultado.ok) {
+          throw new Error(
+            resultado.mensaje ||
+            'No fue posible consultar los servicios.'
+          );
+        }
+
+        const todosLosServicios =
+          Array.isArray(resultado.servicios)
+            ? resultado.servicios
+            : [];
+
+        serviciosActivos = todosLosServicios.filter(servicio => {
+          const estado =
+            normalizarTexto(servicio.estado);
+
+          return !estadosCerrados.includes(estado);
+        });
+
+        serviciosMostrados = [...serviciosActivos];
+
+        actualizarIndicadores();
+        mostrarServicios();
+
+      } catch (error) {
+        console.error(error);
+
+        contenedor.innerHTML = `
+          <div class="error">
+            No se pudo conectar con la API.<br>
+            ${escaparHTML(error.message)}
+          </div>
+        `;
+
+        document.getElementById(
+          'contadorResultados'
+        ).textContent = 'Error de conexión';
+      }
+    }
+
+
+    function filtrarServicios() {
+      const busqueda = normalizarTexto(
+        document.getElementById('buscador').value
+      );
+
+      if (!busqueda) {
+        serviciosMostrados = [...serviciosActivos];
+        mostrarServicios();
+        return;
+      }
+
+      serviciosMostrados = serviciosActivos.filter(servicio => {
+        const textoCompleto = normalizarTexto([
+          servicio.tag,
+          servicio.ot,
+          servicio.area,
+          servicio.faena,
+          servicio.descripcion,
+          servicio.supervisor,
+          servicio.estado
+        ].join(' '));
+
+        return textoCompleto.includes(busqueda);
+      });
+
+      mostrarServicios();
+    }
+
+
+    function mostrarServicios() {
+      const contenedor =
+        document.getElementById('contenedorTarjetas');
+
+      document.getElementById(
+        'contadorResultados'
+      ).textContent =
+        `${serviciosMostrados.length} resultado(s)`;
+
+      if (serviciosMostrados.length === 0) {
+        contenedor.innerHTML = `
+          <div class="sin-resultados">
+            No se encontraron servicios activos.
+          </div>
+        `;
+        return;
+      }
+
+      contenedor.innerHTML = serviciosMostrados
+        .map(crearTarjetaServicio)
+        .join('');
+    }
+
+
+    function crearTarjetaServicio(servicio) {
+      const tag =
+        escaparHTML(servicio.tag || 'SIN TAG');
+
+      const estado =
+        escaparHTML(servicio.estado || 'SIN ESTADO');
+
+      const claseEstado =
+        obtenerClaseEstado(servicio.estado);
+
+      return `
+        <article class="tarjeta">
+
+          <div class="tarjeta-cabecera">
+
+            <h3 class="tag">
+              ${tag}
+            </h3>
+
+            <span class="estado ${claseEstado}">
+              ${estado}
+            </span>
+
+          </div>
+
+          <div class="descripcion">
+            ${
+              escaparHTML(
+                servicio.descripcion ||
+                'Sin descripción registrada.'
+              )
+            }
+          </div>
+
+          <div class="datos">
+
+            <div class="dato">
+              <span class="dato-label">OT</span>
+              <span class="dato-valor">
+                ${escaparHTML(servicio.ot || 'No registrada')}
+              </span>
+            </div>
+
+            <div class="dato">
+              <span class="dato-label">Faena</span>
+              <span class="dato-valor">
+                ${escaparHTML(servicio.faena || 'No registrada')}
+              </span>
+            </div>
+
+            <div class="dato">
+              <span class="dato-label">Área</span>
+              <span class="dato-valor">
+                ${escaparHTML(servicio.area || 'No registrada')}
+              </span>
+            </div>
+
+            <div class="dato">
+              <span class="dato-label">Programado</span>
+              <span class="dato-valor">
+                ${
+                  escaparHTML(
+                    servicio.fechaProgramada ||
+                    'Sin fecha'
+                  )
+                }
+              </span>
+            </div>
+
+            <div class="dato">
+              <span class="dato-label">Supervisor</span>
+              <span class="dato-valor">
+                ${
+                  escaparHTML(
+                    servicio.supervisor ||
+                    'No asignado'
+                  )
+                }
+              </span>
+            </div>
+
+          </div>
+
+          <button
+            type="button"
+            class="boton-abrir"
+            onclick="abrirHistorialTag('${escaparAtributo(servicio.tag)}')"
+          >
+            Abrir TAG
+          </button>
+
+        </article>
+      `;
+    }
+
+
+    function actualizarIndicadores() {
+      const tags = new Set(
+        serviciosActivos
+          .map(servicio => normalizarTexto(servicio.tag))
+          .filter(Boolean)
+      );
+
+      const enArmado = serviciosActivos.filter(servicio =>
+        normalizarTexto(servicio.estado) === 'EN ARMADO'
+      ).length;
+
+      const operativos = serviciosActivos.filter(servicio =>
+        normalizarTexto(servicio.estado) ===
+        'ANDAMIO OPERATIVO'
+      ).length;
+
+      document.getElementById(
+        'totalActivos'
+      ).textContent = serviciosActivos.length;
+
+      document.getElementById(
+        'totalTags'
+      ).textContent = tags.size;
+
+      document.getElementById(
+        'totalArmado'
+      ).textContent = enArmado;
+
+      document.getElementById(
+        'totalOperativos'
+      ).textContent = operativos;
+    }
+
+
+    async function abrirHistorialTag(tag) {
+      const modal =
+        document.getElementById('modalHistorial');
+
+      const contenido =
+        document.getElementById('modalContenido');
+
+      document.getElementById(
+        'modalTag'
+      ).textContent = tag;
+
+      document.getElementById(
+        'modalCantidad'
+      ).textContent = 'Consultando historial...';
+
+      contenido.innerHTML = `
+        <div class="cargando">
+          Cargando historial del TAG...
+        </div>
+      `;
+
+      modal.classList.add('activo');
+
+      try {
+        const url =
+          `${API_URL}?accion=historialTag&tag=${
+            encodeURIComponent(tag)
+          }&t=${Date.now()}`;
+
+        const respuesta = await fetch(url);
+        const resultado = await respuesta.json();
+
+        if (!resultado.ok) {
+          throw new Error(
+            resultado.mensaje ||
+            'No se pudo consultar el historial.'
+          );
+        }
+
+        const servicios =
+          Array.isArray(resultado.servicios)
+            ? resultado.servicios
+            : [];
+
+        document.getElementById(
+          'modalCantidad'
+        ).textContent =
+          `${servicios.length} trabajo(s) registrado(s)`;
+
+        if (servicios.length === 0) {
+          contenido.innerHTML = `
+            <div class="sin-resultados">
+              Este TAG todavía no tiene trabajos registrados.
+            </div>
+          `;
+          return;
+        }
+
+        contenido.innerHTML = servicios
+          .map(servicio => `
+            <article class="historial-item">
+
+              <div class="historial-fecha">
+                ${
+                  escaparHTML(
+                    servicio.fechaProgramada ||
+                    servicio.fechaRegistro ||
+                    'Sin fecha'
+                  )
+                }
+              </div>
+
+              <div class="historial-descripcion">
+                ${
+                  escaparHTML(
+                    servicio.descripcion ||
+                    'Sin descripción'
+                  )
+                }
+              </div>
+
+              <div class="historial-detalles">
+                <span>
+                  OT:
+                  <strong>
+                    ${escaparHTML(servicio.ot || 'S/N')}
+                  </strong>
+                </span>
+
+                <span>
+                  Estado:
+                  <strong>
+                    ${escaparHTML(servicio.estado || 'S/E')}
+                  </strong>
+                </span>
+
+                <span>
+                  Área:
+                  <strong>
+                    ${escaparHTML(servicio.area || 'S/A')}
+                  </strong>
+                </span>
+
+                <span>
+                  Supervisor:
+                  <strong>
+                    ${
+                      escaparHTML(
+                        servicio.supervisor ||
+                        'No asignado'
+                      )
+                    }
+                  </strong>
+                </span>
+              </div>
+
+            </article>
+          `)
+          .join('');
+
+      } catch (error) {
+        console.error(error);
+
+        document.getElementById(
+          'modalCantidad'
+        ).textContent = 'Error';
+
+        contenido.innerHTML = `
+          <div class="error">
+            ${escaparHTML(error.message)}
+          </div>
+        `;
+      }
+    }
+
+
+    function cerrarModal() {
+      document
+        .getElementById('modalHistorial')
+        .classList.remove('activo');
+    }
+
+
+    function cerrarModalDesdeFondo(evento) {
+      if (
+        evento.target.id === 'modalHistorial'
+      ) {
+        cerrarModal();
+      }
+    }
+
+
+    function irNuevoServicio() {
+      window.location.href = 'nuevo-servicio.html';
+    }
+
+
+    function obtenerClaseEstado(estado) {
+      const valor = normalizarTexto(estado);
+
+      if (
+        valor === 'SOLICITADO' ||
+        valor === 'EN PLANIFICACION'
+      ) {
+        return 'estado-solicitado';
+      }
+
+      if (
+        valor === 'EN PREPARACION' ||
+        valor === 'DESPACHADO' ||
+        valor === 'RECIBIDO EN TAG'
+      ) {
+        return 'estado-preparacion';
+      }
+
+      if (valor === 'EN ARMADO') {
+        return 'estado-armado';
+      }
+
+      if (valor === 'ANDAMIO OPERATIVO') {
+        return 'estado-operativo';
+      }
+
+      if (
+        valor === 'EN DESMONTAJE' ||
+        valor === 'EN RETORNO' ||
+        valor === 'RECIBIDO EN BASE'
+      ) {
+        return 'estado-retorno';
+      }
+
+      if (valor === 'OBSERVADO') {
+        return 'estado-observado';
+      }
+
+      return 'estado-general';
+    }
+
+
+    function normalizarTexto(valor) {
+      return String(valor || '')
+        .trim()
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+
+    function escaparHTML(valor) {
+      return String(valor ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+
+    function escaparAtributo(valor) {
+      return String(valor ?? '')
+        .replaceAll('\\', '\\\\')
+        .replaceAll("'", "\\'");
+    }
+  </script>
+
+</body>
+</html>
