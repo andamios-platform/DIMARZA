@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Detalle del Servicio | DIMARZA</title>
+
+  <style>
+    :root {
+      --azul: #123b5d;
+      --azul-claro: #1f5f8b;
+      --naranja: #f28c28;
+      --fondo: #f3f6f9;
+      --blanco: #ffffff;
+      --texto: #24313d;
+      --gris: #6d7a86;
+      --borde: #dce4ea;
+      --verde: #198754;
+      --rojo: #dc3545;
+      --amarillo: #f3b600;
+      --morado: #6f42c1;
+      --sombra: 0 8px 24px rgba(18, 59, 93, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .encabezado {
+      background:
+        linear-gradient(
+          135deg,
+          rgba(18, 59, 93, 0.98),
+          rgba(31, 95, 139, 0.94)
+        );
+      color: white;
+      padding: 20px;
+      box-shadow: var(--sombra);
+    }
+
+    .encabezado-contenido {
+      width: min(1200px, 100%);
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .marca h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .marca p {
+      margin: 5px 0 0;
+      opacity: 0.85;
+      font-size: 13px;
+    }
+
+    .boton-volver {
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 10px;
+      padding: 11px 17px;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .boton-volver:hover {
+      background: rgba(255,255,255,0.22);
+    }
+
+    .contenedor {
+      width: min(1200px, calc(100% - 30px));
+      margin: 25px auto 50px;
+    }
+
+    .cargando,
+    .error {
+      background: white;
+      border-radius: 14px;
+      padding: 35px 20px;
+      text-align: center;
+      box-shadow: var(--sombra);
+      border: 1px dashed var(--borde);
+      color: var(--gris);
+    }
+
+    .error {
+      color: var(--rojo);
+      border-color: rgba(220, 53, 69, 0.35);
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    .cabecera-servicio {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--sombra);
+      border: 1px solid var(--borde);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cabecera-servicio::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 6px;
+      height: 100%;
+      background: var(--naranja);
+    }
+
+    .cabecera-superior {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .tag {
+      margin: 0;
+      color: var(--azul);
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .descripcion {
+      margin: 8px 0 0;
+      color: var(--texto);
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .id-interno {
+      margin-top: 7px;
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .estado {
+      padding: 9px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .estado-solicitado {
+      background: #e8f1fb;
+      color: #145a91;
+    }
+
+    .estado-preparacion {
+      background: #fff3cd;
+      color: #8a6700;
+    }
+
+    .estado-armado {
+      background: #dff2ff;
+      color: #006a9e;
+    }
+
+    .estado-operativo {
+      background: #dff3e7;
+      color: #166b3b;
+    }
+
+    .estado-retorno {
+      background: #f4e6ff;
+      color: #6f2b90;
+    }
+
+    .estado-observado {
+      background: #fde5e7;
+      color: #a62835;
+    }
+
+    .estado-general {
+      background: #edf0f2;
+      color: #4c5963;
+    }
+
+    .datos-resumen {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .dato-resumen {
+      background: #f7f9fb;
+      border-radius: 11px;
+      padding: 14px;
+      border: 1px solid var(--borde);
+    }
+
+    .dato-resumen .label {
+      color: var(--gris);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .dato-resumen .valor {
+      color: var(--azul);
+      font-size: 14px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .seccion {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: var(--sombra);
+      border: 1px solid var(--borde);
+      margin-bottom: 20px;
+    }
+
+    .seccion h2 {
+      margin: 0 0 17px;
+      color: var(--azul);
+      font-size: 20px;
+    }
+
+    .flujo {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .paso {
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      border: 1px solid var(--borde);
+      background: #f7f9fb;
+      color: var(--gris);
+      position: relative;
+    }
+
+    .paso.activo {
+      background: #e8f1fb;
+      color: var(--azul);
+      border-color: #b8d3ea;
+      font-weight: bold;
+    }
+
+    .paso.completado {
+      background: #dff3e7;
+      color: #166b3b;
+      border-color: #b8dfc8;
+      font-weight: bold;
+    }
+
+    .paso-icono {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 7px;
+    }
+
+    .rejilla-modulos {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    .modulo {
+      border: none;
+      border-radius: 14px;
+      min-height: 150px;
+      padding: 20px 15px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .modulo:hover {
+      transform: translateY(-4px);
+    }
+
+    .modulo-icono {
+      display: block;
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+
+    .modulo-previos {
+      background: linear-gradient(135deg, #f28c28, #d96c0f);
+    }
+
+    .modulo-armado {
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+    }
+
+    .modulo-postparada {
+      background: linear-gradient(135deg, #00897b, #00695c);
+    }
+
+    .modulo-fotografias {
+      background: linear-gradient(135deg, #7b1fa2, #4a148c);
+    }
+
+    .modulo-historial {
+      background: linear-gradient(135deg, #5f6b75, #37424b);
+    }
+
+    .detalle-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .detalle-item {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .detalle-item:nth-last-child(-n+2) {
+      border-bottom: none;
+    }
+
+    .detalle-label {
+      color: var(--gris);
+      font-size: 13px;
+    }
+
+    .detalle-valor {
+      color: var(--texto);
+      font-size: 14px;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    @media (max-width: 950px) {
+      .datos-resumen {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .rejilla-modulos {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .flujo {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 650px) {
+      .encabezado-contenido {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .boton-volver {
+        width: 100%;
+      }
+
+      .cabecera-superior {
+        flex-direction: column;
+      }
+
+      .tag {
+        font-size: 34px;
+      }
+
+      .estado {
+        width: 100%;
+      }
+
+      .datos-resumen {
+        grid-template-columns: 1fr;
+      }
+
+      .rejilla-modulos {
+        grid-template-columns: 1fr;
+      }
+
+      .flujo {
+        grid-template-columns: 1fr;
+      }
+
+      .detalle-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detalle-item {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="encabezado">
+    <div class="encabezado-contenido">
+
+      <div class="marca">
+        <h1>DIMARZA</h1>
+        <p>Detalle del Servicio de Andamios</p>
+      </div>
+
+      <button
+        type="button"
+        class="boton-volver"
+        onclick="volverDashboard()"
+      >
+        ← Volver a servicios
+      </button>
+
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <div id="estadoCarga" class="cargando">
+      Cargando información del servicio...
+    </div>
+
+    <div id="mensajeError" class="error oculto">
+    </div>
+
+    <div id="contenidoServicio" class="oculto">
+
+      <section class="cabecera-servicio">
+
+        <div class="cabecera-superior">
+
+          <div>
+            <h2 id="tagServicio" class="tag">TAG</h2>
+
+            <p id="descripcionServicio" class="descripcion">
+              Descripción del trabajo
+            </p>
+
+            <div id="idServicio" class="id-interno">
+              ID interno
+            </div>
+          </div>
+
+          <span id="estadoServicio" class="estado estado-general">
+            SIN ESTADO
+          </span>
+
+        </div>
+
+        <div class="datos-resumen">
+
+          <article class="dato-resumen">
+            <div class="label">OT</div>
+            <div class="valor" id="otServicio">-</div>
+          </article>
+
+          <article class="dato-resumen">
+            <div class="label">Faena</div>
+            <div class="valor" id="faenaServicio">-</div>
+          </article>
+
+          <article class="dato-resumen">
+            <div class="label">Área</div>
+            <div class="valor" id="areaServicio">-</div>
+          </article>
+
+          <article class="dato-resumen">
+            <div class="label">Fecha programada</div>
+            <div class="valor" id="fechaServicio">-</div>
+          </article>
+
+        </div>
+
+      </section>
+
+      <section class="seccion">
+
+        <h2>Estado del proceso</h2>
+
+        <div class="flujo">
+
+          <div id="pasoSolicitado" class="paso">
+            <span class="paso-icono">📄</span>
+            Solicitado
+          </div>
+
+          <div id="pasoPrevios" class="paso">
+            <span class="paso-icono">📦</span>
+            Previos
+          </div>
+
+          <div id="pasoArmado" class="paso">
+            <span class="paso-icono">🔨</span>
+            Armado
+          </div>
+
+          <div id="pasoPostparada" class="paso">
+            <span class="paso-icono">🚚</span>
+            Postparada
+          </div>
+
+          <div id="pasoFinalizado" class="paso">
+            <span class="paso-icono">✅</span>
+            Finalizado
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="seccion">
+
+        <h2>Módulos del servicio</h2>
+
+        <div class="rejilla-modulos">
+
+          <button
+            type="button"
+            class="modulo modulo-previos"
+            onclick="abrirModulo('previos.html')"
+          >
+            <span class="modulo-icono">📦</span>
+            Previos
+          </button>
+
+          <button
+            type="button"
+            class="modulo modulo-armado"
+            onclick="abrirModulo('armado.html')"
+          >
+            <span class="modulo-icono">🔨</span>
+            Armado
+          </button>
+
+          <button
+            type="button"
+            class="modulo modulo-postparada"
+            onclick="abrirModulo('postparada.html')"
+          >
+            <span class="modulo-icono">🚚</span>
+            Postparada
+          </button>
+
+          <button
+            type="button"
+            class="modulo modulo-fotografias"
+            onclick="abrirModulo('fotografias.html')"
+          >
+            <span class="modulo-icono">📷</span>
+            Fotografías
+          </button>
+
+          <button
+            type="button"
+            class="modulo modulo-historial"
+            onclick="abrirHistorial()"
+          >
+            <span class="modulo-icono">📚</span>
+            Historial del TAG
+          </button>
+
+        </div>
+
+      </section>
+
+      <section class="seccion">
+
+        <h2>Datos generales</h2>
+
+        <div class="detalle-grid">
+
+          <div class="detalle-item">
+            <div class="detalle-label">Supervisor</div>
+            <div class="detalle-valor" id="supervisorServicio">-</div>
+          </div>
+
+          <div class="detalle-item">
+            <div class="detalle-label">Responsable de Previos</div>
+            <div class="detalle-valor" id="responsablePrevios">-</div>
+          </div>
+
+          <div class="detalle-item">
+            <div class="detalle-label">Responsable de Armado</div>
+            <div class="detalle-valor" id="responsableArmado">-</div>
+          </div>
+
+          <div class="detalle-item">
+            <div class="detalle-label">Responsable de Postparada</div>
+            <div class="detalle-valor" id="responsablePostparada">-</div>
+          </div>
+
+          <div class="detalle-item">
+            <div class="detalle-label">Fecha de registro</div>
+            <div class="detalle-valor" id="fechaRegistro">-</div>
+          </div>
+
+          <div class="detalle-item">
+            <div class="detalle-label">Fecha de cierre</div>
+            <div class="detalle-valor" id="fechaCierre">-</div>
+          </div>
+
+          <div class="detalle-item">
+            <div class="detalle-label">Servicio de referencia</div>
+            <div class="detalle-valor" id="servicioReferencia">-</div>
+          </div>
+
+          <div class="detalle-item">
+            <div class="detalle-label">Observaciones</div>
+            <div class="detalle-valor" id="observacionesServicio">-</div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <script>
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+    let servicioActual = null;
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarServicio();
+    });
+
+
+    async function cargarServicio() {
+      const parametros =
+        new URLSearchParams(window.location.search);
+
+      const idServicio =
+        parametros.get('id');
+
+      if (!idServicio) {
+        mostrarError(
+          'No se indicó el servicio que se desea abrir.'
+        );
+        return;
+      }
+
+      try {
+        const url =
+          `${API_URL}?accion=obtenerServicio&idServicio=${
+            encodeURIComponent(idServicio)
+          }&t=${Date.now()}`;
+
+        const respuesta = await fetch(url, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+
+        if (!respuesta.ok) {
+          throw new Error(
+            `Error HTTP ${respuesta.status}`
+          );
+        }
+
+        const resultado = await respuesta.json();
+
+        if (!resultado.ok || !resultado.servicio) {
+          throw new Error(
+            resultado.mensaje ||
+            'No se encontró el servicio.'
+          );
+        }
+
+        servicioActual = resultado.servicio;
+
+        mostrarServicio(servicioActual);
+
+      } catch (error) {
+        console.error(error);
+        mostrarError(error.message);
+      }
+    }
+
+
+    function mostrarServicio(servicio) {
+      document.getElementById(
+        'estadoCarga'
+      ).classList.add('oculto');
+
+      document.getElementById(
+        'contenidoServicio'
+      ).classList.remove('oculto');
+
+      asignarTexto(
+        'tagServicio',
+        servicio.tag || 'SIN TAG'
+      );
+
+      asignarTexto(
+        'descripcionServicio',
+        servicio.descripcion || 'Sin descripción'
+      );
+
+      asignarTexto(
+        'idServicio',
+        `ID interno: ${servicio.idServicio || '-'}`
+      );
+
+      asignarTexto(
+        'otServicio',
+        servicio.ot || 'No registrada'
+      );
+
+      asignarTexto(
+        'faenaServicio',
+        servicio.faena || 'No registrada'
+      );
+
+      asignarTexto(
+        'areaServicio',
+        servicio.area || 'No registrada'
+      );
+
+      asignarTexto(
+        'fechaServicio',
+        servicio.fechaProgramada || 'Sin fecha'
+      );
+
+      asignarTexto(
+        'supervisorServicio',
+        servicio.supervisor || 'No asignado'
+      );
+
+      asignarTexto(
+        'responsablePrevios',
+        servicio.responsablePrevios || 'No asignado'
+      );
+
+      asignarTexto(
+        'responsableArmado',
+        servicio.responsableArmado || 'No asignado'
+      );
+
+      asignarTexto(
+        'responsablePostparada',
+        servicio.responsablePostparada || 'No asignado'
+      );
+
+      asignarTexto(
+        'fechaRegistro',
+        servicio.fechaRegistro || '-'
+      );
+
+      asignarTexto(
+        'fechaCierre',
+        servicio.fechaCierre || 'Pendiente'
+      );
+
+      asignarTexto(
+        'servicioReferencia',
+        servicio.servicioReferencia || 'Ninguno'
+      );
+
+      asignarTexto(
+        'observacionesServicio',
+        servicio.observaciones || 'Sin observaciones'
+      );
+
+      mostrarEstado(servicio.estado);
+      actualizarFlujo(servicio.estado);
+
+      document.title =
+        `${servicio.tag || 'Servicio'} | DIMARZA`;
+    }
+
+
+    function mostrarEstado(estado) {
+      const elemento =
+        document.getElementById('estadoServicio');
+
+      const texto =
+        estado || 'SIN ESTADO';
+
+      elemento.textContent = texto;
+
+      elemento.className =
+        `estado ${obtenerClaseEstado(texto)}`;
+    }
+
+
+    function actualizarFlujo(estado) {
+      const valor = normalizarTexto(estado);
+
+      const pasos = [
+        'pasoSolicitado',
+        'pasoPrevios',
+        'pasoArmado',
+        'pasoPostparada',
+        'pasoFinalizado'
+      ];
+
+      pasos.forEach(id => {
+        document.getElementById(id).className = 'paso';
+      });
+
+      let indiceActual = 0;
+
+      if (
+        valor === 'EN PLANIFICACION' ||
+        valor === 'EN PREPARACION' ||
+        valor === 'DESPACHADO' ||
+        valor === 'RECIBIDO EN TAG'
+      ) {
+        indiceActual = 1;
+      }
+
+      if (
+        valor === 'EN ARMADO' ||
+        valor === 'ANDAMIO OPERATIVO'
+      ) {
+        indiceActual = 2;
+      }
+
+      if (
+        valor === 'EN DESMONTAJE' ||
+        valor === 'EN RETORNO' ||
+        valor === 'RECIBIDO EN BASE'
+      ) {
+        indiceActual = 3;
+      }
+
+      if (
+        valor === 'CERRADO' ||
+        valor === 'FINALIZADO'
+      ) {
+        indiceActual = 4;
+      }
+
+      pasos.forEach((id, indice) => {
+        const elemento = document.getElementById(id);
+
+        if (indice < indiceActual) {
+          elemento.classList.add('completado');
+        }
+
+        if (indice === indiceActual) {
+          elemento.classList.add('activo');
+        }
+      });
+    }
+
+
+    function abrirModulo(archivo) {
+      if (!servicioActual || !servicioActual.idServicio) {
+        alert('No se pudo identificar el servicio.');
+        return;
+      }
+
+      window.location.href =
+        `${archivo}?id=${
+          encodeURIComponent(servicioActual.idServicio)
+        }`;
+    }
+
+
+    function abrirHistorial() {
+      if (!servicioActual || !servicioActual.tag) {
+        alert('No se pudo identificar el TAG.');
+        return;
+      }
+
+      window.location.href =
+        `historial.html?tag=${
+          encodeURIComponent(servicioActual.tag)
+        }`;
+    }
+
+
+    function volverDashboard() {
+      window.location.href = 'gestion-andamios.html';
+    }
+
+
+    function mostrarError(mensaje) {
+      document.getElementById(
+        'estadoCarga'
+      ).classList.add('oculto');
+
+      const contenedor =
+        document.getElementById('mensajeError');
+
+      contenedor.textContent = mensaje;
+      contenedor.classList.remove('oculto');
+    }
+
+
+    function asignarTexto(id, valor) {
+      document.getElementById(id).textContent = valor;
+    }
+
+
+    function obtenerClaseEstado(estado) {
+      const valor = normalizarTexto(estado);
+
+      if (
+        valor === 'SOLICITADO' ||
+        valor === 'EN PLANIFICACION'
+      ) {
+        return 'estado-solicitado';
+      }
+
+      if (
+        valor === 'EN PREPARACION' ||
+        valor === 'DESPACHADO' ||
+        valor === 'RECIBIDO EN TAG'
+      ) {
+        return 'estado-preparacion';
+      }
+
+      if (valor === 'EN ARMADO') {
+        return 'estado-armado';
+      }
+
+      if (valor === 'ANDAMIO OPERATIVO') {
+        return 'estado-operativo';
+      }
+
+      if (
+        valor === 'EN DESMONTAJE' ||
+        valor === 'EN RETORNO' ||
+        valor === 'RECIBIDO EN BASE'
+      ) {
+        return 'estado-retorno';
+      }
+
+      if (valor === 'OBSERVADO') {
+        return 'estado-observado';
+      }
+
+      return 'estado-general';
+    }
+
+
+    function normalizarTexto(valor) {
+      return String(valor || '')
+        .trim()
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+  </script>
+
+</body>
+</html>
