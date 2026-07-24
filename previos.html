@@ -22,7 +22,9 @@
       --gris: #6d7a86;
       --borde: #dce4ea;
       --verde: #198754;
+      --verde-claro: #dff3e7;
       --rojo: #dc3545;
+      --amarillo: #f3b600;
       --sombra: 0 8px 24px rgba(18, 59, 93, 0.10);
     }
 
@@ -96,6 +98,10 @@
       border: 1px solid rgba(255, 255, 255, 0.45);
       border-radius: 10px;
       cursor: pointer;
+    }
+
+    .boton-volver:hover {
+      background: rgba(255, 255, 255, 0.22);
     }
 
     .contenedor {
@@ -204,9 +210,79 @@
       border-radius: 12px;
     }
 
+    .panel-historial {
+      padding: 20px;
+      margin-bottom: 20px;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 15px;
+      box-shadow: var(--sombra);
+    }
+
+    .panel-historial-cabecera {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .panel-historial h2 {
+      margin: 0;
+      color: var(--azul);
+      font-size: 19px;
+    }
+
+    .historial-subtitulo {
+      margin: 5px 0 0;
+      color: var(--gris);
+      font-size: 13px;
+    }
+
+    .historial-lista {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .historial-servicio {
+      padding: 15px;
+      background: #f7f9fb;
+      border: 1px solid var(--borde);
+      border-radius: 11px;
+    }
+
+    .historial-servicio-titulo {
+      color: var(--azul);
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .historial-servicio-dato {
+      margin-top: 5px;
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .boton-copiar {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px 12px;
+      color: white;
+      font-weight: bold;
+      background: var(--azul);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .boton-copiar:hover {
+      background: var(--azul-claro);
+    }
+
     .paneles {
       display: grid;
-      grid-template-columns: minmax(280px, 380px) 1fr;
+      grid-template-columns: minmax(300px, 390px) 1fr;
       gap: 20px;
       align-items: start;
     }
@@ -262,6 +338,60 @@
       resize: vertical;
     }
 
+    .busqueda-material {
+      position: relative;
+    }
+
+    .resultados-busqueda {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 5px);
+      left: 0;
+      right: 0;
+      max-height: 260px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(18, 59, 93, 0.18);
+    }
+
+    .resultado-material {
+      width: 100%;
+      padding: 12px;
+      text-align: left;
+      background: white;
+      border: none;
+      border-bottom: 1px solid #edf1f4;
+      cursor: pointer;
+    }
+
+    .resultado-material:last-child {
+      border-bottom: none;
+    }
+
+    .resultado-material:hover {
+      background: #f4f8fb;
+    }
+
+    .resultado-nombre {
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    .resultado-detalle {
+      margin-top: 3px;
+      color: var(--gris);
+      font-size: 11px;
+    }
+
+    .sin-resultados-busqueda {
+      padding: 14px;
+      color: var(--gris);
+      text-align: center;
+      font-size: 13px;
+    }
+
     .detalle-material {
       padding: 12px;
       margin-bottom: 15px;
@@ -270,6 +400,12 @@
       background: #f7f9fb;
       border: 1px solid var(--borde);
       border-radius: 9px;
+    }
+
+    .detalle-material.seleccionado {
+      color: var(--texto);
+      background: #eef5fa;
+      border-color: #bfd7e8;
     }
 
     .boton-agregar {
@@ -286,6 +422,10 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
+    }
+
+    .boton-agregar:hover {
+      filter: brightness(1.04);
     }
 
     .lista-vacia {
@@ -310,6 +450,25 @@
       border: 1px solid var(--borde);
       border-left: 5px solid var(--naranja);
       border-radius: 12px;
+      transition: 0.25s ease;
+    }
+
+    .material.reciente {
+      animation: resaltarMaterial 1.4s ease;
+    }
+
+    @keyframes resaltarMaterial {
+      0% {
+        transform: translateY(-4px);
+        background: #dff3e7;
+        border-color: #9fd4b5;
+      }
+
+      100% {
+        transform: translateY(0);
+        background: #f9fbfc;
+        border-color: var(--borde);
+      }
     }
 
     .material-grupo {
@@ -334,13 +493,42 @@
       font-size: 12px;
     }
 
+    .etiqueta-reciente {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 7px;
+      color: #166b3b;
+      font-size: 10px;
+      font-weight: bold;
+      background: var(--verde-claro);
+      border-radius: 10px;
+    }
+
     .material-controles {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .cantidad-material {
+    .cantidad-material-input {
+      width: 76px;
+      padding: 7px 8px;
+      color: var(--azul);
+      font-size: 17px;
+      font-weight: bold;
+      text-align: center;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .cantidad-material-input:focus {
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(31, 95, 139, 0.12);
+    }
+
+    .cantidad-solo-lectura {
       min-width: 42px;
       color: var(--azul);
       font-size: 18px;
@@ -381,6 +569,42 @@
       border-radius: 11px;
     }
 
+    .resumen-grupos {
+      padding: 16px;
+      margin-top: 14px;
+      background: #f7f9fb;
+      border: 1px solid var(--borde);
+      border-radius: 11px;
+    }
+
+    .resumen-grupos h3 {
+      margin: 0 0 12px;
+      color: var(--azul);
+      font-size: 15px;
+    }
+
+    .resumen-grupo-fila {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px solid #e5ebef;
+      font-size: 13px;
+    }
+
+    .resumen-grupo-fila:last-child {
+      border-bottom: none;
+    }
+
+    .resumen-grupo-nombre {
+      color: var(--gris);
+    }
+
+    .resumen-grupo-cantidad {
+      color: var(--azul);
+      font-weight: bold;
+    }
+
     .acciones {
       display: flex;
       justify-content: flex-end;
@@ -419,6 +643,88 @@
       border: 1px solid #f4bcc2;
     }
 
+    .modal-fondo {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      padding: 20px;
+      background: rgba(12, 27, 39, 0.65);
+    }
+
+    .modal-fondo.activo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      width: min(480px, 100%);
+      overflow: hidden;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+
+    .modal-cabecera {
+      padding: 18px 20px;
+      color: white;
+      background: var(--azul);
+    }
+
+    .modal-cabecera h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .modal-contenido {
+      padding: 20px;
+    }
+
+    .modal-resumen {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .modal-dato {
+      padding: 13px;
+      text-align: center;
+      background: #f7f9fb;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+    }
+
+    .modal-dato-numero {
+      color: var(--azul);
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .modal-dato-label {
+      margin-top: 4px;
+      color: var(--gris);
+      font-size: 11px;
+    }
+
+    .modal-acciones {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 0 20px 20px;
+    }
+
+    .boton-cancelar {
+      padding: 11px 16px;
+      color: var(--gris);
+      font-weight: bold;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
     @media (max-width: 850px) {
       .resumen {
         grid-template-columns: repeat(2, 1fr);
@@ -431,7 +737,8 @@
 
     @media (max-width: 600px) {
       .encabezado-contenido,
-      .cabecera-superior {
+      .cabecera-superior,
+      .panel-historial-cabecera {
         align-items: stretch;
         flex-direction: column;
       }
@@ -456,10 +763,19 @@
 
       .material-controles {
         justify-content: flex-end;
+        flex-wrap: wrap;
       }
 
       .acciones,
       .boton-finalizar {
+        width: 100%;
+      }
+
+      .modal-acciones {
+        flex-direction: column-reverse;
+      }
+
+      .modal-acciones button {
         width: 100%;
       }
     }
@@ -547,11 +863,42 @@
         únicamente para consulta.
       </div>
 
+      <section id="panelHistorial" class="panel-historial oculto">
+
+        <div class="panel-historial-cabecera">
+          <div>
+            <h2>Historial inteligente del TAG</h2>
+            <p id="historialSubtitulo" class="historial-subtitulo">
+              Buscando servicios anteriores...
+            </p>
+          </div>
+        </div>
+
+        <div id="historialLista" class="historial-lista"></div>
+
+      </section>
+
       <section class="paneles">
 
         <div id="panelAgregar" class="panel">
 
           <h2>Agregar material</h2>
+
+          <div class="campo busqueda-material">
+            <label for="buscarMaterial">Buscar material</label>
+
+            <input
+              id="buscarMaterial"
+              type="search"
+              placeholder="Ejemplo: plataforma 2"
+              autocomplete="off"
+            >
+
+            <div
+              id="resultadosBusqueda"
+              class="resultados-busqueda oculto"
+            ></div>
+          </div>
 
           <div class="campo">
             <label for="grupoMaterial">Grupo</label>
@@ -577,7 +924,7 @@
           </div>
 
           <div id="detalleSeleccionado" class="detalle-material">
-            Selecciona un material.
+            Busca o selecciona un material.
           </div>
 
           <div class="campo">
@@ -629,6 +976,11 @@
             <span id="totalPiezas">0 unidades</span>
           </div>
 
+          <div id="resumenGrupos" class="resumen-grupos oculto">
+            <h3>Resumen por grupo</h3>
+            <div id="resumenGruposLista"></div>
+          </div>
+
           <div id="mensaje" class="mensaje"></div>
 
           <div class="acciones">
@@ -637,7 +989,7 @@
               id="btnFinalizar"
               type="button"
               class="boton-finalizar"
-              onclick="finalizarPrevios()"
+              onclick="abrirModalFinalizar()"
             >
               Finalizar Previos
             </button>
@@ -652,6 +1004,64 @@
 
   </main>
 
+  <div
+    id="modalFinalizar"
+    class="modal-fondo"
+    onclick="cerrarModalFinalizarDesdeFondo(event)"
+  >
+    <div class="modal">
+
+      <div class="modal-cabecera">
+        <h3>Finalizar Previos</h3>
+      </div>
+
+      <div class="modal-contenido">
+
+        <p>
+          Los materiales serán guardados y la lista quedará
+          bloqueada para edición.
+        </p>
+
+        <div class="modal-resumen">
+
+          <div class="modal-dato">
+            <div id="modalTotalTipos" class="modal-dato-numero">0</div>
+            <div class="modal-dato-label">Tipos de material</div>
+          </div>
+
+          <div class="modal-dato">
+            <div id="modalTotalPiezas" class="modal-dato-numero">0</div>
+            <div class="modal-dato-label">Unidades totales</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-acciones">
+
+        <button
+          type="button"
+          class="boton-cancelar"
+          onclick="cerrarModalFinalizar()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          id="btnConfirmarFinalizar"
+          type="button"
+          class="boton-finalizar"
+          onclick="finalizarPrevios()"
+        >
+          Confirmar y finalizar
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
   <script>
     const API_URL =
       'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
@@ -661,6 +1071,9 @@
     let catalogoMateriales = [];
     let materialesPrevios = [];
     let modoSoloLectura = false;
+    let materialSeleccionadoBusqueda = null;
+    let claveMaterialReciente = '';
+    let temporizadorMensaje = null;
 
 
     document.addEventListener('DOMContentLoaded', iniciarPagina);
@@ -742,7 +1155,7 @@
 
         catalogoMateriales =
           Array.isArray(
-            resultadoCatalogo.catalogo.materiales
+            resultadoCatalogo.catalogo?.materiales
           )
             ? resultadoCatalogo.catalogo.materiales
             : [];
@@ -763,6 +1176,8 @@
         determinarModoEdicion();
         mostrarServicio();
         cargarGrupos();
+        configurarBuscador();
+        ordenarMateriales();
         renderizarMateriales();
 
         document
@@ -772,6 +1187,8 @@
         document
           .getElementById('contenido')
           .classList.remove('oculto');
+
+        cargarHistorialInteligente();
 
       } catch (error) {
         console.error(error);
@@ -852,6 +1269,160 @@
     }
 
 
+    function configurarBuscador() {
+      const buscador =
+        document.getElementById('buscarMaterial');
+
+      buscador.addEventListener('input', buscarMateriales);
+
+      buscador.addEventListener('focus', () => {
+        if (buscador.value.trim()) {
+          buscarMateriales();
+        }
+      });
+
+      document.addEventListener('click', evento => {
+        const contenedor =
+          document.querySelector('.busqueda-material');
+
+        if (!contenedor.contains(evento.target)) {
+          ocultarResultadosBusqueda();
+        }
+      });
+    }
+
+
+    function buscarMateriales() {
+      const texto = normalizarTexto(
+        document.getElementById('buscarMaterial').value
+      );
+
+      const contenedor =
+        document.getElementById('resultadosBusqueda');
+
+      if (!texto) {
+        ocultarResultadosBusqueda();
+        return;
+      }
+
+      const resultados = catalogoMateriales
+        .filter(material => {
+          const contenido = normalizarTexto([
+            material.grupo,
+            material.subgrupo,
+            material.codigo
+          ].join(' '));
+
+          return contenido.includes(texto);
+        })
+        .sort((a, b) =>
+          String(a.subgrupo || '').localeCompare(
+            String(b.subgrupo || ''),
+            'es',
+            { numeric: true }
+          )
+        )
+        .slice(0, 30);
+
+      if (resultados.length === 0) {
+        contenedor.innerHTML = `
+          <div class="sin-resultados-busqueda">
+            No se encontraron materiales.
+          </div>
+        `;
+        contenedor.classList.remove('oculto');
+        return;
+      }
+
+      contenedor.innerHTML = resultados
+        .map((material, indice) => `
+          <button
+            type="button"
+            class="resultado-material"
+            onclick="seleccionarMaterialBusqueda(${indice})"
+          >
+            <div class="resultado-nombre">
+              ${escaparHTML(material.subgrupo || 'Sin nombre')}
+            </div>
+
+            <div class="resultado-detalle">
+              ${escaparHTML(material.grupo || 'Sin grupo')}
+              · Código:
+              ${escaparHTML(material.codigo || 'Sin código')}
+            </div>
+          </button>
+        `)
+        .join('');
+
+      contenedor.dataset.resultados =
+        JSON.stringify(resultados);
+
+      contenedor.classList.remove('oculto');
+    }
+
+
+    function seleccionarMaterialBusqueda(indice) {
+      const contenedor =
+        document.getElementById('resultadosBusqueda');
+
+      let resultados = [];
+
+      try {
+        resultados = JSON.parse(
+          contenedor.dataset.resultados || '[]'
+        );
+      } catch (error) {
+        resultados = [];
+      }
+
+      const material = resultados[indice];
+
+      if (!material) {
+        return;
+      }
+
+      materialSeleccionadoBusqueda = {
+        grupo: material.grupo || '',
+        subgrupo: material.subgrupo || '',
+        codigo: material.codigo || ''
+      };
+
+      document.getElementById('buscarMaterial').value =
+        material.subgrupo || '';
+
+      document.getElementById('grupoMaterial').value =
+        material.grupo || '';
+
+      cargarSubgrupos();
+
+      const selector =
+        document.getElementById('subgrupoMaterial');
+
+      const opcionCorrecta = [...selector.options].find(
+        opcion =>
+          opcion.dataset.subgrupo === material.subgrupo &&
+          String(opcion.dataset.codigo || '') ===
+          String(material.codigo || '')
+      );
+
+      if (opcionCorrecta) {
+        selector.value = opcionCorrecta.value;
+      }
+
+      mostrarDetalleSeleccionado();
+      ocultarResultadosBusqueda();
+
+      document.getElementById('cantidadMaterial').focus();
+    }
+
+
+    function ocultarResultadosBusqueda() {
+      document
+        .getElementById('resultadosBusqueda')
+        .classList.add('oculto');
+    }
+
+
     function cargarGrupos() {
       const selector =
         document.getElementById('grupoMaterial');
@@ -877,6 +1448,8 @@
 
 
     function cargarSubgrupos() {
+      materialSeleccionadoBusqueda = null;
+
       const grupo =
         document.getElementById('grupoMaterial').value;
 
@@ -895,8 +1468,8 @@
       const subgrupos = catalogoMateriales
         .filter(material => material.grupo === grupo)
         .sort((a, b) =>
-          a.subgrupo.localeCompare(
-            b.subgrupo,
+          String(a.subgrupo || '').localeCompare(
+            String(b.subgrupo || ''),
             'es',
             { numeric: true }
           )
@@ -928,15 +1501,15 @@
       const opcion =
         selector.options[selector.selectedIndex];
 
-      if (!opcion || !opcion.dataset.subgrupo) {
-        return null;
+      if (opcion && opcion.dataset.subgrupo) {
+        return {
+          grupo: opcion.dataset.grupo || '',
+          subgrupo: opcion.dataset.subgrupo || '',
+          codigo: opcion.dataset.codigo || ''
+        };
       }
 
-      return {
-        grupo: opcion.dataset.grupo || '',
-        subgrupo: opcion.dataset.subgrupo || '',
-        codigo: opcion.dataset.codigo || ''
-      };
+      return materialSeleccionadoBusqueda;
     }
 
 
@@ -947,10 +1520,13 @@
       const material = obtenerMaterialSeleccionado();
 
       if (!material) {
+        contenedor.classList.remove('seleccionado');
         contenedor.textContent =
-          'Selecciona un material.';
+          'Busca o selecciona un material.';
         return;
       }
+
+      contenedor.classList.add('seleccionado');
 
       contenedor.innerHTML = `
         <strong>${escaparHTML(material.subgrupo)}</strong><br>
@@ -979,15 +1555,19 @@
 
       if (!material) {
         mostrarMensaje(
-          'Selecciona un grupo y un subgrupo.',
+          'Selecciona un grupo y un subgrupo o usa el buscador.',
           'error'
         );
         return;
       }
 
-      if (!Number.isFinite(cantidad) || cantidad <= 0) {
+      if (
+        !Number.isFinite(cantidad) ||
+        !Number.isInteger(cantidad) ||
+        cantidad <= 0
+      ) {
         mostrarMensaje(
-          'La cantidad debe ser mayor que cero.',
+          'La cantidad debe ser un número entero mayor que cero.',
           'error'
         );
         return;
@@ -995,9 +1575,7 @@
 
       const indiceExistente = materialesPrevios.findIndex(
         item =>
-          String(item.codigo || '') ===
-          String(material.codigo || '') &&
-          item.subgrupo === material.subgrupo
+          claveMaterial(item) === claveMaterial(material)
       );
 
       if (indiceExistente >= 0) {
@@ -1015,6 +1593,10 @@
         });
       }
 
+      claveMaterialReciente = claveMaterial(material);
+
+      ordenarMateriales();
+
       document.getElementById(
         'cantidadMaterial'
       ).value = 1;
@@ -1023,12 +1605,52 @@
         'observacionMaterial'
       ).value = '';
 
+      document.getElementById(
+        'buscarMaterial'
+      ).value = '';
+
       renderizarMateriales();
 
       mostrarMensaje(
         `${material.subgrupo} agregado correctamente.`,
         'exito'
       );
+
+      setTimeout(() => {
+        claveMaterialReciente = '';
+        renderizarMateriales();
+      }, 1800);
+    }
+
+
+    function ordenarMateriales() {
+      materialesPrevios.sort((a, b) => {
+        const comparacionGrupo =
+          String(a.grupo || '').localeCompare(
+            String(b.grupo || ''),
+            'es',
+            { numeric: true }
+          );
+
+        if (comparacionGrupo !== 0) {
+          return comparacionGrupo;
+        }
+
+        return String(a.subgrupo || '').localeCompare(
+          String(b.subgrupo || ''),
+          'es',
+          { numeric: true }
+        );
+      });
+    }
+
+
+    function claveMaterial(material) {
+      return [
+        normalizarTexto(material.grupo),
+        normalizarTexto(material.subgrupo),
+        normalizarTexto(material.codigo)
+      ].join('|');
     }
 
 
@@ -1042,96 +1664,147 @@
       const totales =
         document.getElementById('totales');
 
+      const resumenGrupos =
+        document.getElementById('resumenGrupos');
+
       if (materialesPrevios.length === 0) {
         lista.innerHTML = '';
         vacia.classList.remove('oculto');
         totales.classList.add('oculto');
+        resumenGrupos.classList.add('oculto');
         actualizarTotales();
         return;
       }
 
       vacia.classList.add('oculto');
       totales.classList.remove('oculto');
+      resumenGrupos.classList.remove('oculto');
 
       lista.innerHTML = materialesPrevios
-        .map((material, indice) => `
-          <article class="material">
+        .map((material, indice) => {
+          const esReciente =
+            claveMaterial(material) === claveMaterialReciente;
 
-            <div>
-              <div class="material-grupo">
-                ${escaparHTML(material.grupo)}
+          return `
+            <article class="material ${esReciente ? 'reciente' : ''}">
+
+              <div>
+                <div class="material-grupo">
+                  ${escaparHTML(material.grupo)}
+                </div>
+
+                <div class="material-nombre">
+                  ${escaparHTML(material.subgrupo)}
+                </div>
+
+                <div class="material-codigo">
+                  Código:
+                  ${escaparHTML(material.codigo || 'Sin código')}
+                </div>
+
+                ${
+                  material.observacion
+                    ? `
+                      <div class="material-observacion">
+                        Observación:
+                        ${escaparHTML(material.observacion)}
+                      </div>
+                    `
+                    : ''
+                }
+
+                ${
+                  esReciente
+                    ? `
+                      <span class="etiqueta-reciente">
+                        ✓ Recién agregado
+                      </span>
+                    `
+                    : ''
+                }
               </div>
 
-              <div class="material-nombre">
-                ${escaparHTML(material.subgrupo)}
+              <div class="material-controles">
+
+                ${
+                  !modoSoloLectura
+                    ? `
+                      <button
+                        type="button"
+                        class="boton-cantidad"
+                        onclick="cambiarCantidad(${indice}, -1)"
+                        aria-label="Restar"
+                      >
+                        −
+                      </button>
+
+                      <input
+                        type="number"
+                        class="cantidad-material-input"
+                        min="1"
+                        step="1"
+                        value="${Number(material.cantidad || 1)}"
+                        onchange="editarCantidad(${indice}, this.value)"
+                        onblur="editarCantidad(${indice}, this.value)"
+                      >
+
+                      <button
+                        type="button"
+                        class="boton-cantidad"
+                        onclick="cambiarCantidad(${indice}, 1)"
+                        aria-label="Sumar"
+                      >
+                        +
+                      </button>
+
+                      <button
+                        type="button"
+                        class="boton-eliminar"
+                        onclick="eliminarMaterial(${indice})"
+                        title="Eliminar"
+                        aria-label="Eliminar"
+                      >
+                        ×
+                      </button>
+                    `
+                    : `
+                      <span class="cantidad-solo-lectura">
+                        ${Number(material.cantidad || 0)}
+                      </span>
+                    `
+                }
+
               </div>
 
-              <div class="material-codigo">
-                Código:
-                ${escaparHTML(material.codigo || 'Sin código')}
-              </div>
-
-              ${
-                material.observacion
-                  ? `
-                    <div class="material-observacion">
-                      ${escaparHTML(material.observacion)}
-                    </div>
-                  `
-                  : ''
-              }
-            </div>
-
-            <div class="material-controles">
-
-              ${
-                !modoSoloLectura
-                  ? `
-                    <button
-                      type="button"
-                      class="boton-cantidad"
-                      onclick="cambiarCantidad(${indice}, -1)"
-                    >
-                      −
-                    </button>
-                  `
-                  : ''
-              }
-
-              <span class="cantidad-material">
-                ${material.cantidad}
-              </span>
-
-              ${
-                !modoSoloLectura
-                  ? `
-                    <button
-                      type="button"
-                      class="boton-cantidad"
-                      onclick="cambiarCantidad(${indice}, 1)"
-                    >
-                      +
-                    </button>
-
-                    <button
-                      type="button"
-                      class="boton-eliminar"
-                      onclick="eliminarMaterial(${indice})"
-                      title="Eliminar"
-                    >
-                      ×
-                    </button>
-                  `
-                  : ''
-              }
-
-            </div>
-
-          </article>
-        `)
+            </article>
+          `;
+        })
         .join('');
 
       actualizarTotales();
+      renderizarResumenGrupos();
+    }
+
+
+    function editarCantidad(indice, valor) {
+      if (modoSoloLectura) {
+        return;
+      }
+
+      const cantidad = Number(valor);
+
+      if (
+        !Number.isFinite(cantidad) ||
+        !Number.isInteger(cantidad) ||
+        cantidad <= 0
+      ) {
+        materialesPrevios[indice].cantidad = 1;
+      } else {
+        materialesPrevios[indice].cantidad = cantidad;
+      }
+
+      actualizarTotales();
+      renderizarResumenGrupos();
     }
 
 
@@ -1160,17 +1833,23 @@
         return;
       }
 
+      const material = materialesPrevios[indice];
+
+      const confirmar = window.confirm(
+        `¿Eliminar ${material.subgrupo}?`
+      );
+
+      if (!confirmar) {
+        return;
+      }
+
       materialesPrevios.splice(indice, 1);
       renderizarMateriales();
     }
 
 
     function actualizarTotales() {
-      const totalPiezas = materialesPrevios.reduce(
-        (acumulado, material) =>
-          acumulado + Number(material.cantidad || 0),
-        0
-      );
+      const totalPiezas = obtenerTotalPiezas();
 
       asignarTexto(
         'totalTipos',
@@ -1184,7 +1863,256 @@
     }
 
 
-    async function finalizarPrevios() {
+    function obtenerTotalPiezas() {
+      return materialesPrevios.reduce(
+        (acumulado, material) =>
+          acumulado + Number(material.cantidad || 0),
+        0
+      );
+    }
+
+
+    function renderizarResumenGrupos() {
+      const contenedor =
+        document.getElementById('resumenGruposLista');
+
+      const resumen = materialesPrevios.reduce(
+        (acumulado, material) => {
+          const grupo = material.grupo || 'SIN GRUPO';
+
+          acumulado[grupo] =
+            (acumulado[grupo] || 0) +
+            Number(material.cantidad || 0);
+
+          return acumulado;
+        },
+        {}
+      );
+
+      const grupos = Object.keys(resumen).sort((a, b) =>
+        a.localeCompare(b, 'es', { numeric: true })
+      );
+
+      contenedor.innerHTML = grupos
+        .map(grupo => `
+          <div class="resumen-grupo-fila">
+            <span class="resumen-grupo-nombre">
+              ${escaparHTML(grupo)}
+            </span>
+
+            <span class="resumen-grupo-cantidad">
+              ${resumen[grupo]} unidades
+            </span>
+          </div>
+        `)
+        .join('');
+    }
+
+
+    async function cargarHistorialInteligente() {
+      const tag = String(servicioActual?.tag || '').trim();
+
+      if (!tag) {
+        return;
+      }
+
+      try {
+        const respuesta = await fetch(
+          `${API_URL}?accion=historialTag&tag=${
+            encodeURIComponent(tag)
+          }&t=${Date.now()}`
+        );
+
+        const resultado = await respuesta.json();
+
+        if (!resultado.ok) {
+          return;
+        }
+
+        const servicios = Array.isArray(resultado.servicios)
+          ? resultado.servicios
+              .filter(servicio =>
+                String(servicio.idServicio || '').trim() !==
+                idServicioActual
+              )
+              .sort((a, b) => {
+                const fechaA = fechaComparable(
+                  a.fechaProgramada || a.fechaRegistro
+                );
+
+                const fechaB = fechaComparable(
+                  b.fechaProgramada || b.fechaRegistro
+                );
+
+                return fechaB - fechaA;
+              })
+          : [];
+
+        if (servicios.length === 0) {
+          return;
+        }
+
+        document
+          .getElementById('panelHistorial')
+          .classList.remove('oculto');
+
+        asignarTexto(
+          'historialSubtitulo',
+          `Se encontraron ${servicios.length} servicio(s) anterior(es) para ${tag}.`
+        );
+
+        document.getElementById('historialLista').innerHTML =
+          servicios.slice(0, 6)
+            .map(servicio => `
+              <article class="historial-servicio">
+
+                <div class="historial-servicio-titulo">
+                  ${escaparHTML(servicio.ot || 'OT no registrada')}
+                </div>
+
+                <div class="historial-servicio-dato">
+                  Fecha:
+                  <strong>
+                    ${escaparHTML(
+                      servicio.fechaProgramada ||
+                      servicio.fechaRegistro ||
+                      'Sin fecha'
+                    )}
+                  </strong>
+                </div>
+
+                <div class="historial-servicio-dato">
+                  Estado:
+                  <strong>
+                    ${escaparHTML(servicio.estado || 'Sin estado')}
+                  </strong>
+                </div>
+
+                <div class="historial-servicio-dato">
+                  Trabajo:
+                  <strong>
+                    ${escaparHTML(
+                      servicio.descripcion || 'Sin descripción'
+                    )}
+                  </strong>
+                </div>
+
+                ${
+                  !modoSoloLectura
+                    ? `
+                      <button
+                        type="button"
+                        class="boton-copiar"
+                        onclick="copiarMaterialesServicio('${
+                          escaparAtributo(servicio.idServicio)
+                        }', '${
+                          escaparAtributo(servicio.ot || 'Sin OT')
+                        }')"
+                      >
+                        Copiar materiales
+                      </button>
+                    `
+                    : ''
+                }
+
+              </article>
+            `)
+            .join('');
+
+      } catch (error) {
+        console.warn(
+          'No se pudo cargar el historial inteligente:',
+          error
+        );
+      }
+    }
+
+
+    async function copiarMaterialesServicio(
+      idServicioAnterior,
+      otAnterior
+    ) {
+      if (modoSoloLectura) {
+        return;
+      }
+
+      const confirmar = window.confirm(
+        `¿Deseas copiar los materiales de ${otAnterior}? La lista actual será reemplazada.`
+      );
+
+      if (!confirmar) {
+        return;
+      }
+
+      mostrarMensaje(
+        'Cargando materiales del servicio anterior...',
+        'exito'
+      );
+
+      try {
+        const respuesta = await fetch(
+          `${API_URL}?accion=obtenerPrevios&idServicio=${
+            encodeURIComponent(idServicioAnterior)
+          }&t=${Date.now()}`
+        );
+
+        const resultado = await respuesta.json();
+
+        if (!resultado.ok) {
+          throw new Error(
+            resultado.mensaje ||
+            'No se pudieron obtener los materiales anteriores.'
+          );
+        }
+
+        const materialesAnteriores =
+          Array.isArray(resultado.materiales)
+            ? resultado.materiales
+            : [];
+
+        if (materialesAnteriores.length === 0) {
+          throw new Error(
+            'El servicio seleccionado no tiene materiales de Previos.'
+          );
+        }
+
+        materialesPrevios = materialesAnteriores.map(material => ({
+          grupo: material.grupo || '',
+          subgrupo: material.subgrupo || '',
+          codigo: material.codigo || '',
+          cantidad: Number(material.cantidadAlistada) || 0,
+          observacion: material.observacionPrevios || ''
+        }));
+
+        materialesPrevios = materialesPrevios.filter(
+          material => material.cantidad > 0
+        );
+
+        ordenarMateriales();
+        renderizarMateriales();
+
+        mostrarMensaje(
+          `Se copiaron ${materialesPrevios.length} materiales de ${otAnterior}. Revisa las cantidades antes de finalizar.`,
+          'exito'
+        );
+
+        window.scrollTo({
+          top: document.querySelector('.paneles').offsetTop - 20,
+          behavior: 'smooth'
+        });
+
+      } catch (error) {
+        console.error(error);
+
+        mostrarMensaje(
+          error.message,
+          'error'
+        );
+      }
+    }
+
+
+    function abrirModalFinalizar() {
       if (modoSoloLectura) {
         return;
       }
@@ -1197,16 +2125,52 @@
         return;
       }
 
-      const confirmar = window.confirm(
-        '¿Deseas finalizar Previos? Después de guardar, la lista quedará bloqueada.'
+      asignarTexto(
+        'modalTotalTipos',
+        materialesPrevios.length
       );
 
-      if (!confirmar) {
+      asignarTexto(
+        'modalTotalPiezas',
+        obtenerTotalPiezas()
+      );
+
+      document
+        .getElementById('modalFinalizar')
+        .classList.add('activo');
+    }
+
+
+    function cerrarModalFinalizar() {
+      document
+        .getElementById('modalFinalizar')
+        .classList.remove('activo');
+    }
+
+
+    function cerrarModalFinalizarDesdeFondo(evento) {
+      if (evento.target.id === 'modalFinalizar') {
+        cerrarModalFinalizar();
+      }
+    }
+
+
+    async function finalizarPrevios() {
+      if (modoSoloLectura) {
+        return;
+      }
+
+      if (materialesPrevios.length === 0) {
+        mostrarMensaje(
+          'Debes agregar al menos un material.',
+          'error'
+        );
+        cerrarModalFinalizar();
         return;
       }
 
       const boton =
-        document.getElementById('btnFinalizar');
+        document.getElementById('btnConfirmarFinalizar');
 
       boton.disabled = true;
       boton.textContent = 'Guardando...';
@@ -1236,8 +2200,11 @@
           );
         }
 
+        cerrarModalFinalizar();
+
         mostrarMensaje(
-          resultado.mensaje,
+          resultado.mensaje ||
+          'Previos finalizado correctamente.',
           'exito'
         );
 
@@ -1253,13 +2220,16 @@
           .getElementById('panelAgregar')
           .classList.add('oculto');
 
-        boton.classList.add('oculto');
+        document
+          .getElementById('btnFinalizar')
+          .classList.add('oculto');
 
         document
           .getElementById('avisoBloqueado')
           .classList.remove('oculto');
 
         renderizarMateriales();
+        cargarHistorialInteligente();
 
       } catch (error) {
         console.error(error);
@@ -1269,8 +2239,9 @@
           'error'
         );
 
+      } finally {
         boton.disabled = false;
-        boton.textContent = 'Finalizar Previos';
+        boton.textContent = 'Confirmar y finalizar';
       }
     }
 
@@ -1289,6 +2260,17 @@
 
       mensaje.textContent = texto;
       mensaje.className = `mensaje ${tipo}`;
+
+      if (temporizadorMensaje) {
+        clearTimeout(temporizadorMensaje);
+      }
+
+      temporizadorMensaje = setTimeout(() => {
+        if (mensaje.classList.contains('exito')) {
+          mensaje.className = 'mensaje';
+          mensaje.textContent = '';
+        }
+      }, 4500);
     }
 
 
@@ -1310,6 +2292,21 @@
     }
 
 
+    function fechaComparable(valor) {
+      const texto = String(valor || '').trim();
+
+      if (!texto) {
+        return 0;
+      }
+
+      const fecha = new Date(texto);
+
+      return Number.isNaN(fecha.getTime())
+        ? 0
+        : fecha.getTime();
+    }
+
+
     function normalizarTexto(valor) {
       return String(valor || '')
         .trim()
@@ -1326,6 +2323,13 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    }
+
+
+    function escaparAtributo(valor) {
+      return String(valor ?? '')
+        .replaceAll('\\', '\\\\')
+        .replaceAll("'", "\\'");
     }
   </script>
 
