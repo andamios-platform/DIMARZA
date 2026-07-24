@@ -201,6 +201,59 @@
       word-break: break-word;
     }
 
+
+    .progreso-servicio {
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 15px;
+      box-shadow: var(--sombra);
+    }
+
+    .progreso-titulo {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    .progreso-barra {
+      height: 10px;
+      overflow: hidden;
+      background: #e6edf2;
+      border-radius: 999px;
+    }
+
+    .progreso-relleno {
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--naranja), #ffad55);
+      border-radius: 999px;
+    }
+
+    .progreso-etapas {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      margin-top: 12px;
+      font-size: 11px;
+      text-align: center;
+      color: var(--gris);
+    }
+
+    .progreso-etapas .completada {
+      color: var(--verde);
+      font-weight: bold;
+    }
+
+    .progreso-etapas .actual {
+      color: var(--naranja-oscuro);
+      font-weight: bold;
+    }
+
     .aviso-bloqueado {
       padding: 15px;
       margin-bottom: 20px;
@@ -211,11 +264,16 @@
     }
 
     .panel-historial {
-      padding: 20px;
+      padding: 22px;
       margin-bottom: 20px;
-      background: white;
-      border: 1px solid var(--borde);
-      border-radius: 15px;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(232, 241, 251, 0.95),
+          rgba(255, 255, 255, 0.98)
+        );
+      border: 1px solid #bfd7e8;
+      border-radius: 16px;
       box-shadow: var(--sombra);
     }
 
@@ -230,7 +288,10 @@
     .panel-historial h2 {
       margin: 0;
       color: var(--azul);
-      font-size: 19px;
+      font-size: 21px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .historial-subtitulo {
@@ -282,7 +343,7 @@
 
     .paneles {
       display: grid;
-      grid-template-columns: minmax(300px, 390px) 1fr;
+      grid-template-columns: minmax(280px, 330px) 1fr;
       gap: 20px;
       align-items: start;
     }
@@ -340,6 +401,50 @@
 
     .busqueda-material {
       position: relative;
+      padding: 14px;
+      background: #eef5fa;
+      border: 1px solid #bfd7e8;
+      border-radius: 12px;
+    }
+
+    .busqueda-material label {
+      font-size: 14px;
+    }
+
+    .busqueda-material input {
+      padding: 14px 14px 14px 42px;
+      font-size: 15px;
+      background:
+        white
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236d7a86' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E")
+        no-repeat 14px center;
+    }
+
+    .busqueda-ayuda {
+      margin-top: 7px;
+      color: var(--gris);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .boton-filtros {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      color: var(--azul);
+      font-weight: bold;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .filtros-manuales {
+      padding: 14px;
+      margin-bottom: 14px;
+      background: #f7f9fb;
+      border: 1px solid var(--borde);
+      border-radius: 11px;
     }
 
     .resultados-busqueda {
@@ -583,26 +688,37 @@
       font-size: 15px;
     }
 
-    .resumen-grupo-fila {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 7px 0;
-      border-bottom: 1px solid #e5ebef;
-      font-size: 13px;
+    #resumenGruposLista {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 10px;
     }
 
-    .resumen-grupo-fila:last-child {
-      border-bottom: none;
+    .resumen-grupo-fila {
+      min-height: 86px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px;
+      background: white;
+      border: 1px solid var(--borde);
+      border-top: 4px solid var(--naranja);
+      border-radius: 10px;
+      font-size: 13px;
     }
 
     .resumen-grupo-nombre {
       color: var(--gris);
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 0.4px;
     }
 
     .resumen-grupo-cantidad {
       color: var(--azul);
-      font-weight: bold;
+      font-size: 20px;
+      font-weight: 900;
     }
 
     .acciones {
@@ -771,6 +887,11 @@
         width: 100%;
       }
 
+      .progreso-etapas {
+        grid-template-columns: 1fr;
+        text-align: left;
+      }
+
       .modal-acciones {
         flex-direction: column-reverse;
       }
@@ -858,6 +979,25 @@
 
       </section>
 
+      <section class="progreso-servicio">
+        <div class="progreso-titulo">
+          <span>Avance del servicio</span>
+          <span>Etapa: Previos</span>
+        </div>
+
+        <div class="progreso-barra">
+          <div class="progreso-relleno"></div>
+        </div>
+
+        <div class="progreso-etapas">
+          <span class="completada">Solicitado</span>
+          <span class="actual">Previos</span>
+          <span>Armado</span>
+          <span>Postparada</span>
+          <span>Finalizado</span>
+        </div>
+      </section>
+
       <div id="avisoBloqueado" class="aviso-bloqueado oculto">
         Previos ya fue finalizado. Los materiales se muestran
         únicamente para consulta.
@@ -867,7 +1007,7 @@
 
         <div class="panel-historial-cabecera">
           <div>
-            <h2>Historial inteligente del TAG</h2>
+            <h2>🧠 Historial inteligente del TAG</h2>
             <p id="historialSubtitulo" class="historial-subtitulo">
               Buscando servicios anteriores...
             </p>
@@ -890,9 +1030,14 @@
             <input
               id="buscarMaterial"
               type="search"
-              placeholder="Ejemplo: plataforma 2"
+              placeholder="Escribe nombre, grupo o código..."
               autocomplete="off"
             >
+
+            <div class="busqueda-ayuda">
+              Escribe una parte del nombre. Por ejemplo:
+              plataforma, brazo, pie o un código.
+            </div>
 
             <div
               id="resultadosBusqueda"
@@ -900,27 +1045,39 @@
             ></div>
           </div>
 
-          <div class="campo">
-            <label for="grupoMaterial">Grupo</label>
+          <button
+            type="button"
+            class="boton-filtros"
+            onclick="alternarFiltrosManuales()"
+          >
+            Seleccionar por grupo y subgrupo
+          </button>
 
-            <select
-              id="grupoMaterial"
-              onchange="cargarSubgrupos()"
-            >
-              <option value="">Seleccionar grupo</option>
-            </select>
-          </div>
+          <div id="filtrosManuales" class="filtros-manuales oculto">
 
-          <div class="campo">
-            <label for="subgrupoMaterial">Subgrupo</label>
+            <div class="campo">
+              <label for="grupoMaterial">Grupo</label>
 
-            <select
-              id="subgrupoMaterial"
-              onchange="mostrarDetalleSeleccionado()"
-              disabled
-            >
-              <option value="">Seleccionar subgrupo</option>
-            </select>
+              <select
+                id="grupoMaterial"
+                onchange="cargarSubgrupos()"
+              >
+                <option value="">Seleccionar grupo</option>
+              </select>
+            </div>
+
+            <div class="campo">
+              <label for="subgrupoMaterial">Subgrupo</label>
+
+              <select
+                id="subgrupoMaterial"
+                onchange="mostrarDetalleSeleccionado()"
+                disabled
+              >
+                <option value="">Seleccionar subgrupo</option>
+              </select>
+            </div>
+
           </div>
 
           <div id="detalleSeleccionado" class="detalle-material">
@@ -1266,6 +1423,14 @@
 
       document.title =
         `Previos ${servicioActual.tag || ''} | DIMARZA`;
+    }
+
+
+
+    function alternarFiltrosManuales() {
+      document
+        .getElementById('filtrosManuales')
+        .classList.toggle('oculto');
     }
 
 
