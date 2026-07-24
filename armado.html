@@ -70,7 +70,6 @@
     .seccion-cabecera{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;margin-bottom:10px;background:#edf4f8;border:1px solid var(--borde);border-radius:11px}
     .seccion-cabecera h3{margin:0;color:var(--azul);font-size:16px}
     .contador{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 9px;color:#fff;background:var(--azul2);border-radius:999px;font-size:12px;font-weight:bold}
-    .grupo-titulo{padding:10px 14px;color:var(--azul);background:#f7fafc;border-top:1px solid var(--borde);border-bottom:1px solid var(--borde);font-size:13px;font-weight:bold;letter-spacing:.25px;text-transform:uppercase}
     .tabla-contenedor{overflow-x:auto;border:1px solid var(--borde);border-radius:12px}
     table{width:100%;min-width:1130px;border-collapse:collapse}
     th,td{padding:12px 10px;border-bottom:1px solid var(--borde);text-align:left;vertical-align:middle}
@@ -94,7 +93,69 @@
     .etiqueta.adicional{color:var(--azul);background:var(--azul-claro)}
     .etiqueta.no-utilizado{color:var(--gris);background:#eef1f3}
     .porcentaje{font-size:12px;font-weight:bold;color:var(--gris)}
-    .obs-material{min-width:210px;min-height:65px;resize:vertical;padding:9px 10px;border:1px solid var(--borde);border-radius:8px}
+    .obs-material {
+      width: 180px;
+      min-width: 180px;
+      height: 42px;
+      min-height: 42px;
+      max-height: 110px;
+      resize: vertical;
+      padding: 9px 10px;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      transition: height 0.2s ease;
+    }
+    
+    .obs-material:focus {
+      height: 85px;
+    }   
+    .fila-encabezado-grupo td {
+  padding: 0;
+  background: #edf4f8;
+  border-bottom: 1px solid var(--borde);
+}
+
+.boton-grupo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  color: var(--azul);
+  background: transparent;
+  border: 0;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: left;
+  letter-spacing: 0.25px;
+  text-transform: uppercase;
+}
+
+.boton-grupo:hover {
+  background: #e2edf4;
+}
+
+.icono-grupo {
+  width: 18px;
+  display: inline-block;
+  color: var(--naranja);
+  font-size: 12px;
+}
+
+.cantidad-grupo {
+  min-width: 26px;
+  height: 24px;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  color: #ffffff;
+  background: var(--azul2);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: bold;
+}
     .fila-no-utilizada{opacity:.66;background:#f6f7f8}
     .sin-datos{padding:25px 18px;color:var(--gris);text-align:center}
     .acciones-finales{display:flex;justify-content:flex-end;gap:12px;margin-top:18px}
@@ -126,6 +187,22 @@
       .acciones-finales,.modal-acciones{flex-direction:column-reverse}
       .acciones-finales button,.modal-acciones button{width:100%}
       .modal-grid{grid-template-columns:1fr}
+      .btn-no-usar {
+        padding: 9px 12px;
+        color: #667784;
+        background: #f2f4f6;
+        border: 1px solid #d7e0e7;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      
+      .btn-no-usar:hover {
+        color: #344955;
+        background: #e7ecef;
+        border-color: #b8c5ce;
+      }
     }
   </style>
 </head>
@@ -228,7 +305,14 @@
         </div>
       </section>
 
-      <div class="acciones-finales"><button id="btnFinalizar" class="btn-finalizar" type="button" onclick="abrirModalFinalizar()">Finalizar Armado</button></div>
+      <div class="acciones-finales"><button
+  id="btnFinalizar"
+  class="btn-finalizar"
+  type="button"
+  onclick="abrirModalFinalizar()"
+>
+  ✓ Finalizar Armado
+</button></div>
     </section>
   </div>
 </main>
@@ -247,7 +331,7 @@
     </div>
     <div class="modal-acciones">
       <button class="btn btn-secundario" type="button" onclick="cerrarModalFinalizar()">Cancelar</button>
-      <button id="btnConfirmarFinalizar" class="btn btn-primario" type="button" onclick="finalizarArmado()">Confirmar y finalizar</button>
+      <button id="btnConfirmarFinalizar" class="btn btn-primario" type="button" onclick="finalizarArmado()">✓ Confirmar y finalizar</button>
     </div>
   </div>
 </div>
@@ -349,7 +433,7 @@ function renderizarTodo(){
   const principales=materialesArmado.filter(m=>!m.esAdicional&&!m.noUtilizado&&coincide(m));
   const adicionales=materialesArmado.filter(m=>m.esAdicional&&coincide(m));
   const noUtilizados=materialesArmado.filter(m=>!m.esAdicional&&m.noUtilizado&&coincide(m));
-
+  const gruposContraidos = {};
   renderizarSeccion('tablaPrincipales','sinPrincipales',principales,'principal');
   renderizarSeccion('tablaAdicionales','sinAdicionales',adicionales,'adicional');
   renderizarSeccion('tablaNoUtilizados','sinNoUtilizados',noUtilizados,'noUtilizado');
@@ -359,30 +443,142 @@ function renderizarTodo(){
   escribirTexto('contadorNoUtilizados',noUtilizados.length);
 }
 
-function renderizarSeccion(idTabla,idVacio,lista,tipo){
-  const tbody=document.getElementById(idTabla);
-  const vacio=document.getElementById(idVacio);
-  tbody.innerHTML='';
+function renderizarSeccion(
+  idTabla,
+  idVacio,
+  lista,
+  tipo
+) {
+  const tbody =
+    document.getElementById(idTabla);
 
-  if(!lista.length){vacio.classList.remove('oculto');return}
+  const vacio =
+    document.getElementById(idVacio);
+
+  tbody.innerHTML = '';
+
+  if (!lista.length) {
+    vacio.classList.remove('oculto');
+    return;
+  }
+
   vacio.classList.add('oculto');
 
-  const ordenada=[...lista].sort((a,b)=>{
-    const g=(a.grupo||'').localeCompare(b.grupo||'','es',{numeric:true});
-    return g!==0?g:(a.subgrupo||a.descripcion||'').localeCompare(b.subgrupo||b.descripcion||'','es',{numeric:true});
+  const ordenada = [...lista].sort(
+    (a, b) => {
+      const comparacionGrupo =
+        (a.grupo || '').localeCompare(
+          b.grupo || '',
+          'es',
+          {
+            numeric: true
+          }
+        );
+
+      if (comparacionGrupo !== 0) {
+        return comparacionGrupo;
+      }
+
+      return (
+        a.subgrupo ||
+        a.descripcion ||
+        ''
+      ).localeCompare(
+        b.subgrupo ||
+        b.descripcion ||
+        '',
+        'es',
+        {
+          numeric: true
+        }
+      );
+    }
+  );
+
+  const grupos = {};
+
+  ordenada.forEach(material => {
+    const nombreGrupo =
+      material.grupo || 'SIN GRUPO';
+
+    if (!grupos[nombreGrupo]) {
+      grupos[nombreGrupo] = [];
+    }
+
+    grupos[nombreGrupo].push(material);
   });
 
-  let grupoAnterior=null;
-  ordenada.forEach(material=>{
-    if(material.grupo!==grupoAnterior){
-      const trGrupo=document.createElement('tr');
-      trGrupo.innerHTML=`<td colspan="9" class="grupo-titulo">${escaparHtml(material.grupo||'SIN GRUPO')}</td>`;
-      tbody.appendChild(trGrupo);
-      grupoAnterior=material.grupo;
+  Object.keys(grupos).forEach(
+    nombreGrupo => {
+      const materialesGrupo =
+        grupos[nombreGrupo];
+
+      const claveGrupo =
+        `${tipo}_${normalizar(nombreGrupo)}`;
+
+      const estaContraido =
+        Boolean(gruposContraidos[claveGrupo]);
+
+      const filaGrupo =
+        document.createElement('tr');
+
+      filaGrupo.className =
+        'fila-encabezado-grupo';
+
+      filaGrupo.innerHTML = `
+        <td colspan="9">
+          <button
+            type="button"
+            class="boton-grupo"
+            onclick="alternarGrupo(
+              '${escaparParaAtributo(claveGrupo)}'
+            )"
+          >
+            <span class="icono-grupo">
+              ${estaContraido ? '▶' : '▼'}
+            </span>
+
+            <span>
+              ${escaparHtml(nombreGrupo)}
+            </span>
+
+            <span class="cantidad-grupo">
+              ${materialesGrupo.length}
+            </span>
+          </button>
+        </td>
+      `;
+
+      tbody.appendChild(filaGrupo);
+
+      if (!estaContraido) {
+        materialesGrupo.forEach(
+          material => {
+            tbody.appendChild(
+              crearFilaMaterial(
+                material,
+                tipo
+              )
+            );
+          }
+        );
+      }
     }
-    tbody.appendChild(crearFilaMaterial(material,tipo));
-  });
+  );
 }
+function alternarGrupo(claveGrupo) {
+  gruposContraidos[claveGrupo] =
+    !gruposContraidos[claveGrupo];
+
+  renderizarTodo();
+}
+
+function escaparParaAtributo(valor) {
+  return String(valor || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'");
+}
+  
 
 function crearFilaMaterial(material,tipo){
   const indice=materialesArmado.indexOf(material);
@@ -396,9 +592,18 @@ function crearFilaMaterial(material,tipo){
   if(tipo==='noUtilizado')tr.classList.add('fila-no-utilizada');
 
   let accion='';
-  if(tipo==='principal'){
-    accion=`<button class="btn btn-peligro btn-icono" type="button" title="Marcar como no utilizado" onclick="marcarNoUtilizado(${indice})">×</button>`;
-  }else if(tipo==='adicional'){
+if (tipo === 'principal') {
+  accion = `
+    <button
+      class="btn btn-no-usar"
+      type="button"
+      title="Mover a materiales no utilizados"
+      onclick="marcarNoUtilizado(${indice})"
+    >
+      ⊘ No usar
+    </button>
+  `;
+}else if(tipo==='adicional'){
     accion=`<button class="btn btn-peligro" type="button" onclick="eliminarMaterialAdicional(${indice})">Eliminar</button>`;
   }else{
     accion=`<button class="btn btn-secundario" type="button" onclick="restaurarMaterial(${indice})">↩ Restaurar</button>`;
@@ -498,20 +703,57 @@ function actualizarResumen(){
   document.getElementById('barraCoincidencia').style.width=`${resumenActual.coincidencia}%`;
 }
 
-function calcularResumen(lista){
-  let cantidadPlanificada=0,cantidadUtilizada=0,cantidadNoUtilizada=0,materialesAdicionales=0,diferenciaTotal=0;
-  lista.forEach(material=>{
-    const despachada=Number(material.cantidadDespachada)||0;
-    const utilizada=Number(material.cantidadUtilizada)||0;
-    cantidadPlanificada+=despachada;
-    cantidadUtilizada+=utilizada;
-    diferenciaTotal+=Math.abs(utilizada-despachada);
-    if(material.esAdicional)materialesAdicionales++;
-    if(!material.esAdicional)cantidadNoUtilizada+=Math.max(despachada-utilizada,0);
+function calcularResumen(lista) {
+  let cantidadPlanificada = 0;
+  let cantidadUtilizada = 0;
+  let cantidadNoUtilizada = 0;
+  let materialesAdicionales = 0;
+
+  lista.forEach(material => {
+    const despachada =
+      Number(material.cantidadDespachada) || 0;
+
+    const utilizada =
+      Number(material.cantidadUtilizada) || 0;
+
+    if (material.esAdicional) {
+      materialesAdicionales++;
+      return;
+    }
+
+    cantidadPlanificada += despachada;
+    cantidadUtilizada += utilizada;
+
+    cantidadNoUtilizada += Math.max(
+      despachada - utilizada,
+      0
+    );
   });
-  let coincidencia=cantidadPlanificada===0?(cantidadUtilizada===0?100:0):100-(diferenciaTotal/cantidadPlanificada)*100;
-  coincidencia=Math.max(0,Math.min(100,coincidencia));
-  return{cantidadPlanificada,cantidadUtilizada,cantidadNoUtilizada,materialesAdicionales,diferenciaTotal,coincidencia:Math.round(coincidencia*10)/10};
+
+  let coincidencia = 0;
+
+  if (cantidadPlanificada > 0) {
+    coincidencia =
+      (
+        cantidadUtilizada /
+        cantidadPlanificada
+      ) * 100;
+  }
+
+  coincidencia = Math.max(
+    0,
+    Math.min(100, coincidencia)
+  );
+
+  return {
+    cantidadPlanificada,
+    cantidadUtilizada,
+    cantidadNoUtilizada,
+    materialesAdicionales,
+
+    coincidencia:
+      Math.round(coincidencia * 10) / 10
+  };
 }
 
 function abrirModalFinalizar(){
@@ -555,7 +797,7 @@ async function finalizarArmado(){
     mostrarMensaje(datos.mensaje||'Armado finalizado correctamente.','exito');
     setTimeout(()=>volverDetalle(),1500);
   }catch(error){mostrarMensaje(error.message,'error')}
-  finally{boton.disabled=false;boton.textContent='Confirmar y finalizar'}
+  finally{boton.disabled=false;boton.textContent = '✓ Confirmar y finalizar';}
 }
 
 function abrirModalAdicional(){document.getElementById('modalAdicional').classList.remove('oculto')}
