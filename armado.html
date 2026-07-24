@@ -192,6 +192,225 @@
     .modal-acciones{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
     .form-adicional{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
     .form-adicional .campo.completo{grid-column:1/-1}
+    /* ======================================================
+   EVIDENCIAS FOTOGRÁFICAS
+   ====================================================== */
+
+.evidencias-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(220px,1fr));
+  gap:15px;
+}
+
+.evidencia-card{
+  position:relative;
+  min-height:265px;
+  overflow:hidden;
+  background:#f8fafb;
+  border:2px dashed #bfd0dc;
+  border-radius:14px;
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+.evidencia-card:hover{
+  border-color:var(--azul2);
+  box-shadow:0 8px 20px rgba(22,63,99,.10);
+  transform:translateY(-2px);
+}
+
+.evidencia-card.con-imagen{
+  border-style:solid;
+  border-color:#9fcab8;
+  background:#fff;
+}
+
+.evidencia-input{
+  display:none;
+}
+
+.evidencia-selector{
+  width:100%;
+  min-height:265px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:20px;
+  color:var(--gris);
+  text-align:center;
+  cursor:pointer;
+}
+
+.evidencia-selector strong{
+  color:var(--azul);
+  font-size:15px;
+}
+
+.evidencia-selector small{
+  line-height:1.4;
+}
+
+.evidencia-icono{
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  color:var(--azul);
+  background:var(--azul-claro);
+  border-radius:50%;
+  font-size:28px;
+}
+
+.evidencia-preview{
+  position:relative;
+  display:none;
+  min-height:265px;
+  background:#fff;
+}
+
+.evidencia-card.con-imagen .evidencia-selector{
+  display:none;
+}
+
+.evidencia-card.con-imagen .evidencia-preview{
+  display:block;
+}
+
+.evidencia-preview img{
+  width:100%;
+  height:180px;
+  display:block;
+  object-fit:cover;
+  background:#e7edf1;
+}
+
+.evidencia-info{
+  padding:12px 13px 14px;
+}
+
+.evidencia-info strong{
+  display:block;
+  margin-bottom:5px;
+  color:var(--azul);
+}
+
+.evidencia-archivo{
+  display:block;
+  overflow:hidden;
+  color:var(--gris);
+  font-size:12px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.evidencia-tamano{
+  display:block;
+  margin-top:4px;
+  color:var(--gris2);
+  font-size:11px;
+}
+
+.evidencia-acciones{
+  position:absolute;
+  top:9px;
+  right:9px;
+  display:flex;
+  gap:7px;
+}
+
+.evidencia-accion{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  background:rgba(22,63,99,.90);
+  border:0;
+  border-radius:9px;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+
+.evidencia-accion.eliminar{
+  background:rgba(200,63,73,.92);
+}
+
+.evidencia-observacion{
+  margin-top:14px;
+}
+
+.evidencia-observacion textarea{
+  min-height:85px;
+  resize:vertical;
+}
+
+.evidencia-indicador{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-left:8px;
+  padding:5px 9px;
+  color:var(--verde);
+  background:var(--verde-claro);
+  border-radius:999px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.evidencias-ayuda{
+  margin:-7px 0 16px;
+  color:var(--gris);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.evidencias-resumen{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:16px;
+  padding:12px 14px;
+  color:var(--azul);
+  background:var(--azul-claro);
+  border:1px solid #c7ddeb;
+  border-radius:11px;
+}
+
+.evidencias-resumen strong{
+  font-size:18px;
+}
+
+@media(max-width:1100px){
+  .evidencias-grid{
+    grid-template-columns:repeat(2,minmax(220px,1fr));
+  }
+}
+
+@media(max-width:650px){
+  .evidencias-grid{
+    grid-template-columns:1fr;
+  }
+
+  .evidencia-card,
+  .evidencia-selector,
+  .evidencia-preview{
+    min-height:240px;
+  }
+
+  .evidencia-preview img{
+    height:165px;
+  }
+
+  .evidencias-resumen{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+    
     @media(max-width:1150px){.datos-servicio{grid-template-columns:repeat(3,1fr)}.resumen{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:760px){
       .contenedor{width:min(100% - 18px,1500px);padding-top:10px}
@@ -307,7 +526,465 @@
           <div id="sinNoUtilizados" class="sin-datos oculto">No existen materiales marcados como no utilizados.</div>
         </div>
       </section>
+<section class="seccion-material" id="seccionEvidencias">
+  <div class="seccion-cabecera">
+    <h3>
+      📸 Evidencias fotográficas
+      <span
+        id="indicadorEvidencias"
+        class="evidencia-indicador oculto"
+      >
+        ✓ Evidencias seleccionadas
+      </span>
+    </h3>
 
+    <span
+      id="contadorEvidencias"
+      class="contador"
+    >
+      0
+    </span>
+  </div>
+
+  <p class="evidencias-ayuda">
+    Selecciona una imagen, toma una fotografía con el celular
+    o arrastra el archivo sobre la tarjeta. En este primer paso
+    las imágenes solo se mostrarán como vista previa.
+  </p>
+
+  <div class="evidencias-grid">
+
+    <!-- VISTA GENERAL -->
+    <article
+      id="cardVistaGeneral"
+      class="evidencia-card"
+      ondragover="permitirArrastre(event)"
+      ondrop="recibirEvidenciaArrastrada(event,'vistaGeneral')"
+    >
+      <input
+        id="inputVistaGeneral"
+        class="evidencia-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onchange="cargarVistaPrevia('vistaGeneral',this)"
+      >
+
+      <div
+        class="evidencia-selector"
+        onclick="seleccionarEvidencia('vistaGeneral')"
+      >
+        <span class="evidencia-icono">📷</span>
+        <strong>Vista general</strong>
+        <small>
+          Haz clic, toma una foto<br>
+          o arrastra una imagen
+        </small>
+      </div>
+
+      <div class="evidencia-preview">
+        <img
+          id="previewVistaGeneral"
+          src=""
+          alt="Vista general"
+        >
+
+        <div class="evidencia-acciones">
+          <button
+            class="evidencia-accion"
+            type="button"
+            title="Cambiar fotografía"
+            onclick="seleccionarEvidencia('vistaGeneral')"
+          >
+            ↻
+          </button>
+
+          <button
+            class="evidencia-accion eliminar"
+            type="button"
+            title="Eliminar fotografía"
+            onclick="eliminarEvidencia('vistaGeneral')"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="evidencia-info">
+          <strong>Vista general</strong>
+          <span
+            id="nombreVistaGeneral"
+            class="evidencia-archivo"
+          ></span>
+          <span
+            id="tamanoVistaGeneral"
+            class="evidencia-tamano"
+          ></span>
+        </div>
+      </div>
+    </article>
+
+
+    <!-- LADO IZQUIERDO -->
+    <article
+      id="cardLadoIzquierdo"
+      class="evidencia-card"
+      ondragover="permitirArrastre(event)"
+      ondrop="recibirEvidenciaArrastrada(event,'ladoIzquierdo')"
+    >
+      <input
+        id="inputLadoIzquierdo"
+        class="evidencia-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onchange="cargarVistaPrevia('ladoIzquierdo',this)"
+      >
+
+      <div
+        class="evidencia-selector"
+        onclick="seleccionarEvidencia('ladoIzquierdo')"
+      >
+        <span class="evidencia-icono">📷</span>
+        <strong>Lado izquierdo</strong>
+        <small>
+          Haz clic, toma una foto<br>
+          o arrastra una imagen
+        </small>
+      </div>
+
+      <div class="evidencia-preview">
+        <img
+          id="previewLadoIzquierdo"
+          src=""
+          alt="Lado izquierdo"
+        >
+
+        <div class="evidencia-acciones">
+          <button
+            class="evidencia-accion"
+            type="button"
+            onclick="seleccionarEvidencia('ladoIzquierdo')"
+          >
+            ↻
+          </button>
+
+          <button
+            class="evidencia-accion eliminar"
+            type="button"
+            onclick="eliminarEvidencia('ladoIzquierdo')"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="evidencia-info">
+          <strong>Lado izquierdo</strong>
+          <span
+            id="nombreLadoIzquierdo"
+            class="evidencia-archivo"
+          ></span>
+          <span
+            id="tamanoLadoIzquierdo"
+            class="evidencia-tamano"
+          ></span>
+        </div>
+      </div>
+    </article>
+
+
+    <!-- LADO DERECHO -->
+    <article
+      id="cardLadoDerecho"
+      class="evidencia-card"
+      ondragover="permitirArrastre(event)"
+      ondrop="recibirEvidenciaArrastrada(event,'ladoDerecho')"
+    >
+      <input
+        id="inputLadoDerecho"
+        class="evidencia-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onchange="cargarVistaPrevia('ladoDerecho',this)"
+      >
+
+      <div
+        class="evidencia-selector"
+        onclick="seleccionarEvidencia('ladoDerecho')"
+      >
+        <span class="evidencia-icono">📷</span>
+        <strong>Lado derecho</strong>
+        <small>
+          Haz clic, toma una foto<br>
+          o arrastra una imagen
+        </small>
+      </div>
+
+      <div class="evidencia-preview">
+        <img
+          id="previewLadoDerecho"
+          src=""
+          alt="Lado derecho"
+        >
+
+        <div class="evidencia-acciones">
+          <button
+            class="evidencia-accion"
+            type="button"
+            onclick="seleccionarEvidencia('ladoDerecho')"
+          >
+            ↻
+          </button>
+
+          <button
+            class="evidencia-accion eliminar"
+            type="button"
+            onclick="eliminarEvidencia('ladoDerecho')"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="evidencia-info">
+          <strong>Lado derecho</strong>
+          <span
+            id="nombreLadoDerecho"
+            class="evidencia-archivo"
+          ></span>
+          <span
+            id="tamanoLadoDerecho"
+            class="evidencia-tamano"
+          ></span>
+        </div>
+      </div>
+    </article>
+
+
+    <!-- ACCESO -->
+    <article
+      id="cardAcceso"
+      class="evidencia-card"
+      ondragover="permitirArrastre(event)"
+      ondrop="recibirEvidenciaArrastrada(event,'acceso')"
+    >
+      <input
+        id="inputAcceso"
+        class="evidencia-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onchange="cargarVistaPrevia('acceso',this)"
+      >
+
+      <div
+        class="evidencia-selector"
+        onclick="seleccionarEvidencia('acceso')"
+      >
+        <span class="evidencia-icono">📷</span>
+        <strong>Acceso</strong>
+        <small>
+          Haz clic, toma una foto<br>
+          o arrastra una imagen
+        </small>
+      </div>
+
+      <div class="evidencia-preview">
+        <img
+          id="previewAcceso"
+          src=""
+          alt="Acceso"
+        >
+
+        <div class="evidencia-acciones">
+          <button
+            class="evidencia-accion"
+            type="button"
+            onclick="seleccionarEvidencia('acceso')"
+          >
+            ↻
+          </button>
+
+          <button
+            class="evidencia-accion eliminar"
+            type="button"
+            onclick="eliminarEvidencia('acceso')"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="evidencia-info">
+          <strong>Acceso</strong>
+          <span
+            id="nombreAcceso"
+            class="evidencia-archivo"
+          ></span>
+          <span
+            id="tamanoAcceso"
+            class="evidencia-tamano"
+          ></span>
+        </div>
+      </div>
+    </article>
+
+
+    <!-- ANCLAJES -->
+    <article
+      id="cardAnclajes"
+      class="evidencia-card"
+      ondragover="permitirArrastre(event)"
+      ondrop="recibirEvidenciaArrastrada(event,'anclajes')"
+    >
+      <input
+        id="inputAnclajes"
+        class="evidencia-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onchange="cargarVistaPrevia('anclajes',this)"
+      >
+
+      <div
+        class="evidencia-selector"
+        onclick="seleccionarEvidencia('anclajes')"
+      >
+        <span class="evidencia-icono">📷</span>
+        <strong>Anclajes</strong>
+        <small>
+          Haz clic, toma una foto<br>
+          o arrastra una imagen
+        </small>
+      </div>
+
+      <div class="evidencia-preview">
+        <img
+          id="previewAnclajes"
+          src=""
+          alt="Anclajes"
+        >
+
+        <div class="evidencia-acciones">
+          <button
+            class="evidencia-accion"
+            type="button"
+            onclick="seleccionarEvidencia('anclajes')"
+          >
+            ↻
+          </button>
+
+          <button
+            class="evidencia-accion eliminar"
+            type="button"
+            onclick="eliminarEvidencia('anclajes')"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="evidencia-info">
+          <strong>Anclajes</strong>
+          <span
+            id="nombreAnclajes"
+            class="evidencia-archivo"
+          ></span>
+          <span
+            id="tamanoAnclajes"
+            class="evidencia-tamano"
+          ></span>
+        </div>
+      </div>
+    </article>
+
+
+    <!-- OTRA EVIDENCIA -->
+    <article
+      id="cardOtra"
+      class="evidencia-card"
+      ondragover="permitirArrastre(event)"
+      ondrop="recibirEvidenciaArrastrada(event,'otra')"
+    >
+      <input
+        id="inputOtra"
+        class="evidencia-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onchange="cargarVistaPrevia('otra',this)"
+      >
+
+      <div
+        class="evidencia-selector"
+        onclick="seleccionarEvidencia('otra')"
+      >
+        <span class="evidencia-icono">➕</span>
+        <strong>Otra evidencia</strong>
+        <small>
+          Agrega una fotografía adicional
+        </small>
+      </div>
+
+      <div class="evidencia-preview">
+        <img
+          id="previewOtra"
+          src=""
+          alt="Otra evidencia"
+        >
+
+        <div class="evidencia-acciones">
+          <button
+            class="evidencia-accion"
+            type="button"
+            onclick="seleccionarEvidencia('otra')"
+          >
+            ↻
+          </button>
+
+          <button
+            class="evidencia-accion eliminar"
+            type="button"
+            onclick="eliminarEvidencia('otra')"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="evidencia-info">
+          <strong>Otra evidencia</strong>
+          <span
+            id="nombreOtra"
+            class="evidencia-archivo"
+          ></span>
+          <span
+            id="tamanoOtra"
+            class="evidencia-tamano"
+          ></span>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="campo evidencia-observacion">
+    <label for="observacionOtraEvidencia">
+      Observación de la evidencia adicional
+    </label>
+
+    <textarea
+      id="observacionOtraEvidencia"
+      placeholder="Describe qué se observa en la fotografía adicional..."
+    ></textarea>
+  </div>
+
+  <div class="evidencias-resumen">
+    <span>
+      Fotografías preparadas para el registro
+    </span>
+
+    <strong id="resumenCantidadEvidencias">
+      0 de 6
+    </strong>
+  </div>
+</section>
       <div class="acciones-finales"><button
   id="btnFinalizar"
   class="btn-finalizar"
@@ -366,8 +1043,67 @@ let servicioActual=null;
 let materialesArmado=[];
 let catalogoMateriales=[];
 let resumenActual={};
+
 const gruposContraidos = {};
 
+const evidenciasArmado = {
+  vistaGeneral: null,
+  ladoIzquierdo: null,
+  ladoDerecho: null,
+  acceso: null,
+  anclajes: null,
+  otra: null
+};
+
+const configuracionEvidencias = {
+  vistaGeneral: {
+    input: 'inputVistaGeneral',
+    card: 'cardVistaGeneral',
+    preview: 'previewVistaGeneral',
+    nombre: 'nombreVistaGeneral',
+    tamano: 'tamanoVistaGeneral'
+  },
+
+  ladoIzquierdo: {
+    input: 'inputLadoIzquierdo',
+    card: 'cardLadoIzquierdo',
+    preview: 'previewLadoIzquierdo',
+    nombre: 'nombreLadoIzquierdo',
+    tamano: 'tamanoLadoIzquierdo'
+  },
+
+  ladoDerecho: {
+    input: 'inputLadoDerecho',
+    card: 'cardLadoDerecho',
+    preview: 'previewLadoDerecho',
+    nombre: 'nombreLadoDerecho',
+    tamano: 'tamanoLadoDerecho'
+  },
+
+  acceso: {
+    input: 'inputAcceso',
+    card: 'cardAcceso',
+    preview: 'previewAcceso',
+    nombre: 'nombreAcceso',
+    tamano: 'tamanoAcceso'
+  },
+
+  anclajes: {
+    input: 'inputAnclajes',
+    card: 'cardAnclajes',
+    preview: 'previewAnclajes',
+    nombre: 'nombreAnclajes',
+    tamano: 'tamanoAnclajes'
+  },
+
+  otra: {
+    input: 'inputOtra',
+    card: 'cardOtra',
+    preview: 'previewOtra',
+    nombre: 'nombreOtra',
+    tamano: 'tamanoOtra'
+  }
+};
 document.addEventListener('DOMContentLoaded',iniciarModulo);
 
 async function iniciarModulo(){
@@ -849,7 +1585,284 @@ function agregarMaterialAdicional(){
   cerrarModalAdicional();renderizarTodo();actualizarResumen();
   mostrarMensaje('Material adicional agregado.','exito');
 }
+/* ======================================================
+   EVIDENCIAS FOTOGRÁFICAS
+   ====================================================== */
 
+function seleccionarEvidencia(tipo){
+  const configuracion =
+    configuracionEvidencias[tipo];
+
+  if(!configuracion){
+    return;
+  }
+
+  const input =
+    document.getElementById(
+      configuracion.input
+    );
+
+  if(input && !input.disabled){
+    input.click();
+  }
+}
+
+
+function cargarVistaPrevia(tipo,input){
+  const archivo =
+    input &&
+    input.files &&
+    input.files[0];
+
+  if(!archivo){
+    return;
+  }
+
+  procesarArchivoEvidencia(
+    tipo,
+    archivo
+  );
+}
+
+
+function procesarArchivoEvidencia(tipo,archivo){
+  const configuracion =
+    configuracionEvidencias[tipo];
+
+  if(!configuracion){
+    return;
+  }
+
+  if(!archivo.type.startsWith('image/')){
+    mostrarMensaje(
+      'El archivo seleccionado no es una imagen.',
+      'error'
+    );
+
+    return;
+  }
+
+  const limiteBytes =
+    15 * 1024 * 1024;
+
+  if(archivo.size > limiteBytes){
+    mostrarMensaje(
+      'La imagen supera el límite de 15 MB.',
+      'error'
+    );
+
+    return;
+  }
+
+  const lector =
+    new FileReader();
+
+  lector.onload = evento => {
+    const imagenBase64 =
+      evento.target.result;
+
+    evidenciasArmado[tipo] = {
+      archivo,
+      nombre: archivo.name,
+      tipoMime: archivo.type,
+      tamano: archivo.size,
+      imagenBase64
+    };
+
+    const card =
+      document.getElementById(
+        configuracion.card
+      );
+
+    const preview =
+      document.getElementById(
+        configuracion.preview
+      );
+
+    const nombre =
+      document.getElementById(
+        configuracion.nombre
+      );
+
+    const tamano =
+      document.getElementById(
+        configuracion.tamano
+      );
+
+    preview.src =
+      imagenBase64;
+
+    nombre.textContent =
+      archivo.name;
+
+    tamano.textContent =
+      formatearTamanoArchivo(
+        archivo.size
+      );
+
+    card.classList.add(
+      'con-imagen'
+    );
+
+    actualizarResumenEvidencias();
+
+    mostrarMensaje(
+      'Fotografía preparada correctamente.',
+      'exito'
+    );
+  };
+
+  lector.onerror = () => {
+    mostrarMensaje(
+      'No se pudo leer la fotografía.',
+      'error'
+    );
+  };
+
+  lector.readAsDataURL(
+    archivo
+  );
+}
+
+
+function eliminarEvidencia(tipo){
+  const configuracion =
+    configuracionEvidencias[tipo];
+
+  if(!configuracion){
+    return;
+  }
+
+  evidenciasArmado[tipo] =
+    null;
+
+  const input =
+    document.getElementById(
+      configuracion.input
+    );
+
+  const card =
+    document.getElementById(
+      configuracion.card
+    );
+
+  const preview =
+    document.getElementById(
+      configuracion.preview
+    );
+
+  const nombre =
+    document.getElementById(
+      configuracion.nombre
+    );
+
+  const tamano =
+    document.getElementById(
+      configuracion.tamano
+    );
+
+  input.value = '';
+  preview.src = '';
+  nombre.textContent = '';
+  tamano.textContent = '';
+
+  card.classList.remove(
+    'con-imagen'
+  );
+
+  actualizarResumenEvidencias();
+
+  mostrarMensaje(
+    'Fotografía eliminada.',
+    'exito'
+  );
+}
+
+
+function permitirArrastre(evento){
+  evento.preventDefault();
+
+  evento.dataTransfer.dropEffect =
+    'copy';
+}
+
+
+function recibirEvidenciaArrastrada(
+  evento,
+  tipo
+){
+  evento.preventDefault();
+
+  const archivos =
+    evento.dataTransfer.files;
+
+  if(!archivos || !archivos.length){
+    return;
+  }
+
+  procesarArchivoEvidencia(
+    tipo,
+    archivos[0]
+  );
+}
+
+
+function actualizarResumenEvidencias(){
+  const cantidad =
+    Object.values(
+      evidenciasArmado
+    ).filter(Boolean).length;
+
+  escribirTexto(
+    'contadorEvidencias',
+    cantidad
+  );
+
+  escribirTexto(
+    'resumenCantidadEvidencias',
+    `${cantidad} de 6`
+  );
+
+  const indicador =
+    document.getElementById(
+      'indicadorEvidencias'
+    );
+
+  if(cantidad > 0){
+    indicador.classList.remove(
+      'oculto'
+    );
+  }else{
+    indicador.classList.add(
+      'oculto'
+    );
+  }
+}
+
+
+function formatearTamanoArchivo(bytes){
+  const cantidad =
+    Number(bytes) || 0;
+
+  if(cantidad < 1024){
+    return `${cantidad} bytes`;
+  }
+
+  if(cantidad < 1024 * 1024){
+    return `${
+      Math.round(
+        cantidad / 1024
+      )
+    } KB`;
+  }
+
+  return `${
+    (
+      cantidad /
+      (1024 * 1024)
+    ).toFixed(2)
+  } MB`;
+}
 function aplicarBloqueoSegunEstado(){
   const estado=(servicioActual.estado||'').toUpperCase().trim();
   const editable=['DESPACHADO','RECIBIDO EN TAG','EN ARMADO'].includes(estado);
