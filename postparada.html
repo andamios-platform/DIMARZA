@@ -430,6 +430,318 @@
         width: 100%;
       }
     }
+
+    /* ======================================================
+       EVIDENCIAS FOTOGRÁFICAS DE POSTPARADA
+       ====================================================== */
+
+    .evidencias-ayuda {
+      margin: -6px 0 16px;
+      color: var(--gris);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .evidencias-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .evidencia-card {
+      position: relative;
+      min-height: 265px;
+      overflow: hidden;
+      background: #f8fafb;
+      border: 2px dashed #bfd0dc;
+      border-radius: 14px;
+      transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
+    }
+
+    .evidencia-card:hover {
+      border-color: var(--azul-claro);
+      box-shadow: 0 8px 20px rgba(18, 59, 93, .10);
+      transform: translateY(-2px);
+    }
+
+    .evidencia-card.con-imagen {
+      border-style: solid;
+      border-color: #9fcab8;
+      background: #fff;
+    }
+
+    .evidencia-input {
+      display: none;
+    }
+
+    .evidencia-selector {
+      width: 100%;
+      min-height: 265px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 20px;
+      color: var(--gris);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .evidencia-selector strong {
+      color: var(--azul);
+      font-size: 15px;
+    }
+
+    .evidencia-selector small {
+      line-height: 1.4;
+    }
+
+    .evidencia-icono {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      color: var(--azul);
+      background: #e9f0f5;
+      border-radius: 50%;
+      font-size: 28px;
+    }
+
+    .evidencia-preview {
+      position: relative;
+      display: none;
+      min-height: 265px;
+      background: #fff;
+    }
+
+    .evidencia-card.con-imagen .evidencia-selector,
+    .evidencia-card.registrada .evidencia-selector {
+      display: none;
+    }
+
+    .evidencia-card.con-imagen .evidencia-preview,
+    .evidencia-card.registrada .evidencia-preview {
+      display: block;
+    }
+
+    .evidencia-preview img {
+      width: 100%;
+      height: 180px;
+      display: block;
+      object-fit: cover;
+      background: #e7edf1;
+    }
+
+    .evidencia-info {
+      padding: 12px 13px 14px;
+    }
+
+    .evidencia-info strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--azul);
+    }
+
+    .evidencia-archivo {
+      display: block;
+      overflow: hidden;
+      color: var(--gris);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .evidencia-tamano {
+      display: block;
+      margin-top: 4px;
+      color: var(--gris);
+      font-size: 11px;
+    }
+
+    .evidencia-acciones {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      display: flex;
+      gap: 7px;
+    }
+
+    .evidencia-accion {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: rgba(18, 59, 93, .90);
+      border: 0;
+      border-radius: 9px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
+      cursor: pointer;
+    }
+
+    .evidencia-accion.eliminar {
+      background: rgba(220, 53, 69, .92);
+    }
+
+    .evidencias-resumen {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 12px 14px;
+      color: var(--azul);
+      background: #e9f0f5;
+      border: 1px solid #c7ddeb;
+      border-radius: 11px;
+    }
+
+    .evidencias-resumen strong {
+      font-size: 18px;
+    }
+
+    .evidencia-indicador {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+      padding: 5px 9px;
+      color: var(--verde);
+      background: #e9f7f1;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .evidencia-card.registrada {
+      border-style: solid;
+      border-color: #79b99d;
+      background: #fff;
+    }
+
+    .evidencia-card.registrada .evidencia-preview img {
+      cursor: zoom-in;
+    }
+
+    .evidencia-card.registrada .evidencia-acciones {
+      display: none;
+    }
+
+    .evidencia-registrada-etiqueta {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 3;
+      display: inline-flex;
+      padding: 7px 10px;
+      color: #fff;
+      background: rgba(25, 135, 84, .94);
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .evidencia-boton-ver {
+      width: 100%;
+      margin-top: 9px;
+      padding: 9px 12px;
+      color: var(--azul);
+      background: #e9f0f5;
+      border: 1px solid #bfd7e8;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .visor-fotografia {
+      width: min(1000px, 100%);
+    }
+
+    .visor-cabecera {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .visor-cerrar {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--rojo);
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .visor-imagen-contenedor {
+      min-height: 280px;
+      margin-top: 16px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #17232c;
+      border-radius: 12px;
+    }
+
+    .visor-imagen-contenedor img {
+      width: 100%;
+      max-height: 65vh;
+      display: block;
+      object-fit: contain;
+    }
+
+    .visor-datos {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 12px;
+      padding: 11px 13px;
+      color: var(--gris);
+      background: var(--fondo);
+      border: 1px solid var(--borde);
+      border-radius: 9px;
+      font-size: 12px;
+    }
+
+    .visor-fotografia a.btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    @media (max-width: 1000px) {
+      .evidencias-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+    }
+
+    @media (max-width: 650px) {
+      .evidencias-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .evidencias-resumen,
+      .visor-datos {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .visor-fotografia a.btn {
+        width: 100%;
+      }
+    }
+
   </style>
 </head>
 
@@ -640,6 +952,392 @@
         </div>
       </section>
 
+
+      <section
+        id="seccionEvidencias"
+        class="seccion"
+      >
+        <h2>
+          Evidencias fotográficas
+          <span
+            id="indicadorEvidencias"
+            class="evidencia-indicador oculto"
+          >
+            ✓ Evidencias seleccionadas
+          </span>
+        </h2>
+
+        <p class="evidencias-ayuda">
+          Puedes seleccionar una imagen, tomar una fotografía con el celular
+          o arrastrar el archivo sobre la tarjeta. Las fotografías se comprimen
+          automáticamente antes de guardarse.
+        </p>
+
+        <div class="evidencias-grid">
+
+          <article
+            id="cardVistaGeneralDesmontaje"
+            class="evidencia-card"
+            ondragover="permitirArrastre(event)"
+            ondrop="recibirEvidenciaArrastrada(event, 'vistaGeneralDesmontaje')"
+          >
+            <input
+              id="inputVistaGeneralDesmontaje"
+              class="evidencia-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onchange="cargarVistaPrevia('vistaGeneralDesmontaje', this)"
+            >
+
+            <div
+              class="evidencia-selector"
+              onclick="seleccionarEvidencia('vistaGeneralDesmontaje')"
+            >
+              <span class="evidencia-icono">📷</span>
+              <strong>Vista general desmontaje</strong>
+              <small>
+                Haz clic, toma una foto<br>
+                o arrastra una imagen
+              </small>
+            </div>
+
+            <div class="evidencia-preview">
+              <img
+                id="previewVistaGeneralDesmontaje"
+                src=""
+                alt="Vista general desmontaje"
+              >
+
+              <div class="evidencia-acciones">
+                <button
+                  type="button"
+                  class="evidencia-accion"
+                  title="Cambiar fotografía"
+                  onclick="seleccionarEvidencia('vistaGeneralDesmontaje')"
+                >
+                  ↻
+                </button>
+
+                <button
+                  type="button"
+                  class="evidencia-accion eliminar"
+                  title="Eliminar fotografía"
+                  onclick="eliminarEvidencia('vistaGeneralDesmontaje')"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div class="evidencia-info">
+                <strong>Vista general desmontaje</strong>
+                <span
+                  id="nombreVistaGeneralDesmontaje"
+                  class="evidencia-archivo"
+                ></span>
+                <span
+                  id="tamanoVistaGeneralDesmontaje"
+                  class="evidencia-tamano"
+                ></span>
+              </div>
+            </div>
+          </article>
+
+
+          <article
+            id="cardAreaLimpia"
+            class="evidencia-card"
+            ondragover="permitirArrastre(event)"
+            ondrop="recibirEvidenciaArrastrada(event, 'areaLimpia')"
+          >
+            <input
+              id="inputAreaLimpia"
+              class="evidencia-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onchange="cargarVistaPrevia('areaLimpia', this)"
+            >
+
+            <div
+              class="evidencia-selector"
+              onclick="seleccionarEvidencia('areaLimpia')"
+            >
+              <span class="evidencia-icono">🧹</span>
+              <strong>Área limpia</strong>
+              <small>
+                Haz clic, toma una foto<br>
+                o arrastra una imagen
+              </small>
+            </div>
+
+            <div class="evidencia-preview">
+              <img
+                id="previewAreaLimpia"
+                src=""
+                alt="Área limpia"
+              >
+
+              <div class="evidencia-acciones">
+                <button
+                  type="button"
+                  class="evidencia-accion"
+                  title="Cambiar fotografía"
+                  onclick="seleccionarEvidencia('areaLimpia')"
+                >
+                  ↻
+                </button>
+
+                <button
+                  type="button"
+                  class="evidencia-accion eliminar"
+                  title="Eliminar fotografía"
+                  onclick="eliminarEvidencia('areaLimpia')"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div class="evidencia-info">
+                <strong>Área limpia</strong>
+                <span
+                  id="nombreAreaLimpia"
+                  class="evidencia-archivo"
+                ></span>
+                <span
+                  id="tamanoAreaLimpia"
+                  class="evidencia-tamano"
+                ></span>
+              </div>
+            </div>
+          </article>
+
+
+          <article
+            id="cardMaterialDesmontado"
+            class="evidencia-card"
+            ondragover="permitirArrastre(event)"
+            ondrop="recibirEvidenciaArrastrada(event, 'materialDesmontado')"
+          >
+            <input
+              id="inputMaterialDesmontado"
+              class="evidencia-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onchange="cargarVistaPrevia('materialDesmontado', this)"
+            >
+
+            <div
+              class="evidencia-selector"
+              onclick="seleccionarEvidencia('materialDesmontado')"
+            >
+              <span class="evidencia-icono">🧱</span>
+              <strong>Material desmontado</strong>
+              <small>
+                Haz clic, toma una foto<br>
+                o arrastra una imagen
+              </small>
+            </div>
+
+            <div class="evidencia-preview">
+              <img
+                id="previewMaterialDesmontado"
+                src=""
+                alt="Material desmontado"
+              >
+
+              <div class="evidencia-acciones">
+                <button
+                  type="button"
+                  class="evidencia-accion"
+                  title="Cambiar fotografía"
+                  onclick="seleccionarEvidencia('materialDesmontado')"
+                >
+                  ↻
+                </button>
+
+                <button
+                  type="button"
+                  class="evidencia-accion eliminar"
+                  title="Eliminar fotografía"
+                  onclick="eliminarEvidencia('materialDesmontado')"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div class="evidencia-info">
+                <strong>Material desmontado</strong>
+                <span
+                  id="nombreMaterialDesmontado"
+                  class="evidencia-archivo"
+                ></span>
+                <span
+                  id="tamanoMaterialDesmontado"
+                  class="evidencia-tamano"
+                ></span>
+              </div>
+            </div>
+          </article>
+
+
+          <article
+            id="cardMaterialDanado"
+            class="evidencia-card"
+            ondragover="permitirArrastre(event)"
+            ondrop="recibirEvidenciaArrastrada(event, 'materialDanado')"
+          >
+            <input
+              id="inputMaterialDanado"
+              class="evidencia-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onchange="cargarVistaPrevia('materialDanado', this)"
+            >
+
+            <div
+              class="evidencia-selector"
+              onclick="seleccionarEvidencia('materialDanado')"
+            >
+              <span class="evidencia-icono">⚠️</span>
+              <strong>Material dañado</strong>
+              <small>
+                Haz clic, toma una foto<br>
+                o arrastra una imagen
+              </small>
+            </div>
+
+            <div class="evidencia-preview">
+              <img
+                id="previewMaterialDanado"
+                src=""
+                alt="Material dañado"
+              >
+
+              <div class="evidencia-acciones">
+                <button
+                  type="button"
+                  class="evidencia-accion"
+                  title="Cambiar fotografía"
+                  onclick="seleccionarEvidencia('materialDanado')"
+                >
+                  ↻
+                </button>
+
+                <button
+                  type="button"
+                  class="evidencia-accion eliminar"
+                  title="Eliminar fotografía"
+                  onclick="eliminarEvidencia('materialDanado')"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div class="evidencia-info">
+                <strong>Material dañado</strong>
+                <span
+                  id="nombreMaterialDanado"
+                  class="evidencia-archivo"
+                ></span>
+                <span
+                  id="tamanoMaterialDanado"
+                  class="evidencia-tamano"
+                ></span>
+              </div>
+            </div>
+          </article>
+
+
+          <article
+            id="cardOtraEvidencia"
+            class="evidencia-card"
+            ondragover="permitirArrastre(event)"
+            ondrop="recibirEvidenciaArrastrada(event, 'otraEvidencia')"
+          >
+            <input
+              id="inputOtraEvidencia"
+              class="evidencia-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onchange="cargarVistaPrevia('otraEvidencia', this)"
+            >
+
+            <div
+              class="evidencia-selector"
+              onclick="seleccionarEvidencia('otraEvidencia')"
+            >
+              <span class="evidencia-icono">➕</span>
+              <strong>Otra evidencia</strong>
+              <small>
+                Haz clic, toma una foto<br>
+                o arrastra una imagen
+              </small>
+            </div>
+
+            <div class="evidencia-preview">
+              <img
+                id="previewOtraEvidencia"
+                src=""
+                alt="Otra evidencia"
+              >
+
+              <div class="evidencia-acciones">
+                <button
+                  type="button"
+                  class="evidencia-accion"
+                  title="Cambiar fotografía"
+                  onclick="seleccionarEvidencia('otraEvidencia')"
+                >
+                  ↻
+                </button>
+
+                <button
+                  type="button"
+                  class="evidencia-accion eliminar"
+                  title="Eliminar fotografía"
+                  onclick="eliminarEvidencia('otraEvidencia')"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div class="evidencia-info">
+                <strong>Otra evidencia</strong>
+                <span
+                  id="nombreOtraEvidencia"
+                  class="evidencia-archivo"
+                ></span>
+                <span
+                  id="tamanoOtraEvidencia"
+                  class="evidencia-tamano"
+                ></span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="campo" style="margin-top: 16px;">
+          <label for="observacionOtraEvidencia">
+            Observación de la evidencia adicional
+          </label>
+
+          <textarea
+            id="observacionOtraEvidencia"
+            placeholder="Describe qué se observa en la fotografía adicional..."
+          ></textarea>
+        </div>
+
+        <div class="evidencias-resumen">
+          <span>Fotografías preparadas o registradas</span>
+          <strong id="resumenCantidadEvidencias">0 de 5</strong>
+        </div>
+      </section>
+
       <section class="seccion">
         <div class="acciones">
 
@@ -666,6 +1364,66 @@
     </div>
 
   </main>
+
+
+  <div
+    id="modalVisorFotografia"
+    class="modal-fondo oculto"
+    onclick="cerrarVisorFotografia(event)"
+  >
+    <div
+      class="modal visor-fotografia"
+      onclick="event.stopPropagation()"
+    >
+      <div class="visor-cabecera">
+        <div>
+          <h3 id="visorTitulo">Evidencia fotográfica</h3>
+          <p id="visorDescripcion"></p>
+        </div>
+
+        <button
+          type="button"
+          class="visor-cerrar"
+          onclick="cerrarVisorFotografia()"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="visor-imagen-contenedor">
+        <img
+          id="visorImagen"
+          src=""
+          alt="Evidencia fotográfica"
+        >
+      </div>
+
+      <div class="visor-datos">
+        <span id="visorFecha"></span>
+        <span id="visorUsuario"></span>
+      </div>
+
+      <div class="modal-acciones">
+        <button
+          type="button"
+          class="btn btn-secundario"
+          onclick="cerrarVisorFotografia()"
+        >
+          Cerrar
+        </button>
+
+        <a
+          id="visorAbrirDrive"
+          class="btn btn-principal"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Abrir en Drive
+        </a>
+      </div>
+    </div>
+  </div>
 
   <div
     id="mensaje"
@@ -730,6 +1488,80 @@
     let materialesPostparada = [];
     let postparadaRegistrada = false;
     let guardandoPostparada = false;
+
+    const evidenciasPostparada = {
+      vistaGeneralDesmontaje: null,
+      areaLimpia: null,
+      materialDesmontado: null,
+      materialDanado: null,
+      otraEvidencia: null
+    };
+
+    const configuracionEvidencias = {
+      vistaGeneralDesmontaje: {
+        input: 'inputVistaGeneralDesmontaje',
+        card: 'cardVistaGeneralDesmontaje',
+        preview: 'previewVistaGeneralDesmontaje',
+        nombre: 'nombreVistaGeneralDesmontaje',
+        tamano: 'tamanoVistaGeneralDesmontaje'
+      },
+      areaLimpia: {
+        input: 'inputAreaLimpia',
+        card: 'cardAreaLimpia',
+        preview: 'previewAreaLimpia',
+        nombre: 'nombreAreaLimpia',
+        tamano: 'tamanoAreaLimpia'
+      },
+      materialDesmontado: {
+        input: 'inputMaterialDesmontado',
+        card: 'cardMaterialDesmontado',
+        preview: 'previewMaterialDesmontado',
+        nombre: 'nombreMaterialDesmontado',
+        tamano: 'tamanoMaterialDesmontado'
+      },
+      materialDanado: {
+        input: 'inputMaterialDanado',
+        card: 'cardMaterialDanado',
+        preview: 'previewMaterialDanado',
+        nombre: 'nombreMaterialDanado',
+        tamano: 'tamanoMaterialDanado'
+      },
+      otraEvidencia: {
+        input: 'inputOtraEvidencia',
+        card: 'cardOtraEvidencia',
+        preview: 'previewOtraEvidencia',
+        nombre: 'nombreOtraEvidencia',
+        tamano: 'tamanoOtraEvidencia'
+      }
+    };
+
+    const tiposFotografiaPostparada = {
+      vistaGeneralDesmontaje: {
+        tipoFoto: 'VISTA GENERAL DESMONTAJE',
+        descripcion: 'Vista general del desmontaje finalizado',
+        principal: true
+      },
+      areaLimpia: {
+        tipoFoto: 'ÁREA LIMPIA',
+        descripcion: 'Evidencia del área limpia después del desmontaje',
+        principal: false
+      },
+      materialDesmontado: {
+        tipoFoto: 'MATERIAL DESMONTADO',
+        descripcion: 'Material recuperado después del desmontaje',
+        principal: false
+      },
+      materialDanado: {
+        tipoFoto: 'MATERIAL DAÑADO',
+        descripcion: 'Evidencia del material dañado identificado',
+        principal: false
+      },
+      otraEvidencia: {
+        tipoFoto: 'OTRA EVIDENCIA',
+        descripcion: 'Evidencia fotográfica adicional de Postparada',
+        principal: false
+      }
+    };
 
     document.addEventListener(
       'DOMContentLoaded',
@@ -805,6 +1637,8 @@
         document.getElementById(
           'contenidoPrincipal'
         ).classList.remove('oculto');
+
+        await cargarFotografiasPostparadaRegistradas();
 
         aplicarBloqueoSegunEstado();
 
@@ -1222,21 +2056,18 @@
     }
 
 
-      function cerrarConfirmacion(forzar = false) {
-        if (
-          guardandoPostparada &&
-          !forzar
-        ) {
-          return;
-        }
-      
-        document
-          .getElementById(
-            'modalConfirmacion'
-          )
-          .classList
-          .add('oculto');
+    function cerrarConfirmacion() {
+      if (guardandoPostparada) {
+        return;
       }
+
+      document
+        .getElementById(
+          'modalConfirmacion'
+        )
+        .classList
+        .add('oculto');
+    }
 
 
     function cerrarModalDesdeFondo(evento) {
@@ -1280,6 +2111,16 @@
         'Guardando Postparada...';
 
       try {
+        boton.textContent =
+          'Preparando fotografías...';
+
+        await subirFotografiasPostparada(
+          validacion.responsable
+        );
+
+        boton.textContent =
+          'Finalizando Postparada...';
+
         const materiales =
           materialesPostparada.map(
             material => ({
@@ -1371,7 +2212,7 @@
 
         postparadaRegistrada = true;
 
-        cerrarConfirmacion(true);
+        cerrarConfirmacion();
         mostrarDatosServicio();
         aplicarBloqueoSegunEstado();
 
@@ -1394,6 +2235,947 @@
         boton.textContent =
           'Confirmar y cerrar';
       }
+    }
+
+
+
+    /* ======================================================
+       EVIDENCIAS FOTOGRÁFICAS
+       ====================================================== */
+
+    function seleccionarEvidencia(tipo) {
+      const configuracion =
+        configuracionEvidencias[tipo];
+
+      if (!configuracion) {
+        return;
+      }
+
+      const input =
+        document.getElementById(
+          configuracion.input
+        );
+
+      const evidencia =
+        evidenciasPostparada[tipo];
+
+      if (
+        input &&
+        !input.disabled &&
+        !(evidencia && evidencia.registrada)
+      ) {
+        input.click();
+      }
+    }
+
+
+    function cargarVistaPrevia(tipo, input) {
+      const archivo =
+        input &&
+        input.files &&
+        input.files[0];
+
+      if (!archivo) {
+        return;
+      }
+
+      procesarArchivoEvidencia(
+        tipo,
+        archivo
+      );
+    }
+
+
+    async function procesarArchivoEvidencia(
+      tipo,
+      archivo
+    ) {
+      const configuracion =
+        configuracionEvidencias[tipo];
+
+      if (!configuracion) {
+        return;
+      }
+
+      if (
+        !archivo ||
+        !archivo.type ||
+        !archivo.type.startsWith('image/')
+      ) {
+        mostrarMensaje(
+          'El archivo seleccionado no es una imagen.',
+          'error'
+        );
+        return;
+      }
+
+      if (
+        archivo.size >
+        15 * 1024 * 1024
+      ) {
+        mostrarMensaje(
+          'La imagen supera el límite de 15 MB.',
+          'error'
+        );
+        return;
+      }
+
+      try {
+        mostrarMensaje(
+          'Preparando fotografía...'
+        );
+
+        const comprimida =
+          await comprimirImagen(
+            archivo,
+            1280,
+            0.80
+          );
+
+        evidenciasPostparada[tipo] = {
+          nombre:
+            generarNombreFotografia(tipo),
+          tipoMime:
+            comprimida.tipoMime,
+          tamano:
+            comprimida.tamano,
+          imagenBase64:
+            comprimida.imagenBase64
+        };
+
+        const card =
+          document.getElementById(
+            configuracion.card
+          );
+
+        document.getElementById(
+          configuracion.preview
+        ).src =
+          comprimida.imagenBase64;
+
+        document.getElementById(
+          configuracion.nombre
+        ).textContent =
+          evidenciasPostparada[tipo].nombre;
+
+        document.getElementById(
+          configuracion.tamano
+        ).textContent =
+          `${formatearTamanoArchivo(
+            comprimida.tamano
+          )} comprimida`;
+
+        card.classList.remove(
+          'registrada'
+        );
+
+        card.classList.add(
+          'con-imagen'
+        );
+
+        actualizarResumenEvidencias();
+
+        mostrarMensaje(
+          'Fotografía comprimida y preparada.',
+          'exito'
+        );
+
+      } catch (error) {
+        mostrarMensaje(
+          error.message ||
+          'No se pudo preparar la fotografía.',
+          'error'
+        );
+      }
+    }
+
+
+    function eliminarEvidencia(tipo) {
+      const configuracion =
+        configuracionEvidencias[tipo];
+
+      const evidencia =
+        evidenciasPostparada[tipo];
+
+      if (
+        !configuracion ||
+        (evidencia && evidencia.registrada)
+      ) {
+        return;
+      }
+
+      evidenciasPostparada[tipo] = null;
+
+      document.getElementById(
+        configuracion.input
+      ).value = '';
+
+      document.getElementById(
+        configuracion.preview
+      ).src = '';
+
+      document.getElementById(
+        configuracion.nombre
+      ).textContent = '';
+
+      document.getElementById(
+        configuracion.tamano
+      ).textContent = '';
+
+      document.getElementById(
+        configuracion.card
+      ).classList.remove(
+        'con-imagen'
+      );
+
+      actualizarResumenEvidencias();
+
+      mostrarMensaje(
+        'Fotografía eliminada.',
+        'exito'
+      );
+    }
+
+
+    function permitirArrastre(evento) {
+      evento.preventDefault();
+      evento.dataTransfer.dropEffect =
+        'copy';
+    }
+
+
+    function recibirEvidenciaArrastrada(
+      evento,
+      tipo
+    ) {
+      evento.preventDefault();
+
+      const evidencia =
+        evidenciasPostparada[tipo];
+
+      if (
+        evidencia &&
+        evidencia.registrada
+      ) {
+        return;
+      }
+
+      const archivos =
+        evento.dataTransfer.files;
+
+      if (
+        !archivos ||
+        !archivos.length
+      ) {
+        return;
+      }
+
+      procesarArchivoEvidencia(
+        tipo,
+        archivos[0]
+      );
+    }
+
+
+    function actualizarResumenEvidencias() {
+      const cantidad =
+        Object.values(
+          evidenciasPostparada
+        ).filter(Boolean).length;
+
+      escribirTexto(
+        'resumenCantidadEvidencias',
+        `${cantidad} de 5`
+      );
+
+      const indicador =
+        document.getElementById(
+          'indicadorEvidencias'
+        );
+
+      if (cantidad > 0) {
+        indicador.classList.remove(
+          'oculto'
+        );
+      } else {
+        indicador.classList.add(
+          'oculto'
+        );
+      }
+    }
+
+
+    function comprimirImagen(
+      archivo,
+      dimensionMaxima = 1280,
+      calidad = 0.80
+    ) {
+      return new Promise(
+        (resolver, rechazar) => {
+          const lector =
+            new FileReader();
+
+          lector.onload = evento => {
+            const imagen =
+              new Image();
+
+            imagen.onload = () => {
+              try {
+                let ancho =
+                  imagen.naturalWidth ||
+                  imagen.width;
+
+                let alto =
+                  imagen.naturalHeight ||
+                  imagen.height;
+
+                if (!ancho || !alto) {
+                  throw new Error(
+                    'No se pudieron obtener las dimensiones de la fotografía.'
+                  );
+                }
+
+                const proporcion =
+                  Math.min(
+                    1,
+                    dimensionMaxima /
+                    Math.max(ancho, alto)
+                  );
+
+                ancho =
+                  Math.round(
+                    ancho * proporcion
+                  );
+
+                alto =
+                  Math.round(
+                    alto * proporcion
+                  );
+
+                const canvas =
+                  document.createElement(
+                    'canvas'
+                  );
+
+                canvas.width = ancho;
+                canvas.height = alto;
+
+                const contexto =
+                  canvas.getContext('2d');
+
+                if (!contexto) {
+                  throw new Error(
+                    'El navegador no permite procesar la fotografía.'
+                  );
+                }
+
+                contexto.drawImage(
+                  imagen,
+                  0,
+                  0,
+                  ancho,
+                  alto
+                );
+
+                const tipoSalida =
+                  'image/jpeg';
+
+                const imagenBase64 =
+                  canvas.toDataURL(
+                    tipoSalida,
+                    calidad
+                  );
+
+                resolver({
+                  imagenBase64,
+                  tipoMime: tipoSalida,
+                  tamano:
+                    calcularTamanoBase64(
+                      imagenBase64
+                    )
+                });
+
+              } catch (error) {
+                rechazar(error);
+              }
+            };
+
+            imagen.onerror = () => {
+              rechazar(
+                new Error(
+                  'El formato de la fotografía no es compatible.'
+                )
+              );
+            };
+
+            imagen.src =
+              evento.target.result;
+          };
+
+          lector.onerror = () => {
+            rechazar(
+              new Error(
+                'No se pudo leer la fotografía.'
+              )
+            );
+          };
+
+          lector.readAsDataURL(
+            archivo
+          );
+        }
+      );
+    }
+
+
+    function calcularTamanoBase64(
+      imagenBase64
+    ) {
+      const contenido =
+        String(imagenBase64 || '')
+          .split(',')[1] || '';
+
+      const relleno =
+        contenido.endsWith('==')
+          ? 2
+          : contenido.endsWith('=')
+            ? 1
+            : 0;
+
+      return Math.max(
+        0,
+        Math.floor(
+          contenido.length * 0.75
+        ) - relleno
+      );
+    }
+
+
+    function generarNombreFotografia(tipo) {
+      const datosTipo =
+        tiposFotografiaPostparada[tipo];
+
+      const nombreTipo =
+        datosTipo
+          ? datosTipo.tipoFoto
+          : tipo;
+
+      const nombreLimpio =
+        normalizar(nombreTipo)
+          .replace(
+            /[^a-z0-9]+/g,
+            '_'
+          )
+          .replace(
+            /^_+|_+$/g,
+            ''
+          )
+          .toUpperCase();
+
+      return `${
+        String(ID_SERVICIO)
+          .replace(
+            /[^a-zA-Z0-9_-]/g,
+            ''
+          )
+      }_${nombreLimpio}.jpg`;
+    }
+
+
+    async function subirFotografiasPostparada(
+      usuario
+    ) {
+      const seleccionadas =
+        Object.entries(
+          evidenciasPostparada
+        ).filter(
+          ([, evidencia]) =>
+            Boolean(
+              evidencia &&
+              evidencia.imagenBase64 &&
+              !evidencia.registrada
+            )
+        );
+
+      for (
+        let indice = 0;
+        indice < seleccionadas.length;
+        indice++
+      ) {
+        const [
+          tipo,
+          evidencia
+        ] = seleccionadas[indice];
+
+        const datosTipo =
+          tiposFotografiaPostparada[tipo];
+
+        const descripcionAdicional =
+          tipo === 'otraEvidencia'
+            ? document
+                .getElementById(
+                  'observacionOtraEvidencia'
+                )
+                .value
+                .trim()
+            : '';
+
+        const respuesta =
+          await fetch(
+            API_URL,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'text/plain;charset=utf-8'
+              },
+              body: JSON.stringify({
+                accion:
+                  'subirFotografiaPostparada',
+                idServicio:
+                  ID_SERVICIO,
+                tipoFoto:
+                  datosTipo.tipoFoto,
+                nombreArchivo:
+                  evidencia.nombre,
+                imagenBase64:
+                  evidencia.imagenBase64,
+                descripcion:
+                  descripcionAdicional ||
+                  datosTipo.descripcion,
+                usuario,
+                fotoPrincipal:
+                  datosTipo.principal
+                    ? 'SI'
+                    : 'NO'
+              })
+            }
+          );
+
+        const datos =
+          await respuesta.json();
+
+        if (!datos.ok) {
+          throw new Error(
+            datos.mensaje ||
+            `No se pudo subir la fotografía ${datosTipo.tipoFoto}.`
+          );
+        }
+
+        evidenciasPostparada[tipo] = {
+          registrada: true,
+          fotografia:
+            datos.fotografia
+        };
+      }
+    }
+
+
+    async function cargarFotografiasPostparadaRegistradas() {
+      try {
+        const respuesta =
+          await fetch(
+            `${API_URL}?accion=obtenerFotografiasPostparada&idServicio=${
+              encodeURIComponent(ID_SERVICIO)
+            }&_=${Date.now()}`
+          );
+
+        const datos =
+          await respuesta.json();
+
+        if (!datos.ok) {
+          throw new Error(
+            datos.mensaje ||
+            'No se pudieron cargar las fotografías de Postparada.'
+          );
+        }
+
+        const fotografias =
+          Array.isArray(datos.fotografias)
+            ? datos.fotografias
+            : [];
+
+        fotografias.forEach(
+          mostrarFotografiaRegistrada
+        );
+
+        actualizarResumenEvidencias();
+
+      } catch (error) {
+        console.error(
+          'Error cargando fotografías de Postparada:',
+          error
+        );
+      }
+    }
+
+
+    function mostrarFotografiaRegistrada(
+      fotografia
+    ) {
+      const clave =
+        obtenerClaveEvidenciaPorTipo(
+          fotografia.tipoFoto
+        );
+
+      if (!clave) {
+        return;
+      }
+
+      const configuracion =
+        configuracionEvidencias[clave];
+
+      if (!configuracion) {
+        return;
+      }
+
+      const card =
+        document.getElementById(
+          configuracion.card
+        );
+
+      const imagen =
+        document.getElementById(
+          configuracion.preview
+        );
+
+      if (!card || !imagen) {
+        return;
+      }
+
+      imagen.src =
+        obtenerEnlaceMiniaturaDrive(
+          fotografia.idArchivoDrive,
+          fotografia.enlaceFoto
+        );
+
+      imagen.onerror = function() {
+        this.onerror = null;
+        this.src =
+          crearImagenErrorFotografia();
+      };
+
+      imagen.onclick = () =>
+        abrirVisorFotografia(
+          fotografia
+        );
+
+      document.getElementById(
+        configuracion.nombre
+      ).textContent =
+        fotografia.tipoFoto ||
+        'Fotografía registrada';
+
+      document.getElementById(
+        configuracion.tamano
+      ).textContent =
+        fotografia.fechaHora
+          ? `Registrada: ${fotografia.fechaHora}`
+          : 'Fotografía registrada';
+
+      card.classList.add(
+        'con-imagen',
+        'registrada'
+      );
+
+      evidenciasPostparada[clave] = {
+        registrada: true,
+        fotografia
+      };
+
+      const preview =
+        card.querySelector(
+          '.evidencia-preview'
+        );
+
+      if (!preview) {
+        return;
+      }
+
+      if (
+        !preview.querySelector(
+          '.evidencia-registrada-etiqueta'
+        )
+      ) {
+        const etiqueta =
+          document.createElement('span');
+
+        etiqueta.className =
+          'evidencia-registrada-etiqueta';
+
+        etiqueta.textContent =
+          '✓ Registrada';
+
+        preview.appendChild(
+          etiqueta
+        );
+      }
+
+      const informacion =
+        preview.querySelector(
+          '.evidencia-info'
+        );
+
+      if (
+        informacion &&
+        !informacion.querySelector(
+          '.evidencia-boton-ver'
+        )
+      ) {
+        const boton =
+          document.createElement(
+            'button'
+          );
+
+        boton.type = 'button';
+        boton.className =
+          'evidencia-boton-ver';
+        boton.textContent =
+          '🔍 Ver fotografía';
+
+        boton.onclick = evento => {
+          evento.stopPropagation();
+          abrirVisorFotografia(
+            fotografia
+          );
+        };
+
+        informacion.appendChild(
+          boton
+        );
+      }
+    }
+
+
+    function obtenerClaveEvidenciaPorTipo(
+      tipoFoto
+    ) {
+      const tipo =
+        String(tipoFoto || '')
+          .trim()
+          .toUpperCase()
+          .normalize('NFD')
+          .replace(
+            /[\u0300-\u036f]/g,
+            ''
+          );
+
+      const equivalencias = {
+        'VISTA GENERAL DESMONTAJE':
+          'vistaGeneralDesmontaje',
+        'AREA LIMPIA':
+          'areaLimpia',
+        'MATERIAL DESMONTADO':
+          'materialDesmontado',
+        'MATERIAL DANADO':
+          'materialDanado',
+        'OTRA EVIDENCIA':
+          'otraEvidencia'
+      };
+
+      return equivalencias[tipo] || '';
+    }
+
+
+    function obtenerEnlaceMiniaturaDrive(
+      idArchivoDrive,
+      enlaceGuardado
+    ) {
+      const idArchivo =
+        String(
+          idArchivoDrive || ''
+        ).trim();
+
+      if (idArchivo) {
+        return (
+          'https://drive.google.com/thumbnail?' +
+          `id=${encodeURIComponent(idArchivo)}` +
+          '&sz=w1200'
+        );
+      }
+
+      return enlaceGuardado || '';
+    }
+
+
+    function obtenerEnlaceAbrirDrive(
+      fotografia
+    ) {
+      const idArchivo =
+        String(
+          fotografia.idArchivoDrive ||
+          ''
+        ).trim();
+
+      if (idArchivo) {
+        return (
+          'https://drive.google.com/file/d/' +
+          encodeURIComponent(idArchivo) +
+          '/view'
+        );
+      }
+
+      return fotografia.enlaceFoto || '#';
+    }
+
+
+    function abrirVisorFotografia(
+      fotografia
+    ) {
+      document.getElementById(
+        'visorTitulo'
+      ).textContent =
+        fotografia.tipoFoto ||
+        'Evidencia fotográfica';
+
+      document.getElementById(
+        'visorDescripcion'
+      ).textContent =
+        fotografia.descripcion ||
+        'Sin observación registrada.';
+
+      document.getElementById(
+        'visorFecha'
+      ).textContent =
+        fotografia.fechaHora
+          ? `Fecha: ${fotografia.fechaHora}`
+          : '';
+
+      document.getElementById(
+        'visorUsuario'
+      ).textContent =
+        fotografia.subidoPor
+          ? `Registrado por: ${fotografia.subidoPor}`
+          : '';
+
+      const imagen =
+        document.getElementById(
+          'visorImagen'
+        );
+
+      imagen.src =
+        obtenerEnlaceMiniaturaDrive(
+          fotografia.idArchivoDrive,
+          fotografia.enlaceFoto
+        );
+
+      imagen.onerror = function() {
+        this.onerror = null;
+        this.src =
+          crearImagenErrorFotografia();
+      };
+
+      document.getElementById(
+        'visorAbrirDrive'
+      ).href =
+        obtenerEnlaceAbrirDrive(
+          fotografia
+        );
+
+      document.getElementById(
+        'modalVisorFotografia'
+      ).classList.remove(
+        'oculto'
+      );
+
+      document.body.style.overflow =
+        'hidden';
+    }
+
+
+    function cerrarVisorFotografia(
+      evento
+    ) {
+      if (
+        evento &&
+        evento.target !==
+          evento.currentTarget
+      ) {
+        return;
+      }
+
+      document.getElementById(
+        'modalVisorFotografia'
+      ).classList.add(
+        'oculto'
+      );
+
+      document.getElementById(
+        'visorImagen'
+      ).src = '';
+
+      document.body.style.overflow = '';
+    }
+
+
+    function crearImagenErrorFotografia() {
+      const svg = `
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="900"
+          height="600"
+          viewBox="0 0 900 600"
+        >
+          <rect
+            width="900"
+            height="600"
+            fill="#eaf3fa"
+          />
+          <text
+            x="450"
+            y="270"
+            text-anchor="middle"
+            font-size="80"
+          >
+            📷
+          </text>
+          <text
+            x="450"
+            y="360"
+            text-anchor="middle"
+            font-family="Arial"
+            font-size="28"
+            fill="#123b5d"
+          >
+            Abrir fotografía en Drive
+          </text>
+        </svg>
+      `;
+
+      return (
+        'data:image/svg+xml;charset=UTF-8,' +
+        encodeURIComponent(svg)
+      );
+    }
+
+
+    function formatearTamanoArchivo(
+      bytes
+    ) {
+      const cantidad =
+        Number(bytes) || 0;
+
+      if (cantidad < 1024) {
+        return `${cantidad} bytes`;
+      }
+
+      if (
+        cantidad <
+        1024 * 1024
+      ) {
+        return `${
+          Math.round(
+            cantidad / 1024
+          )
+        } KB`;
+      }
+
+      return `${
+        (
+          cantidad /
+          (1024 * 1024)
+        ).toFixed(2)
+      } MB`;
     }
 
 
@@ -1559,4 +3341,3 @@
 
 </body>
 </html>
-
