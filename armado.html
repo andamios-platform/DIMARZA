@@ -548,8 +548,9 @@
 
   <p class="evidencias-ayuda">
     Selecciona una imagen, toma una fotografía con el celular
-    o arrastra el archivo sobre la tarjeta. En este primer paso
-    las imágenes solo se mostrarán como vista previa.
+    o arrastra el archivo sobre la tarjeta. Selecciona una imagen, toma una fotografía con el celular
+o arrastra el archivo sobre la tarjeta. Las imágenes serán
+comprimidas automáticamente antes de guardarse.
   </p>
 
   <div class="evidencias-grid">
@@ -1104,6 +1105,49 @@ const configuracionEvidencias = {
     tamano: 'tamanoOtra'
   }
 };
+const tiposFotografiaArmado = {
+  vistaGeneral: {
+    tipoFoto: 'VISTA GENERAL',
+    descripcion: 'Vista general del andamio armado',
+    obligatoria: true,
+    principal: true
+  },
+
+  ladoIzquierdo: {
+    tipoFoto: 'LADO IZQUIERDO',
+    descripcion: 'Vista del lado izquierdo del andamio',
+    obligatoria: true,
+    principal: false
+  },
+
+  ladoDerecho: {
+    tipoFoto: 'LADO DERECHO',
+    descripcion: 'Vista del lado derecho del andamio',
+    obligatoria: true,
+    principal: false
+  },
+
+  acceso: {
+    tipoFoto: 'ACCESO',
+    descripcion: 'Evidencia del acceso al andamio',
+    obligatoria: true,
+    principal: false
+  },
+
+  anclajes: {
+    tipoFoto: 'ANCLAJES',
+    descripcion: 'Evidencia de los anclajes del andamio',
+    obligatoria: true,
+    principal: false
+  },
+
+  otra: {
+    tipoFoto: 'OTRA',
+    descripcion: 'Evidencia fotográfica adicional',
+    obligatoria: false,
+    principal: false
+  }
+};
 document.addEventListener('DOMContentLoaded',iniciarModulo);
 
 async function iniciarModulo(){
@@ -1502,6 +1546,34 @@ function abrirModalFinalizar(){
   if(!materialesArmado.length){mostrarMensaje('No existen materiales para registrar.','error');return}
   const total=materialesArmado.reduce((s,m)=>s+(Number(m.cantidadUtilizada)||0),0);
   if(total<=0){mostrarMensaje('Debes registrar al menos una unidad utilizada.','error');return}
+
+    const evidenciasFaltantes =
+    obtenerEvidenciasFaltantes();
+
+  if (evidenciasFaltantes.length) {
+    const nombres =
+      evidenciasFaltantes
+        .map(
+          obtenerNombreVisibleEvidencia
+        )
+        .join(', ');
+
+    mostrarMensaje(
+      `Faltan fotografías obligatorias: ${nombres}.`,
+      'error'
+    );
+
+    document
+      .getElementById(
+        'seccionEvidencias'
+      )
+      .scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+    return;
+  }
   actualizarResumen();
   escribirTexto('modalDespachado',formatearNumero(resumenActual.cantidadPlanificada));
   escribirTexto('modalUtilizado',formatearNumero(resumenActual.cantidadUtilizada));
@@ -1511,35 +1583,176 @@ function abrirModalFinalizar(){
 }
 function cerrarModalFinalizar(){document.getElementById('modalFinalizar').classList.add('oculto')}
 
-async function finalizarArmado(){
-  const boton=document.getElementById('btnConfirmarFinalizar');
-  const responsableArmado=document.getElementById('responsableArmado').value.trim();
-  const usuario=document.getElementById('usuarioRegistro').value.trim()||responsableArmado;
+async function finalizarArmado() {
+  const boton =
+    document.getElementById(
+      'btnConfirmarFinalizar'
+    );
 
-  const materiales=materialesArmado.map(material=>({
-    idDetalle:material.idDetalle||'',
-    codigo:material.codigo||'',
-    descripcion:material.descripcion||material.subgrupo||'',
-    grupo:material.grupo||'',
-    subgrupo:material.subgrupo||material.descripcion||'',
-    unidadMedida:material.unidadMedida||'UNIDAD',
-    cantidadDespachada:Number(material.cantidadDespachada)||0,
-    cantidadUtilizada:Number(material.cantidadUtilizada)||0,
-    observacionArmado:material.observacionArmado||''
-  }));
+  const responsableArmado =
+    document
+      .getElementById(
+        'responsableArmado'
+      )
+      .value
+      .trim();
 
-  boton.disabled=true;boton.textContent='Guardando...';
-  try{
-    const respuesta=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({accion:'finalizarArmado',idServicio:ID_SERVICIO,responsableArmado,usuario,materiales})});
-    const datos=await respuesta.json();
-    if(!datos.ok)throw new Error(datos.mensaje||'No se pudo finalizar el armado.');
+  const usuario =
+    document
+      .getElementById(
+        'usuarioRegistro'
+      )
+      .value
+      .trim() ||
+    responsableArmado;
+
+  const evidenciasFaltantes =
+    obtenerEvidenciasFaltantes();
+
+  if (evidenciasFaltantes.length) {
+    mostrarMensaje(
+      'Debes completar las fotografías obligatorias.',
+      'error'
+    );
+
     cerrarModalFinalizar();
-    mostrarMensaje(datos.mensaje||'Armado finalizado correctamente.','exito');
-    setTimeout(()=>volverDetalle(),1500);
-  }catch(error){mostrarMensaje(error.message,'error')}
-  finally{boton.disabled=false;boton.textContent = '✓ Confirmar y finalizar';}
-}
 
+    document
+      .getElementById(
+        'seccionEvidencias'
+      )
+      .scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+    return;
+  }
+
+  const materiales =
+    materialesArmado.map(
+      material => ({
+        idDetalle:
+          material.idDetalle || '',
+
+        codigo:
+          material.codigo || '',
+
+        descripcion:
+          material.descripcion ||
+          material.subgrupo ||
+          '',
+
+        grupo:
+          material.grupo || '',
+
+        subgrupo:
+          material.subgrupo ||
+          material.descripcion ||
+          '',
+
+        unidadMedida:
+          material.unidadMedida ||
+          'UNIDAD',
+
+        cantidadDespachada:
+          Number(
+            material.cantidadDespachada
+          ) || 0,
+
+        cantidadUtilizada:
+          Number(
+            material.cantidadUtilizada
+          ) || 0,
+
+        observacionArmado:
+          material.observacionArmado ||
+          ''
+      })
+    );
+
+  boton.disabled = true;
+
+  try {
+    boton.textContent =
+      'Preparando fotografías...';
+
+    await subirFotografiasArmado(
+      usuario
+    );
+
+    boton.textContent =
+      'Finalizando armado...';
+
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body: JSON.stringify({
+            accion:
+              'finalizarArmado',
+
+            idServicio:
+              ID_SERVICIO,
+
+            responsableArmado,
+
+            usuario,
+
+            materiales
+          })
+        }
+      );
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo finalizar el armado.'
+      );
+    }
+
+    cerrarModalFinalizar();
+
+    mostrarMensaje(
+      datos.mensaje ||
+      'Armado y fotografías guardados correctamente.',
+      'exito'
+    );
+
+    setTimeout(
+      () => volverDetalle(),
+      1800
+    );
+
+  } catch (error) {
+    console.error(
+      'Error finalizando armado:',
+      error
+    );
+
+    mostrarMensaje(
+      error.message ||
+      'Ocurrió un error durante el registro.',
+      'error'
+    );
+
+  } finally {
+    boton.disabled = false;
+
+    boton.textContent =
+      '✓ Confirmar y finalizar';
+  }
+}
 function abrirModalAdicional(){document.getElementById('modalAdicional').classList.remove('oculto')}
 function cerrarModalAdicional(){
   document.getElementById('modalAdicional').classList.add('oculto');
@@ -1625,15 +1838,19 @@ function cargarVistaPrevia(tipo,input){
 }
 
 
-function procesarArchivoEvidencia(tipo,archivo){
+async function procesarArchivoEvidencia(tipo, archivo) {
   const configuracion =
     configuracionEvidencias[tipo];
 
-  if(!configuracion){
+  if (!configuracion) {
     return;
   }
 
-  if(!archivo.type.startsWith('image/')){
+  if (
+    !archivo ||
+    !archivo.type ||
+    !archivo.type.startsWith('image/')
+  ) {
     mostrarMensaje(
       'El archivo seleccionado no es una imagen.',
       'error'
@@ -1645,7 +1862,7 @@ function procesarArchivoEvidencia(tipo,archivo){
   const limiteBytes =
     15 * 1024 * 1024;
 
-  if(archivo.size > limiteBytes){
+  if (archivo.size > limiteBytes) {
     mostrarMensaje(
       'La imagen supera el límite de 15 MB.',
       'error'
@@ -1654,19 +1871,32 @@ function procesarArchivoEvidencia(tipo,archivo){
     return;
   }
 
-  const lector =
-    new FileReader();
+  try {
+    mostrarMensaje(
+      'Preparando fotografía...',
+      ''
+    );
 
-  lector.onload = evento => {
-    const imagenBase64 =
-      evento.target.result;
+    const imagenComprimida =
+      await comprimirImagen(
+        archivo,
+        1280,
+        0.80
+      );
 
     evidenciasArmado[tipo] = {
-      archivo,
-      nombre: archivo.name,
-      tipoMime: archivo.type,
-      tamano: archivo.size,
-      imagenBase64
+      archivoOriginal: archivo,
+      nombre: generarNombreFotografia(
+        tipo
+      ),
+      tipoMime:
+        imagenComprimida.tipoMime,
+      tamanoOriginal:
+        archivo.size,
+      tamano:
+        imagenComprimida.tamano,
+      imagenBase64:
+        imagenComprimida.imagenBase64
     };
 
     const card =
@@ -1690,15 +1920,15 @@ function procesarArchivoEvidencia(tipo,archivo){
       );
 
     preview.src =
-      imagenBase64;
+      imagenComprimida.imagenBase64;
 
     nombre.textContent =
-      archivo.name;
+      evidenciasArmado[tipo].nombre;
 
     tamano.textContent =
-      formatearTamanoArchivo(
-        archivo.size
-      );
+      `${formatearTamanoArchivo(
+        imagenComprimida.tamano
+      )} comprimida`;
 
     card.classList.add(
       'con-imagen'
@@ -1707,23 +1937,23 @@ function procesarArchivoEvidencia(tipo,archivo){
     actualizarResumenEvidencias();
 
     mostrarMensaje(
-      'Fotografía preparada correctamente.',
+      'Fotografía comprimida y preparada.',
       'exito'
     );
-  };
 
-  lector.onerror = () => {
+  } catch (error) {
+    console.error(
+      'Error preparando fotografía:',
+      error
+    );
+
     mostrarMensaje(
-      'No se pudo leer la fotografía.',
+      error.message ||
+      'No se pudo preparar la fotografía.',
       'error'
     );
-  };
-
-  lector.readAsDataURL(
-    archivo
-  );
+  }
 }
-
 
 function eliminarEvidencia(tipo){
   const configuracion =
@@ -1838,7 +2068,337 @@ function actualizarResumenEvidencias(){
     );
   }
 }
+function comprimirImagen(
+  archivo,
+  dimensionMaxima = 1280,
+  calidad = 0.80
+) {
+  return new Promise(
+    (resolver, rechazar) => {
 
+      const lector =
+        new FileReader();
+
+      lector.onload = evento => {
+        const imagen =
+          new Image();
+
+        imagen.onload = () => {
+          try {
+            let ancho =
+              imagen.naturalWidth ||
+              imagen.width;
+
+            let alto =
+              imagen.naturalHeight ||
+              imagen.height;
+
+            if (!ancho || !alto) {
+              throw new Error(
+                'No se pudieron obtener las dimensiones de la fotografía.'
+              );
+            }
+
+            const proporcion =
+              Math.min(
+                1,
+                dimensionMaxima /
+                Math.max(ancho, alto)
+              );
+
+            ancho =
+              Math.round(
+                ancho * proporcion
+              );
+
+            alto =
+              Math.round(
+                alto * proporcion
+              );
+
+            const canvas =
+              document.createElement(
+                'canvas'
+              );
+
+            canvas.width =
+              ancho;
+
+            canvas.height =
+              alto;
+
+            const contexto =
+              canvas.getContext('2d');
+
+            if (!contexto) {
+              throw new Error(
+                'El navegador no permite procesar la fotografía.'
+              );
+            }
+
+            contexto.drawImage(
+              imagen,
+              0,
+              0,
+              ancho,
+              alto
+            );
+
+            const tipoSalida =
+              'image/jpeg';
+
+            const imagenBase64 =
+              canvas.toDataURL(
+                tipoSalida,
+                calidad
+              );
+
+            const tamano =
+              calcularTamanoBase64(
+                imagenBase64
+              );
+
+            resolver({
+              imagenBase64,
+              tipoMime: tipoSalida,
+              tamano,
+              ancho,
+              alto
+            });
+
+          } catch (error) {
+            rechazar(error);
+          }
+        };
+
+        imagen.onerror = () => {
+          rechazar(
+            new Error(
+              'El formato de la fotografía no es compatible.'
+            )
+          );
+        };
+
+        imagen.src =
+          evento.target.result;
+      };
+
+      lector.onerror = () => {
+        rechazar(
+          new Error(
+            'No se pudo leer la fotografía.'
+          )
+        );
+      };
+
+      lector.readAsDataURL(
+        archivo
+      );
+    }
+  );
+}
+
+
+function calcularTamanoBase64(
+  imagenBase64
+) {
+  const contenido =
+    String(imagenBase64 || '')
+      .split(',')[1] || '';
+
+  const relleno =
+    contenido.endsWith('==')
+      ? 2
+      : contenido.endsWith('=')
+        ? 1
+        : 0;
+
+  return Math.max(
+    0,
+    Math.floor(
+      contenido.length * 0.75
+    ) - relleno
+  );
+}
+
+
+function generarNombreFotografia(
+  tipo
+) {
+  const datosTipo =
+    tiposFotografiaArmado[tipo];
+
+  const nombreTipo =
+    datosTipo
+      ? datosTipo.tipoFoto
+      : tipo;
+
+  const nombreLimpio =
+    normalizar(nombreTipo)
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .toUpperCase();
+
+  const idLimpio =
+    String(ID_SERVICIO)
+      .replace(/[^a-zA-Z0-9_-]/g, '');
+
+  return `${idLimpio}_${nombreLimpio}.jpg`;
+}
+
+function obtenerEvidenciasFaltantes() {
+  return Object.keys(
+    tiposFotografiaArmado
+  ).filter(tipo => {
+    const configuracion =
+      tiposFotografiaArmado[tipo];
+
+    return (
+      configuracion.obligatoria &&
+      !evidenciasArmado[tipo]
+    );
+  });
+}
+
+
+function obtenerNombreVisibleEvidencia(
+  tipo
+) {
+  const configuracion =
+    tiposFotografiaArmado[tipo];
+
+  if (!configuracion) {
+    return tipo;
+  }
+
+  return configuracion.tipoFoto
+    .toLowerCase()
+    .replace(/\b\w/g, letra =>
+      letra.toUpperCase()
+    );
+}
+  async function subirFotografiasArmado(
+  usuario
+) {
+  const evidenciasSeleccionadas =
+    Object.entries(
+      evidenciasArmado
+    ).filter(
+      ([, evidencia]) =>
+        Boolean(evidencia)
+    );
+
+  const resultados = [];
+
+  for (
+    let indice = 0;
+    indice <
+    evidenciasSeleccionadas.length;
+    indice++
+  ) {
+    const [
+      tipo,
+      evidencia
+    ] =
+      evidenciasSeleccionadas[indice];
+
+    const datosTipo =
+      tiposFotografiaArmado[tipo];
+
+    const descripcionAdicional =
+      tipo === 'otra'
+        ? document
+            .getElementById(
+              'observacionOtraEvidencia'
+            )
+            .value
+            .trim()
+        : '';
+
+    const descripcion =
+      descripcionAdicional ||
+      datosTipo.descripcion;
+
+    const boton =
+      document.getElementById(
+        'btnConfirmarFinalizar'
+      );
+
+    boton.textContent =
+      `Subiendo fotografía ${
+        indice + 1
+      } de ${
+        evidenciasSeleccionadas.length
+      }...`;
+
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body: JSON.stringify({
+            accion:
+              'subirFotografiaArmado',
+
+            idServicio:
+              ID_SERVICIO,
+
+            tag:
+              servicioActual.tag || '',
+
+            etapa:
+              'ARMADO',
+
+            tipoFoto:
+              datosTipo.tipoFoto,
+
+            nombreArchivo:
+              evidencia.nombre,
+
+            tipoMime:
+              evidencia.tipoMime,
+
+            imagenBase64:
+              evidencia.imagenBase64,
+
+            descripcion,
+
+            usuario,
+
+            subidoPor:
+              usuario,
+
+            fotoPrincipal:
+              datosTipo.principal
+                ? 'SI'
+                : 'NO'
+          })
+        }
+      );
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        `No se pudo subir la fotografía ${
+          datosTipo.tipoFoto
+        }.`
+      );
+    }
+
+    resultados.push(datos);
+  }
+
+  return resultados;
+}
 
 function formatearTamanoArchivo(bytes){
   const cantidad =
