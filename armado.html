@@ -2807,6 +2807,11 @@ function mostrarFotografiaRegistrada(fotografia) {
   card.dataset.fotografiaRegistrada =
     'true';
 
+  evidenciasArmado[clave] = {
+  registrada: true,
+  fotografia
+};
+
   const preview =
     card.querySelector(
       '.evidencia-preview'
