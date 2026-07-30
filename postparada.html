@@ -1,1 +1,1559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Postparada | DIMARZA</title>
+
+  <style>
+    :root {
+      --azul: #123b5d;
+      --azul-claro: #1f5f8b;
+      --naranja: #f28c28;
+      --naranja-oscuro: #d96c0f;
+      --fondo: #f3f6f9;
+      --blanco: #ffffff;
+      --texto: #24313d;
+      --gris: #6d7a86;
+      --borde: #dce4ea;
+      --verde: #198754;
+      --rojo: #dc3545;
+      --amarillo: #ffc107;
+      --sombra: 0 8px 24px rgba(18, 59, 93, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button:disabled,
+    input:disabled,
+    textarea:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    .encabezado {
+      padding: 20px;
+      color: white;
+      background:
+        linear-gradient(
+          135deg,
+          var(--azul),
+          var(--azul-claro)
+        );
+      box-shadow: var(--sombra);
+    }
+
+    .encabezado-contenido {
+      width: min(1200px, 100%);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .marca h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .marca p {
+      margin: 5px 0 0;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    .boton-volver {
+      padding: 11px 17px;
+      color: white;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .contenedor {
+      width: min(1200px, calc(100% - 30px));
+      margin: 25px auto 50px;
+    }
+
+    .cargando,
+    .error-general,
+    .sin-datos {
+      padding: 35px 20px;
+      text-align: center;
+      color: var(--gris);
+      background: white;
+      border: 1px dashed var(--borde);
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+    }
+
+    .error-general {
+      color: var(--rojo);
+      border-color: rgba(220, 53, 69, 0.35);
+    }
+
+    .seccion {
+      margin-bottom: 22px;
+      padding: 22px;
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 15px;
+      box-shadow: var(--sombra);
+    }
+
+    .seccion h2 {
+      margin: 0 0 18px;
+      font-size: 18px;
+      color: var(--azul);
+    }
+
+    .datos-servicio {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .dato {
+      min-height: 82px;
+      padding: 15px;
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      background: #f9fbfc;
+    }
+
+    .dato-etiqueta {
+      margin-bottom: 7px;
+      color: var(--gris);
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .dato-valor {
+      font-size: 16px;
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
+
+    .estado {
+      display: inline-flex;
+      padding: 7px 11px;
+      border-radius: 999px;
+      color: white;
+      background: var(--azul-claro);
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .estado-cerrado {
+      background: var(--verde);
+    }
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .tarjeta {
+      padding: 17px;
+      border: 1px solid var(--borde);
+      border-radius: 13px;
+      background: #f9fbfc;
+    }
+
+    .tarjeta-etiqueta {
+      color: var(--gris);
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .tarjeta-valor {
+      margin-top: 8px;
+      color: var(--azul);
+      font-size: 27px;
+      font-weight: bold;
+    }
+
+    .campo {
+      margin-bottom: 17px;
+    }
+
+    .campo:last-child {
+      margin-bottom: 0;
+    }
+
+    .campo label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    .campo input,
+    .campo textarea {
+      width: 100%;
+      padding: 12px 13px;
+      color: var(--texto);
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      outline: none;
+    }
+
+    .campo input:focus,
+    .campo textarea:focus {
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(31, 95, 139, 0.12);
+    }
+
+    .campo textarea {
+      min-height: 105px;
+      resize: vertical;
+    }
+
+    .tabla-contenedor {
+      overflow-x: auto;
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 890px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--borde);
+      vertical-align: middle;
+    }
+
+    th {
+      color: white;
+      background: var(--azul);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .material-principal {
+      font-weight: bold;
+      color: var(--azul);
+    }
+
+    .material-secundario {
+      margin-top: 4px;
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .numero-lectura {
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .entrada-cantidad {
+      width: 100px;
+      padding: 9px 8px;
+      text-align: center;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .entrada-cantidad:focus {
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(31, 95, 139, 0.10);
+    }
+
+    .acciones {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-secundario {
+      color: var(--azul);
+      background: #e9f0f5;
+    }
+
+    .btn-principal {
+      color: white;
+      background: var(--naranja);
+    }
+
+    .btn-principal:hover:not(:disabled) {
+      background: var(--naranja-oscuro);
+    }
+
+    .mensaje {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1000;
+      max-width: min(430px, calc(100% - 36px));
+      padding: 15px 17px;
+      color: white;
+      background: var(--azul);
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+    }
+
+    .mensaje.exito {
+      background: var(--verde);
+    }
+
+    .mensaje.error {
+      background: var(--rojo);
+    }
+
+    .aviso-lectura {
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      color: #6b5100;
+      background: #fff6d8;
+      border: 1px solid #f1d47a;
+      border-radius: 11px;
+      font-weight: bold;
+    }
+
+    .modal-fondo {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 28, 40, 0.62);
+    }
+
+    .modal {
+      width: min(520px, 100%);
+      padding: 24px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .modal h3 {
+      margin: 0 0 12px;
+      color: var(--azul);
+    }
+
+    .modal p {
+      margin: 0 0 20px;
+      line-height: 1.5;
+    }
+
+    .modal-acciones {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    @media (max-width: 850px) {
+      .datos-servicio,
+      .resumen {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .encabezado-contenido {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .datos-servicio,
+      .resumen {
+        grid-template-columns: 1fr;
+      }
+
+      .seccion {
+        padding: 17px;
+      }
+
+      .acciones,
+      .modal-acciones {
+        flex-direction: column-reverse;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="encabezado">
+    <div class="encabezado-contenido">
+
+      <div class="marca">
+        <h1>🚚 Postparada</h1>
+        <p>DIMARZA - Gestión y Modulación de Andamios</p>
+      </div>
+
+      <button
+        type="button"
+        class="boton-volver"
+        onclick="volverDetalle()"
+      >
+        ← Volver al servicio
+      </button>
+
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <div
+      id="contenidoCargando"
+      class="cargando"
+    >
+      Cargando información de Postparada...
+    </div>
+
+    <div
+      id="contenidoPrincipal"
+      class="oculto"
+    >
+
+      <div
+        id="avisoLectura"
+        class="aviso-lectura oculto"
+      >
+        La Postparada ya fue finalizada. El módulo está disponible únicamente para consulta.
+      </div>
+
+      <section class="seccion">
+        <h2>Datos del servicio</h2>
+
+        <div class="datos-servicio">
+
+          <div class="dato">
+            <div class="dato-etiqueta">Servicio</div>
+            <div
+              id="idServicioVista"
+              class="dato-valor"
+            >
+              —
+            </div>
+          </div>
+
+          <div class="dato">
+            <div class="dato-etiqueta">TAG</div>
+            <div
+              id="tagServicio"
+              class="dato-valor"
+            >
+              —
+            </div>
+          </div>
+
+          <div class="dato">
+            <div class="dato-etiqueta">OT</div>
+            <div
+              id="otServicio"
+              class="dato-valor"
+            >
+              —
+            </div>
+          </div>
+
+          <div class="dato">
+            <div class="dato-etiqueta">Estado</div>
+            <div>
+              <span
+                id="estadoServicio"
+                class="estado"
+              >
+                —
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="seccion">
+        <h2>Resumen</h2>
+
+        <div class="resumen">
+
+          <div class="tarjeta">
+            <div class="tarjeta-etiqueta">
+              Cantidad utilizada
+            </div>
+            <div
+              id="resumenUtilizada"
+              class="tarjeta-valor"
+            >
+              0
+            </div>
+          </div>
+
+          <div class="tarjeta">
+            <div class="tarjeta-etiqueta">
+              Cantidad desmontada
+            </div>
+            <div
+              id="resumenDesmontada"
+              class="tarjeta-valor"
+            >
+              0
+            </div>
+          </div>
+
+          <div class="tarjeta">
+            <div class="tarjeta-etiqueta">
+              Cantidad dañada
+            </div>
+            <div
+              id="resumenDanada"
+              class="tarjeta-valor"
+            >
+              0
+            </div>
+          </div>
+
+          <div class="tarjeta">
+            <div class="tarjeta-etiqueta">
+              Cantidad faltante
+            </div>
+            <div
+              id="resumenFaltante"
+              class="tarjeta-valor"
+            >
+              0
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="seccion">
+        <h2>Responsable y observaciones</h2>
+
+        <div class="campo">
+          <label for="responsablePostparada">
+            Responsable de Postparada
+          </label>
+
+          <input
+            id="responsablePostparada"
+            type="text"
+            autocomplete="off"
+            placeholder="Ingrese el nombre del responsable"
+          >
+        </div>
+
+        <div class="campo">
+          <label for="observacionPostparada">
+            Observación general de Postparada
+          </label>
+
+          <textarea
+            id="observacionPostparada"
+            placeholder="Registre observaciones del desmontaje, materiales dañados, faltantes u otras novedades"
+          ></textarea>
+        </div>
+      </section>
+
+      <section class="seccion">
+        <h2>Materiales desmontados</h2>
+
+        <div
+          id="sinMateriales"
+          class="sin-datos oculto"
+        >
+          No existen materiales utilizados para registrar en Postparada.
+        </div>
+
+        <div
+          id="tablaMaterialesContenedor"
+          class="tabla-contenedor"
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Grupo</th>
+                <th>Utilizado</th>
+                <th>Desmontado</th>
+                <th>Dañado</th>
+                <th>Faltante</th>
+              </tr>
+            </thead>
+
+            <tbody id="tablaMateriales"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="seccion">
+        <div class="acciones">
+
+          <button
+            type="button"
+            class="btn btn-secundario"
+            onclick="volverDetalle()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            id="btnFinalizar"
+            type="button"
+            class="btn btn-principal"
+            onclick="abrirConfirmacion()"
+          >
+            Finalizar Postparada
+          </button>
+
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <div
+    id="mensaje"
+    class="mensaje oculto"
+  ></div>
+
+  <div
+    id="modalConfirmacion"
+    class="modal-fondo oculto"
+    onclick="cerrarModalDesdeFondo(event)"
+  >
+    <div class="modal">
+      <h3>Finalizar Postparada</h3>
+
+      <p>
+        Se guardarán las cantidades registradas y el servicio cambiará al estado
+        <strong>CERRADO</strong>. Después quedará disponible solo para consulta.
+      </p>
+
+      <div class="modal-acciones">
+
+        <button
+          type="button"
+          class="btn btn-secundario"
+          onclick="cerrarConfirmacion()"
+        >
+          Volver
+        </button>
+
+        <button
+          id="btnConfirmarFinalizar"
+          type="button"
+          class="btn btn-principal"
+          onclick="finalizarPostparada()"
+        >
+          Confirmar y cerrar
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+    const PARAMETROS =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const ID_SERVICIO =
+      (
+        PARAMETROS.get('id') ||
+        PARAMETROS.get('idServicio') ||
+        ''
+      )
+        .trim()
+        .toUpperCase();
+
+    let servicioActual = {};
+    let materialesPostparada = [];
+    let postparadaRegistrada = false;
+    let guardandoPostparada = false;
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      iniciarPostparada
+    );
+
+
+    async function iniciarPostparada() {
+      if (!ID_SERVICIO) {
+        mostrarErrorInicial(
+          'No se recibió el ID del servicio.'
+        );
+        return;
+      }
+
+      try {
+        const url =
+          `${API_URL}?accion=obtenerPostparada&idServicio=${
+            encodeURIComponent(ID_SERVICIO)
+          }&_=${Date.now()}`;
+
+        const respuesta =
+          await fetch(url);
+
+        if (!respuesta.ok) {
+          throw new Error(
+            `Error de conexión (${respuesta.status}).`
+          );
+        }
+
+        const datos =
+          await respuesta.json();
+
+        if (!datos.ok) {
+          throw new Error(
+            datos.mensaje ||
+            'No se pudo cargar la Postparada.'
+          );
+        }
+
+        servicioActual =
+          datos.servicio || {};
+
+        materialesPostparada =
+          Array.isArray(datos.materiales)
+            ? datos.materiales
+            : [];
+
+        postparadaRegistrada =
+          Boolean(datos.postparadaRegistrada);
+
+        mostrarDatosServicio();
+        mostrarMateriales();
+
+        document.getElementById(
+          'responsablePostparada'
+        ).value =
+          servicioActual.responsablePostparada ||
+          '';
+
+        document.getElementById(
+          'observacionPostparada'
+        ).value =
+          datos.observacionPostparada ||
+          '';
+
+        actualizarResumen();
+
+        document.getElementById(
+          'contenidoCargando'
+        ).classList.add('oculto');
+
+        document.getElementById(
+          'contenidoPrincipal'
+        ).classList.remove('oculto');
+
+        aplicarBloqueoSegunEstado();
+
+      } catch (error) {
+        mostrarErrorInicial(
+          error.message ||
+          'Ocurrió un error al cargar el módulo.'
+        );
+      }
+    }
+
+
+    function mostrarDatosServicio() {
+      escribirTexto(
+        'idServicioVista',
+        servicioActual.idServicio ||
+        ID_SERVICIO
+      );
+
+      escribirTexto(
+        'tagServicio',
+        servicioActual.tag
+      );
+
+      escribirTexto(
+        'otServicio',
+        servicioActual.ot
+      );
+
+      const estado =
+        document.getElementById(
+          'estadoServicio'
+        );
+
+      estado.textContent =
+        servicioActual.estado ||
+        '—';
+
+      estado.classList.toggle(
+        'estado-cerrado',
+        normalizar(
+          servicioActual.estado
+        ) === 'cerrado'
+      );
+    }
+
+
+    function mostrarMateriales() {
+      const cuerpo =
+        document.getElementById(
+          'tablaMateriales'
+        );
+
+      const contenedor =
+        document.getElementById(
+          'tablaMaterialesContenedor'
+        );
+
+      const sinMateriales =
+        document.getElementById(
+          'sinMateriales'
+        );
+
+      cuerpo.innerHTML = '';
+
+      if (
+        materialesPostparada.length === 0
+      ) {
+        contenedor.classList.add('oculto');
+        sinMateriales.classList.remove('oculto');
+        document.getElementById(
+          'btnFinalizar'
+        ).disabled = true;
+        return;
+      }
+
+      contenedor.classList.remove('oculto');
+      sinMateriales.classList.add('oculto');
+
+      materialesPostparada.forEach(
+        (material, indice) => {
+          const fila =
+            document.createElement('tr');
+
+          fila.innerHTML = `
+            <td>
+              <div class="material-principal">
+                ${
+                  escaparHtml(
+                    material.descripcion ||
+                    material.subgrupo ||
+                    'MATERIAL'
+                  )
+                }
+              </div>
+
+              <div class="material-secundario">
+                ${
+                  escaparHtml(
+                    material.codigo ||
+                    material.idDetalle ||
+                    ''
+                  )
+                }
+              </div>
+            </td>
+
+            <td>
+              ${
+                escaparHtml(
+                  material.grupo || '—'
+                )
+              }
+            </td>
+
+            <td class="numero-lectura">
+              ${
+                formatearNumero(
+                  material.cantidadUtilizada
+                )
+              }
+            </td>
+
+            <td>
+              <input
+                type="number"
+                min="0"
+                step="any"
+                class="entrada-cantidad"
+                data-indice="${indice}"
+                data-campo="cantidadDesmontada"
+                value="${
+                  escaparAtributo(
+                    formatearNumero(
+                      material.cantidadDesmontada
+                    )
+                  )
+                }"
+                oninput="actualizarCantidad(this)"
+              >
+            </td>
+
+            <td>
+              <input
+                type="number"
+                min="0"
+                step="any"
+                class="entrada-cantidad"
+                data-indice="${indice}"
+                data-campo="cantidadDanada"
+                value="${
+                  escaparAtributo(
+                    formatearNumero(
+                      material.cantidadDanada
+                    )
+                  )
+                }"
+                oninput="actualizarCantidad(this)"
+              >
+            </td>
+
+            <td>
+              <input
+                type="number"
+                min="0"
+                step="any"
+                class="entrada-cantidad"
+                data-indice="${indice}"
+                data-campo="cantidadFaltante"
+                value="${
+                  escaparAtributo(
+                    formatearNumero(
+                      material.cantidadFaltante
+                    )
+                  )
+                }"
+                oninput="actualizarCantidad(this)"
+              >
+            </td>
+          `;
+
+          cuerpo.appendChild(fila);
+        }
+      );
+    }
+
+
+    function actualizarCantidad(input) {
+      const indice =
+        Number(input.dataset.indice);
+
+      const campo =
+        input.dataset.campo;
+
+      if (
+        !Number.isInteger(indice) ||
+        !materialesPostparada[indice] ||
+        !campo
+      ) {
+        return;
+      }
+
+      materialesPostparada[indice][campo] =
+        input.value === ''
+          ? 0
+          : Number(input.value);
+
+      actualizarResumen();
+    }
+
+
+    function actualizarResumen() {
+      const resumen =
+        materialesPostparada.reduce(
+          (acumulado, material) => {
+            acumulado.utilizada +=
+              Number(
+                material.cantidadUtilizada
+              ) || 0;
+
+            acumulado.desmontada +=
+              Number(
+                material.cantidadDesmontada
+              ) || 0;
+
+            acumulado.danada +=
+              Number(
+                material.cantidadDanada
+              ) || 0;
+
+            acumulado.faltante +=
+              Number(
+                material.cantidadFaltante
+              ) || 0;
+
+            return acumulado;
+          },
+          {
+            utilizada: 0,
+            desmontada: 0,
+            danada: 0,
+            faltante: 0
+          }
+        );
+
+      escribirTexto(
+        'resumenUtilizada',
+        formatearNumero(
+          resumen.utilizada
+        )
+      );
+
+      escribirTexto(
+        'resumenDesmontada',
+        formatearNumero(
+          resumen.desmontada
+        )
+      );
+
+      escribirTexto(
+        'resumenDanada',
+        formatearNumero(
+          resumen.danada
+        )
+      );
+
+      escribirTexto(
+        'resumenFaltante',
+        formatearNumero(
+          resumen.faltante
+        )
+      );
+    }
+
+
+    function validarPostparada() {
+      const responsable =
+        document
+          .getElementById(
+            'responsablePostparada'
+          )
+          .value
+          .trim();
+
+      if (!responsable) {
+        throw new Error(
+          'Debes indicar el responsable de Postparada.'
+        );
+      }
+
+      if (
+        materialesPostparada.length === 0
+      ) {
+        throw new Error(
+          'No existen materiales para registrar.'
+        );
+      }
+
+      materialesPostparada.forEach(
+        (material, indice) => {
+          const descripcion =
+            material.descripcion ||
+            material.subgrupo ||
+            `Material ${indice + 1}`;
+
+          const utilizada =
+            Number(
+              material.cantidadUtilizada
+            );
+
+          const desmontada =
+            Number(
+              material.cantidadDesmontada
+            );
+
+          const danada =
+            Number(
+              material.cantidadDanada
+            );
+
+          const faltante =
+            Number(
+              material.cantidadFaltante
+            );
+
+          if (
+            !Number.isFinite(desmontada) ||
+            desmontada < 0
+          ) {
+            throw new Error(
+              `La cantidad desmontada de ${descripcion} no es válida.`
+            );
+          }
+
+          if (
+            !Number.isFinite(danada) ||
+            danada < 0
+          ) {
+            throw new Error(
+              `La cantidad dañada de ${descripcion} no es válida.`
+            );
+          }
+
+          if (
+            !Number.isFinite(faltante) ||
+            faltante < 0
+          ) {
+            throw new Error(
+              `La cantidad faltante de ${descripcion} no es válida.`
+            );
+          }
+
+          if (
+            desmontada > utilizada
+          ) {
+            throw new Error(
+              `La cantidad desmontada de ${descripcion} no puede superar la utilizada.`
+            );
+          }
+
+          if (
+            danada > desmontada
+          ) {
+            throw new Error(
+              `La cantidad dañada de ${descripcion} no puede superar la desmontada.`
+            );
+          }
+
+          if (
+            Math.abs(
+              (
+                desmontada +
+                faltante
+              ) -
+              utilizada
+            ) > 0.000001
+          ) {
+            throw new Error(
+              `${descripcion}: desmontado (${formatearNumero(desmontada)}) + faltante (${formatearNumero(faltante)}) debe ser igual a utilizado (${formatearNumero(utilizada)}).`
+            );
+          }
+        }
+      );
+
+      return {
+        responsable,
+        observacion:
+          document
+            .getElementById(
+              'observacionPostparada'
+            )
+            .value
+            .trim()
+      };
+    }
+
+
+    function abrirConfirmacion() {
+      try {
+        validarPostparada();
+
+        document
+          .getElementById(
+            'modalConfirmacion'
+          )
+          .classList
+          .remove('oculto');
+
+      } catch (error) {
+        mostrarMensaje(
+          error.message,
+          'error'
+        );
+      }
+    }
+
+
+    function cerrarConfirmacion() {
+      if (guardandoPostparada) {
+        return;
+      }
+
+      document
+        .getElementById(
+          'modalConfirmacion'
+        )
+        .classList
+        .add('oculto');
+    }
+
+
+    function cerrarModalDesdeFondo(evento) {
+      if (
+        evento.target.id ===
+        'modalConfirmacion'
+      ) {
+        cerrarConfirmacion();
+      }
+    }
+
+
+    async function finalizarPostparada() {
+      if (guardandoPostparada) {
+        return;
+      }
+
+      let validacion;
+
+      try {
+        validacion =
+          validarPostparada();
+      } catch (error) {
+        cerrarConfirmacion();
+
+        mostrarMensaje(
+          error.message,
+          'error'
+        );
+        return;
+      }
+
+      const boton =
+        document.getElementById(
+          'btnConfirmarFinalizar'
+        );
+
+      guardandoPostparada = true;
+      boton.disabled = true;
+      boton.textContent =
+        'Guardando Postparada...';
+
+      try {
+        const materiales =
+          materialesPostparada.map(
+            material => ({
+              idDetalle:
+                material.idDetalle,
+
+              descripcion:
+                material.descripcion,
+
+              subgrupo:
+                material.subgrupo,
+
+              cantidadUtilizada:
+                Number(
+                  material.cantidadUtilizada
+                ) || 0,
+
+              cantidadDesmontada:
+                Number(
+                  material.cantidadDesmontada
+                ) || 0,
+
+              cantidadDanada:
+                Number(
+                  material.cantidadDanada
+                ) || 0,
+
+              cantidadFaltante:
+                Number(
+                  material.cantidadFaltante
+                ) || 0
+            })
+          );
+
+        const respuesta =
+          await fetch(
+            API_URL,
+            {
+              method: 'POST',
+
+              headers: {
+                'Content-Type':
+                  'text/plain;charset=utf-8'
+              },
+
+              body: JSON.stringify({
+                accion:
+                  'finalizarPostparada',
+
+                idServicio:
+                  ID_SERVICIO,
+
+                materiales,
+
+                responsablePostparada:
+                  validacion.responsable,
+
+                observacionPostparada:
+                  validacion.observacion,
+
+                usuario:
+                  validacion.responsable
+              })
+            }
+          );
+
+        if (!respuesta.ok) {
+          throw new Error(
+            `Error de conexión (${respuesta.status}).`
+          );
+        }
+
+        const datos =
+          await respuesta.json();
+
+        if (!datos.ok) {
+          throw new Error(
+            datos.mensaje ||
+            'No se pudo finalizar la Postparada.'
+          );
+        }
+
+        servicioActual.estado =
+          datos.estado ||
+          'CERRADO';
+
+        servicioActual.responsablePostparada =
+          validacion.responsable;
+
+        postparadaRegistrada = true;
+
+        cerrarConfirmacion();
+        mostrarDatosServicio();
+        aplicarBloqueoSegunEstado();
+
+        mostrarMensaje(
+          datos.mensaje ||
+          'Postparada finalizada correctamente.',
+          'exito'
+        );
+
+      } catch (error) {
+        mostrarMensaje(
+          error.message ||
+          'Ocurrió un error al finalizar la Postparada.',
+          'error'
+        );
+
+      } finally {
+        guardandoPostparada = false;
+        boton.disabled = false;
+        boton.textContent =
+          'Confirmar y cerrar';
+      }
+    }
+
+
+    function aplicarBloqueoSegunEstado() {
+      const estado =
+        normalizar(
+          servicioActual.estado
+        );
+
+      const editable = [
+        'andamio operativo',
+        'en desmontaje'
+      ].includes(estado);
+
+      if (
+        postparadaRegistrada ||
+        estado === 'cerrado' ||
+        !editable
+      ) {
+        document
+          .querySelectorAll(
+            '#contenidoPrincipal input, #contenidoPrincipal textarea'
+          )
+          .forEach(elemento => {
+            elemento.disabled = true;
+          });
+
+        document.getElementById(
+          'btnFinalizar'
+        ).disabled = true;
+
+        document.getElementById(
+          'avisoLectura'
+        ).classList.remove('oculto');
+      }
+    }
+
+
+    function volverDetalle() {
+      window.location.href =
+        `detalle-servicio.html?id=${
+          encodeURIComponent(
+            ID_SERVICIO
+          )
+        }`;
+    }
+
+
+    function mostrarErrorInicial(mensaje) {
+      document.getElementById(
+        'contenidoCargando'
+      ).innerHTML = `
+        <div class="error-general">
+          <strong>No se pudo cargar el módulo.</strong>
+          <p>${escaparHtml(mensaje)}</p>
+
+          <button
+            type="button"
+            class="btn btn-secundario"
+            onclick="volverDetalle()"
+          >
+            Volver
+          </button>
+        </div>
+      `;
+    }
+
+
+    function mostrarMensaje(
+      texto,
+      tipo = ''
+    ) {
+      const mensaje =
+        document.getElementById(
+          'mensaje'
+        );
+
+      mensaje.textContent = texto;
+      mensaje.className =
+        `mensaje ${tipo}`.trim();
+
+      mensaje.classList.remove(
+        'oculto'
+      );
+
+      clearTimeout(
+        mostrarMensaje.temporizador
+      );
+
+      mostrarMensaje.temporizador =
+        setTimeout(
+          () => {
+            mensaje.classList.add(
+              'oculto'
+            );
+          },
+          4500
+        );
+    }
+
+
+    function escribirTexto(
+      id,
+      valor
+    ) {
+      const elemento =
+        document.getElementById(id);
+
+      if (!elemento) {
+        return;
+      }
+
+      elemento.textContent =
+        valor === null ||
+        valor === undefined ||
+        valor === ''
+          ? '—'
+          : valor;
+    }
+
+
+    function normalizar(valor) {
+      return (valor || '')
+        .toString()
+        .normalize('NFD')
+        .replace(
+          /[\u0300-\u036f]/g,
+          ''
+        )
+        .toLowerCase()
+        .trim();
+    }
+
+
+    function formatearNumero(valor) {
+      const numero =
+        Number(valor) || 0;
+
+      return Number.isInteger(numero)
+        ? String(numero)
+        : numero
+            .toFixed(2)
+            .replace(/0+$/, '')
+            .replace(/\.$/, '');
+    }
+
+
+    function escaparHtml(valor) {
+      return (valor || '')
+        .toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+
+    function escaparAtributo(valor) {
+      return escaparHtml(valor);
+    }
+  </script>
+
+</body>
+</html>
 
