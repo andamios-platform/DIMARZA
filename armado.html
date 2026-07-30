@@ -688,13 +688,12 @@
       0
     </span>
   </div>
-
-  <p class="evidencias-ayuda">
-    Selecciona una imagen, toma una fotografía con el celular
-    o arrastra el archivo sobre la tarjeta. Selecciona una imagen, toma una fotografía con el celular
-o arrastra el archivo sobre la tarjeta. Las imágenes serán
-comprimidas automáticamente antes de guardarse.
-  </p>
+    
+    <p class="evidencias-ayuda">
+      Selecciona una imagen, toma una fotografía con el celular
+      o arrastra el archivo sobre la tarjeta. Las imágenes serán
+      comprimidas automáticamente antes de guardarse.
+    </p>
 
   <div class="evidencias-grid">
 
@@ -1354,13 +1353,36 @@ const tiposFotografiaArmado = {
 };
 document.addEventListener('DOMContentLoaded',iniciarModulo);
 
-async function iniciarModulo(){
-  if(!ID_SERVICIO){mostrarErrorInicial('No se recibió el ID del servicio.');return}
-  try{
-    await Promise.all([cargarArmado(),cargarCatalogo()]);
-    document.getElementById('contenidoCargando').classList.add('oculto');
-    document.getElementById('contenidoPrincipal').classList.remove('oculto');
-  }catch(error){mostrarErrorInicial(error.message)}
+async function iniciarModulo() {
+  if (!ID_SERVICIO) {
+    mostrarErrorInicial(
+      'No se recibió el ID del servicio.'
+    );
+    return;
+  }
+
+  try {
+    await Promise.all([
+      cargarArmado(),
+      cargarCatalogo()
+    ]);
+
+    document
+      .getElementById('contenidoCargando')
+      .classList.add('oculto');
+
+    document
+      .getElementById('contenidoPrincipal')
+      .classList.remove('oculto');
+
+    // Carga las fotografías guardadas del servicio
+    await cargarFotografiasRegistradas();
+
+  } catch (error) {
+    mostrarErrorInicial(
+      error.message
+    );
+  }
 }
 
 async function cargarArmado(){
@@ -2645,6 +2667,501 @@ function normalizar(valor){return(valor||'').toString().normalize('NFD').replace
 function formatearNumero(valor){const n=Number(valor)||0;return Number.isInteger(n)?String(n):n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')}
 function formatearDiferencia(valor){const n=Number(valor)||0;return n===0?'0':n>0?`+${formatearNumero(n)}`:formatearNumero(n)}
 function escaparHtml(valor){return(valor||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+
+/**
+ * ======================================================
+ * CARGA DE FOTOGRAFÍAS REGISTRADAS
+ * ======================================================
+ */
+
+async function cargarFotografiasRegistradas() {
+  try {
+    const respuesta = await fetch(
+      `${API_URL}?accion=obtenerFotografiasArmado&idServicio=${
+        encodeURIComponent(ID_SERVICIO)
+      }&t=${Date.now()}`
+    );
+
+    const resultado = await respuesta.json();
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudieron cargar las fotografías.'
+      );
+    }
+
+    const fotografias =
+      Array.isArray(resultado.fotografias)
+        ? resultado.fotografias
+        : [];
+
+    if (fotografias.length === 0) {
+      return;
+    }
+
+    fotografias.forEach(fotografia => {
+      mostrarFotografiaRegistrada(fotografia);
+    });
+
+    actualizarContadorFotografiasRegistradas(
+      fotografias.length
+    );
+
+  } catch (error) {
+    console.error(
+      'Error al cargar fotografías:',
+      error
+    );
+
+    /*
+     * No bloqueamos la carga completa del módulo
+     * si solamente fallan las fotografías.
+     */
+  }
+}
+
+
+function mostrarFotografiaRegistrada(fotografia) {
+  const clave =
+    obtenerClaveEvidenciaPorTipo(
+      fotografia.tipoFoto
+    );
+
+  if (!clave) {
+    return;
+  }
+
+  const configuracion =
+    obtenerConfiguracionEvidencia(clave);
+
+  if (!configuracion) {
+    return;
+  }
+
+  const card =
+    document.getElementById(
+      configuracion.cardId
+    );
+
+  const imagen =
+    document.getElementById(
+      configuracion.previewId
+    );
+
+  const nombre =
+    document.getElementById(
+      configuracion.nombreId
+    );
+
+  const tamano =
+    document.getElementById(
+      configuracion.tamanoId
+    );
+
+  if (!card || !imagen) {
+    return;
+  }
+
+  const enlaceMiniatura =
+    obtenerEnlaceMiniaturaDrive(
+      fotografia.idArchivoDrive,
+      fotografia.enlaceFoto
+    );
+
+  imagen.src = enlaceMiniatura;
+
+  imagen.onerror = function() {
+    /*
+     * Si Drive no permite mostrar la miniatura
+     * directamente, conservamos la tarjeta y
+     * el botón para abrir la fotografía.
+     */
+    this.onerror = null;
+    this.src =
+      crearImagenErrorFotografia();
+  };
+
+  imagen.onclick = function() {
+    abrirVisorFotografia(fotografia);
+  };
+
+  if (nombre) {
+    nombre.textContent =
+      fotografia.tipoFoto ||
+      'Fotografía registrada';
+  }
+
+  if (tamano) {
+    tamano.textContent =
+      fotografia.fechaHora
+        ? `Registrada: ${fotografia.fechaHora}`
+        : 'Fotografía registrada';
+  }
+
+  card.classList.add(
+    'con-imagen',
+    'registrada'
+  );
+
+  card.dataset.fotografiaRegistrada =
+    'true';
+
+  const preview =
+    card.querySelector(
+      '.evidencia-preview'
+    );
+
+  if (!preview) {
+    return;
+  }
+
+  let etiqueta =
+    preview.querySelector(
+      '.evidencia-registrada-etiqueta'
+    );
+
+  if (!etiqueta) {
+    etiqueta =
+      document.createElement('span');
+
+    etiqueta.className =
+      'evidencia-registrada-etiqueta';
+
+    etiqueta.textContent =
+      '✓ Registrada';
+
+    preview.appendChild(etiqueta);
+  }
+
+  let botonVer =
+    preview.querySelector(
+      '.evidencia-boton-ver'
+    );
+
+  if (!botonVer) {
+    botonVer =
+      document.createElement('button');
+
+    botonVer.type = 'button';
+
+    botonVer.className =
+      'evidencia-boton-ver';
+
+    botonVer.textContent =
+      '🔍 Ver fotografía';
+
+    botonVer.addEventListener(
+      'click',
+      function(event) {
+        event.stopPropagation();
+        abrirVisorFotografia(fotografia);
+      }
+    );
+
+    const informacion =
+      preview.querySelector(
+        '.evidencia-info'
+      );
+
+    if (informacion) {
+      informacion.appendChild(botonVer);
+    }
+  }
+}
+
+
+function obtenerClaveEvidenciaPorTipo(tipoFoto) {
+  const tipo = normalizarTextoEvidencia(
+    tipoFoto
+  );
+
+  const equivalencias = {
+    'VISTA GENERAL': 'vistaGeneral',
+    'LADO IZQUIERDO': 'ladoIzquierdo',
+    'LADO DERECHO': 'ladoDerecho',
+    'ACCESO': 'acceso',
+    'ANCLAJES': 'anclajes',
+    'OTRA': 'otra',
+    'OTRA EVIDENCIA': 'otra'
+  };
+
+  return equivalencias[tipo] || '';
+}
+
+
+function normalizarTextoEvidencia(valor) {
+  return String(valor || '')
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    );
+}
+
+
+function obtenerConfiguracionEvidencia(clave) {
+  const configuraciones = {
+    vistaGeneral: {
+      cardId: 'cardVistaGeneral',
+      previewId: 'previewVistaGeneral',
+      nombreId: 'nombreVistaGeneral',
+      tamanoId: 'tamanoVistaGeneral'
+    },
+
+    ladoIzquierdo: {
+      cardId: 'cardLadoIzquierdo',
+      previewId: 'previewLadoIzquierdo',
+      nombreId: 'nombreLadoIzquierdo',
+      tamanoId: 'tamanoLadoIzquierdo'
+    },
+
+    ladoDerecho: {
+      cardId: 'cardLadoDerecho',
+      previewId: 'previewLadoDerecho',
+      nombreId: 'nombreLadoDerecho',
+      tamanoId: 'tamanoLadoDerecho'
+    },
+
+    acceso: {
+      cardId: 'cardAcceso',
+      previewId: 'previewAcceso',
+      nombreId: 'nombreAcceso',
+      tamanoId: 'tamanoAcceso'
+    },
+
+    anclajes: {
+      cardId: 'cardAnclajes',
+      previewId: 'previewAnclajes',
+      nombreId: 'nombreAnclajes',
+      tamanoId: 'tamanoAnclajes'
+    },
+
+    otra: {
+      cardId: 'cardOtra',
+      previewId: 'previewOtra',
+      nombreId: 'nombreOtra',
+      tamanoId: 'tamanoOtra'
+    }
+  };
+
+  return configuraciones[clave] || null;
+}
+
+
+function obtenerEnlaceMiniaturaDrive(
+  idArchivoDrive,
+  enlaceGuardado
+) {
+  const idArchivo =
+    String(idArchivoDrive || '').trim();
+
+  if (idArchivo) {
+    return (
+      'https://drive.google.com/thumbnail?' +
+      `id=${encodeURIComponent(idArchivo)}` +
+      '&sz=w1200'
+    );
+  }
+
+  return enlaceGuardado || '';
+}
+
+
+function obtenerEnlaceAbrirDrive(fotografia) {
+  const idArchivo =
+    String(
+      fotografia.idArchivoDrive || ''
+    ).trim();
+
+  if (idArchivo) {
+    return (
+      'https://drive.google.com/file/d/' +
+      encodeURIComponent(idArchivo) +
+      '/view'
+    );
+  }
+
+  return fotografia.enlaceFoto || '#';
+}
+
+
+function abrirVisorFotografia(fotografia) {
+  const modal =
+    document.getElementById(
+      'modalVisorFotografia'
+    );
+
+  const imagen =
+    document.getElementById(
+      'visorImagen'
+    );
+
+  const enlaceDrive =
+    obtenerEnlaceAbrirDrive(
+      fotografia
+    );
+
+  document.getElementById(
+    'visorTitulo'
+  ).textContent =
+    fotografia.tipoFoto ||
+    'Evidencia fotográfica';
+
+  document.getElementById(
+    'visorDescripcion'
+  ).textContent =
+    fotografia.descripcion ||
+    'Sin observación registrada.';
+
+  document.getElementById(
+    'visorFecha'
+  ).textContent =
+    fotografia.fechaHora
+      ? `Fecha: ${fotografia.fechaHora}`
+      : '';
+
+  document.getElementById(
+    'visorUsuario'
+  ).textContent =
+    fotografia.subidoPor
+      ? `Registrado por: ${fotografia.subidoPor}`
+      : '';
+
+  imagen.src =
+    obtenerEnlaceMiniaturaDrive(
+      fotografia.idArchivoDrive,
+      fotografia.enlaceFoto
+    );
+
+  imagen.onerror = function() {
+    this.onerror = null;
+    this.src =
+      crearImagenErrorFotografia();
+  };
+
+  document.getElementById(
+    'visorAbrirDrive'
+  ).href = enlaceDrive;
+
+  modal.classList.remove('oculto');
+
+  document.body.style.overflow =
+    'hidden';
+}
+
+
+function cerrarVisorFotografia(event) {
+  if (
+    event &&
+    event.target !== event.currentTarget
+  ) {
+    return;
+  }
+
+  const modal =
+    document.getElementById(
+      'modalVisorFotografia'
+    );
+
+  if (!modal) {
+    return;
+  }
+
+  modal.classList.add('oculto');
+
+  document.getElementById(
+    'visorImagen'
+  ).src = '';
+
+  document.body.style.overflow = '';
+}
+
+
+function actualizarContadorFotografiasRegistradas(
+  cantidad
+) {
+  const contador =
+    document.getElementById(
+      'contadorEvidencias'
+    );
+
+  const resumen =
+    document.getElementById(
+      'resumenCantidadEvidencias'
+    );
+
+  const indicador =
+    document.getElementById(
+      'indicadorEvidencias'
+    );
+
+  if (contador) {
+    contador.textContent = cantidad;
+  }
+
+  if (resumen) {
+    resumen.textContent =
+      `${cantidad} registrada${
+        cantidad === 1 ? '' : 's'
+      }`;
+  }
+
+  if (indicador) {
+    indicador.textContent =
+      '✓ Evidencias registradas';
+
+    indicador.classList.remove(
+      'oculto'
+    );
+  }
+}
+
+
+function crearImagenErrorFotografia() {
+  const svg = `
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="900"
+      height="600"
+      viewBox="0 0 900 600"
+    >
+      <rect
+        width="900"
+        height="600"
+        fill="#eaf3fa"
+      />
+
+      <text
+        x="450"
+        y="270"
+        text-anchor="middle"
+        font-size="80"
+      >
+        📷
+      </text>
+
+      <text
+        x="450"
+        y="360"
+        text-anchor="middle"
+        font-family="Arial"
+        font-size="28"
+        fill="#163f63"
+      >
+        Abrir fotografía en Drive
+      </text>
+    </svg>
+  `;
+
+  return (
+    'data:image/svg+xml;charset=UTF-8,' +
+    encodeURIComponent(svg)
+  );
+}
+
 </script>
 </body>
 </html>
