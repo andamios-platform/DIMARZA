@@ -1222,18 +1222,21 @@
     }
 
 
-    function cerrarConfirmacion() {
-      if (guardandoPostparada) {
-        return;
+      function cerrarConfirmacion(forzar = false) {
+        if (
+          guardandoPostparada &&
+          !forzar
+        ) {
+          return;
+        }
+      
+        document
+          .getElementById(
+            'modalConfirmacion'
+          )
+          .classList
+          .add('oculto');
       }
-
-      document
-        .getElementById(
-          'modalConfirmacion'
-        )
-        .classList
-        .add('oculto');
-    }
 
 
     function cerrarModalDesdeFondo(evento) {
@@ -1368,7 +1371,7 @@
 
         postparadaRegistrada = true;
 
-        cerrarConfirmacion();
+        cerrarConfirmacion(true);
         mostrarDatosServicio();
         aplicarBloqueoSegunEstado();
 
