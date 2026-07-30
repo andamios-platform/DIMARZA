@@ -425,6 +425,149 @@
       
 
     }
+
+    /* ======================================================
+   FOTOGRAFÍAS YA REGISTRADAS
+   ====================================================== */
+
+.evidencia-card.registrada{
+  border-style:solid;
+  border-color:#79b99d;
+  background:#ffffff;
+}
+
+.evidencia-card.registrada .evidencia-selector{
+  display:none;
+}
+
+.evidencia-card.registrada .evidencia-preview{
+  display:block;
+}
+
+.evidencia-card.registrada .evidencia-preview img{
+  cursor:zoom-in;
+}
+
+.evidencia-card.registrada .evidencia-acciones{
+  display:none;
+}
+
+.evidencia-registrada-etiqueta{
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:3;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:7px 10px;
+  color:#ffffff;
+  background:rgba(31,143,95,.94);
+  border-radius:999px;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  font-size:11px;
+  font-weight:bold;
+}
+
+.evidencia-boton-ver{
+  width:100%;
+  margin-top:9px;
+  padding:9px 12px;
+  color:var(--azul);
+  background:var(--azul-claro);
+  border:1px solid #bfd7e8;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.evidencia-boton-ver:hover{
+  background:#dcecf7;
+}
+
+.visor-fotografia{
+  width:min(1000px,100%);
+}
+
+.visor-cabecera{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.visor-cabecera h3{
+  margin-bottom:4px;
+}
+
+.visor-cabecera p{
+  margin:0;
+}
+
+.visor-cerrar{
+  width:40px;
+  height:40px;
+  flex:0 0 40px;
+  display:grid;
+  place-items:center;
+  color:#ffffff;
+  background:var(--rojo);
+  border:0;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+.visor-imagen-contenedor{
+  min-height:280px;
+  margin-top:16px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:#17232c;
+  border-radius:12px;
+}
+
+.visor-imagen-contenedor img{
+  width:100%;
+  max-height:65vh;
+  display:block;
+  object-fit:contain;
+}
+
+.visor-datos{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  margin-top:12px;
+  padding:11px 13px;
+  color:var(--gris);
+  background:var(--gris-claro);
+  border:1px solid var(--borde);
+  border-radius:9px;
+  font-size:12px;
+}
+
+.visor-fotografia a.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+@media(max-width:650px){
+  .visor-datos{
+    flex-direction:column;
+    gap:5px;
+  }
+
+  .visor-imagen-contenedor{
+    min-height:220px;
+  }
+
+  .visor-fotografia a.btn{
+    width:100%;
+  }
+}
   </style>
 </head>
 <body>
@@ -998,6 +1141,67 @@ comprimidas automáticamente antes de guardarse.
   </div>
 </main>
 
+
+<!-- VISOR DE FOTOGRAFÍAS GUARDADAS -->
+<div
+  id="modalVisorFotografia"
+  class="modal-fondo oculto"
+  onclick="cerrarVisorFotografia(event)"
+>
+  <div
+    class="modal visor-fotografia"
+    onclick="event.stopPropagation()"
+  >
+    <div class="visor-cabecera">
+      <div>
+        <h3 id="visorTitulo">Evidencia fotográfica</h3>
+        <p id="visorDescripcion"></p>
+      </div>
+
+      <button
+        type="button"
+        class="visor-cerrar"
+        onclick="cerrarVisorFotografia()"
+      >
+        ✕
+      </button>
+    </div>
+
+    <div class="visor-imagen-contenedor">
+      <img
+        id="visorImagen"
+        src=""
+        alt="Evidencia fotográfica"
+      >
+    </div>
+
+    <div class="visor-datos">
+      <span id="visorFecha"></span>
+      <span id="visorUsuario"></span>
+    </div>
+
+    <div class="modal-acciones">
+      <button
+        type="button"
+        class="btn btn-secundario"
+        onclick="cerrarVisorFotografia()"
+      >
+        Cerrar
+      </button>
+
+      <a
+        id="visorAbrirDrive"
+        class="btn btn-primario"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Abrir en Drive
+      </a>
+    </div>
+  </div>
+</div>
+  
 <div id="mensaje" class="mensaje oculto"></div>
 
 <div id="modalFinalizar" class="modal-fondo oculto">
