@@ -2212,15 +2212,23 @@
 
         postparadaRegistrada = true;
 
-        cerrarConfirmacion();
-        mostrarDatosServicio();
-        aplicarBloqueoSegunEstado();
-
+        document
+          .getElementById(
+            'modalConfirmacion'
+          )
+          .classList
+          .add('oculto');
+        
         mostrarMensaje(
           datos.mensaje ||
           'Postparada finalizada correctamente.',
           'exito'
         );
+        
+        setTimeout(() => {
+          window.location.href =
+            'gestion-andamios.html';
+        }, 1200);
 
       } catch (error) {
         mostrarMensaje(
