@@ -877,17 +877,42 @@
     }
 
 
-    function abrirModulo(archivo) {
-      if (!servicioActual || !servicioActual.idServicio) {
-        alert('No se pudo identificar el servicio.');
-        return;
-      }
+function abrirModulo(archivo) {
+  if (!servicioActual || !servicioActual.idServicio) {
+    alert('No se pudo identificar el servicio.');
+    return;
+  }
 
-      window.location.href =
-        `${archivo}?id=${
-          encodeURIComponent(servicioActual.idServicio)
-        }`;
-    }
+  const parametros =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const origen =
+    parametros.get('origen');
+
+  const tag =
+    parametros.get('tag');
+
+  let url =
+    `${archivo}?id=${
+      encodeURIComponent(
+        servicioActual.idServicio
+      )
+    }`;
+
+  if (
+    origen === 'historial' &&
+    tag
+  ) {
+    url +=
+      `&origen=historial&tag=${
+        encodeURIComponent(tag)
+      }`;
+  }
+
+  window.location.href = url;
+}
 
 
     function abrirHistorial() {
@@ -903,9 +928,33 @@
     }
 
 
-    function volverDashboard() {
-      window.location.href = 'gestion-andamios.html';
-    }
+function volverDashboard() {
+  const parametros =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const origen =
+    parametros.get('origen');
+
+  const tag =
+    parametros.get('tag');
+
+  if (
+    origen === 'historial' &&
+    tag
+  ) {
+    window.location.href =
+      `historial.html?tag=${
+        encodeURIComponent(tag)
+      }`;
+
+    return;
+  }
+
+  window.location.href =
+    'gestion-andamios.html';
+}
 
 
     function mostrarError(mensaje) {
