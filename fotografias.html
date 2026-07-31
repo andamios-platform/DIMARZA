@@ -1597,12 +1597,37 @@ function renderizarGalerias() {
     }
 
 
-    function volverDetalle() {
-      window.location.href =
-        `detalle-servicio.html?id=${
-          encodeURIComponent(idServicioActual)
-        }`;
-    }
+function volverDetalle() {
+  const parametros =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const origen =
+    parametros.get('origen');
+
+  const tag =
+    parametros.get('tag');
+
+  if (
+    origen === 'historial' &&
+    tag
+  ) {
+    window.location.href =
+      `historial.html?tag=${
+        encodeURIComponent(tag)
+      }`;
+
+    return;
+  }
+
+  window.location.href =
+    `detalle-servicio.html?id=${
+      encodeURIComponent(
+        idServicioActual
+      )
+    }`;
+}
 
 
     function mostrarCarga() {
