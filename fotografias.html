@@ -1,1 +1,1702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Fotografías del Armado | DIMARZA</title>
+
+  <style>
+    :root {
+      --azul: #123b5d;
+      --azul-claro: #1f5f8b;
+      --morado: #6f42c1;
+      --morado-oscuro: #4a148c;
+      --naranja: #f28c28;
+      --fondo: #f3f6f9;
+      --blanco: #ffffff;
+      --texto: #24313d;
+      --gris: #6d7a86;
+      --borde: #dce4ea;
+      --rojo: #dc3545;
+      --verde: #198754;
+      --sombra: 0 8px 24px rgba(18, 59, 93, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    body.modal-abierto {
+      overflow: hidden;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    .encabezado {
+      background:
+        linear-gradient(
+          135deg,
+          rgba(74, 20, 140, 0.98),
+          rgba(123, 31, 162, 0.94)
+        );
+      color: white;
+      padding: 20px;
+      box-shadow: var(--sombra);
+    }
+
+    .encabezado-contenido {
+      width: min(1200px, 100%);
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .marca h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .marca p {
+      margin: 5px 0 0;
+      opacity: 0.88;
+      font-size: 13px;
+    }
+
+    .acciones-encabezado {
+      display: flex;
+      gap: 10px;
+    }
+
+    .boton-encabezado {
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 10px;
+      padding: 11px 17px;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .boton-encabezado:hover {
+      background: rgba(255,255,255,0.22);
+    }
+
+    .contenedor {
+      width: min(1200px, calc(100% - 30px));
+      margin: 25px auto 50px;
+    }
+
+    .cargando,
+    .error,
+    .sin-fotografias {
+      background: white;
+      border-radius: 15px;
+      padding: 40px 20px;
+      text-align: center;
+      box-shadow: var(--sombra);
+      border: 1px dashed var(--borde);
+      color: var(--gris);
+    }
+
+    .error {
+      color: var(--rojo);
+      border-color: rgba(220, 53, 69, 0.35);
+    }
+
+    .cabecera-servicio {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: var(--sombra);
+      border: 1px solid var(--borde);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cabecera-servicio::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 6px;
+      height: 100%;
+      background: var(--morado);
+    }
+
+    .cabecera-superior {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .titulo-tag {
+      margin: 0;
+      color: var(--azul);
+      font-size: 34px;
+      font-weight: 900;
+    }
+
+    .descripcion-servicio {
+      margin: 7px 0 0;
+      color: var(--texto);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .id-servicio {
+      margin-top: 6px;
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .etiqueta-armado {
+      background: #f1e6f8;
+      color: var(--morado-oscuro);
+      border: 1px solid #d7bce8;
+      padding: 9px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .resumen-item {
+      padding: 13px;
+      border-radius: 11px;
+      background: #f7f9fb;
+      border: 1px solid var(--borde);
+    }
+
+    .resumen-label {
+      color: var(--gris);
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    .resumen-valor {
+      color: var(--azul);
+      font-size: 14px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .barra-herramientas {
+      background: white;
+      border-radius: 16px;
+      padding: 17px;
+      box-shadow: var(--sombra);
+      border: 1px solid var(--borde);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .contador {
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    .filtro-contenedor {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filtro-contenedor label {
+      color: var(--gris);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .filtro-contenedor select {
+      min-width: 230px;
+      border: 1px solid var(--borde);
+      border-radius: 9px;
+      padding: 10px 12px;
+      background: white;
+      color: var(--texto);
+      outline: none;
+    }
+
+    .filtro-contenedor select:focus {
+      border-color: var(--morado);
+      box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.12);
+    }
+
+    .grupo-fotografias {
+      margin-bottom: 25px;
+    }
+
+    .titulo-grupo {
+      margin: 0 0 14px;
+      color: var(--azul);
+      font-size: 19px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cantidad-grupo {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 25px;
+      height: 25px;
+      padding: 0 8px;
+      border-radius: 20px;
+      background: #eee4f5;
+      color: var(--morado-oscuro);
+      font-size: 12px;
+    }
+
+    .galeria {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 17px;
+    }
+
+    .tarjeta-foto {
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--borde);
+      box-shadow: var(--sombra);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tarjeta-foto:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(18, 59, 93, 0.16);
+    }
+
+    .foto-contenedor {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #e9edf1;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .foto-contenedor img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+
+    .foto-contenedor:hover img {
+      transform: scale(1.035);
+    }
+
+    .foto-contenedor::after {
+      content: "🔍 Ver fotografía";
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 12px;
+      color: white;
+      font-size: 13px;
+      font-weight: bold;
+      text-align: center;
+      background: linear-gradient(
+        transparent,
+        rgba(0,0,0,0.75)
+      );
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .foto-contenedor:hover::after {
+      opacity: 1;
+    }
+
+    .foto-error {
+      width: 100%;
+      height: 100%;
+      min-height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--gris);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .foto-error-icono {
+      font-size: 38px;
+    }
+
+    .contenido-foto {
+      padding: 15px;
+    }
+
+    .tipo-foto {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 15px;
+      background: #eee4f5;
+      color: var(--morado-oscuro);
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .descripcion-foto {
+      margin: 0 0 12px;
+      color: var(--texto);
+      line-height: 1.45;
+      min-height: 41px;
+      font-size: 14px;
+    }
+
+    .metadata {
+      display: grid;
+      gap: 7px;
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .metadata-linea {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    .acciones-foto {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .boton-drive {
+      flex: 1;
+      border: none;
+      border-radius: 9px;
+      padding: 10px 12px;
+      background: var(--azul);
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .boton-drive:hover {
+      background: var(--azul-claro);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(7, 12, 18, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-contenido {
+      width: min(1100px, 100%);
+      max-height: calc(100vh - 40px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+    }
+
+    .modal-imagen-contenedor {
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 500px;
+      position: relative;
+    }
+
+    .modal-imagen {
+      width: 100%;
+      height: 100%;
+      max-height: calc(100vh - 40px);
+      object-fit: contain;
+    }
+
+    .modal-info {
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .modal-tipo {
+      display: inline-block;
+      background: #eee4f5;
+      color: var(--morado-oscuro);
+      border-radius: 20px;
+      padding: 6px 11px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-bottom: 13px;
+    }
+
+    .modal-info h2 {
+      margin: 0 0 15px;
+      color: var(--azul);
+      font-size: 20px;
+    }
+
+    .modal-descripcion {
+      color: var(--texto);
+      line-height: 1.55;
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+    }
+
+    .modal-dato {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .modal-dato-label {
+      color: var(--gris);
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .modal-dato-valor {
+      color: var(--texto);
+      font-size: 13px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .modal-acciones {
+      margin-top: 20px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .boton-modal {
+      border: none;
+      border-radius: 9px;
+      padding: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .boton-abrir {
+      background: var(--azul);
+      color: white;
+    }
+
+    .boton-cerrar-secundario {
+      background: #e9edf1;
+      color: var(--texto);
+    }
+
+    .boton-cerrar-modal {
+      position: fixed;
+      right: 25px;
+      top: 20px;
+      width: 43px;
+      height: 43px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(0,0,0,0.45);
+      color: white;
+      font-size: 25px;
+      cursor: pointer;
+      z-index: 10001;
+    }
+
+    .boton-cerrar-modal:hover {
+      background: rgba(220, 53, 69, 0.85);
+    }
+
+    .navegacion-modal {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 46px;
+      height: 60px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.18);
+      color: white;
+      font-size: 30px;
+      cursor: pointer;
+      z-index: 10001;
+    }
+
+    .navegacion-modal:hover {
+      background: rgba(255,255,255,0.30);
+    }
+
+    .anterior {
+      left: 18px;
+    }
+
+    .siguiente {
+      right: 18px;
+    }
+
+    @media (max-width: 950px) {
+      .resumen {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .galeria {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .modal-contenido {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+      }
+
+      .modal-imagen-contenedor {
+        min-height: 400px;
+      }
+
+      .modal-imagen {
+        max-height: 60vh;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .encabezado-contenido {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .acciones-encabezado,
+      .boton-encabezado {
+        width: 100%;
+      }
+
+      .cabecera-superior {
+        flex-direction: column;
+      }
+
+      .etiqueta-armado {
+        width: 100%;
+        text-align: center;
+      }
+
+      .titulo-tag {
+        font-size: 29px;
+      }
+
+      .resumen {
+        grid-template-columns: 1fr;
+      }
+
+      .barra-herramientas {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .filtro-contenedor {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .filtro-contenedor select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .galeria {
+        grid-template-columns: 1fr;
+      }
+
+      .modal {
+        padding: 0;
+      }
+
+      .modal-contenido {
+        border-radius: 0;
+        max-height: 100vh;
+        height: 100vh;
+      }
+
+      .modal-imagen-contenedor {
+        min-height: 45vh;
+      }
+
+      .boton-cerrar-modal {
+        right: 10px;
+        top: 10px;
+      }
+
+      .navegacion-modal {
+        width: 38px;
+        height: 52px;
+      }
+
+      .anterior {
+        left: 7px;
+      }
+
+      .siguiente {
+        right: 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="encabezado">
+    <div class="encabezado-contenido">
+
+      <div class="marca">
+        <h1>📷 Fotografías del Armado</h1>
+        <p>Galería de evidencias del andamio operativo</p>
+      </div>
+
+      <div class="acciones-encabezado">
+        <button
+          type="button"
+          class="boton-encabezado"
+          onclick="volverDetalle()"
+        >
+          ← Volver al servicio
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <div id="estadoCarga" class="cargando">
+      Cargando fotografías del armado...
+    </div>
+
+    <div id="mensajeError" class="error oculto"></div>
+
+    <div id="contenidoPrincipal" class="oculto">
+
+      <section class="cabecera-servicio">
+
+        <div class="cabecera-superior">
+
+          <div>
+            <h2 id="tagServicio" class="titulo-tag">
+              TAG
+            </h2>
+
+            <p
+              id="descripcionServicio"
+              class="descripcion-servicio"
+            >
+              Descripción del servicio
+            </p>
+
+            <div id="idServicioTexto" class="id-servicio">
+              ID interno
+            </div>
+          </div>
+
+          <span class="etiqueta-armado">
+            FOTOGRAFÍAS DE ARMADO
+          </span>
+
+        </div>
+
+        <div class="resumen">
+
+          <article class="resumen-item">
+            <div class="resumen-label">OT</div>
+            <div id="otServicio" class="resumen-valor">-</div>
+          </article>
+
+          <article class="resumen-item">
+            <div class="resumen-label">Faena</div>
+            <div id="faenaServicio" class="resumen-valor">-</div>
+          </article>
+
+          <article class="resumen-item">
+            <div class="resumen-label">Área</div>
+            <div id="areaServicio" class="resumen-valor">-</div>
+          </article>
+
+          <article class="resumen-item">
+            <div class="resumen-label">Estado</div>
+            <div id="estadoServicio" class="resumen-valor">-</div>
+          </article>
+
+        </div>
+
+      </section>
+
+      <section class="barra-herramientas">
+
+        <div id="contadorFotografias" class="contador">
+          0 fotografías
+        </div>
+
+        <div class="filtro-contenedor">
+          <label for="filtroTipo">
+            Filtrar por tipo:
+          </label>
+
+          <select id="filtroTipo">
+            <option value="">Todas las fotografías</option>
+          </select>
+        </div>
+
+      </section>
+
+      <div id="sinFotografias" class="sin-fotografias oculto">
+        <div style="font-size: 46px; margin-bottom: 12px;">
+          📷
+        </div>
+
+        <strong>
+          Este servicio todavía no tiene fotografías de Armado.
+        </strong>
+
+        <p style="margin: 9px 0 0;">
+          Las fotografías aparecerán aquí cuando hayan sido registradas
+          desde el módulo de Armado.
+        </p>
+      </div>
+
+      <div id="contenedorGalerias"></div>
+
+    </div>
+
+  </main>
+
+  <div id="modalFotografia" class="modal oculto">
+
+    <button
+      type="button"
+      class="boton-cerrar-modal"
+      onclick="cerrarVisor()"
+      aria-label="Cerrar"
+    >
+      ×
+    </button>
+
+    <button
+      id="botonAnterior"
+      type="button"
+      class="navegacion-modal anterior"
+      onclick="mostrarAnterior()"
+      aria-label="Fotografía anterior"
+    >
+      ‹
+    </button>
+
+    <button
+      id="botonSiguiente"
+      type="button"
+      class="navegacion-modal siguiente"
+      onclick="mostrarSiguiente()"
+      aria-label="Fotografía siguiente"
+    >
+      ›
+    </button>
+
+    <div class="modal-contenido">
+
+      <div class="modal-imagen-contenedor">
+        <img
+          id="imagenModal"
+          class="modal-imagen"
+          alt="Fotografía ampliada"
+        >
+      </div>
+
+      <aside class="modal-info">
+
+        <span id="tipoModal" class="modal-tipo">
+          FOTOGRAFÍA
+        </span>
+
+        <h2 id="tituloModal">
+          Evidencia del Armado
+        </h2>
+
+        <div
+          id="descripcionModal"
+          class="modal-descripcion"
+        >
+          Sin descripción.
+        </div>
+
+        <div class="modal-dato">
+          <div class="modal-dato-label">Fecha y hora</div>
+          <div id="fechaModal" class="modal-dato-valor">-</div>
+        </div>
+
+        <div class="modal-dato">
+          <div class="modal-dato-label">Registrado por</div>
+          <div id="usuarioModal" class="modal-dato-valor">-</div>
+        </div>
+
+        <div class="modal-dato">
+          <div class="modal-dato-label">Nombre del archivo</div>
+          <div id="nombreModal" class="modal-dato-valor">-</div>
+        </div>
+
+        <div class="modal-acciones">
+
+          <button
+            id="botonAbrirDrive"
+            type="button"
+            class="boton-modal boton-abrir"
+          >
+            Abrir archivo en Drive
+          </button>
+
+          <button
+            type="button"
+            class="boton-modal boton-cerrar-secundario"
+            onclick="cerrarVisor()"
+          >
+            Cerrar
+          </button>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </div>
+
+  <script>
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+    let idServicioActual = '';
+    let servicioActual = null;
+    let fotografias = [];
+    let fotografiasVisibles = [];
+    let indiceVisor = 0;
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      iniciarPagina();
+    });
+
+
+    async function iniciarPagina() {
+      const parametros =
+        new URLSearchParams(window.location.search);
+
+      idServicioActual =
+        String(parametros.get('id') || '').trim();
+
+      if (!idServicioActual) {
+        mostrarError(
+          'No se indicó el servicio que se desea consultar.'
+        );
+        return;
+      }
+
+      document.getElementById(
+        'filtroTipo'
+      ).addEventListener('change', aplicarFiltro);
+
+      document.addEventListener('keydown', manejarTeclado);
+
+      await cargarInformacion();
+    }
+
+
+    async function cargarInformacion() {
+      try {
+        mostrarCarga();
+
+        const resultados = await Promise.all([
+          consultarServicio(),
+          consultarFotografiasArmado()
+        ]);
+
+        servicioActual = resultados[0];
+        fotografias = normalizarFotografias(resultados[1]);
+
+        mostrarInformacionServicio();
+        cargarOpcionesFiltro();
+        aplicarFiltro();
+
+        document.getElementById(
+          'estadoCarga'
+        ).classList.add('oculto');
+
+        document.getElementById(
+          'contenidoPrincipal'
+        ).classList.remove('oculto');
+
+      } catch (error) {
+        console.error(error);
+
+        mostrarError(
+          error.message ||
+          'No se pudo cargar la información.'
+        );
+      }
+    }
+
+
+    async function consultarServicio() {
+      const url =
+        `${API_URL}?accion=obtenerServicio&idServicio=${
+          encodeURIComponent(idServicioActual)
+        }&t=${Date.now()}`;
+
+      const respuesta = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow'
+      });
+
+      if (!respuesta.ok) {
+        throw new Error(
+          `Error HTTP ${respuesta.status} al consultar el servicio.`
+        );
+      }
+
+      const resultado = await respuesta.json();
+
+      if (!resultado.ok || !resultado.servicio) {
+        throw new Error(
+          resultado.mensaje ||
+          'No se encontró la información del servicio.'
+        );
+      }
+
+      return resultado.servicio;
+    }
+
+
+    async function consultarFotografiasArmado() {
+      const url =
+        `${API_URL}?accion=obtenerFotografiasArmado&idServicio=${
+          encodeURIComponent(idServicioActual)
+        }&t=${Date.now()}`;
+
+      const respuesta = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow'
+      });
+
+      if (!respuesta.ok) {
+        throw new Error(
+          `Error HTTP ${respuesta.status} al consultar las fotografías.`
+        );
+      }
+
+      const resultado = await respuesta.json();
+
+      if (!resultado.ok) {
+        throw new Error(
+          resultado.mensaje ||
+          'No se pudieron consultar las fotografías de Armado.'
+        );
+      }
+
+      if (Array.isArray(resultado.fotografias)) {
+        return resultado.fotografias;
+      }
+
+      if (Array.isArray(resultado.datos)) {
+        return resultado.datos;
+      }
+
+      if (Array.isArray(resultado.lista)) {
+        return resultado.lista;
+      }
+
+      return [];
+    }
+
+
+    function normalizarFotografias(lista) {
+      return lista.map((foto, indice) => {
+        const idArchivo =
+          foto.idArchivo ||
+          foto.fileId ||
+          foto.idDrive ||
+          extraerIdDrive(
+            foto.url ||
+            foto.urlDrive ||
+            foto.enlace ||
+            foto.link
+          );
+
+        const urlDrive =
+          foto.urlDrive ||
+          foto.url ||
+          foto.enlace ||
+          foto.link ||
+          (
+            idArchivo
+              ? `https://drive.google.com/file/d/${idArchivo}/view`
+              : ''
+          );
+
+        const urlImagen =
+          foto.urlImagen ||
+          foto.imagen ||
+          foto.urlVista ||
+          foto.thumbnail ||
+          foto.miniatura ||
+          (
+            idArchivo
+              ? `https://drive.google.com/thumbnail?id=${
+                  encodeURIComponent(idArchivo)
+                }&sz=w1600`
+              : urlDrive
+          );
+
+        return {
+          indiceOriginal: indice,
+
+          idFotografia:
+            foto.idFotografia ||
+            foto.idFoto ||
+            foto.id ||
+            `FOTO-${indice + 1}`,
+
+          idArchivo: idArchivo,
+
+          tipo:
+            limpiarTipoFoto(
+              foto.tipoFotografia ||
+              foto.tipoFoto ||
+              foto.tipo ||
+              foto.categoria ||
+              'Otra Evidencia'
+            ),
+
+          descripcion:
+            foto.descripcion ||
+            foto.observacion ||
+            foto.observaciones ||
+            foto.comentario ||
+            'Sin descripción.',
+
+          fecha:
+            foto.fechaHora ||
+            foto.fechaRegistro ||
+            foto.fecha ||
+            foto.creadoEl ||
+            '-',
+
+          usuario:
+            foto.usuario ||
+            foto.registradoPor ||
+            foto.responsable ||
+            foto.creadoPor ||
+            'No registrado',
+
+          nombreArchivo:
+            foto.nombreArchivo ||
+            foto.nombre ||
+            foto.fileName ||
+            `Fotografía ${indice + 1}`,
+
+          urlDrive: urlDrive,
+          urlImagen: urlImagen
+        };
+      });
+    }
+
+
+    function mostrarInformacionServicio() {
+      asignarTexto(
+        'tagServicio',
+        servicioActual.tag || 'SIN TAG'
+      );
+
+      asignarTexto(
+        'descripcionServicio',
+        servicioActual.descripcion || 'Sin descripción'
+      );
+
+      asignarTexto(
+        'idServicioTexto',
+        `ID interno: ${
+          servicioActual.idServicio || idServicioActual
+        }`
+      );
+
+      asignarTexto(
+        'otServicio',
+        servicioActual.ot || 'No registrada'
+      );
+
+      asignarTexto(
+        'faenaServicio',
+        servicioActual.faena || 'No registrada'
+      );
+
+      asignarTexto(
+        'areaServicio',
+        servicioActual.area || 'No registrada'
+      );
+
+      asignarTexto(
+        'estadoServicio',
+        servicioActual.estado || 'Sin estado'
+      );
+
+      document.title =
+        `Fotografías ${servicioActual.tag || idServicioActual} | DIMARZA`;
+    }
+
+
+    function cargarOpcionesFiltro() {
+      const selector =
+        document.getElementById('filtroTipo');
+
+      selector.innerHTML =
+        '<option value="">Todas las fotografías</option>';
+
+      const tipos = [...new Set(
+        fotografias.map(foto => foto.tipo)
+      )].sort((a, b) =>
+        a.localeCompare(b, 'es', {
+          sensitivity: 'base',
+          numeric: true
+        })
+      );
+
+      tipos.forEach(tipo => {
+        const opcion = document.createElement('option');
+
+        opcion.value = tipo;
+        opcion.textContent = tipo;
+
+        selector.appendChild(opcion);
+      });
+    }
+
+
+    function aplicarFiltro() {
+      const tipoSeleccionado =
+        document.getElementById('filtroTipo').value;
+
+      fotografiasVisibles = tipoSeleccionado
+        ? fotografias.filter(
+            foto => foto.tipo === tipoSeleccionado
+          )
+        : [...fotografias];
+
+      actualizarContador();
+      renderizarGalerias();
+    }
+
+
+    function actualizarContador() {
+      const cantidad = fotografiasVisibles.length;
+
+      document.getElementById(
+        'contadorFotografias'
+      ).textContent =
+        `${cantidad} ${
+          cantidad === 1 ? 'fotografía' : 'fotografías'
+        }`;
+    }
+
+
+    function renderizarGalerias() {
+      const contenedor =
+        document.getElementById('contenedorGalerias');
+
+      const sinFotografias =
+        document.getElementById('sinFotografias');
+
+      contenedor.innerHTML = '';
+
+      if (!fotografiasVisibles.length) {
+        sinFotografias.classList.remove('oculto');
+        return;
+      }
+
+      sinFotografias.classList.add('oculto');
+
+      const grupos = agruparPorTipo(fotografiasVisibles);
+
+      Object.keys(grupos)
+        .sort((a, b) =>
+          a.localeCompare(b, 'es', {
+            sensitivity: 'base',
+            numeric: true
+          })
+        )
+        .forEach(tipo => {
+          const seccion =
+            document.createElement('section');
+
+          seccion.className = 'grupo-fotografias';
+
+          const titulo =
+            document.createElement('h2');
+
+          titulo.className = 'titulo-grupo';
+
+          titulo.innerHTML =
+            `📷 ${escaparHtml(tipo)}
+             <span class="cantidad-grupo">
+               ${grupos[tipo].length}
+             </span>`;
+
+          const galeria =
+            document.createElement('div');
+
+          galeria.className = 'galeria';
+
+          grupos[tipo].forEach(foto => {
+            galeria.appendChild(
+              crearTarjetaFotografia(foto)
+            );
+          });
+
+          seccion.appendChild(titulo);
+          seccion.appendChild(galeria);
+          contenedor.appendChild(seccion);
+        });
+    }
+
+
+    function agruparPorTipo(lista) {
+      return lista.reduce((resultado, foto) => {
+        const tipo = foto.tipo || 'Otra Evidencia';
+
+        if (!resultado[tipo]) {
+          resultado[tipo] = [];
+        }
+
+        resultado[tipo].push(foto);
+
+        return resultado;
+      }, {});
+    }
+
+
+    function crearTarjetaFotografia(foto) {
+      const tarjeta =
+        document.createElement('article');
+
+      tarjeta.className = 'tarjeta-foto';
+
+      const posicion =
+        fotografiasVisibles.findIndex(
+          item => item === foto
+        );
+
+      const contenedorImagen =
+        document.createElement('div');
+
+      contenedorImagen.className = 'foto-contenedor';
+
+      contenedorImagen.addEventListener('click', () => {
+        abrirVisor(posicion);
+      });
+
+      if (foto.urlImagen) {
+        const imagen = document.createElement('img');
+
+        imagen.src = foto.urlImagen;
+        imagen.alt = foto.tipo;
+        imagen.loading = 'lazy';
+
+        imagen.onerror = () => {
+          contenedorImagen.innerHTML = crearHtmlErrorFoto();
+        };
+
+        contenedorImagen.appendChild(imagen);
+
+      } else {
+        contenedorImagen.innerHTML = crearHtmlErrorFoto();
+      }
+
+      const contenido =
+        document.createElement('div');
+
+      contenido.className = 'contenido-foto';
+
+      const descripcion =
+        foto.descripcion === 'Sin descripción.'
+          ? foto.descripcion
+          : limitarTexto(foto.descripcion, 135);
+
+      contenido.innerHTML = `
+        <span class="tipo-foto">
+          ${escaparHtml(foto.tipo)}
+        </span>
+
+        <p class="descripcion-foto">
+          ${escaparHtml(descripcion)}
+        </p>
+
+        <div class="metadata">
+
+          <div class="metadata-linea">
+            <span>🕒</span>
+            <span>${escaparHtml(foto.fecha || '-')}</span>
+          </div>
+
+          <div class="metadata-linea">
+            <span>👤</span>
+            <span>${escaparHtml(foto.usuario || 'No registrado')}</span>
+          </div>
+
+        </div>
+
+        <div class="acciones-foto">
+          <button
+            type="button"
+            class="boton-drive"
+            data-accion="abrir"
+          >
+            Ver fotografía
+          </button>
+        </div>
+      `;
+
+      contenido.querySelector(
+        '[data-accion="abrir"]'
+      ).addEventListener('click', () => {
+        abrirVisor(posicion);
+      });
+
+      tarjeta.appendChild(contenedorImagen);
+      tarjeta.appendChild(contenido);
+
+      return tarjeta;
+    }
+
+
+    function abrirVisor(indice) {
+      if (
+        indice < 0 ||
+        indice >= fotografiasVisibles.length
+      ) {
+        return;
+      }
+
+      indiceVisor = indice;
+
+      mostrarFotografiaEnVisor();
+
+      document.getElementById(
+        'modalFotografia'
+      ).classList.remove('oculto');
+
+      document.body.classList.add('modal-abierto');
+    }
+
+
+    function mostrarFotografiaEnVisor() {
+      const foto =
+        fotografiasVisibles[indiceVisor];
+
+      if (!foto) {
+        return;
+      }
+
+      const imagen =
+        document.getElementById('imagenModal');
+
+      imagen.src = foto.urlImagen || foto.urlDrive || '';
+      imagen.alt = foto.tipo || 'Fotografía';
+
+      asignarTexto(
+        'tipoModal',
+        foto.tipo || 'Fotografía'
+      );
+
+      asignarTexto(
+        'tituloModal',
+        `${
+          foto.tipo || 'Evidencia'
+        } · ${indiceVisor + 1} de ${
+          fotografiasVisibles.length
+        }`
+      );
+
+      asignarTexto(
+        'descripcionModal',
+        foto.descripcion || 'Sin descripción.'
+      );
+
+      asignarTexto(
+        'fechaModal',
+        foto.fecha || '-'
+      );
+
+      asignarTexto(
+        'usuarioModal',
+        foto.usuario || 'No registrado'
+      );
+
+      asignarTexto(
+        'nombreModal',
+        foto.nombreArchivo || '-'
+      );
+
+      const botonDrive =
+        document.getElementById('botonAbrirDrive');
+
+      botonDrive.disabled = !foto.urlDrive;
+      botonDrive.style.opacity =
+        foto.urlDrive ? '1' : '0.5';
+
+      botonDrive.onclick = () => {
+        if (foto.urlDrive) {
+          window.open(
+            foto.urlDrive,
+            '_blank',
+            'noopener,noreferrer'
+          );
+        }
+      };
+
+      const hayVarias =
+        fotografiasVisibles.length > 1;
+
+      document.getElementById(
+        'botonAnterior'
+      ).classList.toggle('oculto', !hayVarias);
+
+      document.getElementById(
+        'botonSiguiente'
+      ).classList.toggle('oculto', !hayVarias);
+    }
+
+
+    function mostrarAnterior() {
+      if (!fotografiasVisibles.length) {
+        return;
+      }
+
+      indiceVisor =
+        (
+          indiceVisor - 1 +
+          fotografiasVisibles.length
+        ) % fotografiasVisibles.length;
+
+      mostrarFotografiaEnVisor();
+    }
+
+
+    function mostrarSiguiente() {
+      if (!fotografiasVisibles.length) {
+        return;
+      }
+
+      indiceVisor =
+        (indiceVisor + 1) %
+        fotografiasVisibles.length;
+
+      mostrarFotografiaEnVisor();
+    }
+
+
+    function cerrarVisor() {
+      document.getElementById(
+        'modalFotografia'
+      ).classList.add('oculto');
+
+      document.getElementById(
+        'imagenModal'
+      ).removeAttribute('src');
+
+      document.body.classList.remove('modal-abierto');
+    }
+
+
+    function manejarTeclado(evento) {
+      const modal =
+        document.getElementById('modalFotografia');
+
+      if (modal.classList.contains('oculto')) {
+        return;
+      }
+
+      if (evento.key === 'Escape') {
+        cerrarVisor();
+      }
+
+      if (evento.key === 'ArrowLeft') {
+        mostrarAnterior();
+      }
+
+      if (evento.key === 'ArrowRight') {
+        mostrarSiguiente();
+      }
+    }
+
+
+    function volverDetalle() {
+      window.location.href =
+        `detalle-servicio.html?id=${
+          encodeURIComponent(idServicioActual)
+        }`;
+    }
+
+
+    function mostrarCarga() {
+      document.getElementById(
+        'estadoCarga'
+      ).classList.remove('oculto');
+
+      document.getElementById(
+        'mensajeError'
+      ).classList.add('oculto');
+
+      document.getElementById(
+        'contenidoPrincipal'
+      ).classList.add('oculto');
+    }
+
+
+    function mostrarError(mensaje) {
+      document.getElementById(
+        'estadoCarga'
+      ).classList.add('oculto');
+
+      document.getElementById(
+        'contenidoPrincipal'
+      ).classList.add('oculto');
+
+      const contenedor =
+        document.getElementById('mensajeError');
+
+      contenedor.textContent = mensaje;
+      contenedor.classList.remove('oculto');
+    }
+
+
+    function asignarTexto(id, valor) {
+      const elemento = document.getElementById(id);
+
+      if (elemento) {
+        elemento.textContent =
+          valor === null ||
+          valor === undefined ||
+          valor === ''
+            ? '-'
+            : valor;
+      }
+    }
+
+
+    function limpiarTipoFoto(tipo) {
+      const valor =
+        String(tipo || '').trim();
+
+      if (!valor) {
+        return 'Otra Evidencia';
+      }
+
+      return valor
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/(^|\s)\S/g, letra =>
+          letra.toUpperCase()
+        );
+    }
+
+
+    function extraerIdDrive(url) {
+      const texto = String(url || '');
+
+      if (!texto) {
+        return '';
+      }
+
+      const patrones = [
+        /\/d\/([a-zA-Z0-9_-]+)/,
+        /[?&]id=([a-zA-Z0-9_-]+)/,
+        /\/thumbnail\?id=([a-zA-Z0-9_-]+)/
+      ];
+
+      for (const patron of patrones) {
+        const coincidencia = texto.match(patron);
+
+        if (coincidencia && coincidencia[1]) {
+          return coincidencia[1];
+        }
+      }
+
+      return '';
+    }
+
+
+    function limitarTexto(texto, limite) {
+      const valor = String(texto || '');
+
+      if (valor.length <= limite) {
+        return valor;
+      }
+
+      return `${valor.substring(0, limite).trim()}…`;
+    }
+
+
+    function crearHtmlErrorFoto() {
+      return `
+        <div class="foto-error">
+          <div class="foto-error-icono">🖼️</div>
+          <div>No se pudo mostrar la vista previa.</div>
+        </div>
+      `;
+    }
+
+
+    function escaparHtml(valor) {
+      return String(valor || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+
+</body>
+</html>
