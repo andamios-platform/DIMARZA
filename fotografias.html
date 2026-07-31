@@ -574,6 +574,41 @@
     .siguiente {
       right: 18px;
     }
+    .galeria-unica {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.tarjeta-foto {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.contenido-foto {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.acciones-foto {
+  margin-top: auto;
+}
+
+@media (max-width: 950px) {
+  .galeria-unica {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .galeria-unica {
+    grid-template-columns: 1fr;
+  }
+}
 
     @media (max-width: 950px) {
       .resumen {
@@ -1052,97 +1087,105 @@
 
 
     function normalizarFotografias(lista) {
-      return lista.map((foto, indice) => {
-        const idArchivo =
-          foto.idArchivo ||
-          foto.fileId ||
-          foto.idDrive ||
-          extraerIdDrive(
-            foto.url ||
-            foto.urlDrive ||
-            foto.enlace ||
-            foto.link
+  return lista.map((foto, indice) => {
+
+    const idArchivo =
+      foto.idArchivoDrive ||
+      foto.idArchivo ||
+      foto.fileId ||
+      foto.idDrive ||
+      extraerIdDrive(
+        foto.enlaceFoto ||
+        foto.url ||
+        foto.urlDrive ||
+        foto.enlace ||
+        foto.link
+      );
+
+    const urlDrive =
+      foto.enlaceFoto ||
+      foto.urlDrive ||
+      foto.url ||
+      foto.enlace ||
+      foto.link ||
+      (
+        idArchivo
+          ? `https://drive.google.com/file/d/${idArchivo}/view`
+          : ''
+      );
+
+    const urlImagen =
+      idArchivo
+        ? `https://drive.google.com/thumbnail?id=${
+            encodeURIComponent(idArchivo)
+          }&sz=w1600`
+        : (
+            foto.urlImagen ||
+            foto.imagen ||
+            foto.urlVista ||
+            foto.thumbnail ||
+            foto.miniatura ||
+            foto.enlaceFoto ||
+            ''
           );
 
-        const urlDrive =
-          foto.urlDrive ||
-          foto.url ||
-          foto.enlace ||
-          foto.link ||
-          (
-            idArchivo
-              ? `https://drive.google.com/file/d/${idArchivo}/view`
-              : ''
-          );
+    return {
+      indiceOriginal: indice,
 
-        const urlImagen =
-          foto.urlImagen ||
-          foto.imagen ||
-          foto.urlVista ||
-          foto.thumbnail ||
-          foto.miniatura ||
-          (
-            idArchivo
-              ? `https://drive.google.com/thumbnail?id=${
-                  encodeURIComponent(idArchivo)
-                }&sz=w1600`
-              : urlDrive
-          );
+      idFotografia:
+        foto.idFoto ||
+        foto.idFotografia ||
+        foto.id ||
+        `FOTO-${indice + 1}`,
 
-        return {
-          indiceOriginal: indice,
+      idArchivo,
 
-          idFotografia:
-            foto.idFotografia ||
-            foto.idFoto ||
-            foto.id ||
-            `FOTO-${indice + 1}`,
+      tipo:
+        limpiarTipoFoto(
+          foto.tipoFoto ||
+          foto.tipoFotografia ||
+          foto.tipo ||
+          foto.categoria ||
+          'Otra Evidencia'
+        ),
 
-          idArchivo: idArchivo,
+      descripcion:
+        foto.descripcion ||
+        foto.observacion ||
+        foto.observaciones ||
+        foto.comentario ||
+        'Sin descripción.',
 
-          tipo:
-            limpiarTipoFoto(
-              foto.tipoFotografia ||
-              foto.tipoFoto ||
-              foto.tipo ||
-              foto.categoria ||
-              'Otra Evidencia'
-            ),
+      fecha:
+        foto.fechaHora ||
+        foto.fechaRegistro ||
+        foto.fecha ||
+        foto.creadoEl ||
+        '-',
 
-          descripcion:
-            foto.descripcion ||
-            foto.observacion ||
-            foto.observaciones ||
-            foto.comentario ||
-            'Sin descripción.',
+      usuario:
+        foto.subidoPor ||
+        foto.usuario ||
+        foto.registradoPor ||
+        foto.responsable ||
+        foto.creadoPor ||
+        'No registrado',
 
-          fecha:
-            foto.fechaHora ||
-            foto.fechaRegistro ||
-            foto.fecha ||
-            foto.creadoEl ||
-            '-',
+      nombreArchivo:
+        foto.nombreArchivo ||
+        foto.nombre ||
+        foto.fileName ||
+        (
+          foto.tipoFoto
+            ? `${foto.tipoFoto}.jpg`
+            : `Fotografía ${indice + 1}`
+        ),
 
-          usuario:
-            foto.usuario ||
-            foto.registradoPor ||
-            foto.responsable ||
-            foto.creadoPor ||
-            'No registrado',
-
-          nombreArchivo:
-            foto.nombreArchivo ||
-            foto.nombre ||
-            foto.fileName ||
-            `Fotografía ${indice + 1}`,
-
-          urlDrive: urlDrive,
-          urlImagen: urlImagen
-        };
-      });
-    }
-
-
+      urlDrive,
+      urlImagen
+    };
+  });
+}
     function mostrarInformacionServicio() {
       asignarTexto(
         'tagServicio',
@@ -1240,64 +1283,48 @@
     }
 
 
-    function renderizarGalerias() {
-      const contenedor =
-        document.getElementById('contenedorGalerias');
+function renderizarGalerias() {
+  const contenedor =
+    document.getElementById(
+      'contenedorGalerias'
+    );
 
-      const sinFotografias =
-        document.getElementById('sinFotografias');
+  const sinFotografias =
+    document.getElementById(
+      'sinFotografias'
+    );
 
-      contenedor.innerHTML = '';
+  contenedor.innerHTML = '';
 
-      if (!fotografiasVisibles.length) {
-        sinFotografias.classList.remove('oculto');
-        return;
-      }
+  if (!fotografiasVisibles.length) {
+    sinFotografias.classList.remove(
+      'oculto'
+    );
+    return;
+  }
 
-      sinFotografias.classList.add('oculto');
+  sinFotografias.classList.add(
+    'oculto'
+  );
 
-      const grupos = agruparPorTipo(fotografiasVisibles);
+  const galeria =
+    document.createElement('div');
 
-      Object.keys(grupos)
-        .sort((a, b) =>
-          a.localeCompare(b, 'es', {
-            sensitivity: 'base',
-            numeric: true
-          })
-        )
-        .forEach(tipo => {
-          const seccion =
-            document.createElement('section');
+  galeria.className =
+    'galeria galeria-unica';
 
-          seccion.className = 'grupo-fotografias';
-
-          const titulo =
-            document.createElement('h2');
-
-          titulo.className = 'titulo-grupo';
-
-          titulo.innerHTML =
-            `📷 ${escaparHtml(tipo)}
-             <span class="cantidad-grupo">
-               ${grupos[tipo].length}
-             </span>`;
-
-          const galeria =
-            document.createElement('div');
-
-          galeria.className = 'galeria';
-
-          grupos[tipo].forEach(foto => {
-            galeria.appendChild(
-              crearTarjetaFotografia(foto)
-            );
-          });
-
-          seccion.appendChild(titulo);
-          seccion.appendChild(galeria);
-          contenedor.appendChild(seccion);
-        });
+  fotografiasVisibles.forEach(
+    foto => {
+      galeria.appendChild(
+        crearTarjetaFotografia(foto)
+      );
     }
+  );
+
+  contenedor.appendChild(
+    galeria
+  );
+}
 
 
     function agruparPorTipo(lista) {
