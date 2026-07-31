@@ -2659,7 +2659,37 @@ function aplicarBloqueoSegunEstado(){
   }
 }
 
-function volverDetalle(){location.href=`detalle-servicio.html?id=${encodeURIComponent(ID_SERVICIO)}`}
+function volverDetalle() {
+  const parametros =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const origen =
+    parametros.get('origen');
+
+  const tag =
+    parametros.get('tag');
+
+  if (
+    origen === 'historial' &&
+    tag
+  ) {
+    window.location.href =
+      `historial.html?tag=${
+        encodeURIComponent(tag)
+      }`;
+
+    return;
+  }
+
+  window.location.href =
+    `detalle-servicio.html?id=${
+      encodeURIComponent(
+        ID_SERVICIO
+      )
+    }`;
+}
 function mostrarErrorInicial(mensaje){document.getElementById('contenidoCargando').innerHTML=`<div class="sin-datos"><strong>No se pudo cargar el módulo.</strong><p>${escaparHtml(mensaje)}</p><button class="btn btn-secundario" onclick="volverDetalle()">Volver</button></div>`}
 function mostrarMensaje(texto,tipo=''){const m=document.getElementById('mensaje');m.textContent=texto;m.className=`mensaje ${tipo}`.trim();m.classList.remove('oculto');clearTimeout(mostrarMensaje.t);mostrarMensaje.t=setTimeout(()=>m.classList.add('oculto'),3800)}
 function escribirTexto(id,valor){const e=document.getElementById(id);if(e)e.textContent=(valor===null||valor===undefined||valor==='')?'—':valor}
