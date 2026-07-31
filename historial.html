@@ -38,11 +38,29 @@ function cabecera(){txt('tagTitulo',TAG);txt('etiquetaCantidad',`${servicios.len
 function estados(){[...new Set(servicios.map(s=>s.estado).filter(Boolean))].sort().forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;filtroEstado.appendChild(o)})}
 function aplicarFiltros(){const q=norm(buscarHistorial.value),e=norm(filtroEstado.value);filtrados=servicios.filter(s=>{const t=norm([s.idServicio,s.ot,s.descripcion,s.area,s.faena,s.supervisor,s.responsablePrevios,s.responsableArmado,s.responsablePostparada].join(' '));return(!q||t.includes(q))&&(!e||norm(s.estado)===e)});render()}
 function render(){listaServicios.innerHTML='';sinResultados.classList.toggle('oculto',filtrados.length>0);filtrados.forEach((s,i)=>listaServicios.appendChild(card(s,i)))}
-function card(s,i){const a=document.createElement('article');a.className='servicio-card';a.innerHTML=`<div class="servicio-cabecera"><div><h3 class="servicio-id">${esc(s.idServicio||`Servicio ${i+1}`)}</h3><p class="servicio-descripcion">${esc(s.descripcion||'Sin descripción registrada')}</p></div><span class="estado ${claseEstado(s.estado)}">${esc(s.estado||'SIN ESTADO')}</span></div><div class="servicio-datos">${dato('OT',s.ot||'No registrada')}${dato('Fecha programada',s.fechaProgramada||'Sin fecha')}${dato('Faena',s.faena||'No registrada')}${dato('Área',s.area||'No registrada')}${dato('Supervisor',s.supervisor||'No asignado')}${dato('Fecha de registro',s.fechaRegistro||'—')}${dato('Fecha de cierre',s.fechaCierre||'Pendiente')}${dato('Referencia',s.servicioReferencia||'Ninguno')}</div><div class="responsables">${resp('Responsable de Previos',s.responsablePrevios)}${resp('Responsable de Armado',s.responsableArmado)}${resp('Responsable de Postparada',s.responsablePostparada)}</div><div class="servicio-acciones"><button class="btn btn-previos" onclick="abrir('previos.html','${attr(s.idServicio)}')">📦 Ver materiales</button><button class="btn btn-fotos" onclick="abrir('fotografias.html','${attr(s.idServicio)}')">📷 Fotografías de Armado</button><button class="btn btn-detalle" onclick="abrir('detalle-servicio.html','${attr(s.idServicio)}')">Abrir detalle</button></div>`;return a}
+function card(s,i){const a=document.createElement('article');a.className='servicio-card';a.innerHTML=`<div class="servicio-cabecera"><div><h3 class="servicio-id">${esc(s.idServicio||`Servicio ${i+1}`)}</h3><p class="servicio-descripcion">${esc(s.descripcion||'Sin descripción registrada')}</p></div><span class="estado ${claseEstado(s.estado)}">${esc(s.estado||'SIN ESTADO')}</span></div><div class="servicio-datos">${dato('OT',s.ot||'No registrada')}${dato('Fecha programada',s.fechaProgramada||'Sin fecha')}${dato('Faena',s.faena||'No registrada')}${dato('Área',s.area||'No registrada')}${dato('Supervisor',s.supervisor||'No asignado')}${dato('Fecha de registro',s.fechaRegistro||'—')}${dato('Fecha de cierre',s.fechaCierre||'Pendiente')}${dato('Referencia',s.servicioReferencia||'Ninguno')}</div><div class="responsables">${resp('Responsable de Previos',s.responsablePrevios)}${resp('Responsable de Armado',s.responsableArmado)}${resp('Responsable de Postparada',s.responsablePostparada)}</div><div class="servicio-acciones">
+<button
+  type="button"
+  class="btn btn-previos"
+  onclick="abrirArmado(
+    '${attr(s.idServicio)}'
+  )"
+>
+  🔨 Ver materiales utilizados
+</button>
+<button class="btn btn-fotos" onclick="abrir('fotografias.html','${attr(s.idServicio)}')">📷 Fotografías de Armado</button><button class="btn btn-detalle" onclick="abrir('detalle-servicio.html','${attr(s.idServicio)}')">Abrir detalle</button></div>`;return a}
 function dato(l,v){return `<div class="dato"><div class="dato-label">${esc(l)}</div><div class="dato-valor">${esc(v)}</div></div>`}
 function resp(l,v){return `<div class="responsable"><span>${esc(l)}</span><strong>${esc(v||'No asignado')}</strong></div>`}
 function limpiarFiltros(){buscarHistorial.value='';filtroEstado.value='';aplicarFiltros()}
 function abrir(f,id){location.href=`${f}?id=${encodeURIComponent(id)}`}
+function abrirArmado(idServicio) {
+  location.href =
+    `armado.html?id=${
+      encodeURIComponent(idServicio)
+    }&origen=historial&tag=${
+      encodeURIComponent(TAG)
+    }`;
+}
 function claseEstado(e){const v=norm(e);if(v==='cerrado')return'estado-cerrado';if(v==='andamio operativo')return'estado-operativo';if(['solicitado','en planificacion','en preparacion','despachado','recibido en tag','en armado','en desmontaje','en retorno','recibido en base'].includes(v))return'estado-proceso';return'estado-general'}
 function error(m){estadoCarga.classList.add('oculto');mensajeError.textContent=m;mensajeError.classList.remove('oculto')}
 function txt(id,v){document.getElementById(id).textContent=v??'—'}
