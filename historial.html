@@ -57,7 +57,17 @@ function card(s,i){const a=document.createElement('article');a.className='servic
 >
   📷 Fotografías de Armado
 </button>
-<button class="btn btn-detalle" onclick="abrir('detalle-servicio.html','${attr(s.idServicio)}')">Abrir detalle</button></div>`;return a}
+<button
+  type="button"
+  class="btn btn-detalle"
+  onclick="abrirDetalle(
+    '${attr(s.idServicio)}'
+  )"
+>
+  Abrir detalle
+</button>
+
+</div>`;return a}
 function dato(l,v){return `<div class="dato"><div class="dato-label">${esc(l)}</div><div class="dato-valor">${esc(v)}</div></div>`}
 function resp(l,v){return `<div class="responsable"><span>${esc(l)}</span><strong>${esc(v||'No asignado')}</strong></div>`}
 function limpiarFiltros(){buscarHistorial.value='';filtroEstado.value='';aplicarFiltros()}
@@ -73,6 +83,14 @@ function abrirArmado(idServicio) {
 function abrirFotografias(idServicio) {
   location.href =
     `fotografias.html?id=${
+      encodeURIComponent(idServicio)
+    }&origen=historial&tag=${
+      encodeURIComponent(TAG)
+    }`;
+}
+function abrirDetalle(idServicio) {
+  location.href =
+    `detalle-servicio.html?id=${
       encodeURIComponent(idServicio)
     }&origen=historial&tag=${
       encodeURIComponent(TAG)
