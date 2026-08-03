@@ -379,6 +379,125 @@
   border:1px solid #c7ddeb;
   border-radius:11px;
 }
+/* ======================================================
+   CONTROL DE TIEMPOS DEL ARMADO
+   ====================================================== */
+
+.control-armado {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.control-armado-info h2 {
+  margin: 0 0 7px;
+  color: var(--azul);
+}
+
+.control-armado-info p {
+  margin: 0;
+  color: var(--gris);
+  line-height: 1.5;
+}
+
+.control-armado-datos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.control-armado-dato {
+  padding: 13px;
+  background: var(--gris-claro);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+}
+
+.control-armado-dato span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--gris);
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.control-armado-dato strong {
+  color: var(--azul);
+  font-size: 15px;
+}
+
+.control-armado-acciones {
+  min-width: 220px;
+}
+
+.btn-iniciar-armado,
+.btn-terminar-montaje {
+  width: 100%;
+  padding: 15px 20px;
+  color: white;
+  border: 0;
+  border-radius: 11px;
+  font-weight: bold;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .15);
+}
+
+.btn-iniciar-armado {
+  background: linear-gradient(
+    135deg,
+    var(--verde),
+    #147548
+  );
+}
+
+.btn-terminar-montaje {
+  background: linear-gradient(
+    135deg,
+    var(--naranja),
+    var(--naranja2)
+  );
+}
+
+.btn-iniciar-armado:disabled,
+.btn-terminar-montaje:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.bloqueado-etapa {
+  position: relative;
+  pointer-events: none;
+  opacity: .48;
+  filter: grayscale(.25);
+}
+
+.aviso-bloqueo {
+  margin-bottom: 15px;
+  padding: 13px 15px;
+  color: #8a6700;
+  background: var(--amarillo-claro);
+  border: 1px solid #eed38b;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media(max-width:760px) {
+  .control-armado {
+    grid-template-columns: 1fr;
+  }
+
+  .control-armado-datos {
+    grid-template-columns: 1fr;
+  }
+
+  .control-armado-acciones {
+    width: 100%;
+    min-width: 0;
+  }
+}
 
 .evidencias-resumen strong{
   font-size:18px;
@@ -604,13 +723,112 @@
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panel-titulo"><h2>Responsable del armado</h2></div>
-      <div class="responsable-grid">
-        <div class="campo"><label for="responsableArmado">Responsable del montaje</label><input id="responsableArmado" type="text" placeholder="Nombre del responsable"></div>
-        <div class="campo"><label for="usuarioRegistro">Usuario que registra</label><input id="usuarioRegistro" type="text" placeholder="Nombre de quien registra"></div>
+<section class="panel">
+  <div class="panel-titulo">
+    <h2>Responsable del armado</h2>
+  </div>
+
+  <div class="responsable-grid">
+
+    <div class="campo">
+      <label for="responsableArmado">
+        Responsable del montaje
+      </label>
+
+      <input
+        id="responsableArmado"
+        type="text"
+        placeholder="Nombre del responsable"
+      >
+    </div>
+
+    <div class="campo">
+      <label for="usuarioRegistro">
+        Usuario que registra
+      </label>
+
+      <input
+        id="usuarioRegistro"
+        type="text"
+        placeholder="Nombre de quien registra"
+      >
+    </div>
+
+  </div>
+</section>
+
+
+<section
+  id="panelControlArmado"
+  class="panel"
+>
+  <div class="control-armado">
+
+    <div class="control-armado-info">
+
+      <h2 id="tituloControlArmado">
+        Control del montaje
+      </h2>
+
+      <p id="descripcionControlArmado">
+        El montaje todavía no ha sido iniciado.
+      </p>
+
+      <div class="control-armado-datos">
+
+        <div class="control-armado-dato">
+          <span>Inicio del armado</span>
+
+          <strong id="fechaInicioArmado">
+            Pendiente
+          </strong>
+        </div>
+
+        <div class="control-armado-dato">
+          <span>Fin del montaje</span>
+
+          <strong id="fechaFinMontaje">
+            Pendiente
+          </strong>
+        </div>
+
+        <div class="control-armado-dato">
+          <span>Duración del montaje</span>
+
+          <strong id="duracionArmado">
+            Pendiente
+          </strong>
+        </div>
+
       </div>
-    </section>
+
+    </div>
+
+    <div class="control-armado-acciones">
+
+      <button
+        id="btnIniciarArmado"
+        type="button"
+        class="btn-iniciar-armado oculto"
+        onclick="iniciarArmado()"
+      >
+        ▶ Iniciar Armado
+      </button>
+
+      <button
+        id="btnTerminarMontaje"
+        type="button"
+        class="btn-terminar-montaje oculto"
+        onclick="terminarMontaje()"
+      >
+        ⏹ Terminar Montaje
+      </button>
+
+    </div>
+
+  </div>
+</section>
+
 
     <section class="panel">
       <div class="panel-titulo"><h2>Resumen del armado</h2></div>
@@ -670,6 +888,13 @@
         </div>
       </section>
 <section class="seccion-material" id="seccionEvidencias">
+  <div
+  id="avisoEvidenciasBloqueadas"
+  class="aviso-bloqueo oculto"
+>
+  🔒 Las fotografías se habilitarán cuando presiones
+  <strong>Terminar Montaje</strong>.
+</div>
   <div class="seccion-cabecera">
     <h3>
       📸 Evidencias fotográficas
@@ -1247,6 +1472,9 @@ let servicioActual=null;
 let materialesArmado=[];
 let catalogoMateriales=[];
 let resumenActual={};
+let montajeIniciado = false;
+let montajeTerminado = false;
+let armadoFinalizado = false;
 
 const gruposContraidos = {};
 
@@ -1409,7 +1637,8 @@ async function cargarArmado(){
   completarResponsables();
   renderizarTodo();
   actualizarResumen();
-  aplicarBloqueoSegunEstado();
+  determinarEstadoMontaje();
+  aplicarFlujoArmado();
 }
 
 async function cargarCatalogo(){
@@ -1767,6 +1996,13 @@ function calcularResumen(lista) {
 }
 
 function abrirModalFinalizar(){
+  if (!montajeTerminado) {
+  mostrarMensaje(
+    'Primero debes terminar el montaje.',
+    'error'
+  );
+  return;
+}
   const responsable=document.getElementById('responsableArmado').value.trim();
   if(!responsable){mostrarMensaje('Debes indicar el responsable del armado.','error');return}
   if(!materialesArmado.length){mostrarMensaje('No existen materiales para registrar.','error');return}
@@ -2649,15 +2885,492 @@ function formatearTamanoArchivo(bytes){
     ).toFixed(2)
   } MB`;
 }
-function aplicarBloqueoSegunEstado(){
-  const estado=(servicioActual.estado||'').toUpperCase().trim();
-  const editable=['DESPACHADO','RECIBIDO EN TAG','EN ARMADO'].includes(estado);
-  if(!editable){
-    document.querySelectorAll('#contenidoPrincipal input,#contenidoPrincipal select,#contenidoPrincipal textarea,#contenidoPrincipal button').forEach(e=>e.disabled=true);
-    document.getElementById('btnFinalizar').disabled=true;
-    mostrarMensaje(`El armado está en modo lectura porque el servicio se encuentra en estado ${servicioActual.estado}.`,'error');
+function determinarEstadoMontaje() {
+  montajeIniciado =
+    Boolean(
+      servicioActual.fechaInicioArmado
+    );
+
+  montajeTerminado =
+    Boolean(
+      servicioActual.fechaFinMontaje
+    );
+
+  armadoFinalizado =
+    Boolean(
+      servicioActual.fechaFinalizacionArmado
+    ) ||
+    [
+      'ANDAMIO OPERATIVO',
+      'EN DESMONTAJE',
+      'EN RETORNO',
+      'RECIBIDO EN BASE',
+      'CERRADO'
+    ].includes(
+      normalizarEstado(
+        servicioActual.estado
+      )
+    );
+}
+
+
+function aplicarFlujoArmado() {
+  const estado =
+    normalizarEstado(
+      servicioActual.estado
+    );
+
+  escribirTexto(
+    'fechaInicioArmado',
+    servicioActual.fechaInicioArmado ||
+    'Pendiente'
+  );
+
+  escribirTexto(
+    'fechaFinMontaje',
+    servicioActual.fechaFinMontaje ||
+    'Pendiente'
+  );
+
+  escribirTexto(
+    'duracionArmado',
+    montajeTerminado
+      ? (
+          servicioActual.duracionArmado ||
+          'Registrada'
+        )
+      : 'Pendiente'
+  );
+
+  const btnIniciar =
+    document.getElementById(
+      'btnIniciarArmado'
+    );
+
+  const btnTerminar =
+    document.getElementById(
+      'btnTerminarMontaje'
+    );
+
+  btnIniciar.classList.add(
+    'oculto'
+  );
+
+  btnTerminar.classList.add(
+    'oculto'
+  );
+
+  if (
+    [
+      'DESPACHADO',
+      'RECIBIDO EN TAG'
+    ].includes(estado) &&
+    !montajeIniciado
+  ) {
+    btnIniciar.classList.remove(
+      'oculto'
+    );
+
+    escribirTexto(
+      'tituloControlArmado',
+      'Armado pendiente de inicio'
+    );
+
+    escribirTexto(
+      'descripcionControlArmado',
+      'Registra al responsable y presiona Iniciar Armado cuando comience físicamente el montaje.'
+    );
+
+    bloquearMateriales(true);
+    bloquearEvidencias(true);
+    habilitarFinalizacion(false);
+
+    return;
+  }
+
+  if (
+    estado === 'EN ARMADO' &&
+    montajeIniciado &&
+    !montajeTerminado
+  ) {
+    btnTerminar.classList.remove(
+      'oculto'
+    );
+
+    escribirTexto(
+      'tituloControlArmado',
+      'Montaje en ejecución'
+    );
+
+    escribirTexto(
+      'descripcionControlArmado',
+      'El tiempo del montaje está siendo registrado. Presiona Terminar Montaje apenas concluya físicamente el armado.'
+    );
+
+    bloquearMateriales(false);
+    bloquearEvidencias(true);
+    habilitarFinalizacion(false);
+
+    return;
+  }
+
+  if (
+    estado === 'EN ARMADO' &&
+    montajeTerminado
+  ) {
+    escribirTexto(
+      'tituloControlArmado',
+      'Montaje terminado'
+    );
+
+    escribirTexto(
+      'descripcionControlArmado',
+      'La duración quedó registrada. Completa los materiales, fotografías y finaliza el Armado.'
+    );
+
+    bloquearMateriales(false);
+    bloquearEvidencias(false);
+    habilitarFinalizacion(true);
+
+    return;
+  }
+
+  if (armadoFinalizado) {
+    escribirTexto(
+      'tituloControlArmado',
+      'Armado finalizado'
+    );
+
+    escribirTexto(
+      'descripcionControlArmado',
+      'El servicio ya fue registrado como Andamio Operativo.'
+    );
+
+    bloquearMateriales(true);
+    bloquearEvidencias(true);
+    habilitarFinalizacion(false);
+
+    aplicarModoLecturaCompleto();
+
+    return;
+  }
+
+  bloquearMateriales(true);
+  bloquearEvidencias(true);
+  habilitarFinalizacion(false);
+}
+
+
+function bloquearMateriales(bloquear) {
+  const paneles =
+    document.querySelectorAll(
+      '#buscarMaterial,' +
+      '.barra-herramientas button,' +
+      '#tablaPrincipales input,' +
+      '#tablaPrincipales textarea,' +
+      '#tablaPrincipales button,' +
+      '#tablaAdicionales input,' +
+      '#tablaAdicionales textarea,' +
+      '#tablaAdicionales button,' +
+      '#tablaNoUtilizados input,' +
+      '#tablaNoUtilizados textarea,' +
+      '#tablaNoUtilizados button'
+    );
+
+  paneles.forEach(elemento => {
+    elemento.disabled =
+      Boolean(bloquear);
+  });
+}
+
+
+function bloquearEvidencias(bloquear) {
+  const seccion =
+    document.getElementById(
+      'seccionEvidencias'
+    );
+
+  const aviso =
+    document.getElementById(
+      'avisoEvidenciasBloqueadas'
+    );
+
+  seccion
+    .querySelectorAll(
+      'input, textarea, button'
+    )
+    .forEach(elemento => {
+      /*
+       * Las fotografías ya registradas
+       * continúan pudiéndose visualizar.
+       */
+      if (
+        elemento.classList.contains(
+          'evidencia-boton-ver'
+        )
+      ) {
+        return;
+      }
+
+      elemento.disabled =
+        Boolean(bloquear);
+    });
+
+  aviso.classList.toggle(
+    'oculto',
+    !bloquear
+  );
+
+  seccion.classList.toggle(
+    'bloqueado-etapa',
+    bloquear
+  );
+}
+
+
+function habilitarFinalizacion(habilitar) {
+  document.getElementById(
+    'btnFinalizar'
+  ).disabled =
+    !habilitar;
+}
+
+
+function aplicarModoLecturaCompleto() {
+  document
+    .querySelectorAll(
+      '#contenidoPrincipal input,' +
+      '#contenidoPrincipal select,' +
+      '#contenidoPrincipal textarea,' +
+      '#contenidoPrincipal button'
+    )
+    .forEach(elemento => {
+      elemento.disabled = true;
+    });
+}
+
+
+function normalizarEstado(valor) {
+  return String(valor || '')
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    );
+}
+  async function iniciarArmado() {
+  const responsable =
+    document
+      .getElementById(
+        'responsableArmado'
+      )
+      .value
+      .trim();
+
+  const usuario =
+    document
+      .getElementById(
+        'usuarioRegistro'
+      )
+      .value
+      .trim() ||
+    responsable;
+
+  if (!responsable) {
+    mostrarMensaje(
+      'Debes indicar el responsable del montaje.',
+      'error'
+    );
+
+    document
+      .getElementById(
+        'responsableArmado'
+      )
+      .focus();
+
+    return;
+  }
+
+  if (
+    !confirm(
+      '¿Confirmas que el montaje comenzará en este momento?'
+    )
+  ) {
+    return;
+  }
+
+  const boton =
+    document.getElementById(
+      'btnIniciarArmado'
+    );
+
+  boton.disabled = true;
+  boton.textContent =
+    'Iniciando armado...';
+
+  try {
+    const respuesta =
+      await fetch(API_URL, {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body: JSON.stringify({
+          accion: 'iniciarArmado',
+          idServicio: ID_SERVICIO,
+          responsableArmado:
+            responsable,
+          usuario
+        })
+      });
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo iniciar el Armado.'
+      );
+    }
+
+    servicioActual.estado =
+      datos.estado;
+
+    servicioActual.responsableArmado =
+      datos.responsableArmado;
+
+    servicioActual.fechaInicioArmado =
+      datos.fechaInicioArmado;
+
+    determinarEstadoMontaje();
+    mostrarServicio();
+    aplicarFlujoArmado();
+
+    mostrarMensaje(
+      datos.mensaje,
+      'exito'
+    );
+
+  } catch (error) {
+    mostrarMensaje(
+      error.message ||
+      'No se pudo iniciar el Armado.',
+      'error'
+    );
+
+  } finally {
+    boton.disabled = false;
+    boton.textContent =
+      '▶ Iniciar Armado';
   }
 }
+async function terminarMontaje() {
+  const usuario =
+    document
+      .getElementById(
+        'usuarioRegistro'
+      )
+      .value
+      .trim() ||
+    document
+      .getElementById(
+        'responsableArmado'
+      )
+      .value
+      .trim();
+
+  if (
+    !confirm(
+      '¿Confirmas que el montaje físico terminó en este momento? Esta hora se utilizará para calcular la duración.'
+    )
+  ) {
+    return;
+  }
+
+  const boton =
+    document.getElementById(
+      'btnTerminarMontaje'
+    );
+
+  boton.disabled = true;
+  boton.textContent =
+    'Registrando término...';
+
+  try {
+    const respuesta =
+      await fetch(API_URL, {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body: JSON.stringify({
+          accion: 'terminarMontaje',
+          idServicio: ID_SERVICIO,
+          usuario
+        })
+      });
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo terminar el montaje.'
+      );
+    }
+
+    servicioActual.fechaInicioArmado =
+      datos.fechaInicioArmado;
+
+    servicioActual.fechaFinMontaje =
+      datos.fechaFinMontaje;
+
+    servicioActual.duracionArmado =
+      datos.duracionFormateada;
+
+    montajeIniciado = true;
+    montajeTerminado = true;
+
+    aplicarFlujoArmado();
+
+    mostrarMensaje(
+      datos.mensaje,
+      'exito'
+    );
+
+    document
+      .getElementById(
+        'seccionEvidencias'
+      )
+      .scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+  } catch (error) {
+    mostrarMensaje(
+      error.message ||
+      'No se pudo registrar el término del montaje.',
+      'error'
+    );
+
+  } finally {
+    boton.disabled = false;
+    boton.textContent =
+      '⏹ Terminar Montaje';
+  }
+}  
+
 
 function volverDetalle() {
   const parametros =
