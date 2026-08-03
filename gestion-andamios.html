@@ -633,6 +633,106 @@
   margin-top: 10px;
 }
 
+
+/* ======================================================
+   RESUMEN POR ETAPA
+   ====================================================== */
+
+.resumen-etapas {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.etapa-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  box-shadow: var(--sombra);
+}
+
+.etapa-card span {
+  color: var(--gris);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.etapa-card strong {
+  min-width: 30px;
+  height: 30px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 9px;
+  color: white;
+  background: var(--azul);
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.etapa-solicitado {
+  border-left: 4px solid #4285c5;
+}
+
+.etapa-previos {
+  border-left: 4px solid #e4a500;
+}
+
+.etapa-armado {
+  border-left: 4px solid #1494c4;
+}
+
+.etapa-operativo {
+  border-left: 4px solid #198754;
+}
+
+.etapa-postparada {
+  border-left: 4px solid #7a3ea1;
+}
+
+.etapa-solicitado strong {
+  background: #4285c5;
+}
+
+.etapa-previos strong {
+  background: #c58d00;
+}
+
+.etapa-armado strong {
+  background: #1494c4;
+}
+
+.etapa-operativo strong {
+  background: #198754;
+}
+
+.etapa-postparada strong {
+  background: #7a3ea1;
+}
+
+.boton-faena-icono-todas {
+  font-size: 14px;
+  line-height: 1;
+}
+
+@media (max-width: 850px) {
+  .resumen-etapas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .resumen-etapas {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 620px) {
   .filtros-faena-superior {
     align-items: flex-start;
@@ -868,6 +968,37 @@
   </div>
 
 </section>
+
+    <section class="resumen-etapas">
+
+  <article class="etapa-card etapa-solicitado">
+    <span>Solicitados</span>
+    <strong id="totalSolicitados">0</strong>
+  </article>
+
+  <article class="etapa-card etapa-previos">
+    <span>Previos</span>
+    <strong id="totalPrevios">0</strong>
+  </article>
+
+  <article class="etapa-card etapa-armado">
+    <span>Armado</span>
+    <strong id="totalEtapaArmado">0</strong>
+  </article>
+
+  <article class="etapa-card etapa-operativo">
+    <span>Operativos</span>
+    <strong id="totalEtapaOperativos">0</strong>
+  </article>
+
+  <article class="etapa-card etapa-postparada">
+    <span>Postparada</span>
+    <strong id="totalPostparada">0</strong>
+  </article>
+
+</section>
+
+    
     <section class="resumen">
 
       <article class="indicador">
@@ -1063,8 +1194,10 @@ function crearBotonesFaena() {
       }"
       onclick="seleccionarFaena('TODAS')"
     >
-      <span class="boton-faena-indicador"></span>
-
+      <span class="boton-faena-icono-todas">
+        ▦
+      </span>
+      
       <span>Todas</span>
 
       <span class="boton-faena-cantidad">
@@ -1251,21 +1384,25 @@ function actualizarTextoFiltro() {
       'contadorResultados'
     );
 
-  if (
-    faenaSeleccionada ===
-    'TODAS'
-  ) {
-    texto.textContent =
-      `${cantidad} ${palabraActividad}`;
+if (
+  faenaSeleccionada ===
+  'TODAS'
+) {
+  texto.textContent =
+    `${cantidad} ${palabraActividad}`;
 
-    titulo.textContent =
-      'Andamios activos';
+  titulo.textContent =
+    'Andamios activos';
 
-    contador.textContent =
-      `${cantidad} ${palabraActividad}`;
+  contador.textContent =
+    `Mostrando ${cantidad} ${
+      cantidad === 1
+        ? 'resultado'
+        : 'resultados'
+    }`;
 
-    return;
-  }
+  return;
+}
 
   texto.textContent =
     `${faenaSeleccionada} • ${cantidad} ${palabraActividad}`;
@@ -1273,8 +1410,12 @@ function actualizarTextoFiltro() {
   titulo.textContent =
     `Andamios activos • ${faenaSeleccionada}`;
 
-  contador.textContent =
-    `${cantidad} ${palabraActividad}`;
+contador.textContent =
+  `Mostrando ${cantidad} ${
+    cantidad === 1
+      ? 'resultado'
+      : 'resultados'
+  }`;
 }
 
     function mostrarServicios() {
@@ -1440,7 +1581,7 @@ function crearTarjetaServicio(servicio) {
     
 
 
-   function actualizarIndicadores(
+function actualizarIndicadores(
   lista = serviciosMostrados
 ) {
   const servicios =
@@ -1458,6 +1599,33 @@ function crearTarjetaServicio(servicio) {
       .filter(Boolean)
   );
 
+  const solicitados =
+    servicios.filter(servicio => {
+      const estado =
+        normalizarTexto(
+          servicio.estado
+        );
+
+      return [
+        'SOLICITADO',
+        'EN PLANIFICACION'
+      ].includes(estado);
+    }).length;
+
+  const previos =
+    servicios.filter(servicio => {
+      const estado =
+        normalizarTexto(
+          servicio.estado
+        );
+
+      return [
+        'EN PREPARACION',
+        'DESPACHADO',
+        'RECIBIDO EN TAG'
+      ].includes(estado);
+    }).length;
+
   const enArmado =
     servicios.filter(servicio =>
       normalizarTexto(
@@ -1471,6 +1639,20 @@ function crearTarjetaServicio(servicio) {
         servicio.estado
       ) === 'ANDAMIO OPERATIVO'
     ).length;
+
+  const postparada =
+    servicios.filter(servicio => {
+      const estado =
+        normalizarTexto(
+          servicio.estado
+        );
+
+      return [
+        'EN DESMONTAJE',
+        'EN RETORNO',
+        'RECIBIDO EN BASE'
+      ].includes(estado);
+    }).length;
 
   document.getElementById(
     'totalActivos'
@@ -1491,6 +1673,31 @@ function crearTarjetaServicio(servicio) {
     'totalOperativos'
   ).textContent =
     operativos;
+
+  document.getElementById(
+    'totalSolicitados'
+  ).textContent =
+    solicitados;
+
+  document.getElementById(
+    'totalPrevios'
+  ).textContent =
+    previos;
+
+  document.getElementById(
+    'totalEtapaArmado'
+  ).textContent =
+    enArmado;
+
+  document.getElementById(
+    'totalEtapaOperativos'
+  ).textContent =
+    operativos;
+
+  document.getElementById(
+    'totalPostparada'
+  ).textContent =
+    postparada;
 }
 
 
