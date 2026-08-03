@@ -640,7 +640,7 @@
 
 .resumen-etapas {
   display: grid;
-  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
   gap: 12px;
   margin-bottom: 26px;
 }
@@ -692,9 +692,6 @@
   border-left: 4px solid #198754;
 }
 
-.etapa-postparada {
-  border-left: 4px solid #7a3ea1;
-}
 
 .etapa-solicitado strong {
   background: #4285c5;
@@ -710,10 +707,6 @@
 
 .etapa-operativo strong {
   background: #198754;
-}
-
-.etapa-postparada strong {
-  background: #7a3ea1;
 }
 
 .boton-faena-icono-todas {
@@ -976,6 +969,13 @@
     <strong id="totalSolicitados">0</strong>
   </article>
 
+<section class="resumen-etapas">
+
+  <article class="etapa-card etapa-solicitado">
+    <span>Solicitados</span>
+    <strong id="totalSolicitados">0</strong>
+  </article>
+
   <article class="etapa-card etapa-previos">
     <span>Previos</span>
     <strong id="totalPrevios">0</strong>
@@ -991,13 +991,7 @@
     <strong id="totalEtapaOperativos">0</strong>
   </article>
 
-  <article class="etapa-card etapa-postparada">
-    <span>Postparada</span>
-    <strong id="totalPostparada">0</strong>
-  </article>
-
 </section>
-
     
     <section class="resumen">
 
@@ -1640,19 +1634,6 @@ function actualizarIndicadores(
       ) === 'ANDAMIO OPERATIVO'
     ).length;
 
-  const postparada =
-    servicios.filter(servicio => {
-      const estado =
-        normalizarTexto(
-          servicio.estado
-        );
-
-      return [
-        'EN DESMONTAJE',
-        'EN RETORNO',
-        'RECIBIDO EN BASE'
-      ].includes(estado);
-    }).length;
 
   document.getElementById(
     'totalActivos'
@@ -1694,10 +1675,6 @@ function actualizarIndicadores(
   ).textContent =
     operativos;
 
-  document.getElementById(
-    'totalPostparada'
-  ).textContent =
-    postparada;
 }
 
 
