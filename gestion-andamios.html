@@ -433,7 +433,7 @@
       font-size: 12px;
       color: var(--gris);
     }
-    /* ======================================================
+/* ======================================================
    FILTROS POR FAENA
    ====================================================== */
 
@@ -471,6 +471,9 @@
 }
 
 .boton-faena {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 14px;
   color: var(--azul);
   background: #eef4f8;
@@ -483,8 +486,8 @@
 }
 
 .boton-faena:hover {
-  background: #dcebf4;
   transform: translateY(-1px);
+  filter: brightness(.98);
 }
 
 .boton-faena.activo {
@@ -493,16 +496,89 @@
   border-color: var(--azul);
   box-shadow: 0 5px 14px rgba(18, 59, 93, 0.22);
 }
+.boton-faena.faena-centinela.activo {
+  color: white;
+  background: #198754;
+  border-color: #198754;
+}
+
+.boton-faena.faena-antapaccay.activo {
+  color: white;
+  background: #7a3ea1;
+  border-color: #7a3ea1;
+}
+
+.boton-faena.faena-sierra-gorda.activo {
+  color: white;
+  background: #1769aa;
+  border-color: #1769aa;
+}
+
+.boton-faena.faena-calama.activo {
+  color: white;
+  background: #d96f0b;
+  border-color: #d96f0b;
+}
+
+.boton-faena-indicador {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.boton-faena-cantidad {
+  min-width: 24px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .65);
+  color: inherit;
+  font-size: 11px;
+}
+
+.boton-faena.activo .boton-faena-cantidad {
+  background: rgba(255, 255, 255, .18);
+}
+
+.faena-todas {
+  color: var(--azul);
+}
+
+.faena-centinela {
+  color: #198754;
+  background: #e7f5ed;
+  border-color: #b8dfc8;
+}
+
+.faena-antapaccay {
+  color: #7a3ea1;
+  background: #f3eafd;
+  border-color: #d9c1ed;
+}
+
+.faena-sierra-gorda {
+  color: #1769aa;
+  background: #e8f2fb;
+  border-color: #bdd7ea;
+}
+
+.faena-calama {
+  color: #d96f0b;
+  background: #fff1e2;
+  border-color: #f2cfaa;
+}
 
 .insignia-faena {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 1px;
+  margin-top: 10px;
   padding: 6px 9px;
-  color: var(--azul);
-  background: #eaf3fa;
-  border: 1px solid #c7ddeb;
   border-radius: 999px;
   font-size: 10px;
   font-weight: bold;
@@ -510,9 +586,51 @@
 }
 
 .insignia-faena::before {
-  content: "●";
-  color: var(--naranja);
-  font-size: 9px;
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.insignia-centinela {
+  color: #198754;
+  background: #e7f5ed;
+  border: 1px solid #b8dfc8;
+}
+
+.insignia-antapaccay {
+  color: #7a3ea1;
+  background: #f3eafd;
+  border: 1px solid #d9c1ed;
+}
+
+.insignia-sierra-gorda {
+  color: #1769aa;
+  background: #e8f2fb;
+  border: 1px solid #bdd7ea;
+}
+
+.insignia-calama {
+  color: #d96f0b;
+  background: #fff1e2;
+  border: 1px solid #f2cfaa;
+}
+
+.insignia-general {
+  color: var(--azul);
+  background: #eaf3fa;
+  border: 1px solid #c7ddeb;
+}
+
+.tarjeta-identificacion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.tarjeta-estado {
+  margin-top: 10px;
 }
 
 @media (max-width: 620px) {
@@ -528,9 +646,9 @@
 
   .boton-faena {
     width: 100%;
+    justify-content: center;
   }
 }
-
     @media (max-width: 850px) {
       .resumen {
         grid-template-columns: repeat(2, 1fr);
@@ -777,7 +895,9 @@
     <section>
 
       <div class="titulo-seccion">
-        <h2>Andamios activos</h2>
+        <h2 id="tituloAndamiosActivos">
+          Andamios activos
+        </h2>
 
         <span id="contadorResultados">
           Cargando información...
@@ -834,6 +954,12 @@
     let serviciosActivos = [];
     let serviciosMostrados = [];
     let faenaSeleccionada = 'TODAS';
+    const FAENAS_DISPONIBLES = [
+      'CENTINELA',
+      'ANTAPACCAY',
+      'SIERRA GORDA',
+      'CALAMA'
+    ];
 
     const estadosCerrados = [
       'CERRADO',
@@ -925,55 +1051,29 @@ function crearBotonesFaena() {
       'botonesFaena'
     );
 
-  const faenas = [
-    ...new Set(
-      serviciosActivos
-        .map(servicio =>
-          normalizarTexto(
-            servicio.faena
-          )
-        )
-        .filter(Boolean)
-    )
-  ].sort((a, b) =>
-    a.localeCompare(
-      b,
-      'es',
-      { numeric: true }
-    )
-  );
+  const botones = [];
 
-  /*
-   * Si la faena anteriormente elegida
-   * ya no existe, volvemos a TODAS.
-   */
-  if (
-    faenaSeleccionada !== 'TODAS' &&
-    !faenas.includes(
-      faenaSeleccionada
-    )
-  ) {
-    faenaSeleccionada = 'TODAS';
-  }
+  botones.push(`
+    <button
+      type="button"
+      class="boton-faena faena-todas ${
+        faenaSeleccionada === 'TODAS'
+          ? 'activo'
+          : ''
+      }"
+      onclick="seleccionarFaena('TODAS')"
+    >
+      <span class="boton-faena-indicador"></span>
 
-  const botones = [
-    `
-      <button
-        type="button"
-        class="boton-faena ${
-          faenaSeleccionada === 'TODAS'
-            ? 'activo'
-            : ''
-        }"
-        data-faena="TODAS"
-        onclick="seleccionarFaena('TODAS')"
-      >
-        Todas
-      </button>
-    `
-  ];
+      <span>Todas</span>
 
-  faenas.forEach(faena => {
+      <span class="boton-faena-cantidad">
+        ${serviciosActivos.length}
+      </span>
+    </button>
+  `);
+
+  FAENAS_DISPONIBLES.forEach(faena => {
     const cantidad =
       serviciosActivos.filter(servicio =>
         normalizarTexto(
@@ -984,20 +1084,28 @@ function crearBotonesFaena() {
     botones.push(`
       <button
         type="button"
-        class="boton-faena ${
-          faenaSeleccionada === faena
-            ? 'activo'
-            : ''
-        }"
-        data-faena="${
-          escaparHTML(faena)
-        }"
+        class="
+          boton-faena
+          ${obtenerClaseFaenaBoton(faena)}
+          ${
+            faenaSeleccionada === faena
+              ? 'activo'
+              : ''
+          }
+        "
         onclick="seleccionarFaena(
           '${escaparAtributo(faena)}'
         )"
       >
-        ${escaparHTML(faena)}
-        (${cantidad})
+        <span class="boton-faena-indicador"></span>
+
+        <span>
+          ${escaparHTML(faena)}
+        </span>
+
+        <span class="boton-faena-cantidad">
+          ${cantidad}
+        </span>
       </button>
     `);
   });
@@ -1005,7 +1113,52 @@ function crearBotonesFaena() {
   contenedor.innerHTML =
     botones.join('');
 }
+    function obtenerClaseFaenaBoton(faena) {
+  const valor =
+    normalizarTexto(faena);
 
+  if (valor === 'CENTINELA') {
+    return 'faena-centinela';
+  }
+
+  if (valor === 'ANTAPACCAY') {
+    return 'faena-antapaccay';
+  }
+
+  if (valor === 'SIERRA GORDA') {
+    return 'faena-sierra-gorda';
+  }
+
+  if (valor === 'CALAMA') {
+    return 'faena-calama';
+  }
+
+  return 'faena-todas';
+}
+
+
+function obtenerClaseInsigniaFaena(faena) {
+  const valor =
+    normalizarTexto(faena);
+
+  if (valor === 'CENTINELA') {
+    return 'insignia-centinela';
+  }
+
+  if (valor === 'ANTAPACCAY') {
+    return 'insignia-antapaccay';
+  }
+
+  if (valor === 'SIERRA GORDA') {
+    return 'insignia-sierra-gorda';
+  }
+
+  if (valor === 'CALAMA') {
+    return 'insignia-calama';
+  }
+
+  return 'insignia-general';
+}
 
 function seleccionarFaena(faena) {
   faenaSeleccionada =
@@ -1075,9 +1228,27 @@ function aplicarFiltros() {
 
 
 function actualizarTextoFiltro() {
+  const cantidad =
+    serviciosMostrados.length;
+
+  const palabraActividad =
+    cantidad === 1
+      ? 'actividad activa'
+      : 'actividades activas';
+
   const texto =
     document.getElementById(
       'textoFiltroFaena'
+    );
+
+  const titulo =
+    document.getElementById(
+      'tituloAndamiosActivos'
+    );
+
+  const contador =
+    document.getElementById(
+      'contadorResultados'
     );
 
   if (
@@ -1085,25 +1256,30 @@ function actualizarTextoFiltro() {
     'TODAS'
   ) {
     texto.textContent =
-      'Mostrando todas las faenas';
+      `${cantidad} ${palabraActividad}`;
+
+    titulo.textContent =
+      'Andamios activos';
+
+    contador.textContent =
+      `${cantidad} ${palabraActividad}`;
 
     return;
   }
 
   texto.textContent =
-    `Mostrando únicamente ${
-      faenaSeleccionada
-    }`;
+    `${faenaSeleccionada} • ${cantidad} ${palabraActividad}`;
+
+  titulo.textContent =
+    `Andamios activos • ${faenaSeleccionada}`;
+
+  contador.textContent =
+    `${cantidad} ${palabraActividad}`;
 }
 
     function mostrarServicios() {
       const contenedor =
         document.getElementById('contenedorTarjetas');
-
-      document.getElementById(
-        'contadorResultados'
-      ).textContent =
-        `${serviciosMostrados.length} resultado(s)`;
 
       if (serviciosMostrados.length === 0) {
         contenedor.innerHTML = `
@@ -1119,110 +1295,149 @@ function actualizarTextoFiltro() {
         .join('');
     }
 
+function crearTarjetaServicio(servicio) {
+  const tag =
+    escaparHTML(
+      servicio.tag ||
+      'SIN TAG'
+    );
 
-    function crearTarjetaServicio(servicio) {
-      const tag =
-        escaparHTML(servicio.tag || 'SIN TAG');
+  const estado =
+    escaparHTML(
+      servicio.estado ||
+      'SIN ESTADO'
+    );
 
-      const estado =
-        escaparHTML(servicio.estado || 'SIN ESTADO');
+  const faena =
+    servicio.faena ||
+    'FAENA NO REGISTRADA';
 
-      const claseEstado =
-        obtenerClaseEstado(servicio.estado);
+  const claseEstado =
+    obtenerClaseEstado(
+      servicio.estado
+    );
 
-      return `
-        <article class="tarjeta">
+  const claseFaena =
+    obtenerClaseInsigniaFaena(
+      servicio.faena
+    );
 
-          <div class="tarjeta-cabecera">
+  return `
+    <article class="tarjeta">
 
-            <h3 class="tag">
-              ${tag}
-            </h3>
+      <div class="tarjeta-cabecera">
 
-            <span class="estado ${claseEstado}">
-              ${estado}
-            </span>
+        <div class="tarjeta-identificacion">
 
-          </div>
-          <div>
-            <span class="insignia-faena">
-              ${
-                escaparHTML(
-                  servicio.faena ||
-                  'FAENA NO REGISTRADA'
-                )
-              }
-            </span>
-          </div>
-          <div class="descripcion">
+          <h3 class="tag">
+            ${tag}
+          </h3>
+
+          <span
+            class="insignia-faena ${claseFaena}"
+          >
+            ${escaparHTML(faena)}
+          </span>
+
+          <span
+            class="estado tarjeta-estado ${claseEstado}"
+          >
+            ${estado}
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="descripcion">
+        ${
+          escaparHTML(
+            servicio.descripcion ||
+            'Sin descripción registrada.'
+          )
+        }
+      </div>
+
+      <div class="datos">
+
+        <div class="dato">
+          <span class="dato-label">
+            OT
+          </span>
+
+          <span class="dato-valor">
             ${
               escaparHTML(
-                servicio.descripcion ||
-                'Sin descripción registrada.'
+                servicio.ot ||
+                'No registrada'
               )
             }
-          </div>
+          </span>
+        </div>
 
-          <div class="datos">
+        <div class="dato">
+          <span class="dato-label">
+            Área
+          </span>
 
-            <div class="dato">
-              <span class="dato-label">OT</span>
-              <span class="dato-valor">
-                ${escaparHTML(servicio.ot || 'No registrada')}
-              </span>
-            </div>
+          <span class="dato-valor">
+            ${
+              escaparHTML(
+                servicio.area ||
+                'No registrada'
+              )
+            }
+          </span>
+        </div>
 
-            <div class="dato">
-              <span class="dato-label">Faena</span>
-              <span class="dato-valor">
-                ${escaparHTML(servicio.faena || 'No registrada')}
-              </span>
-            </div>
+        <div class="dato">
+          <span class="dato-label">
+            Programado
+          </span>
 
-            <div class="dato">
-              <span class="dato-label">Área</span>
-              <span class="dato-valor">
-                ${escaparHTML(servicio.area || 'No registrada')}
-              </span>
-            </div>
+          <span class="dato-valor">
+            ${
+              escaparHTML(
+                servicio.fechaProgramada ||
+                'Sin fecha'
+              )
+            }
+          </span>
+        </div>
 
-            <div class="dato">
-              <span class="dato-label">Programado</span>
-              <span class="dato-valor">
-                ${
-                  escaparHTML(
-                    servicio.fechaProgramada ||
-                    'Sin fecha'
-                  )
-                }
-              </span>
-            </div>
+        <div class="dato">
+          <span class="dato-label">
+            Supervisor
+          </span>
 
-            <div class="dato">
-              <span class="dato-label">Supervisor</span>
-              <span class="dato-valor">
-                ${
-                  escaparHTML(
-                    servicio.supervisor ||
-                    'No asignado'
-                  )
-                }
-              </span>
-            </div>
+          <span class="dato-valor">
+            ${
+              escaparHTML(
+                servicio.supervisor ||
+                'No asignado'
+              )
+            }
+          </span>
+        </div>
 
-          </div>
+      </div>
 
-          <button
-            type="button"
-            class="boton-abrir"
-            onclick="abrirServicio('${escaparAtributo(servicio.idServicio)}')"
-          >
-            Abrir Servicio (TAG)
-          </button>
+      <button
+        type="button"
+        class="boton-abrir"
+        onclick="abrirServicio(
+          '${escaparAtributo(
+            servicio.idServicio
+          )}'
+        )"
+      >
+        Abrir Servicio (TAG)
+      </button>
 
-        </article>
-      `;
-    }
+    </article>
+  `;
+}
+    
 
 
    function actualizarIndicadores(
