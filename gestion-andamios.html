@@ -433,6 +433,103 @@
       font-size: 12px;
       color: var(--gris);
     }
+    /* ======================================================
+   FILTROS POR FAENA
+   ====================================================== */
+
+.filtros-faena {
+  margin-bottom: 22px;
+  padding: 15px;
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 13px;
+  box-shadow: var(--sombra);
+}
+
+.filtros-faena-superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filtros-faena-superior strong {
+  color: var(--azul);
+  font-size: 14px;
+}
+
+.filtros-faena-superior span {
+  color: var(--gris);
+  font-size: 12px;
+}
+
+.filtros-faena-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.boton-faena {
+  padding: 10px 14px;
+  color: var(--azul);
+  background: #eef4f8;
+  border: 1px solid #c9dbe7;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.boton-faena:hover {
+  background: #dcebf4;
+  transform: translateY(-1px);
+}
+
+.boton-faena.activo {
+  color: white;
+  background: var(--azul);
+  border-color: var(--azul);
+  box-shadow: 0 5px 14px rgba(18, 59, 93, 0.22);
+}
+
+.insignia-faena {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1px;
+  padding: 6px 9px;
+  color: var(--azul);
+  background: #eaf3fa;
+  border: 1px solid #c7ddeb;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.insignia-faena::before {
+  content: "●";
+  color: var(--naranja);
+  font-size: 9px;
+}
+
+@media (max-width: 620px) {
+  .filtros-faena-superior {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filtros-faena-botones {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .boton-faena {
+    width: 100%;
+  }
+}
 
     @media (max-width: 850px) {
       .resumen {
@@ -624,7 +721,35 @@
       </button>
 
     </section>
+<section class="filtros-faena">
 
+  <div class="filtros-faena-superior">
+
+    <strong>
+      Filtrar por faena
+    </strong>
+
+    <span id="textoFiltroFaena">
+      Mostrando todas las faenas
+    </span>
+
+  </div>
+
+  <div
+    id="botonesFaena"
+    class="filtros-faena-botones"
+  >
+    <button
+      type="button"
+      class="boton-faena activo"
+      data-faena="TODAS"
+      onclick="seleccionarFaena('TODAS')"
+    >
+      Todas
+    </button>
+  </div>
+
+</section>
     <section class="resumen">
 
       <article class="indicador">
@@ -708,6 +833,7 @@
 
     let serviciosActivos = [];
     let serviciosMostrados = [];
+    let faenaSeleccionada = 'TODAS';
 
     const estadosCerrados = [
       'CERRADO',
@@ -770,10 +896,8 @@
           return !estadosCerrados.includes(estado);
         });
 
-        serviciosMostrados = [...serviciosActivos];
-
-        actualizarIndicadores();
-        mostrarServicios();
+          crearBotonesFaena();
+          aplicarFiltros();
 
       } catch (error) {
         console.error(error);
@@ -792,34 +916,185 @@
     }
 
 
-    function filtrarServicios() {
-      const busqueda = normalizarTexto(
-        document.getElementById('buscador').value
-      );
+function filtrarServicios() {
+  aplicarFiltros();
+}
+function crearBotonesFaena() {
+  const contenedor =
+    document.getElementById(
+      'botonesFaena'
+    );
 
-      if (!busqueda) {
-        serviciosMostrados = [...serviciosActivos];
-        mostrarServicios();
-        return;
+  const faenas = [
+    ...new Set(
+      serviciosActivos
+        .map(servicio =>
+          normalizarTexto(
+            servicio.faena
+          )
+        )
+        .filter(Boolean)
+    )
+  ].sort((a, b) =>
+    a.localeCompare(
+      b,
+      'es',
+      { numeric: true }
+    )
+  );
+
+  /*
+   * Si la faena anteriormente elegida
+   * ya no existe, volvemos a TODAS.
+   */
+  if (
+    faenaSeleccionada !== 'TODAS' &&
+    !faenas.includes(
+      faenaSeleccionada
+    )
+  ) {
+    faenaSeleccionada = 'TODAS';
+  }
+
+  const botones = [
+    `
+      <button
+        type="button"
+        class="boton-faena ${
+          faenaSeleccionada === 'TODAS'
+            ? 'activo'
+            : ''
+        }"
+        data-faena="TODAS"
+        onclick="seleccionarFaena('TODAS')"
+      >
+        Todas
+      </button>
+    `
+  ];
+
+  faenas.forEach(faena => {
+    const cantidad =
+      serviciosActivos.filter(servicio =>
+        normalizarTexto(
+          servicio.faena
+        ) === faena
+      ).length;
+
+    botones.push(`
+      <button
+        type="button"
+        class="boton-faena ${
+          faenaSeleccionada === faena
+            ? 'activo'
+            : ''
+        }"
+        data-faena="${
+          escaparHTML(faena)
+        }"
+        onclick="seleccionarFaena(
+          '${escaparAtributo(faena)}'
+        )"
+      >
+        ${escaparHTML(faena)}
+        (${cantidad})
+      </button>
+    `);
+  });
+
+  contenedor.innerHTML =
+    botones.join('');
+}
+
+
+function seleccionarFaena(faena) {
+  faenaSeleccionada =
+    normalizarTexto(faena) ||
+    'TODAS';
+
+  crearBotonesFaena();
+  aplicarFiltros();
+}
+
+
+function aplicarFiltros() {
+  const busqueda =
+    normalizarTexto(
+      document
+        .getElementById(
+          'buscador'
+        )
+        .value
+    );
+
+  serviciosMostrados =
+    serviciosActivos.filter(
+      servicio => {
+        const faenaServicio =
+          normalizarTexto(
+            servicio.faena
+          );
+
+        const coincideFaena =
+          faenaSeleccionada ===
+            'TODAS' ||
+          faenaServicio ===
+            faenaSeleccionada;
+
+        const textoCompleto =
+          normalizarTexto([
+            servicio.tag,
+            servicio.ot,
+            servicio.area,
+            servicio.faena,
+            servicio.descripcion,
+            servicio.supervisor,
+            servicio.estado
+          ].join(' '));
+
+        const coincideBusqueda =
+          !busqueda ||
+          textoCompleto.includes(
+            busqueda
+          );
+
+        return (
+          coincideFaena &&
+          coincideBusqueda
+        );
       }
+    );
 
-      serviciosMostrados = serviciosActivos.filter(servicio => {
-        const textoCompleto = normalizarTexto([
-          servicio.tag,
-          servicio.ot,
-          servicio.area,
-          servicio.faena,
-          servicio.descripcion,
-          servicio.supervisor,
-          servicio.estado
-        ].join(' '));
+  actualizarTextoFiltro();
+  actualizarIndicadores(
+    serviciosMostrados
+  );
 
-        return textoCompleto.includes(busqueda);
-      });
+  mostrarServicios();
+}
 
-      mostrarServicios();
-    }
 
+function actualizarTextoFiltro() {
+  const texto =
+    document.getElementById(
+      'textoFiltroFaena'
+    );
+
+  if (
+    faenaSeleccionada ===
+    'TODAS'
+  ) {
+    texto.textContent =
+      'Mostrando todas las faenas';
+
+    return;
+  }
+
+  texto.textContent =
+    `Mostrando únicamente ${
+      faenaSeleccionada
+    }`;
+}
 
     function mostrarServicios() {
       const contenedor =
@@ -869,7 +1144,16 @@
             </span>
 
           </div>
-
+          <div>
+            <span class="insignia-faena">
+              ${
+                escaparHTML(
+                  servicio.faena ||
+                  'FAENA NO REGISTRADA'
+                )
+              }
+            </span>
+          </div>
           <div class="descripcion">
             ${
               escaparHTML(
@@ -941,38 +1225,58 @@
     }
 
 
-    function actualizarIndicadores() {
-      const tags = new Set(
-        serviciosActivos
-          .map(servicio => normalizarTexto(servicio.tag))
-          .filter(Boolean)
-      );
+   function actualizarIndicadores(
+  lista = serviciosMostrados
+) {
+  const servicios =
+    Array.isArray(lista)
+      ? lista
+      : [];
 
-      const enArmado = serviciosActivos.filter(servicio =>
-        normalizarTexto(servicio.estado) === 'EN ARMADO'
-      ).length;
+  const tags = new Set(
+    servicios
+      .map(servicio =>
+        normalizarTexto(
+          servicio.tag
+        )
+      )
+      .filter(Boolean)
+  );
 
-      const operativos = serviciosActivos.filter(servicio =>
-        normalizarTexto(servicio.estado) ===
-        'ANDAMIO OPERATIVO'
-      ).length;
+  const enArmado =
+    servicios.filter(servicio =>
+      normalizarTexto(
+        servicio.estado
+      ) === 'EN ARMADO'
+    ).length;
 
-      document.getElementById(
-        'totalActivos'
-      ).textContent = serviciosActivos.length;
+  const operativos =
+    servicios.filter(servicio =>
+      normalizarTexto(
+        servicio.estado
+      ) === 'ANDAMIO OPERATIVO'
+    ).length;
 
-      document.getElementById(
-        'totalTags'
-      ).textContent = tags.size;
+  document.getElementById(
+    'totalActivos'
+  ).textContent =
+    servicios.length;
 
-      document.getElementById(
-        'totalArmado'
-      ).textContent = enArmado;
+  document.getElementById(
+    'totalTags'
+  ).textContent =
+    tags.size;
 
-      document.getElementById(
-        'totalOperativos'
-      ).textContent = operativos;
-    }
+  document.getElementById(
+    'totalArmado'
+  ).textContent =
+    enArmado;
+
+  document.getElementById(
+    'totalOperativos'
+  ).textContent =
+    operativos;
+}
 
 
     async function abrirHistorialTag(tag) {
@@ -1396,9 +1700,21 @@ function obtenerFechaActualISO() {
 
         <select id="faena" required>
           <option value="">Seleccionar</option>
-          <option value="CENTINELA">CENTINELA</option>
-          <option value="SIERRA GORDA">SIERRA GORDA</option>
-          <option value="CALAMA">CALAMA</option>
+<option value="CENTINELA">
+  CENTINELA
+</option>
+
+<option value="ANTAPACCAY">
+  ANTAPACCAY
+</option>
+
+<option value="SIERRA GORDA">
+  SIERRA GORDA
+</option>
+
+<option value="CALAMA">
+  CALAMA
+</option>
         </select>
       </div>
 
