@@ -145,7 +145,7 @@
 
     .resumen {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 15px;
       margin-bottom: 26px;
     }
@@ -568,21 +568,21 @@
 }
 
 .faena-calama {
-  color: #fb8c00;
-  background: #fff3e0;
-  border-color: #ffcc80;
+  color: #9a7800;
+  background: #fff9dc;
+  border-color: #ead77a;
 }
 
 .boton-faena.faena-calama.activo {
   color: white;
-  background: #fb8c00;
-  border-color: #fb8c00;
+  background: #9a7800;
+  border-color: #9a7800;
 }
 
 .insignia-calama {
-  color: #fb8c00;
-  background: #fff3e0;
-  border: 1px solid #ffcc80;
+  color: #9a7800;
+  background: #fff9dc;
+  border: 1px solid #ead77a;
 }
 
 .insignia-faena {
@@ -1008,16 +1008,6 @@
       <article class="indicador">
         <div class="numero" id="totalTags">0</div>
         <div class="nombre">TAG diferentes</div>
-      </article>
-
-      <article class="indicador">
-        <div class="numero" id="totalArmado">0</div>
-        <div class="nombre">En armado</div>
-      </article>
-
-      <article class="indicador">
-        <div class="numero" id="totalOperativos">0</div>
-        <div class="nombre">Operativos</div>
       </article>
 
     </section>
@@ -1649,16 +1639,6 @@ function actualizarIndicadores(
     'totalTags'
   ).textContent =
     tags.size;
-
-  document.getElementById(
-    'totalArmado'
-  ).textContent =
-    enArmado;
-
-  document.getElementById(
-    'totalOperativos'
-  ).textContent =
-    operativos;
 
   document.getElementById(
     'totalSolicitados'
