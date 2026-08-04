@@ -1873,7 +1873,7 @@ function actualizarIndicadores(
   if (!fecha.value) {
     fecha.value = obtenerFechaActualISO();
   }
-
+  cargarSupervisores();
   modal.classList.add('activo');
 
   setTimeout(() => {
@@ -1895,7 +1895,96 @@ function cerrarModalNuevoDesdeFondo(evento) {
   }
 }
 
+async function cargarSupervisores() {
+  const selector =
+    document.getElementById(
+      'supervisor'
+    );
 
+  selector.innerHTML = `
+    <option value="">
+      Cargando supervisores...
+    </option>
+  `;
+
+  selector.disabled = true;
+
+  try {
+    const url =
+      `${API_URL}?accion=supervisoresAndamios&t=${Date.now()}`;
+
+    const respuesta =
+      await fetch(url, {
+        method: 'GET',
+        redirect: 'follow'
+      });
+
+    if (!respuesta.ok) {
+      throw new Error(
+        `Error HTTP ${respuesta.status}`
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudieron cargar los supervisores.'
+      );
+    }
+
+    const supervisores =
+      Array.isArray(
+        resultado.supervisores
+      )
+        ? resultado.supervisores
+        : [];
+
+    selector.innerHTML = `
+      <option value="">
+        Seleccionar supervisor
+      </option>
+    `;
+
+    supervisores.forEach(nombre => {
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value = nombre;
+      opcion.textContent = nombre;
+
+      selector.appendChild(
+        opcion
+      );
+    });
+
+    if (
+      supervisores.length === 0
+    ) {
+      selector.innerHTML = `
+        <option value="">
+          No hay supervisores registrados
+        </option>
+      `;
+    }
+
+  } catch (error) {
+    console.error(error);
+
+    selector.innerHTML = `
+      <option value="">
+        Error al cargar supervisores
+      </option>
+    `;
+
+  } finally {
+    selector.disabled = false;
+  }
+}
 async function guardarNuevoServicio(evento) {
   evento.preventDefault();
 
@@ -2144,13 +2233,18 @@ function obtenerFechaActualISO() {
       </div>
 
       <div class="campo">
-        <label for="supervisor">Supervisor *</label>
-        <input
+        <label for="supervisor">
+          Supervisor *
+        </label>
+      
+        <select
           id="supervisor"
-          type="text"
           required
-          placeholder="Nombre del supervisor"
         >
+          <option value="">
+            Cargando supervisores...
+          </option>
+        </select>
       </div>
 
       <div class="campo">
