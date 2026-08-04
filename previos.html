@@ -1239,29 +1239,48 @@
         <h3>Finalizar Previos</h3>
       </div>
 
-      <div class="modal-contenido">
+     <div class="modal-contenido">
 
-        <p>
-          Los materiales serán guardados y la lista quedará
-          bloqueada para edición.
-        </p>
+  <p>
+    Revisa cuidadosamente los materiales antes de finalizar
+    Previos. La lista quedará bloqueada para edición.
+  </p>
 
-        <div class="modal-resumen">
+  <div class="modal-tabla-contenedor">
 
-          <div class="modal-dato">
-            <div id="modalTotalTipos" class="modal-dato-numero">0</div>
-            <div class="modal-dato-label">Tipos de material</div>
-          </div>
+    <table class="modal-tabla-materiales">
 
-          <div class="modal-dato">
-            <div id="modalTotalPiezas" class="modal-dato-numero">0</div>
-            <div class="modal-dato-label">Unidades totales</div>
-          </div>
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Grupo</th>
+          <th class="columna-codigo">Código</th>
+          <th class="columna-cantidad">Cantidad</th>
+        </tr>
+      </thead>
 
-        </div>
+      <tbody id="modalListaMateriales">
+      </tbody>
 
-      </div>
+    </table>
 
+  </div>
+
+  <div class="modal-resumen">
+
+    <div class="modal-dato">
+      <div id="modalTotalTipos" class="modal-dato-numero">0</div>
+      <div class="modal-dato-label">Tipos de material</div>
+    </div>
+
+    <div class="modal-dato">
+      <div id="modalTotalPiezas" class="modal-dato-numero">0</div>
+      <div class="modal-dato-label">Unidades totales</div>
+    </div>
+
+  </div>
+
+</div>
       <div class="modal-acciones">
 
         <button
@@ -2344,34 +2363,95 @@
     }
 
 
-    function abrirModalFinalizar() {
-      if (modoSoloLectura) {
-        return;
-      }
+function abrirModalFinalizar() {
+  if (modoSoloLectura) {
+    return;
+  }
 
-      if (materialesPrevios.length === 0) {
-        mostrarMensaje(
-          'Debes agregar al menos un material.',
-          'error'
-        );
-        return;
-      }
+  if (materialesPrevios.length === 0) {
+    mostrarMensaje(
+      'Debes agregar al menos un material.',
+      'error'
+    );
+    return;
+  }
 
-      asignarTexto(
-        'modalTotalTipos',
-        materialesPrevios.length
-      );
+  ordenarMateriales();
 
-      asignarTexto(
-        'modalTotalPiezas',
-        obtenerTotalPiezas()
-      );
+  asignarTexto(
+    'modalTotalTipos',
+    materialesPrevios.length
+  );
 
-      document
-        .getElementById('modalFinalizar')
-        .classList.add('activo');
-    }
+  asignarTexto(
+    'modalTotalPiezas',
+    obtenerTotalPiezas()
+  );
 
+  const cuerpoTabla =
+    document.getElementById(
+      'modalListaMateriales'
+    );
+
+  cuerpoTabla.innerHTML =
+    materialesPrevios
+      .map(material => `
+        <tr>
+
+          <td>
+            <strong>
+              ${escaparHTML(
+                material.subgrupo ||
+                'Sin nombre'
+              )}
+            </strong>
+
+            ${
+              material.observacion
+                ? `
+                  <div class="modal-observacion-material">
+                    Observación:
+                    ${escaparHTML(
+                      material.observacion
+                    )}
+                  </div>
+                `
+                : ''
+            }
+          </td>
+
+          <td>
+            ${escaparHTML(
+              material.grupo ||
+              'Sin grupo'
+            )}
+          </td>
+
+          <td class="columna-codigo">
+            ${escaparHTML(
+              material.codigo ||
+              'Sin código'
+            )}
+          </td>
+
+          <td class="columna-cantidad">
+            ${Number(
+              material.cantidad || 0
+            )}
+          </td>
+
+        </tr>
+      `)
+      .join('');
+
+  document
+    .getElementById(
+      'modalFinalizar'
+    )
+    .classList.add(
+      'activo'
+    );
+}
 
     function cerrarModalFinalizar() {
       document
