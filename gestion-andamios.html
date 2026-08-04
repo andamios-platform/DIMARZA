@@ -2162,6 +2162,8 @@ async function guardarNuevoServicio(evento) {
     document
       .getElementById('formNuevoServicio')
       .reset();
+    cargarSupervisores();
+    cargarResponsablesPrevios();
 
     document.getElementById(
       'fechaProgramada'
