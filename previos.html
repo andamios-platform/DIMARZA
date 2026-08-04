@@ -775,7 +775,7 @@
     }
 
     .modal {
-      width: min(480px, 100%);
+      width: min(820px, 100%);
       overflow: hidden;
       background: white;
       border-radius: 15px;
@@ -796,6 +796,73 @@
     .modal-contenido {
       padding: 20px;
     }
+    .modal {
+  width: min(820px, 100%);
+}
+
+.modal-tabla-contenedor {
+  max-height: 300px;
+  margin: 16px 0;
+  overflow: auto;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+}
+
+.modal-tabla-materiales {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.modal-tabla-materiales th,
+.modal-tabla-materiales td {
+  padding: 11px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+
+.modal-tabla-materiales th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: white;
+  background: var(--azul);
+}
+
+.modal-tabla-materiales tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.modal-tabla-materiales tbody tr:nth-child(even) {
+  background: #f7f9fb;
+}
+
+.modal-tabla-materiales .columna-cantidad {
+  width: 100px;
+  text-align: center;
+  font-weight: bold;
+  color: var(--azul);
+}
+
+.modal-tabla-materiales .columna-codigo {
+  width: 130px;
+}
+
+.modal-observacion-material {
+  margin-top: 4px;
+  color: var(--gris);
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .modal-tabla-materiales {
+    min-width: 620px;
+  }
+
+  .modal-tabla-contenedor {
+    max-height: 260px;
+  }
+}
 
     .modal-resumen {
       display: grid;
