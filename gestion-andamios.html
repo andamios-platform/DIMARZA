@@ -1944,7 +1944,7 @@ async function guardarNuevoServicio(evento) {
   };
 
   boton.disabled = true;
-  boton.textContent = 'Guardando...';
+  boton.textContent = 'Guardando actividad...';
 
   mensaje.className =
     'mensaje-formulario campo-completo';
@@ -2002,7 +2002,7 @@ async function guardarNuevoServicio(evento) {
 
   } finally {
     boton.disabled = false;
-    boton.textContent = 'Guardar servicio';
+    boton.textContent = 'Guardar actividad';
   }
 }
 
@@ -2053,8 +2053,8 @@ function obtenerFechaActualISO() {
 
     <div class="modal-cabecera">
       <div>
-        <h3>Nuevo servicio</h3>
-        <p>Registro inicial del trabajo por TAG</p>
+        <h3>Nueva actividad</h3>
+        <p>Registro inicial de la actividad por TAG</p>
       </div>
 
       <button
@@ -2074,8 +2074,7 @@ function obtenerFechaActualISO() {
     >
 
       <div class="campo">
-        <label for="faena">Faena *</label>
-
+      <label for="faena">Unidad minera *</label>
         <select id="faena" required>
           <option value="">Seleccionar</option>
 <option value="CENTINELA">
@@ -2221,7 +2220,7 @@ function obtenerFechaActualISO() {
           type="submit"
           class="boton-principal"
         >
-          Guardar servicio
+          Guardar actividad
         </button>
 
       </div>
