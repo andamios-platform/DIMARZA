@@ -1873,8 +1873,10 @@ function actualizarIndicadores(
   if (!fecha.value) {
     fecha.value = obtenerFechaActualISO();
   }
-  cargarSupervisores();
-  modal.classList.add('activo');
+cargarSupervisores();
+cargarResponsablesPrevios();
+
+modal.classList.add('activo');
 
   setTimeout(() => {
     document.getElementById('tag').focus();
@@ -1985,6 +1987,102 @@ async function cargarSupervisores() {
     selector.disabled = false;
   }
 }
+
+async function cargarResponsablesPrevios() {
+  const selector =
+    document.getElementById(
+      'responsablePrevios'
+    );
+
+  selector.innerHTML = `
+    <option value="">
+      Cargando responsables...
+    </option>
+  `;
+
+  selector.disabled = true;
+
+  try {
+    const url =
+      `${API_URL}?accion=personalPrevios&t=${Date.now()}`;
+
+    const respuesta =
+      await fetch(url, {
+        method: 'GET',
+        redirect: 'follow'
+      });
+
+    if (!respuesta.ok) {
+      throw new Error(
+        `Error HTTP ${respuesta.status}`
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo cargar el personal.'
+      );
+    }
+
+    const responsables =
+      Array.isArray(
+        resultado.responsables
+      )
+        ? resultado.responsables
+        : [];
+
+    selector.innerHTML = `
+      <option value="">
+        Seleccionar responsable
+      </option>
+    `;
+
+    responsables.forEach(persona => {
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value =
+        persona.nombre;
+
+      opcion.textContent =
+        persona.cargo
+          ? `${persona.nombre} — ${persona.cargo}`
+          : persona.nombre;
+
+      selector.appendChild(
+        opcion
+      );
+    });
+
+    if (
+      responsables.length === 0
+    ) {
+      selector.innerHTML = `
+        <option value="">
+          No hay personal registrado
+        </option>
+      `;
+    }
+
+  } catch (error) {
+    console.error(error);
+
+    selector.innerHTML = `
+      <option value="">
+        Error al cargar responsables
+      </option>
+    `;
+
+  } finally {
+    selector.disabled = false;
+  }
+}
 async function guardarNuevoServicio(evento) {
   evento.preventDefault();
 
@@ -2013,14 +2111,8 @@ async function guardarNuevoServicio(evento) {
       .getElementById('responsablePrevios')
       .value
       .trim(),
-    responsableArmado: document
-      .getElementById('responsableArmado')
-      .value
-      .trim(),
-    responsablePostparada: document
-      .getElementById('responsablePostparada')
-      .value
-      .trim(),
+      responsableArmado: '',
+      responsablePostparada: '',
     supervisor: document
       .getElementById('supervisor')
       .value
@@ -2251,39 +2343,16 @@ function obtenerFechaActualISO() {
         <label for="responsablePrevios">
           Responsable de previos *
         </label>
-
-        <input
+      
+        <select
           id="responsablePrevios"
-          type="text"
           required
-          placeholder="Nombre del responsable"
         >
+          <option value="">
+            Cargando responsables...
+          </option>
+        </select>
       </div>
-
-      <div class="campo">
-        <label for="responsableArmado">
-          Responsable de armado
-        </label>
-
-        <input
-          id="responsableArmado"
-          type="text"
-          placeholder="Puede asignarse después"
-        >
-      </div>
-
-      <div class="campo">
-        <label for="responsablePostparada">
-          Responsable de postparada
-        </label>
-
-        <input
-          id="responsablePostparada"
-          type="text"
-          placeholder="Puede asignarse después"
-        >
-      </div>
-
       <div class="campo campo-completo">
         <label for="observaciones">Observaciones</label>
 
