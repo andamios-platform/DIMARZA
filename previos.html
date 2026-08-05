@@ -347,7 +347,9 @@
       gap: 20px;
       align-items: start;
     }
-
+    .paneles.solo-lectura {
+        grid-template-columns: 1fr;
+      }
     .panel {
       padding: 21px;
       background: white;
@@ -1517,14 +1519,18 @@
         document
           .getElementById('panelAgregar')
           .classList.add('oculto');
-
+      
         document
           .getElementById('btnFinalizar')
           .classList.add('oculto');
-
+      
         document
           .getElementById('avisoBloqueado')
           .classList.remove('oculto');
+      
+        document
+          .querySelector('.paneles')
+          .classList.add('solo-lectura');
       }
     }
 
@@ -2685,7 +2691,9 @@ function abrirModalFinalizar() {
         document
           .getElementById('panelAgregar')
           .classList.add('oculto');
-
+        document
+          .querySelector('.paneles')
+          .classList.add('solo-lectura');
         document
           .getElementById('btnFinalizar')
           .classList.add('oculto');
