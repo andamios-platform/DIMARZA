@@ -37,14 +37,16 @@
       color: var(--texto);
     }
 
-    button,
+     button,
     input,
+    select,
     textarea {
       font: inherit;
     }
-
+    
     button:disabled,
     input:disabled,
+    select:disabled,
     textarea:disabled {
       opacity: 0.65;
       cursor: not-allowed;
@@ -218,6 +220,7 @@
     }
 
     .campo input,
+    .campo select,
     .campo textarea {
       width: 100%;
       padding: 12px 13px;
@@ -228,8 +231,9 @@
       outline: none;
     }
 
-    .campo input:focus,
-    .campo textarea:focus {
+      .campo input:focus,
+      .campo select:focus,
+      .campo textarea:focus {
       border-color: var(--azul-claro);
       box-shadow: 0 0 0 3px rgba(31, 95, 139, 0.12);
     }
@@ -901,12 +905,11 @@
             Responsable de Postparada
           </label>
 
-          <input
-            id="responsablePostparada"
-            type="text"
-            autocomplete="off"
-            placeholder="Ingrese el nombre del responsable"
-          >
+          <select id="responsablePostparada">
+            <option value="">
+              Cargando personal...
+            </option>
+          </select>
         </div>
 
         <div class="campo">
@@ -1569,6 +1572,97 @@
     );
 
 
+    async function cargarPersonalPostparada() {
+  const selector =
+    document.getElementById(
+      'responsablePostparada'
+    );
+
+  selector.innerHTML = `
+    <option value="">
+      Cargando personal...
+    </option>
+  `;
+
+  selector.disabled = true;
+
+  try {
+    const respuesta = await fetch(
+      `${API_URL}?accion=personalPrevios&_=${Date.now()}`
+    );
+
+    if (!respuesta.ok) {
+      throw new Error(
+        `Error de conexión (${respuesta.status}).`
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo cargar el personal.'
+      );
+    }
+
+    const personal =
+      Array.isArray(resultado.responsables)
+        ? resultado.responsables
+        : [];
+
+    selector.innerHTML = `
+      <option value="">
+        Seleccionar responsable
+      </option>
+    `;
+
+    personal.forEach(persona => {
+      const opcion =
+        document.createElement('option');
+
+      opcion.value =
+        persona.nombre || '';
+
+      opcion.textContent =
+        persona.cargo
+          ? `${persona.nombre} — ${persona.cargo}`
+          : persona.nombre;
+
+      selector.appendChild(opcion);
+    });
+
+    if (personal.length === 0) {
+      selector.innerHTML = `
+        <option value="">
+          No hay personal registrado
+        </option>
+      `;
+    }
+
+  } catch (error) {
+    console.error(
+      'Error cargando personal de Postparada:',
+      error
+    );
+
+    selector.innerHTML = `
+      <option value="">
+        Error al cargar personal
+      </option>
+    `;
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo cargar la lista de personal.',
+      'error'
+    );
+
+  } finally {
+    selector.disabled = false;
+  }
+}
     async function iniciarPostparada() {
       if (!ID_SERVICIO) {
         mostrarErrorInicial(
@@ -1578,6 +1672,7 @@
       }
 
       try {
+        await cargarPersonalPostparada();
         const url =
           `${API_URL}?accion=obtenerPostparada&idServicio=${
             encodeURIComponent(ID_SERVICIO)
@@ -3205,7 +3300,9 @@
       ) {
         document
           .querySelectorAll(
-            '#contenidoPrincipal input, #contenidoPrincipal textarea'
+            '#contenidoPrincipal input,' +
+            '#contenidoPrincipal select,' +
+            '#contenidoPrincipal textarea'
           )
           .forEach(elemento => {
             elemento.disabled = true;
