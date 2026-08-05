@@ -833,7 +833,14 @@
   background: #f7f9fb;
 }
 
-.modal-tabla-materiales .columna-cantidad {
+.modal-tabla-materiales th.columna-cantidad {
+  width: 100px;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+}
+
+.modal-tabla-materiales td.columna-cantidad {
   width: 100px;
   text-align: center;
   font-weight: bold;
@@ -2429,11 +2436,9 @@ function abrirModalFinalizar() {
             )}
           </td>
 
-          <td class="columna-cantidad">
-            <span style="color:#24313d;">
-              ${Number(material.cantidad || 0)}
-            </span>
-          </td>
+<td class="columna-cantidad">
+  ${Number(material.cantidad || 0)}
+</td>
 
         </tr>
       `)
