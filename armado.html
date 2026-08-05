@@ -502,6 +502,135 @@
 .evidencias-resumen strong{
   font-size:18px;
 }
+/* ======================================================
+   VISTA DEL ARMADO DESDE HISTORIAL
+   ====================================================== */
+
+.panel-historial-armado {
+  padding: 20px;
+  margin-top: 18px;
+  background: #ffffff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.panel-historial-armado h2 {
+  margin: 0;
+  color: var(--azul);
+  font-size: 21px;
+}
+
+.historial-armado-subtitulo {
+  margin: 6px 0 16px;
+  color: var(--gris);
+  font-size: 13px;
+}
+
+.tabla-historial-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+}
+
+.tabla-historial-armado {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+}
+
+.tabla-historial-armado th,
+.tabla-historial-armado td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+}
+
+.tabla-historial-armado th {
+  color: #ffffff;
+  background: var(--azul);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.tabla-historial-armado tbody tr:nth-child(even) {
+  background: #f7f9fb;
+}
+
+.tabla-historial-armado tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.historial-material-nombre {
+  color: var(--azul);
+  font-weight: bold;
+}
+
+.historial-material-grupo {
+  color: var(--gris);
+}
+
+.historial-material-cantidad {
+  width: 140px;
+  color: var(--texto);
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center !important;
+}
+
+.historial-material-observacion {
+  margin-top: 5px;
+  color: var(--gris);
+  font-size: 11px;
+}
+
+.historial-material-adicional {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 4px 7px;
+  color: var(--azul);
+  background: var(--azul-claro);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.historial-total-materiales {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  color: var(--azul);
+  background: var(--azul-claro);
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+body.modo-historial .evidencias-ayuda,
+body.modo-historial .evidencia-observacion,
+body.modo-historial .evidencias-resumen,
+body.modo-historial #avisoEvidenciasBloqueadas {
+  display: none !important;
+}
+
+body.modo-historial #seccionEvidencias {
+  pointer-events: auto;
+  opacity: 1;
+  filter: none;
+}
+
+body.modo-historial
+.evidencia-card:not(.registrada) {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  .historial-total-materiales {
+    flex-direction: column;
+  }
+}
 
 @media(max-width:1100px){
   .evidencias-grid{
@@ -699,7 +828,10 @@
     <button class="btn-volver" type="button" onclick="volverDetalle()">← Volver al servicio</button>
   </section>
 
-  <section class="progreso">
+  <section
+  id="panelProgresoArmado"
+  class="progreso"
+>
     <div class="progreso-superior"><span>Avance del servicio</span><span>Etapa: Armado</span></div>
     <div class="progreso-barra"><div class="progreso-relleno"></div></div>
     <div class="progreso-etapas">
@@ -723,7 +855,10 @@
       </div>
     </section>
 
-<section class="panel">
+<section
+  id="panelResponsableArmado"
+  class="panel"
+>
   <div class="panel-titulo">
     <h2>Responsable del armado</h2>
   </div>
@@ -830,8 +965,13 @@
 </section>
 
 
-    <section class="panel">
-      <div class="panel-titulo"><h2>Resumen del armado</h2></div>
+<section
+  id="panelResumenArmado"
+  class="panel"
+>
+  <div class="panel-titulo">
+    <h2>Resumen del armado</h2>
+  </div>
       <div class="resumen">
         <div class="resumen-card"><span>Despachado</span><strong id="totalDespachado">0</strong></div>
         <div class="resumen-card"><span>Utilizado</span><strong id="totalUtilizado">0</strong></div>
@@ -844,8 +984,13 @@
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panel-titulo"><h2>Control de materiales</h2></div>
+<section
+  id="panelMaterialesArmado"
+  class="panel"
+>
+  <div class="panel-titulo">
+    <h2>Control de materiales</h2>
+  </div>
 <p class="panel-subtitulo">
   El botón “No usado” no elimina la información: mueve el material a “No utilizados” y registra la cantidad utilizada como cero.
 </p>
@@ -1470,8 +1615,18 @@
 
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
-const parametros=new URLSearchParams(location.search);
-const ID_SERVICIO=(parametros.get('id')||parametros.get('idServicio')||'').trim();
+const parametros =
+  new URLSearchParams(location.search);
+
+const ID_SERVICIO =
+  (
+    parametros.get('id') ||
+    parametros.get('idServicio') ||
+    ''
+  ).trim();
+
+const ES_HISTORIAL =
+  parametros.get('origen') === 'historial';
 
 let servicioActual=null;
 let materialesArmado=[];
@@ -1613,8 +1768,10 @@ document
       .getElementById('contenidoPrincipal')
       .classList.remove('oculto');
 
-    // Carga las fotografías guardadas del servicio
-    await cargarFotografiasRegistradas();
+      // Carga las fotografías guardadas del servicio
+      await cargarFotografiasRegistradas();
+
+aplicarModoHistorial();
 
   } catch (error) {
     mostrarErrorInicial(
@@ -3541,7 +3698,267 @@ async function terminarMontaje() {
   }
 }  
 
+function aplicarModoHistorial() {
+  if (!ES_HISTORIAL) {
+    return;
+  }
 
+  document.body.classList.add(
+    'modo-historial'
+  );
+
+  const elementosOcultar = [
+    'panelProgresoArmado',
+    'panelResponsableArmado',
+    'panelControlArmado',
+    'panelResumenArmado'
+  ];
+
+  elementosOcultar.forEach(id => {
+    const elemento =
+      document.getElementById(id);
+
+    if (elemento) {
+      elemento.classList.add('oculto');
+    }
+  });
+const panelMateriales =
+  document.getElementById(
+    'panelMaterialesArmado'
+  );
+
+if (panelMateriales) {
+  panelMateriales
+    .querySelectorAll(
+      ':scope > .panel-titulo,' +
+      ':scope > .panel-subtitulo,' +
+      ':scope > .barra-herramientas,' +
+      ':scope > .seccion-material:not(#seccionEvidencias),' +
+      ':scope > .acciones-finales'
+    )
+    .forEach(elemento => {
+      elemento.classList.add('oculto');
+    });
+}
+  const cabecera =
+    document.querySelector('.cabecera');
+
+  if (cabecera) {
+    const titulo =
+      cabecera.querySelector('h1');
+
+    const descripcion =
+      cabecera.querySelector('p');
+
+    if (titulo) {
+      titulo.textContent =
+        'Resultado del Armado';
+    }
+
+    if (descripcion) {
+      descripcion.textContent =
+        'Consulta de materiales utilizados y evidencias fotográficas registradas.';
+    }
+  }
+
+  crearTablaHistorialArmado();
+}
+
+
+function crearTablaHistorialArmado() {
+  const existentes =
+    document.getElementById(
+      'panelHistorialMateriales'
+    );
+
+  if (existentes) {
+    existentes.remove();
+  }
+
+  const materialesUtilizados =
+    materialesArmado
+      .filter(material =>
+        Number(
+          material.cantidadUtilizada
+        ) > 0
+      )
+      .sort((a, b) => {
+        const grupoA =
+          String(a.grupo || '');
+
+        const grupoB =
+          String(b.grupo || '');
+
+        const compararGrupo =
+          grupoA.localeCompare(
+            grupoB,
+            'es',
+            { numeric: true }
+          );
+
+        if (compararGrupo !== 0) {
+          return compararGrupo;
+        }
+
+        return String(
+          a.descripcion ||
+          a.subgrupo ||
+          ''
+        ).localeCompare(
+          String(
+            b.descripcion ||
+            b.subgrupo ||
+            ''
+          ),
+          'es',
+          { numeric: true }
+        );
+      });
+
+  const panel =
+    document.createElement('section');
+
+  panel.id =
+    'panelHistorialMateriales';
+
+  panel.className =
+    'panel-historial-armado';
+
+  const totalUtilizado =
+    materialesUtilizados.reduce(
+      (total, material) =>
+        total +
+        Number(
+          material.cantidadUtilizada ||
+          0
+        ),
+      0
+    );
+
+  panel.innerHTML = `
+    <h2>Materiales utilizados</h2>
+
+    <p class="historial-armado-subtitulo">
+      Lista final de materiales registrados durante
+      el armado del andamio.
+    </p>
+
+    ${
+      materialesUtilizados.length
+        ? `
+          <div class="tabla-historial-contenedor">
+
+            <table class="tabla-historial-armado">
+
+              <thead>
+                <tr>
+                  <th>Material</th>
+                  <th>Grupo</th>
+                  <th>Código</th>
+                  <th class="historial-material-cantidad">
+                    Cantidad utilizada
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                ${materialesUtilizados
+                  .map(material => `
+                    <tr>
+
+                      <td>
+                        <div class="historial-material-nombre">
+                          ${escaparHtml(
+                            material.descripcion ||
+                            material.subgrupo ||
+                            'Sin descripción'
+                          )}
+                        </div>
+
+                        ${
+                          material.esAdicional
+                            ? `
+                              <span class="historial-material-adicional">
+                                Material adicional
+                              </span>
+                            `
+                            : ''
+                        }
+
+                        ${
+                          material.observacionArmado
+                            ? `
+                              <div class="historial-material-observacion">
+                                Observación:
+                                ${escaparHtml(
+                                  material.observacionArmado
+                                )}
+                              </div>
+                            `
+                            : ''
+                        }
+                      </td>
+
+                      <td class="historial-material-grupo">
+                        ${escaparHtml(
+                          material.grupo ||
+                          'Sin grupo'
+                        )}
+                      </td>
+
+                      <td>
+                        ${escaparHtml(
+                          material.codigo ||
+                          'S/C'
+                        )}
+                      </td>
+
+                      <td class="historial-material-cantidad">
+                        ${formatearNumero(
+                          material.cantidadUtilizada
+                        )}
+                      </td>
+
+                    </tr>
+                  `)
+                  .join('')}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          <div class="historial-total-materiales">
+            <span>
+              ${materialesUtilizados.length}
+              tipo(s) de material
+            </span>
+
+            <span>
+              ${formatearNumero(totalUtilizado)}
+              unidades utilizadas
+            </span>
+          </div>
+        `
+        : `
+          <div class="sin-datos">
+            No existen materiales utilizados registrados.
+          </div>
+        `
+    }
+  `;
+
+  const seccionEvidencias =
+    document.getElementById(
+      'seccionEvidencias'
+    );
+
+  if (seccionEvidencias) {
+    seccionEvidencias.before(panel);
+  }
+}
 function volverDetalle() {
   const parametros =
     new URLSearchParams(
