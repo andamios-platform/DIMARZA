@@ -545,6 +545,63 @@
       display: grid;
       gap: 12px;
     }
+    .tabla-consulta-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--borde);
+  border-radius: 11px;
+}
+
+.tabla-consulta {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabla-consulta th,
+.tabla-consulta td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+
+.tabla-consulta th {
+  color: white;
+  background: var(--azul);
+  font-weight: bold;
+}
+
+.tabla-consulta tbody tr:nth-child(even) {
+  background: #f7f9fb;
+}
+
+.tabla-consulta tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla-consulta-material {
+  color: var(--azul);
+  font-weight: bold;
+}
+
+.tabla-consulta-codigo {
+  width: 130px;
+  color: var(--gris);
+}
+
+.tabla-consulta-cantidad {
+  width: 110px;
+  color: var(--texto);
+  font-weight: bold;
+  text-align: center !important;
+}
+
+.tabla-consulta-observacion {
+  margin-top: 4px;
+  color: var(--gris);
+  font-size: 11px;
+}
 
     .material {
       display: grid;
@@ -1907,137 +1964,234 @@
     }
 
 
-    function renderizarMateriales() {
-      const lista =
-        document.getElementById('listaMateriales');
+function renderizarMateriales() {
+  const lista =
+    document.getElementById('listaMateriales');
 
-      const vacia =
-        document.getElementById('listaVacia');
+  const vacia =
+    document.getElementById('listaVacia');
 
-      const totales =
-        document.getElementById('totales');
+  const totales =
+    document.getElementById('totales');
 
-      const resumenGrupos =
-        document.getElementById('resumenGrupos');
+  const resumenGrupos =
+    document.getElementById('resumenGrupos');
 
-      if (materialesPrevios.length === 0) {
-        lista.innerHTML = '';
-        vacia.classList.remove('oculto');
-        totales.classList.add('oculto');
-        resumenGrupos.classList.add('oculto');
-        actualizarTotales();
-        return;
-      }
+  if (materialesPrevios.length === 0) {
+    lista.innerHTML = '';
+    vacia.classList.remove('oculto');
+    totales.classList.add('oculto');
+    resumenGrupos.classList.add('oculto');
 
-      vacia.classList.add('oculto');
-      totales.classList.remove('oculto');
-      resumenGrupos.classList.remove('oculto');
+    actualizarTotales();
+    return;
+  }
 
-      lista.innerHTML = materialesPrevios
-        .map((material, indice) => {
-          const esReciente =
-            claveMaterial(material) === claveMaterialReciente;
+  vacia.classList.add('oculto');
+  totales.classList.remove('oculto');
+  resumenGrupos.classList.remove('oculto');
 
-          return `
-            <article class="material ${esReciente ? 'reciente' : ''}">
+  /*
+   * Cuando Previos ya fue finalizado,
+   * mostrar una tabla de consulta.
+   */
+  if (modoSoloLectura) {
+    lista.innerHTML = `
+      <div class="tabla-consulta-contenedor">
 
-              <div>
-                <div class="material-grupo">
-                  ${escaparHTML(material.grupo)}
-                </div>
+        <table class="tabla-consulta">
 
-                <div class="material-nombre">
-                  ${escaparHTML(material.subgrupo)}
-                </div>
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Grupo</th>
+              <th>Código</th>
+              <th class="tabla-consulta-cantidad">
+                Cantidad
+              </th>
+            </tr>
+          </thead>
 
-                <div class="material-codigo">
-                  Código:
-                  ${escaparHTML(material.codigo || 'Sin código')}
-                </div>
+          <tbody>
 
-                ${
-                  material.observacion
-                    ? `
-                      <div class="material-observacion">
-                        Observación:
-                        ${escaparHTML(material.observacion)}
-                      </div>
-                    `
-                    : ''
-                }
+            ${materialesPrevios
+              .map(material => `
+                <tr>
 
-                ${
-                  esReciente
-                    ? `
-                      <span class="etiqueta-reciente">
-                        ✓ Recién agregado
-                      </span>
-                    `
-                    : ''
-                }
-              </div>
+                  <td>
+                    <div class="tabla-consulta-material">
+                      ${escaparHTML(
+                        material.subgrupo ||
+                        'Sin nombre'
+                      )}
+                    </div>
 
-              <div class="material-controles">
+                    ${
+                      material.observacion
+                        ? `
+                          <div class="tabla-consulta-observacion">
+                            Observación:
+                            ${escaparHTML(
+                              material.observacion
+                            )}
+                          </div>
+                        `
+                        : ''
+                    }
+                  </td>
 
-                ${
-                  !modoSoloLectura
-                    ? `
-                      <button
-                        type="button"
-                        class="boton-cantidad"
-                        onclick="cambiarCantidad(${indice}, -1)"
-                        aria-label="Restar"
-                      >
-                        −
-                      </button>
+                  <td>
+                    ${escaparHTML(
+                      material.grupo ||
+                      'Sin grupo'
+                    )}
+                  </td>
 
-                      <input
-                        type="number"
-                        class="cantidad-material-input"
-                        min="1"
-                        step="1"
-                        value="${Number(material.cantidad || 1)}"
-                        onchange="editarCantidad(${indice}, this.value)"
-                        onblur="editarCantidad(${indice}, this.value)"
-                      >
+                  <td class="tabla-consulta-codigo">
+                    ${escaparHTML(
+                      material.codigo ||
+                      'Sin código'
+                    )}
+                  </td>
 
-                      <button
-                        type="button"
-                        class="boton-cantidad"
-                        onclick="cambiarCantidad(${indice}, 1)"
-                        aria-label="Sumar"
-                      >
-                        +
-                      </button>
+                  <td class="tabla-consulta-cantidad">
+                    ${Number(
+                      material.cantidad || 0
+                    )}
+                  </td>
 
-                      <button
-                        type="button"
-                        class="boton-eliminar"
-                        onclick="eliminarMaterial(${indice})"
-                        title="Eliminar"
-                        aria-label="Eliminar"
-                      >
-                        ×
-                      </button>
-                    `
-                    : `
-                      <span class="cantidad-solo-lectura">
-                        ${Number(material.cantidad || 0)}
-                      </span>
-                    `
-                }
+                </tr>
+              `)
+              .join('')}
 
-              </div>
+          </tbody>
 
-            </article>
-          `;
-        })
-        .join('');
+        </table>
 
-      actualizarTotales();
-      renderizarResumenGrupos();
-    }
+      </div>
+    `;
 
+    actualizarTotales();
+    renderizarResumenGrupos();
+    return;
+  }
+
+  /*
+   * Mientras Previos sea editable,
+   * conservar las tarjetas y controles.
+   */
+  lista.innerHTML = materialesPrevios
+    .map((material, indice) => {
+      const esReciente =
+        claveMaterial(material) ===
+        claveMaterialReciente;
+
+      return `
+        <article class="material ${
+          esReciente ? 'reciente' : ''
+        }">
+
+          <div>
+
+            <div class="material-grupo">
+              ${escaparHTML(material.grupo)}
+            </div>
+
+            <div class="material-nombre">
+              ${escaparHTML(material.subgrupo)}
+            </div>
+
+            <div class="material-codigo">
+              Código:
+              ${escaparHTML(
+                material.codigo ||
+                'Sin código'
+              )}
+            </div>
+
+            ${
+              material.observacion
+                ? `
+                  <div class="material-observacion">
+                    Observación:
+                    ${escaparHTML(
+                      material.observacion
+                    )}
+                  </div>
+                `
+                : ''
+            }
+
+            ${
+              esReciente
+                ? `
+                  <span class="etiqueta-reciente">
+                    ✓ Recién agregado
+                  </span>
+                `
+                : ''
+            }
+
+          </div>
+
+          <div class="material-controles">
+
+            <button
+              type="button"
+              class="boton-cantidad"
+              onclick="cambiarCantidad(${indice}, -1)"
+              aria-label="Restar"
+            >
+              −
+            </button>
+
+            <input
+              type="number"
+              class="cantidad-material-input"
+              min="1"
+              step="1"
+              value="${Number(
+                material.cantidad || 1
+              )}"
+              onchange="editarCantidad(
+                ${indice},
+                this.value
+              )"
+              onblur="editarCantidad(
+                ${indice},
+                this.value
+              )"
+            >
+
+            <button
+              type="button"
+              class="boton-cantidad"
+              onclick="cambiarCantidad(${indice}, 1)"
+              aria-label="Sumar"
+            >
+              +
+            </button>
+
+            <button
+              type="button"
+              class="boton-eliminar"
+              onclick="eliminarMaterial(${indice})"
+              title="Eliminar"
+              aria-label="Eliminar"
+            >
+              ×
+            </button>
+
+          </div>
+
+        </article>
+      `;
+    })
+    .join('');
+
+  actualizarTotales();
+  renderizarResumenGrupos();
+}
 
     function editarCantidad(indice, valor) {
       if (modoSoloLectura) {
