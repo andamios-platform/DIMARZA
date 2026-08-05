@@ -3971,18 +3971,18 @@ function volverDetalle() {
   const tag =
     parametros.get('tag');
 
-  if (
-    origen === 'historial' &&
-    tag
-  ) {
-    window.location.href =
-      `historial.html?tag=${
-        encodeURIComponent(tag)
-      }`;
+if (
+  origen === 'historial' &&
+  tag
+) {
+  window.location.replace(
+    `historial.html?tag=${
+      encodeURIComponent(tag)
+    }`
+  );
 
-    return;
-  }
-
+  return;
+}
   window.location.href =
     `detalle-servicio.html?id=${
       encodeURIComponent(
