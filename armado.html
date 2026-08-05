@@ -728,33 +728,33 @@
     <h2>Responsable del armado</h2>
   </div>
 
-  <div class="responsable-grid">
+<div class="responsable-grid">
 
-    <div class="campo">
-      <label for="responsableArmado">
-        Responsable del montaje
-      </label>
+  <div class="campo">
+    <label for="responsableArmado">
+      Responsable del montaje
+    </label>
 
-      <input
-        id="responsableArmado"
-        type="text"
-        placeholder="Nombre del responsable"
-      >
-    </div>
-
-    <div class="campo">
-      <label for="usuarioRegistro">
-        Usuario que registra
-      </label>
-
-      <input
-        id="usuarioRegistro"
-        type="text"
-        placeholder="Nombre de quien registra"
-      >
-    </div>
-
+    <select id="responsableArmado">
+      <option value="">
+        Cargando personal...
+      </option>
+    </select>
   </div>
+
+  <div class="campo">
+    <label for="usuarioRegistro">
+      Usuario que registra
+    </label>
+
+    <select id="usuarioRegistro">
+      <option value="">
+        Cargando personal...
+      </option>
+    </select>
+  </div>
+
+</div>
 </section>
 
 
@@ -1592,12 +1592,16 @@ async function iniciarModulo() {
   try {
     await Promise.all([
       cargarArmado(),
-      cargarCatalogo()
+      cargarCatalogo(),
+      cargarPersonalArmado()
     ]);
+    
+    completarResponsables();
+    aplicarFlujoArmado();
 
-    document
-      .getElementById('contenidoCargando')
-      .classList.add('oculto');
+document
+  .getElementById('contenidoCargando')
+  .classList.add('oculto');
 
     document
       .getElementById('contenidoPrincipal')
@@ -1634,7 +1638,6 @@ async function cargarArmado(){
   }):[];
 
   mostrarServicio();
-  completarResponsables();
   renderizarTodo();
   actualizarResumen();
   determinarEstadoMontaje();
@@ -1658,10 +1661,171 @@ function mostrarServicio(){
   escribirTexto('datoSupervisor',servicioActual.supervisor||'—');
   escribirTexto('estadoServicio',servicioActual.estado||'SIN ESTADO');
 }
+async function cargarPersonalArmado() {
+  const responsable =
+    document.getElementById(
+      'responsableArmado'
+    );
 
-function completarResponsables(){
-  if(servicioActual.responsableArmado&&!document.getElementById('responsableArmado').value){
-    document.getElementById('responsableArmado').value=servicioActual.responsableArmado;
+  const usuario =
+    document.getElementById(
+      'usuarioRegistro'
+    );
+
+  const selectores = [
+    responsable,
+    usuario
+  ];
+
+  selectores.forEach(selector => {
+    selector.innerHTML = `
+      <option value="">
+        Cargando personal...
+      </option>
+    `;
+
+    selector.disabled = true;
+  });
+
+  try {
+    const respuesta = await fetch(
+      `${API_URL}?accion=personalPrevios&t=${Date.now()}`
+    );
+
+    if (!respuesta.ok) {
+      throw new Error(
+        `Error HTTP ${respuesta.status}`
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo cargar el personal.'
+      );
+    }
+
+    const personal =
+      Array.isArray(
+        resultado.responsables
+      )
+        ? resultado.responsables
+        : [];
+
+    selectores.forEach(selector => {
+      selector.innerHTML = `
+        <option value="">
+          Seleccionar persona
+        </option>
+      `;
+
+      personal.forEach(persona => {
+        const opcion =
+          document.createElement(
+            'option'
+          );
+
+        opcion.value =
+          persona.nombre || '';
+
+        opcion.textContent =
+          persona.cargo
+            ? `${persona.nombre} — ${persona.cargo}`
+            : persona.nombre;
+
+        selector.appendChild(opcion);
+      });
+
+      if (personal.length === 0) {
+        selector.innerHTML = `
+          <option value="">
+            No hay personal registrado
+          </option>
+        `;
+      }
+    });
+
+  } catch (error) {
+    console.error(
+      'Error cargando personal:',
+      error
+    );
+
+    selectores.forEach(selector => {
+      selector.innerHTML = `
+        <option value="">
+          Error al cargar personal
+        </option>
+      `;
+    });
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo cargar la lista de personal.',
+      'error'
+    );
+
+  } finally {
+    selectores.forEach(selector => {
+      selector.disabled = false;
+    });
+  }
+}
+function completarResponsables() {
+  const responsable =
+    document.getElementById(
+      'responsableArmado'
+    );
+
+  const usuario =
+    document.getElementById(
+      'usuarioRegistro'
+    );
+
+  const responsableGuardado =
+    String(
+      servicioActual.responsableArmado ||
+      ''
+    ).trim();
+
+  if (responsableGuardado) {
+    const existeResponsable =
+      [...responsable.options].some(
+        opcion =>
+          opcion.value ===
+          responsableGuardado
+      );
+
+    if (!existeResponsable) {
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value =
+        responsableGuardado;
+
+      opcion.textContent =
+        responsableGuardado;
+
+      responsable.appendChild(
+        opcion
+      );
+    }
+
+    responsable.value =
+      responsableGuardado;
+  }
+
+  if (
+    responsableGuardado &&
+    !usuario.value
+  ) {
+    usuario.value =
+      responsableGuardado;
   }
 }
 
