@@ -1196,7 +1196,7 @@
     </article>
 
 
-    <!-- ANCLAJES -->
+    <!-- ESTABILIZACIÓN DEL ANDAMIO -->
     <article
       id="cardAnclajes"
       class="evidencia-card"
@@ -1217,7 +1217,12 @@
         onclick="seleccionarEvidencia('anclajes')"
       >
         <span class="evidencia-icono">📷</span>
-        <strong>Anclajes</strong>
+        <strong>
+          Estabilización del andamio
+          <small style="font-weight:normal;color:#87949d;">
+            (opcional)
+          </small>
+        </strong>
         <small>
           Haz clic, toma una foto<br>
           o arrastra una imagen
@@ -1228,7 +1233,7 @@
         <img
           id="previewAnclajes"
           src=""
-          alt="Anclajes"
+          alt="Estabilización del andamio"
         >
 
         <div class="evidencia-acciones">
@@ -1250,7 +1255,7 @@
         </div>
 
         <div class="evidencia-info">
-          <strong>Anclajes</strong>
+          <strong>Estabilización del andamio</strong>
           <span
             id="nombreAnclajes"
             class="evidencia-archivo"
@@ -1565,12 +1570,13 @@ const tiposFotografiaArmado = {
     principal: false
   },
 
-  anclajes: {
-    tipoFoto: 'ANCLAJES',
-    descripcion: 'Evidencia de los anclajes del andamio',
-    obligatoria: true,
-    principal: false
-  },
+    anclajes: {
+      tipoFoto: 'ESTABILIZACION DEL ANDAMIO',
+      descripcion:
+        'Evidencia de la estabilización del andamio',
+      obligatoria: false,
+      principal: false
+    },
 
   otra: {
     tipoFoto: 'OTRA',
@@ -3788,15 +3794,25 @@ function obtenerClaveEvidenciaPorTipo(tipoFoto) {
     tipoFoto
   );
 
-  const equivalencias = {
-    'VISTA GENERAL': 'vistaGeneral',
-    'LADO IZQUIERDO': 'ladoIzquierdo',
-    'LADO DERECHO': 'ladoDerecho',
-    'ACCESO': 'acceso',
-    'ANCLAJES': 'anclajes',
-    'OTRA': 'otra',
-    'OTRA EVIDENCIA': 'otra'
-  };
+const equivalencias = {
+  'VISTA GENERAL': 'vistaGeneral',
+  'LADO IZQUIERDO': 'ladoIzquierdo',
+  'LADO DERECHO': 'ladoDerecho',
+  'ACCESO': 'acceso',
+
+  'ESTABILIZACION DEL ANDAMIO':
+    'anclajes',
+
+  /*
+   * Conserva compatibilidad con fotografías
+   * registradas anteriormente.
+   */
+  'ANCLAJES':
+    'anclajes',
+
+  'OTRA': 'otra',
+  'OTRA EVIDENCIA': 'otra'
+};
 
   return equivalencias[tipo] || '';
 }
