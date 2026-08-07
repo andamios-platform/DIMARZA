@@ -1627,6 +1627,20 @@ async function registrarEvento(
     return;
   }
 
+  /*
+ * Detenemos el cronómetro visual inmediatamente
+ * cuando se cierra un tramo.
+ *
+ * El tiempo definitivo seguirá siendo calculado
+ * por Apps Script con la hora real del servidor.
+ */
+if (
+  tipoEvento === 'PAUSA' ||
+  tipoEvento === 'LLEGADA'
+) {
+  detenerCronometro();
+}
+  
   bloquearBotones(
     true
   );
