@@ -932,7 +932,7 @@
       <button
         type="button"
         class="boton-secundario"
-        onclick="cargarServicios()"
+        onclick="actualizarTodo()"
       >
         Actualizar
       </button>
@@ -1068,12 +1068,10 @@
     let serviciosActivos = [];
     let serviciosMostrados = [];
     let faenaSeleccionada = 'TODAS';
-    const FAENAS_DISPONIBLES = [
-      'CENTINELA',
-      'ANTAPACCAY',
-      'SIERRA GORDA',
-      'CALAMA'
-    ];
+    let configuracionMinas = {
+      minas: [],
+      relaciones: []
+    };
 
     const estadosCerrados = [
       'CERRADO',
@@ -1081,15 +1079,152 @@
     ];
 
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       document
         .getElementById('buscador')
         .addEventListener('input', filtrarServicios);
-
-      cargarServicios();
+    
+      await cargarConfiguracionMinas();
+      await cargarServicios();
     });
 
+    async function cargarConfiguracionMinas() {
+  try {
+    const respuesta = await fetch(
+      `${API_URL}?accion=configuracion&t=${Date.now()}`
+    );
 
+    if (!respuesta.ok) {
+      throw new Error(
+        `Error HTTP ${respuesta.status}`
+      );
+    }
+
+    const resultado =
+      await respuesta.json();
+
+    if (!resultado.ok) {
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo cargar la configuración.'
+      );
+    }
+
+    configuracionMinas =
+      resultado.configuracion || {
+        minas: [],
+        relaciones: []
+      };
+
+    cargarMinasFormulario();
+
+  } catch (error) {
+    console.error(
+      'Error cargando configuración:',
+      error
+    );
+
+    configuracionMinas = {
+      minas: [],
+      relaciones: []
+    };
+  }
+}
+    function cargarMinasFormulario() {
+  const selector =
+    document.getElementById('faena');
+
+  selector.innerHTML = `
+    <option value="">
+      Seleccionar unidad minera
+    </option>
+  `;
+
+  const minas =
+    Array.isArray(
+      configuracionMinas.minas
+    )
+      ? configuracionMinas.minas
+      : [];
+
+  minas.forEach(mina => {
+    const opcion =
+      document.createElement('option');
+
+    opcion.value = mina;
+    opcion.textContent = mina;
+
+    selector.appendChild(opcion);
+  });
+}
+
+
+function cargarServiciosMina() {
+  const mina =
+    document
+      .getElementById('faena')
+      .value
+      .trim();
+
+  const selector =
+    document.getElementById(
+      'servicioMina'
+    );
+
+  selector.innerHTML = '';
+
+  if (!mina) {
+    selector.disabled = true;
+
+    selector.innerHTML = `
+      <option value="">
+        Primero seleccione una unidad minera
+      </option>
+    `;
+
+    return;
+  }
+
+  const relaciones =
+    Array.isArray(
+      configuracionMinas.relaciones
+    )
+      ? configuracionMinas.relaciones
+      : [];
+
+  const servicios =
+    relaciones
+      .filter(item =>
+        normalizarTexto(item.mina) ===
+        normalizarTexto(mina)
+      )
+      .map(item =>
+        item.servicio
+      );
+
+  selector.innerHTML = `
+    <option value="">
+      Seleccionar servicio
+    </option>
+  `;
+
+  servicios.forEach(servicio => {
+    const opcion =
+      document.createElement('option');
+
+    opcion.value = servicio;
+    opcion.textContent = servicio;
+
+    selector.appendChild(opcion);
+  });
+
+  selector.disabled = false;
+
+  if (servicios.length === 1) {
+    selector.value =
+      servicios[0];
+  }
+}
     async function cargarServicios() {
       const contenedor =
         document.getElementById('contenedorTarjetas');
@@ -1189,12 +1324,18 @@ function crearBotonesFaena() {
     </button>
   `);
 
-  FAENAS_DISPONIBLES.forEach(faena => {
+const minasDisponibles =
+  Array.isArray(
+    configuracionMinas.minas
+  )
+    ? configuracionMinas.minas
+    : [];
+
+minasDisponibles.forEach(faena => {
     const cantidad =
       serviciosActivos.filter(servicio =>
-        normalizarTexto(
-          servicio.faena
-        ) === faena
+        normalizarTexto(servicio.faena) ===
+        normalizarTexto(faena)
       ).length;
 
     botones.push(`
@@ -1203,11 +1344,11 @@ function crearBotonesFaena() {
         class="
           boton-faena
           ${obtenerClaseFaenaBoton(faena)}
-          ${
-            faenaSeleccionada === faena
-              ? 'activo'
-              : ''
-          }
+            ${
+              faenaSeleccionada === normalizarTexto(faena)
+                ? 'activo'
+                : ''
+            }
         "
         onclick="seleccionarFaena(
           '${escaparAtributo(faena)}'
@@ -2094,6 +2235,10 @@ async function guardarNuevoServicio(evento) {
 
   const datos = {
     faena: document.getElementById('faena').value,
+    servicioMina:
+  document
+    .getElementById('servicioMina')
+    .value,
     area: document.getElementById('area').value.trim(),
     tag: document
       .getElementById('tag')
@@ -2162,6 +2307,23 @@ async function guardarNuevoServicio(evento) {
     document
       .getElementById('formNuevoServicio')
       .reset();
+    cargarMinasFormulario();
+
+document
+  .getElementById(
+    'servicioMina'
+  )
+  .innerHTML = `
+    <option value="">
+      Primero seleccione una unidad minera
+    </option>
+  `;
+
+document
+  .getElementById(
+    'servicioMina'
+  )
+  .disabled = true;
     cargarSupervisores();
     cargarResponsablesPrevios();
 
@@ -2226,6 +2388,10 @@ function obtenerFechaActualISO() {
   window.location.href =
     `detalle-servicio.html?id=${encodeURIComponent(idServicio)}`;
 }
+    async function actualizarTodo() {
+  await cargarConfiguracionMinas();
+  await cargarServicios();
+}
   </script>
 <div
   id="modalNuevoServicio"
@@ -2256,27 +2422,37 @@ function obtenerFechaActualISO() {
       onsubmit="guardarNuevoServicio(event)"
     >
 
-      <div class="campo">
-      <label for="faena">Unidad minera *</label>
-        <select id="faena" required>
-          <option value="">Seleccionar</option>
-<option value="CENTINELA">
-  CENTINELA
-</option>
+<div class="campo">
+  <label for="faena">
+    Unidad minera *
+  </label>
 
-<option value="ANTAPACCAY">
-  ANTAPACCAY
-</option>
+  <select
+    id="faena"
+    required
+    onchange="cargarServiciosMina()"
+  >
+    <option value="">
+      Cargando unidades mineras...
+    </option>
+  </select>
+</div>
 
-<option value="SIERRA GORDA">
-  SIERRA GORDA
-</option>
+<div class="campo">
+  <label for="servicioMina">
+    Servicio *
+  </label>
 
-<option value="CALAMA">
-  CALAMA
-</option>
-        </select>
-      </div>
+  <select
+    id="servicioMina"
+    required
+    disabled
+  >
+    <option value="">
+      Primero seleccione una unidad minera
+    </option>
+  </select>
+</div>
 
       <div class="campo">
         <label for="area">Área *</label>
