@@ -942,9 +942,9 @@
 
   <div class="filtros-faena-superior">
 
-    <strong>
-      Filtrar por actividad
-    </strong>
+<strong>
+  Filtrar por servicio
+</strong>
 
     <span id="textoFiltroFaena">
       Mostrando todas las faenas
@@ -956,14 +956,13 @@
     id="botonesFaena"
     class="filtros-faena-botones"
   >
-    <button
-      type="button"
-      class="boton-faena activo"
-      data-faena="TODAS"
-      onclick="seleccionarFaena('TODAS')"
-    >
-      Todas
-    </button>
+<button
+  type="button"
+  class="boton-faena activo"
+  onclick="seleccionarServicio('TODOS')"
+>
+  Todos
+</button>
   </div>
 
 </section>
@@ -1067,7 +1066,7 @@
 
     let serviciosActivos = [];
     let serviciosMostrados = [];
-    let faenaSeleccionada = 'TODAS';
+    let servicioSeleccionado = 'TODOS';
     let configuracionMinas = {
       minas: [],
       relaciones: []
@@ -1271,8 +1270,8 @@ function cargarServiciosMina() {
           return !estadosCerrados.includes(estado);
         });
 
-          crearBotonesFaena();
-          aplicarFiltros();
+        crearBotonesServicio();
+        aplicarFiltros();
 
       } catch (error) {
         console.error(error);
@@ -1294,7 +1293,7 @@ function cargarServiciosMina() {
 function filtrarServicios() {
   aplicarFiltros();
 }
-function crearBotonesFaena() {
+function crearBotonesServicio() {
   const contenedor =
     document.getElementById(
       'botonesFaena'
@@ -1306,17 +1305,17 @@ function crearBotonesFaena() {
     <button
       type="button"
       class="boton-faena faena-todas ${
-        faenaSeleccionada === 'TODAS'
+        servicioSeleccionado === 'TODOS'
           ? 'activo'
           : ''
       }"
-      onclick="seleccionarFaena('TODAS')"
+      onclick="seleccionarServicio('TODOS')"
     >
       <span class="boton-faena-icono-todas">
         ▦
       </span>
-      
-      <span>Todas</span>
+
+      <span>Todos</span>
 
       <span class="boton-faena-cantidad">
         ${serviciosActivos.length}
@@ -1324,48 +1323,65 @@ function crearBotonesFaena() {
     </button>
   `);
 
-const minasDisponibles =
-  Array.isArray(
-    configuracionMinas.minas
-  )
-    ? configuracionMinas.minas
-    : [];
+  const serviciosDisponibles =
+    [
+      ...new Set(
+        configuracionMinas.relaciones
+          .map(item =>
+            item.servicio
+          )
+          .filter(Boolean)
+      )
+    ];
 
-minasDisponibles.forEach(faena => {
-    const cantidad =
-      serviciosActivos.filter(servicio =>
-        normalizarTexto(servicio.faena) ===
-        normalizarTexto(faena)
-      ).length;
+  serviciosDisponibles.forEach(
+    nombreServicio => {
 
-    botones.push(`
-      <button
-        type="button"
-        class="
-          boton-faena
-          ${obtenerClaseFaenaBoton(faena)}
-            ${
-              faenaSeleccionada === normalizarTexto(faena)
-                ? 'activo'
-                : ''
-            }
-        "
-        onclick="seleccionarFaena(
-          '${escaparAtributo(faena)}'
-        )"
-      >
-        <span class="boton-faena-indicador"></span>
+      const cantidad =
+        serviciosActivos.filter(
+          servicio =>
+            normalizarTexto(
+              servicio.servicioMina
+            ) ===
+            normalizarTexto(
+              nombreServicio
+            )
+        ).length;
 
-        <span>
-          ${escaparHTML(faena)}
-        </span>
+      botones.push(`
+        <button
+          type="button"
+          class="boton-faena ${
+            servicioSeleccionado ===
+            normalizarTexto(nombreServicio)
+              ? 'activo'
+              : ''
+          }"
+          onclick="seleccionarServicio(
+            '${escaparAtributo(
+              nombreServicio
+            )}'
+          )"
+        >
+          <span
+            class="boton-faena-indicador"
+          ></span>
 
-        <span class="boton-faena-cantidad">
-          ${cantidad}
-        </span>
-      </button>
-    `);
-  });
+          <span>
+            ${escaparHTML(
+              nombreServicio
+            )}
+          </span>
+
+          <span
+            class="boton-faena-cantidad"
+          >
+            ${cantidad}
+          </span>
+        </button>
+      `);
+    }
+  );
 
   contenedor.innerHTML =
     botones.join('');
@@ -1417,12 +1433,16 @@ function obtenerClaseInsigniaFaena(faena) {
   return 'insignia-general';
 }
 
-function seleccionarFaena(faena) {
-  faenaSeleccionada =
-    normalizarTexto(faena) ||
-    'TODAS';
+function seleccionarServicio(
+  nombreServicio
+) {
+  servicioSeleccionado =
+    normalizarTexto(
+      nombreServicio
+    ) ||
+    'TODOS';
 
-  crearBotonesFaena();
+  crearBotonesServicio();
   aplicarFiltros();
 }
 
@@ -1440,16 +1460,17 @@ function aplicarFiltros() {
   serviciosMostrados =
     serviciosActivos.filter(
       servicio => {
-        const faenaServicio =
+
+        const servicioActividad =
           normalizarTexto(
-            servicio.faena
+            servicio.servicioMina
           );
 
-        const coincideFaena =
-          faenaSeleccionada ===
-            'TODAS' ||
-          faenaServicio ===
-            faenaSeleccionada;
+        const coincideServicio =
+          servicioSeleccionado ===
+            'TODOS' ||
+          servicioActividad ===
+            servicioSeleccionado;
 
         const textoCompleto =
           normalizarTexto([
@@ -1457,6 +1478,7 @@ function aplicarFiltros() {
             servicio.ot,
             servicio.area,
             servicio.faena,
+            servicio.servicioMina,
             servicio.descripcion,
             servicio.supervisor,
             servicio.estado
@@ -1469,20 +1491,20 @@ function aplicarFiltros() {
           );
 
         return (
-          coincideFaena &&
+          coincideServicio &&
           coincideBusqueda
         );
       }
     );
 
   actualizarTextoFiltro();
+
   actualizarIndicadores(
     serviciosMostrados
   );
 
   mostrarServicios();
 }
-
 
 function actualizarTextoFiltro() {
   const cantidad =
@@ -1508,15 +1530,31 @@ function actualizarTextoFiltro() {
       'contadorResultados'
     );
 
-if (
-  faenaSeleccionada ===
-  'TODAS'
-) {
+  if (
+    servicioSeleccionado ===
+    'TODOS'
+  ) {
+    texto.textContent =
+      `${cantidad} ${palabraActividad}`;
+
+    titulo.textContent =
+      'Andamios activos';
+
+    contador.textContent =
+      `Mostrando ${cantidad} ${
+        cantidad === 1
+          ? 'resultado'
+          : 'resultados'
+      }`;
+
+    return;
+  }
+
   texto.textContent =
-    `${cantidad} ${palabraActividad}`;
+    `${servicioSeleccionado} • ${cantidad} ${palabraActividad}`;
 
   titulo.textContent =
-    'Andamios activos';
+    `Andamios activos • ${servicioSeleccionado}`;
 
   contador.textContent =
     `Mostrando ${cantidad} ${
@@ -1524,24 +1562,7 @@ if (
         ? 'resultado'
         : 'resultados'
     }`;
-
-  return;
 }
-
-  texto.textContent =
-    `${faenaSeleccionada} • ${cantidad} ${palabraActividad}`;
-
-  titulo.textContent =
-    `Andamios activos • ${faenaSeleccionada}`;
-
-contador.textContent =
-  `Mostrando ${cantidad} ${
-    cantidad === 1
-      ? 'resultado'
-      : 'resultados'
-  }`;
-}
-
     function mostrarServicios() {
       const contenedor =
         document.getElementById('contenedorTarjetas');
@@ -1640,6 +1661,21 @@ function crearTarjetaServicio(servicio) {
           </span>
         </div>
 
+        <div class="dato">
+  <span class="dato-label">
+    Servicio
+  </span>
+
+  <span class="dato-valor">
+    ${
+      escaparHTML(
+        servicio.servicioMina ||
+        'No registrado'
+      )
+    }
+  </span>
+</div>
+        
         <div class="dato">
           <span class="dato-label">
             Área
