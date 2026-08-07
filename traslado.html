@@ -945,7 +945,8 @@
           <div class="tiempo-acumulado">
             Tiempo efectivo acumulado:
             <span id="tiempoEfectivo">
-              0 min
+              00:00:00
+
             </span>
           </div>
 
@@ -1702,18 +1703,38 @@ if (
         'observacion'
       )
       .value = '';
+    
+    document
+      .getElementById(
+        'ubicacion'
+      )
+      .value = '';
 
-    await cargarTraslado();
+actualizarTrasladoLocal(
+  datos
+);
 
-  } catch (error) {
-    console.error(error);
+} catch (error) {
+  console.error(error);
 
-    mostrarMensaje(
-      error.message,
-      'error'
-    );
+  mostrarMensaje(
+    error.message,
+    'error'
+  );
 
-  } finally {
+  /*
+   * Si intentamos cerrar un tramo pero el servidor
+   * rechazó la operación, el traslado sigue activo.
+   * Volvemos a poner en marcha el cronómetro.
+   */
+  if (
+    tipoEvento === 'PAUSA' ||
+    tipoEvento === 'LLEGADA'
+  ) {
+    aplicarEstadoTraslado();
+  }
+
+} finally {
     bloquearBotones(
       false
     );
@@ -2107,6 +2128,145 @@ function formatearSegundos(
       '0'
     )
   }`;
+}
+function actualizarTrasladoLocal(
+  datos
+) {
+  /*
+   * Si por alguna razón trasladoActual
+   * todavía no existe, evitamos errores.
+   */
+  if (!trasladoActual) {
+    trasladoActual = {
+      eventos: []
+    };
+  }
+
+  if (
+    !Array.isArray(
+      trasladoActual.eventos
+    )
+  ) {
+    trasladoActual.eventos = [];
+  }
+
+  /*
+   * Construimos exactamente el evento
+   * que acaba de confirmar el servidor.
+   */
+  const nuevoEvento = {
+    idEvento:
+      datos.idEvento || '',
+
+    idServicio:
+      datos.idServicio ||
+      ID_SERVICIO,
+
+    tag:
+      servicioActual?.tag ||
+      '',
+
+    tipoEvento:
+      datos.tipoEvento ||
+      '',
+
+    fechaHora:
+      datos.fechaHora ||
+      '',
+
+    fechaHoraValor:
+      Number(
+        datos.fechaHoraValor
+      ) || Date.now(),
+
+    responsable:
+      datos.responsable ||
+      '',
+
+    ubicacion:
+      datos.ubicacion ||
+      '',
+
+    motivoObservacion:
+      datos.motivoObservacion ||
+      '',
+
+    tiempoTramoSegundos:
+      Number(
+        datos.tiempoTramoSegundos
+      ) || 0,
+
+    usuario:
+      datos.responsable ||
+      ''
+  };
+
+  /*
+   * Agregamos el evento localmente.
+   */
+  trasladoActual.eventos.push(
+    nuevoEvento
+  );
+
+  trasladoActual.ultimoEvento =
+    nuevoEvento;
+
+  /*
+   * Actualizamos el tiempo acumulado
+   * usando el cálculo oficial del servidor.
+   */
+  trasladoActual.tiempoEfectivoSegundos =
+    Number(
+      datos.tiempoEfectivoSegundos
+    ) || 0;
+
+  trasladoActual.tiempoEfectivo =
+    datos.tiempoEfectivo ||
+    '00:00:00';
+
+  /*
+   * El estado visual del módulo Traslado
+   * depende del evento registrado.
+   */
+  switch (
+    normalizar(
+      datos.tipoEvento
+    )
+  ) {
+    case 'INICIO':
+    case 'REANUDACION':
+      trasladoActual.estadoTraslado =
+        'EN TRASLADO';
+      break;
+
+    case 'PAUSA':
+      trasladoActual.estadoTraslado =
+        'TRASLADO PAUSADO';
+      break;
+
+    case 'LLEGADA':
+      trasladoActual.estadoTraslado =
+        'FINALIZADO';
+      break;
+  }
+
+  /*
+   * También actualizamos el estado real
+   * del servicio en memoria.
+   */
+  if (servicioActual) {
+    servicioActual.estado =
+      datos.estado ||
+      servicioActual.estado;
+  }
+
+  /*
+   * Refrescamos únicamente el HTML.
+   * Aquí ya NO consultamos Apps Script.
+   */
+  mostrarServicio();
+  renderizarHistorial();
+  aplicarEstadoTraslado();
 }
 </script>
 
