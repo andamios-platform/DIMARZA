@@ -1312,12 +1312,12 @@ function aplicarEstadoTraslado() {
       'PENDIENTE'
   );
 
-  escribirTexto(
-    'tiempoEfectivo',
-    trasladoActual
-      .tiempoEfectivo ||
-      '0 min'
-  );
+    escribirTexto(
+      'tiempoEfectivo',
+      trasladoActual
+        .tiempoEfectivo ||
+        '00:00:00'
+    );
 
   ocultarBotones();
 
