@@ -1,1 +1,2057 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Traslado | DIMARZA</title>
+
+  <style>
+    :root {
+      --azul: #163f63;
+      --azul2: #2f6d9b;
+      --azul-claro: #eaf3fa;
+
+      --naranja: #f28c28;
+      --naranja2: #d96f0b;
+
+      --verde: #1f8f5f;
+      --verde-claro: #e9f7f1;
+
+      --amarillo: #b17a00;
+      --amarillo-claro: #fff6dc;
+
+      --rojo: #c83f49;
+      --rojo-claro: #fff0f1;
+
+      --gris: #667784;
+      --gris-claro: #f5f7f9;
+
+      --borde: #d7e0e7;
+      --texto: #1f2d36;
+
+      --sombra:
+        0 10px 28px
+        rgba(26,54,76,.10);
+
+      --radio: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--texto);
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background:
+        linear-gradient(
+          180deg,
+          #edf4f8 0%,
+          #f8fafb 260px,
+          #f5f7f9 100%
+        );
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    .contenedor {
+      width:
+        min(
+          1400px,
+          calc(100% - 28px)
+        );
+
+      margin: 0 auto;
+      padding: 22px 0 45px;
+    }
+
+    /* ==============================
+       CABECERA
+       ============================== */
+
+    .cabecera {
+      display: grid;
+      grid-template-columns:
+        1fr auto;
+
+      gap: 18px;
+      align-items: center;
+
+      padding: 22px;
+      margin-bottom: 18px;
+
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(22,63,99,.98),
+          rgba(47,109,155,.94)
+        );
+
+      border-radius: var(--radio);
+      box-shadow: var(--sombra);
+    }
+
+    .cabecera h1 {
+      margin: 0 0 7px;
+      font-size:
+        clamp(
+          25px,
+          3vw,
+          38px
+        );
+    }
+
+    .cabecera p {
+      margin: 0;
+      opacity: .9;
+      line-height: 1.45;
+    }
+
+    .btn-volver {
+      padding: 11px 16px;
+      color: white;
+      font-weight: bold;
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          .12
+        );
+
+      border:
+        1px solid
+        rgba(
+          255,
+          255,
+          255,
+          .35
+        );
+
+      border-radius: 10px;
+    }
+
+    /* ==============================
+       PANEL GENERAL
+       ============================== */
+
+    .panel {
+      padding: 20px;
+      margin-bottom: 18px;
+
+      background: white;
+
+      border:
+        1px solid
+        var(--borde);
+
+      border-radius:
+        var(--radio);
+
+      box-shadow:
+        var(--sombra);
+    }
+
+    .panel-titulo {
+      display: flex;
+      justify-content:
+        space-between;
+      align-items: center;
+      gap: 15px;
+
+      margin-bottom: 16px;
+    }
+
+    .panel-titulo h2 {
+      margin: 0;
+      color: var(--azul);
+      font-size: 21px;
+    }
+
+    /* ==============================
+       PROGRESO
+       ============================== */
+
+    .progreso-superior {
+      display: flex;
+      justify-content:
+        space-between;
+
+      gap: 12px;
+
+      margin-bottom: 12px;
+
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    .progreso-barra {
+      height: 11px;
+      overflow: hidden;
+
+      background: #e6edf2;
+
+      border-radius: 999px;
+    }
+
+    .progreso-relleno {
+      width: 60%;
+      height: 100%;
+
+      background:
+        linear-gradient(
+          90deg,
+          var(--naranja),
+          #ffb45e
+        );
+    }
+
+    .progreso-etapas {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          5,
+          1fr
+        );
+
+      gap: 8px;
+
+      margin-top: 12px;
+
+      color: var(--gris);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .progreso-etapas .completada {
+      color: var(--verde);
+      font-weight: bold;
+    }
+
+    .progreso-etapas .actual {
+      color: var(--naranja2);
+      font-weight: bold;
+    }
+
+    /* ==============================
+       DATOS DEL SERVICIO
+       ============================== */
+
+    .datos-servicio {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          6,
+          minmax(
+            130px,
+            1fr
+          )
+        );
+
+      gap: 12px;
+    }
+
+    .dato {
+      min-height: 80px;
+      padding: 13px;
+
+      background:
+        var(--gris-claro);
+
+      border:
+        1px solid
+        var(--borde);
+
+      border-radius: 11px;
+    }
+
+    .dato span {
+      display: block;
+
+      margin-bottom: 7px;
+
+      color: var(--gris);
+      font-size: 11px;
+      font-weight: bold;
+
+      text-transform:
+        uppercase;
+    }
+
+    .dato strong {
+      display: block;
+
+      color: var(--azul);
+
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .estado {
+      display: inline-flex;
+      align-items: center;
+
+      padding: 8px 12px;
+
+      color: var(--azul);
+
+      background:
+        var(--azul-claro);
+
+      border-radius: 999px;
+
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* ==============================
+       CONTROL DEL TRASLADO
+       ============================== */
+
+    .control-grid {
+      display: grid;
+
+      grid-template-columns:
+        minmax(
+          300px,
+          1fr
+        )
+        minmax(
+          300px,
+          .8fr
+        );
+
+      gap: 20px;
+    }
+
+    .estado-traslado {
+      padding: 22px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f7fafc,
+          #eef5fa
+        );
+
+      border:
+        1px solid
+        #bfd7e8;
+
+      border-radius: 14px;
+    }
+
+    .estado-traslado-etiqueta {
+      margin-bottom: 6px;
+
+      color: var(--gris);
+
+      font-size: 12px;
+      font-weight: bold;
+
+      text-transform:
+        uppercase;
+    }
+
+    .estado-traslado h3 {
+      margin: 0 0 18px;
+
+      color: var(--azul);
+
+      font-size: 28px;
+    }
+
+    .cronometro {
+      margin: 10px 0 4px;
+
+      color: var(--azul);
+
+      font-size:
+        clamp(
+          34px,
+          5vw,
+          54px
+        );
+
+      font-weight: 900;
+
+      letter-spacing: 1px;
+    }
+
+    .cronometro-label {
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .tiempo-acumulado {
+      margin-top: 18px;
+      padding: 12px 14px;
+
+      color: var(--verde);
+
+      background:
+        var(--verde-claro);
+
+      border-radius: 10px;
+
+      font-weight: bold;
+    }
+
+    /* ==============================
+       FORMULARIO
+       ============================== */
+
+    .formulario {
+      display: grid;
+      gap: 14px;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .campo label {
+      color: var(--gris);
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+      width: 100%;
+      padding: 12px;
+
+      color: var(--texto);
+      background: white;
+
+      border:
+        1px solid
+        var(--borde);
+
+      border-radius: 9px;
+
+      outline: none;
+    }
+
+    .campo textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+      border-color:
+        var(--azul2);
+
+      box-shadow:
+        0 0 0 3px
+        rgba(
+          47,
+          109,
+          155,
+          .12
+        );
+    }
+
+    /* ==============================
+       BOTONES
+       ============================== */
+
+    .acciones {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          1fr
+        );
+
+      gap: 12px;
+
+      margin-top: 18px;
+    }
+
+    .btn {
+      padding: 14px 18px;
+
+      border: 0;
+      border-radius: 10px;
+
+      font-weight: bold;
+    }
+
+    .btn-iniciar {
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--verde),
+          #147548
+        );
+    }
+
+    .btn-pausar {
+      color: #6f5100;
+
+      background:
+        var(--amarillo-claro);
+
+      border:
+        1px solid
+        #ead18c;
+    }
+
+    .btn-reanudar {
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--azul2),
+          var(--azul)
+        );
+    }
+
+    .btn-llegada {
+      color: white;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--naranja),
+          var(--naranja2)
+        );
+    }
+
+    /* ==============================
+       HISTORIAL
+       ============================== */
+
+    .historial {
+      display: grid;
+      gap: 10px;
+    }
+
+    .evento {
+      display: grid;
+
+      grid-template-columns:
+        155px
+        130px
+        1fr
+        130px;
+
+      gap: 12px;
+      align-items: center;
+
+      padding: 13px 14px;
+
+      background:
+        #f8fafb;
+
+      border:
+        1px solid
+        var(--borde);
+
+      border-radius: 10px;
+    }
+
+    .evento-fecha {
+      color: var(--gris);
+      font-size: 12px;
+    }
+
+    .evento-tipo {
+      font-weight: bold;
+      color: var(--azul);
+    }
+
+    .evento-detalle {
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .evento-tiempo {
+      text-align: right;
+      color: var(--verde);
+      font-weight: bold;
+    }
+
+    .evento.pausa {
+      border-left:
+        5px solid
+        var(--amarillo);
+    }
+
+    .evento.inicio,
+    .evento.reanudacion {
+      border-left:
+        5px solid
+        var(--azul2);
+    }
+
+    .evento.llegada {
+      border-left:
+        5px solid
+        var(--verde);
+    }
+
+    .sin-datos {
+      padding: 25px;
+      text-align: center;
+
+      color: var(--gris);
+
+      border:
+        1px dashed
+        var(--borde);
+
+      border-radius: 11px;
+    }
+
+    /* ==============================
+       MENSAJE
+       ============================== */
+
+    .mensaje {
+      position: fixed;
+
+      right: 18px;
+      bottom: 18px;
+
+      z-index: 3000;
+
+      max-width: 390px;
+
+      padding: 14px 16px;
+
+      color: white;
+      background: var(--azul);
+
+      border-radius: 10px;
+
+      box-shadow:
+        var(--sombra);
+    }
+
+    .mensaje.exito {
+      background:
+        var(--verde);
+    }
+
+    .mensaje.error {
+      background:
+        var(--rojo);
+    }
+
+    .cargando {
+      min-height: 220px;
+
+      display: grid;
+      place-items: center;
+
+      color: var(--azul);
+      font-weight: bold;
+    }
+
+    @media(
+      max-width: 1000px
+    ) {
+      .datos-servicio {
+        grid-template-columns:
+          repeat(
+            3,
+            1fr
+          );
+      }
+
+      .control-grid {
+        grid-template-columns:
+          1fr;
+      }
+    }
+
+    @media(
+      max-width: 650px
+    ) {
+      .contenedor {
+        width:
+          calc(
+            100% - 18px
+          );
+
+        padding-top: 10px;
+      }
+
+      .cabecera {
+        grid-template-columns:
+          1fr;
+      }
+
+      .datos-servicio {
+        grid-template-columns:
+          1fr;
+      }
+
+      .progreso-etapas {
+        grid-template-columns:
+          1fr;
+
+        text-align: left;
+      }
+
+      .acciones {
+        grid-template-columns:
+          1fr;
+      }
+
+      .evento {
+        grid-template-columns:
+          1fr;
+      }
+
+      .evento-tiempo {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="contenedor">
+
+  <section class="cabecera">
+
+    <div>
+      <h1>
+        Traslado de Materiales
+      </h1>
+
+      <p>
+        Controla el tiempo efectivo de traslado,
+        interrupciones y llegada del material al
+        punto de montaje.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-volver"
+      onclick="volverDetalle()"
+    >
+      ← Volver al servicio
+    </button>
+
+  </section>
+
+
+  <section class="panel">
+
+    <div class="progreso-superior">
+      <span>
+        Progreso de la actividad
+      </span>
+
+      <span>
+        Etapa: Traslado
+      </span>
+    </div>
+
+    <div class="progreso-barra">
+      <div
+        class="progreso-relleno"
+      ></div>
+    </div>
+
+    <div class="progreso-etapas">
+      <span class="completada">
+        Solicitado
+      </span>
+
+      <span class="completada">
+        Previos
+      </span>
+
+      <span class="actual">
+        Traslado
+      </span>
+
+      <span>
+        Armado
+      </span>
+
+      <span>
+        Operativo
+      </span>
+    </div>
+
+  </section>
+
+
+  <div
+    id="contenidoCargando"
+    class="panel cargando"
+  >
+    Cargando traslado...
+  </div>
+
+
+  <div
+    id="contenidoPrincipal"
+    class="oculto"
+  >
+
+    <section class="panel">
+
+      <div class="panel-titulo">
+
+        <h2>
+          Información del servicio
+        </h2>
+
+        <span
+          id="estadoServicio"
+          class="estado"
+        >
+          —
+        </span>
+
+      </div>
+
+      <div class="datos-servicio">
+
+        <div class="dato">
+          <span>ID Servicio</span>
+          <strong id="datoId">
+            —
+          </strong>
+        </div>
+
+        <div class="dato">
+          <span>TAG</span>
+          <strong id="datoTag">
+            —
+          </strong>
+        </div>
+
+        <div class="dato">
+          <span>Mina</span>
+          <strong id="datoMina">
+            —
+          </strong>
+        </div>
+
+        <div class="dato">
+          <span>Servicio</span>
+          <strong id="datoServicio">
+            —
+          </strong>
+        </div>
+
+        <div class="dato">
+          <span>Área</span>
+          <strong id="datoArea">
+            —
+          </strong>
+        </div>
+
+        <div class="dato">
+          <span>OT</span>
+          <strong id="datoOt">
+            —
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="panel">
+
+      <div class="panel-titulo">
+        <h2>
+          Control del traslado
+        </h2>
+      </div>
+
+      <div class="control-grid">
+
+        <div class="estado-traslado">
+
+          <div
+            class="estado-traslado-etiqueta"
+          >
+            Estado del traslado
+          </div>
+
+          <h3 id="estadoTraslado">
+            PENDIENTE
+          </h3>
+
+          <div
+            id="cronometro"
+            class="cronometro"
+          >
+            00:00:00
+          </div>
+
+          <div class="cronometro-label">
+            Tiempo del tramo actual
+          </div>
+
+          <div class="tiempo-acumulado">
+            Tiempo efectivo acumulado:
+            <span id="tiempoEfectivo">
+              0 min
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="formulario">
+
+          <div class="campo">
+            <label for="responsable">
+              Responsable del traslado *
+            </label>
+
+            <select id="responsable">
+              <option value="">
+                Cargando personal...
+              </option>
+            </select>
+          </div>
+
+
+          <div class="campo">
+            <label for="ubicacion">
+              Ubicación / punto
+            </label>
+
+            <input
+              id="ubicacion"
+              type="text"
+              placeholder="Ejemplo: Plataforma inferior, acceso norte..."
+            >
+          </div>
+
+
+          <div class="campo">
+            <label for="observacion">
+              Motivo / observación
+            </label>
+
+            <textarea
+              id="observacion"
+              placeholder="Ejemplo: Material queda en espera de grúa..."
+            ></textarea>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="acciones">
+
+        <button
+          id="btnIniciar"
+          type="button"
+          class="btn btn-iniciar oculto"
+          onclick="registrarEvento('INICIO')"
+        >
+          ▶ Iniciar traslado
+        </button>
+
+        <button
+          id="btnPausar"
+          type="button"
+          class="btn btn-pausar oculto"
+          onclick="registrarEvento('PAUSA')"
+        >
+          ⏸ Pausar traslado
+        </button>
+
+        <button
+          id="btnReanudar"
+          type="button"
+          class="btn btn-reanudar oculto"
+          onclick="registrarEvento('REANUDACION')"
+        >
+          ▶ Reanudar traslado
+        </button>
+
+        <button
+          id="btnLlegada"
+          type="button"
+          class="btn btn-llegada oculto"
+          onclick="registrarEvento('LLEGADA')"
+        >
+          ✓ Material en destino
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <section class="panel">
+
+      <div class="panel-titulo">
+        <h2>
+          Historial del traslado
+        </h2>
+      </div>
+
+      <div
+        id="historial"
+        class="historial"
+      ></div>
+
+      <div
+        id="historialVacio"
+        class="sin-datos"
+      >
+        El traslado todavía no tiene eventos registrados.
+      </div>
+
+    </section>
+
+  </div>
+
+</main>
+
+
+<div
+  id="mensaje"
+  class="mensaje oculto"
+></div>
+
+
+<script>
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+const parametros =
+  new URLSearchParams(
+    window.location.search
+  );
+
+const ID_SERVICIO =
+  (
+    parametros.get('id') ||
+    parametros.get(
+      'idServicio'
+    ) ||
+    ''
+  )
+    .trim()
+    .toUpperCase();
+
+let trasladoActual = null;
+let servicioActual = null;
+
+let temporizadorCronometro = null;
+let fechaInicioTramoActual = null;
+
+
+document.addEventListener(
+  'DOMContentLoaded',
+  iniciarModulo
+);
+
+
+async function iniciarModulo() {
+  if (!ID_SERVICIO) {
+    mostrarMensaje(
+      'No se recibió el ID del servicio.',
+      'error'
+    );
+
+    return;
+  }
+
+  try {
+    await Promise.all([
+      cargarTraslado(),
+      cargarPersonal()
+    ]);
+
+    document
+      .getElementById(
+        'contenidoCargando'
+      )
+      .classList.add(
+        'oculto'
+      );
+
+    document
+      .getElementById(
+        'contenidoPrincipal'
+      )
+      .classList.remove(
+        'oculto'
+      );
+
+  } catch (error) {
+    console.error(error);
+
+    document
+      .getElementById(
+        'contenidoCargando'
+      )
+      .innerHTML = `
+        <div>
+          No se pudo cargar el traslado.<br><br>
+          ${escaparHTML(
+            error.message
+          )}
+        </div>
+      `;
+  }
+}
+
+
+async function cargarTraslado() {
+  const respuesta =
+    await fetch(
+      `${API_URL}?accion=obtenerTraslado&idServicio=${
+        encodeURIComponent(
+          ID_SERVICIO
+        )
+      }&t=${Date.now()}`
+    );
+
+  const datos =
+    await respuesta.json();
+
+  if (!datos.ok) {
+    throw new Error(
+      datos.mensaje ||
+      'No se pudo cargar el traslado.'
+    );
+  }
+
+  trasladoActual = datos;
+
+  servicioActual =
+    datos.servicio || {};
+
+  mostrarServicio();
+  renderizarHistorial();
+  aplicarEstadoTraslado();
+}
+
+
+async function cargarPersonal() {
+  try {
+    const respuesta =
+      await fetch(
+        `${API_URL}?accion=personalPrevios&t=${Date.now()}`
+      );
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo cargar el personal.'
+      );
+    }
+
+    const selector =
+      document.getElementById(
+        'responsable'
+      );
+
+    selector.innerHTML = `
+      <option value="">
+        Seleccionar responsable
+      </option>
+    `;
+
+    const personas =
+      Array.isArray(
+        datos.responsables
+      )
+        ? datos.responsables
+        : [];
+
+    personas.forEach(persona => {
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value =
+        persona.nombre;
+
+      opcion.textContent =
+        persona.cargo
+          ? `${persona.nombre} — ${persona.cargo}`
+          : persona.nombre;
+
+      selector.appendChild(
+        opcion
+      );
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    document
+      .getElementById(
+        'responsable'
+      )
+      .innerHTML = `
+        <option value="">
+          No se pudo cargar el personal
+        </option>
+      `;
+  }
+}
+
+
+function mostrarServicio() {
+  escribirTexto(
+    'datoId',
+    servicioActual.idServicio ||
+    ID_SERVICIO
+  );
+
+  escribirTexto(
+    'datoTag',
+    servicioActual.tag
+  );
+
+  escribirTexto(
+    'datoMina',
+    servicioActual.faena
+  );
+
+  escribirTexto(
+    'datoServicio',
+    servicioActual.servicioMina
+  );
+
+  escribirTexto(
+    'datoArea',
+    servicioActual.area
+  );
+
+  escribirTexto(
+    'datoOt',
+    servicioActual.ot
+  );
+
+  escribirTexto(
+    'estadoServicio',
+    servicioActual.estado
+  );
+}
+
+
+function aplicarEstadoTraslado() {
+  detenerCronometro();
+
+  const estado =
+    normalizar(
+      trasladoActual
+        .estadoTraslado
+    );
+
+  escribirTexto(
+    'estadoTraslado',
+    trasladoActual
+      .estadoTraslado ||
+      'PENDIENTE'
+  );
+
+  escribirTexto(
+    'tiempoEfectivo',
+    trasladoActual
+      .tiempoEfectivo ||
+      '0 min'
+  );
+
+  ocultarBotones();
+
+  /*
+   * Todavía no existe ningún evento.
+   */
+  if (
+    estado === 'PENDIENTE'
+  ) {
+    mostrarBoton(
+      'btnIniciar'
+    );
+
+    escribirCronometro(
+      0
+    );
+
+    return;
+  }
+
+  /*
+   * Tramo activo.
+   */
+  if (
+    estado === 'EN TRASLADO'
+  ) {
+    mostrarBoton(
+      'btnPausar'
+    );
+
+    mostrarBoton(
+      'btnLlegada'
+    );
+
+    iniciarCronometroActivo();
+
+    return;
+  }
+
+  /*
+   * Traslado en espera.
+   */
+  if (
+    estado ===
+    'TRASLADO PAUSADO'
+  ) {
+    mostrarBoton(
+      'btnReanudar'
+    );
+
+    escribirCronometro(
+      0
+    );
+
+    return;
+  }
+
+  /*
+   * Traslado terminado.
+   */
+  if (
+    estado === 'FINALIZADO'
+  ) {
+    escribirCronometro(
+      0
+    );
+
+    bloquearFormulario();
+
+    return;
+  }
+}
+
+
+function iniciarCronometroActivo() {
+  const eventos =
+    Array.isArray(
+      trasladoActual.eventos
+    )
+      ? trasladoActual.eventos
+      : [];
+
+  if (!eventos.length) {
+    return;
+  }
+
+  const ultimo =
+    eventos[
+      eventos.length - 1
+    ];
+
+  /*
+   * El backend devuelve fechaHora
+   * como dd/MM/yyyy HH:mm:ss.
+   */
+  fechaInicioTramoActual =
+    convertirFechaTexto(
+      ultimo.fechaHora
+    );
+
+  if (
+    !fechaInicioTramoActual
+  ) {
+    return;
+  }
+
+  actualizarCronometro();
+
+  temporizadorCronometro =
+    setInterval(
+      actualizarCronometro,
+      1000
+    );
+}
+
+
+function actualizarCronometro() {
+  if (
+    !fechaInicioTramoActual
+  ) {
+    return;
+  }
+
+  const diferencia =
+    Date.now() -
+    fechaInicioTramoActual
+      .getTime();
+
+  escribirCronometro(
+    diferencia
+  );
+}
+
+
+function escribirCronometro(
+  milisegundos
+) {
+  const totalSegundos =
+    Math.max(
+      0,
+      Math.floor(
+        Number(
+          milisegundos
+        ) /
+        1000
+      )
+    );
+
+  const horas =
+    Math.floor(
+      totalSegundos /
+      3600
+    );
+
+  const minutos =
+    Math.floor(
+      (
+        totalSegundos %
+        3600
+      ) /
+      60
+    );
+
+  const segundos =
+    totalSegundos %
+    60;
+
+  document
+    .getElementById(
+      'cronometro'
+    )
+    .textContent =
+      `${
+        String(
+          horas
+        ).padStart(
+          2,
+          '0'
+        )
+      }:${
+        String(
+          minutos
+        ).padStart(
+          2,
+          '0'
+        )
+      }:${
+        String(
+          segundos
+        ).padStart(
+          2,
+          '0'
+        )
+      }`;
+}
+
+
+function detenerCronometro() {
+  if (
+    temporizadorCronometro
+  ) {
+    clearInterval(
+      temporizadorCronometro
+    );
+
+    temporizadorCronometro =
+      null;
+  }
+
+  fechaInicioTramoActual =
+    null;
+}
+
+
+async function registrarEvento(
+  tipoEvento
+) {
+  const responsable =
+    document
+      .getElementById(
+        'responsable'
+      )
+      .value
+      .trim();
+
+  const ubicacion =
+    document
+      .getElementById(
+        'ubicacion'
+      )
+      .value
+      .trim();
+
+  const observacion =
+    document
+      .getElementById(
+        'observacion'
+      )
+      .value
+      .trim();
+
+  if (!responsable) {
+    mostrarMensaje(
+      'Selecciona al responsable del traslado.',
+      'error'
+    );
+
+    return;
+  }
+
+  if (
+    tipoEvento ===
+      'PAUSA' &&
+    !observacion
+  ) {
+    mostrarMensaje(
+      'Debes indicar el motivo de la pausa.',
+      'error'
+    );
+
+    return;
+  }
+
+  if (
+    tipoEvento ===
+      'LLEGADA' &&
+    !ubicacion
+  ) {
+    mostrarMensaje(
+      'Indica el punto donde quedó el material.',
+      'error'
+    );
+
+    return;
+  }
+
+  let pregunta = '';
+
+  switch (tipoEvento) {
+    case 'INICIO':
+      pregunta =
+        '¿Confirmas que el traslado comienza en este momento?';
+      break;
+
+    case 'PAUSA':
+      pregunta =
+        '¿Confirmas que el traslado se detiene temporalmente?';
+      break;
+
+    case 'REANUDACION':
+      pregunta =
+        '¿Confirmas que el traslado se reanuda en este momento?';
+      break;
+
+    case 'LLEGADA':
+      pregunta =
+        '¿Confirmas que el material llegó al punto donde se realizará el armado?';
+      break;
+  }
+
+  if (
+    pregunta &&
+    !window.confirm(
+      pregunta
+    )
+  ) {
+    return;
+  }
+
+  bloquearBotones(
+    true
+  );
+
+  try {
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+          method:
+            'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body:
+            JSON.stringify({
+              accion:
+                'registrarEventoTraslado',
+
+              idServicio:
+                ID_SERVICIO,
+
+              tipoEvento,
+
+              responsable,
+
+              ubicacion,
+
+              motivoObservacion:
+                observacion,
+
+              usuario:
+                responsable
+            })
+        }
+      );
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo registrar el evento.'
+      );
+    }
+
+    mostrarMensaje(
+      datos.mensaje ||
+      'Evento registrado correctamente.',
+      'exito'
+    );
+
+    document
+      .getElementById(
+        'observacion'
+      )
+      .value = '';
+
+    await cargarTraslado();
+
+  } catch (error) {
+    console.error(error);
+
+    mostrarMensaje(
+      error.message,
+      'error'
+    );
+
+  } finally {
+    bloquearBotones(
+      false
+    );
+  }
+}
+
+
+function renderizarHistorial() {
+  const contenedor =
+    document.getElementById(
+      'historial'
+    );
+
+  const vacio =
+    document.getElementById(
+      'historialVacio'
+    );
+
+  const eventos =
+    Array.isArray(
+      trasladoActual.eventos
+    )
+      ? trasladoActual.eventos
+      : [];
+
+  if (!eventos.length) {
+    contenedor.innerHTML =
+      '';
+
+    vacio.classList.remove(
+      'oculto'
+    );
+
+    return;
+  }
+
+  vacio.classList.add(
+    'oculto'
+  );
+
+  contenedor.innerHTML =
+    [...eventos]
+      .reverse()
+      .map(evento => {
+
+        const tipo =
+          normalizar(
+            evento.tipoEvento
+          );
+
+        const clase =
+          tipo
+            .toLowerCase();
+
+        const detalle = [
+          evento.responsable
+            ? `Responsable: ${evento.responsable}`
+            : '',
+
+          evento.ubicacion
+            ? `Punto: ${evento.ubicacion}`
+            : '',
+
+          evento.motivoObservacion
+            ? evento.motivoObservacion
+            : ''
+        ]
+          .filter(Boolean)
+          .join(' · ');
+
+        const tiempo =
+          Number(
+            evento
+              .tiempoTramoMinutos
+          ) > 0
+            ? `${
+                evento
+                  .tiempoTramoMinutos
+              } min`
+            : '—';
+
+        return `
+          <article
+            class="evento ${clase}"
+          >
+
+            <div
+              class="evento-fecha"
+            >
+              ${
+                escaparHTML(
+                  evento.fechaHora ||
+                  ''
+                )
+              }
+            </div>
+
+            <div
+              class="evento-tipo"
+            >
+              ${
+                escaparHTML(
+                  evento.tipoEvento ||
+                  ''
+                )
+              }
+            </div>
+
+            <div
+              class="evento-detalle"
+            >
+              ${
+                escaparHTML(
+                  detalle ||
+                  'Sin observación'
+                )
+              }
+            </div>
+
+            <div
+              class="evento-tiempo"
+            >
+              ${tiempo}
+            </div>
+
+          </article>
+        `;
+      })
+      .join('');
+}
+
+
+function ocultarBotones() {
+  [
+    'btnIniciar',
+    'btnPausar',
+    'btnReanudar',
+    'btnLlegada'
+  ]
+    .forEach(id => {
+      document
+        .getElementById(id)
+        .classList.add(
+          'oculto'
+        );
+    });
+}
+
+
+function mostrarBoton(id) {
+  document
+    .getElementById(id)
+    .classList.remove(
+      'oculto'
+    );
+}
+
+
+function bloquearBotones(
+  bloquear
+) {
+  [
+    'btnIniciar',
+    'btnPausar',
+    'btnReanudar',
+    'btnLlegada'
+  ]
+    .forEach(id => {
+      document
+        .getElementById(id)
+        .disabled =
+          Boolean(
+            bloquear
+          );
+    });
+}
+
+
+function bloquearFormulario() {
+  document
+    .getElementById(
+      'responsable'
+    )
+    .disabled = true;
+
+  document
+    .getElementById(
+      'ubicacion'
+    )
+    .disabled = true;
+
+  document
+    .getElementById(
+      'observacion'
+    )
+    .disabled = true;
+}
+
+
+function convertirFechaTexto(
+  valor
+) {
+  const texto =
+    String(
+      valor ||
+      ''
+    ).trim();
+
+  const coincidencia =
+    texto.match(
+      /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/
+    );
+
+  if (!coincidencia) {
+    return null;
+  }
+
+  return new Date(
+    Number(
+      coincidencia[3]
+    ),
+    Number(
+      coincidencia[2]
+    ) - 1,
+    Number(
+      coincidencia[1]
+    ),
+    Number(
+      coincidencia[4]
+    ),
+    Number(
+      coincidencia[5]
+    ),
+    Number(
+      coincidencia[6]
+    )
+  );
+}
+
+
+function volverDetalle() {
+  window.location.href =
+    `detalle-servicio.html?id=${
+      encodeURIComponent(
+        ID_SERVICIO
+      )
+    }`;
+}
+
+
+function escribirTexto(
+  id,
+  valor
+) {
+  const elemento =
+    document.getElementById(
+      id
+    );
+
+  if (!elemento) {
+    return;
+  }
+
+  elemento.textContent =
+    (
+      valor === null ||
+      valor === undefined ||
+      valor === ''
+    )
+      ? '—'
+      : valor;
+}
+
+
+function normalizar(valor) {
+  return String(
+    valor || ''
+  )
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    );
+}
+
+
+function escaparHTML(valor) {
+  return String(
+    valor ?? ''
+  )
+    .replaceAll(
+      '&',
+      '&amp;'
+    )
+    .replaceAll(
+      '<',
+      '&lt;'
+    )
+    .replaceAll(
+      '>',
+      '&gt;'
+    )
+    .replaceAll(
+      '"',
+      '&quot;'
+    )
+    .replaceAll(
+      "'",
+      '&#039;'
+    );
+}
+
+
+function mostrarMensaje(
+  texto,
+  tipo = ''
+) {
+  const mensaje =
+    document.getElementById(
+      'mensaje'
+    );
+
+  mensaje.textContent =
+    texto;
+
+  mensaje.className =
+    `mensaje ${tipo}`
+      .trim();
+
+  mensaje.classList.remove(
+    'oculto'
+  );
+
+  clearTimeout(
+    mostrarMensaje.temporizador
+  );
+
+  mostrarMensaje.temporizador =
+    setTimeout(
+      () => {
+        mensaje
+          .classList
+          .add(
+            'oculto'
+          );
+      },
+      3800
+    );
+}
+</script>
+
+</body>
+</html>
