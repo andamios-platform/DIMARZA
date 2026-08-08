@@ -254,6 +254,7 @@
     1fr 40px
     1fr 40px
     1fr 40px
+    1fr 40px
     1fr;
   gap: 8px;
   align-items: center;
@@ -304,11 +305,15 @@
   line-height: 1;
 }
 
-    .rejilla-modulos {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 16px;
-    }
+.rejilla-modulos {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+    .estado-traslado {
+  background: #e3f2fd;
+  color: #1d5f8a;
+}
 
     .modulo {
       border: none;
@@ -334,6 +339,9 @@
 
     .modulo-previos {
       background: linear-gradient(135deg, #f28c28, #d96c0f);
+    }
+    .modulo-traslado {
+      background: linear-gradient(135deg, #2f6d9b, #1d4f73);
     }
 
     .modulo-armado {
@@ -532,31 +540,38 @@
 
 <div class="flujo">
 
-  <div id="pasoSolicitado" class="paso">
-    <span class="paso-icono">📄</span>
-    <span>Solicitado</span>
-  </div>
+<div id="pasoSolicitado" class="paso">
+  <span class="paso-icono">📄</span>
+  <span>Solicitado</span>
+</div>
 
-  <div class="flecha-flujo">➜</div>
+<div class="flecha-flujo">➜</div>
 
-  <div id="pasoPrevios" class="paso">
-    <span class="paso-icono">📦</span>
-    <span>Previos</span>
-  </div>
+<div id="pasoPrevios" class="paso">
+  <span class="paso-icono">📦</span>
+  <span>Previos</span>
+</div>
 
-  <div class="flecha-flujo">➜</div>
+<div class="flecha-flujo">➜</div>
 
-  <div id="pasoArmado" class="paso">
-    <span class="paso-icono">🔨</span>
-    <span>Armado</span>
-  </div>
+<div id="pasoTraslado" class="paso">
+  <span class="paso-icono">🚚</span>
+  <span>Traslado</span>
+</div>
 
-  <div class="flecha-flujo">➜</div>
+<div class="flecha-flujo">➜</div>
 
-  <div id="pasoOperativo" class="paso">
-    <span class="paso-icono">✅</span>
-    <span>Operativo</span>
-  </div>
+<div id="pasoArmado" class="paso">
+  <span class="paso-icono">🔨</span>
+  <span>Armado</span>
+</div>
+
+<div class="flecha-flujo">➜</div>
+
+<div id="pasoOperativo" class="paso">
+  <span class="paso-icono">✅</span>
+  <span>Operativo</span>
+</div>
 
 </div>
       </section>
@@ -575,7 +590,14 @@
             <span class="modulo-icono">📦</span>
             Previos
           </button>
-
+          <button
+            type="button"
+            class="modulo modulo-traslado"
+            onclick="abrirModulo('traslado.html')"
+          >
+            <span class="modulo-icono">🚚</span>
+            Traslado
+          </button>
           <button
             type="button"
             class="modulo modulo-armado"
@@ -843,12 +865,13 @@ function actualizarFlujo(estado) {
   const valor =
     normalizarTexto(estado);
 
-  const pasos = [
-    'pasoSolicitado',
-    'pasoPrevios',
-    'pasoArmado',
-    'pasoOperativo'
-  ];
+const pasos = [
+  'pasoSolicitado',
+  'pasoPrevios',
+  'pasoTraslado',
+  'pasoArmado',
+  'pasoOperativo'
+];
 
   pasos.forEach(id => {
     const elemento =
@@ -859,32 +882,40 @@ function actualizarFlujo(estado) {
     }
   });
 
-  let indiceActual = 0;
+let indiceActual = 0;
 
-  if (
-    valor === 'EN PLANIFICACION' ||
-    valor === 'EN PREPARACION' ||
-    valor === 'DESPACHADO' ||
-    valor === 'RECIBIDO EN TAG'
-  ) {
-    indiceActual = 1;
-  }
+if (
+  valor === 'EN PLANIFICACION' ||
+  valor === 'EN PREPARACION'
+) {
+  indiceActual = 1;
+}
 
-  if (valor === 'EN ARMADO') {
-    indiceActual = 2;
-  }
+if (
+  valor === 'DESPACHADO' ||
+  valor === 'EN TRASLADO' ||
+  valor === 'TRASLADO PAUSADO'
+) {
+  indiceActual = 2;
+}
 
-  if (
-    valor === 'ANDAMIO OPERATIVO' ||
-    valor === 'EN DESMONTAJE' ||
-    valor === 'EN RETORNO' ||
-    valor === 'RECIBIDO EN BASE' ||
-    valor === 'CERRADO' ||
-    valor === 'FINALIZADO'
-  ) {
-    indiceActual = 3;
-  }
+if (
+  valor === 'RECIBIDO EN TAG' ||
+  valor === 'EN ARMADO'
+) {
+  indiceActual = 3;
+}
 
+if (
+  valor === 'ANDAMIO OPERATIVO' ||
+  valor === 'EN DESMONTAJE' ||
+  valor === 'EN RETORNO' ||
+  valor === 'RECIBIDO EN BASE' ||
+  valor === 'CERRADO' ||
+  valor === 'FINALIZADO'
+) {
+  indiceActual = 4;
+}
   pasos.forEach((id, indice) => {
     const elemento =
       document.getElementById(id);
@@ -1022,7 +1053,12 @@ function volverDashboard() {
       ) {
         return 'estado-preparacion';
       }
-
+      if (
+        valor === 'EN TRASLADO' ||
+        valor === 'TRASLADO PAUSADO'
+      ) {
+        return 'estado-traslado';
+      }
       if (valor === 'EN ARMADO') {
         return 'estado-armado';
       }
