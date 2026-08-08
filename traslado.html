@@ -1415,6 +1415,8 @@ async function iniciarModulo() {
       cargarFotografiasTraslado()
     ]);
 
+    renderizarHistorial();
+    
     document
       .getElementById(
         'contenidoCargando'
@@ -1469,35 +1471,7 @@ async function cargarFotografiasTraslado() {
         'No se pudieron cargar las fotografías del traslado.'
       );
     }
-    fotografiasTraslado.push({
-  idFoto:
-    datosFoto.idFoto || '',
 
-  idServicio:
-    ID_SERVICIO,
-
-  idEvento:
-    datos.idEvento,
-
-  tipoFoto,
-
-  enlaceFoto:
-    datosFoto.enlaceFoto || '',
-
-  idArchivoDrive:
-    datosFoto.idArchivoDrive || '',
-
-  descripcion:
-    observacion ||
-    ubicacion ||
-    tipoFoto,
-
-  fechaHora:
-    datosFoto.fechaHora || '',
-
-  subidoPor:
-    responsable
-});
     fotografiasTraslado =
       Array.isArray(
         datos.fotografias
@@ -2419,6 +2393,35 @@ if (
       'El evento fue registrado, pero no se pudo guardar la fotografía.'
     );
   }
+      fotografiasTraslado.push({
+  idFoto:
+    datosFoto.idFoto || '',
+
+  idServicio:
+    ID_SERVICIO,
+
+  idEvento:
+    datos.idEvento,
+
+  tipoFoto,
+
+  enlaceFoto:
+    datosFoto.enlaceFoto || '',
+
+  idArchivoDrive:
+    datosFoto.idArchivoDrive || '',
+
+  descripcion:
+    observacion ||
+    ubicacion ||
+    tipoFoto,
+
+  fechaHora:
+    datosFoto.fechaHora || '',
+
+  subidoPor:
+    responsable
+});
 }
 
     mostrarMensaje(
