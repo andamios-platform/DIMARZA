@@ -712,6 +712,153 @@
       }
     }
 
+    /* ==============================
+   EVIDENCIA DEL TRASLADO
+   ============================== */
+
+.evidencia-traslado {
+  margin-top: 18px;
+  padding: 16px;
+
+  background: #f8fafb;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius: 12px;
+}
+
+.evidencia-traslado-titulo {
+  margin-bottom: 5px;
+
+  color: var(--azul);
+
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.evidencia-traslado-ayuda {
+  margin-bottom: 12px;
+
+  color: var(--gris);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.evidencia-input {
+  display: none;
+}
+
+.evidencia-selector {
+  min-height: 135px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding: 18px;
+
+  color: var(--gris);
+
+  text-align: center;
+
+  background: white;
+
+  border:
+    2px dashed
+    #bfd0dc;
+
+  border-radius: 11px;
+
+  cursor: pointer;
+}
+
+.evidencia-selector:hover {
+  border-color:
+    var(--azul2);
+
+  background:
+    var(--azul-claro);
+}
+
+.evidencia-icono {
+  font-size: 30px;
+}
+
+.evidencia-preview {
+  display: none;
+
+  overflow: hidden;
+
+  background: white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius: 11px;
+}
+
+.evidencia-preview.activa {
+  display: block;
+}
+
+.evidencia-preview img {
+  width: 100%;
+  max-height: 260px;
+
+  display: block;
+
+  object-fit: contain;
+
+  background: #e7edf1;
+}
+
+.evidencia-preview-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 11px 12px;
+}
+
+.evidencia-preview-info span {
+  overflow: hidden;
+
+  color: var(--gris);
+
+  font-size: 12px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-quitar-foto {
+  flex: 0 0 auto;
+
+  padding: 8px 11px;
+
+  color: var(--rojo);
+
+  background:
+    var(--rojo-claro);
+
+  border:
+    1px solid #efc1c5;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: bold;
+}
+
     @media(
       max-width: 650px
     ) {
@@ -996,7 +1143,83 @@
 
       </div>
 
+      <!-- EVIDENCIA FOTOGRÁFICA -->
+      <div
+        id="bloqueFotoTraslado"
+        class="evidencia-traslado oculto"
+      >
 
+        <div
+          id="tituloFotoTraslado"
+          class="evidencia-traslado-titulo"
+        >
+          📷 Evidencia fotográfica
+        </div>
+
+        <div
+          id="ayudaFotoTraslado"
+          class="evidencia-traslado-ayuda"
+        >
+          Registra una fotografía del lugar donde quedó el material.
+        </div>
+
+        <input
+          id="inputFotoTraslado"
+          class="evidencia-input"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onchange="cargarFotoTraslado(this)"
+        >
+
+        <div
+          id="selectorFotoTraslado"
+          class="evidencia-selector"
+          onclick="seleccionarFotoTraslado()"
+        >
+          <span class="evidencia-icono">
+            📷
+          </span>
+
+          <strong>
+            Tomar o seleccionar fotografía
+          </strong>
+
+          <small>
+            También puedes elegir una imagen existente.
+          </small>
+        </div>
+
+        <div
+          id="previewFotoTraslado"
+          class="evidencia-preview"
+        >
+          <img
+            id="imagenFotoTraslado"
+            src=""
+            alt="Evidencia del traslado"
+          >
+
+          <div class="evidencia-preview-info">
+
+            <span id="nombreFotoTraslado"></span>
+
+            <button
+              type="button"
+              class="btn-quitar-foto"
+              onclick="quitarFotoTraslado()"
+            >
+              ✕ Quitar
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- BOTONES DEL TRASLADO -->
       <div class="acciones">
 
         <button
@@ -1061,7 +1284,6 @@
       </div>
 
     </section>
-
   </div>
 
 </main>
@@ -1098,6 +1320,7 @@ let servicioActual = null;
 
 let temporizadorCronometro = null;
 let fechaInicioTramoActual = null;
+let fotoTrasladoActual = null;
 
 
 document.addEventListener(
@@ -1321,6 +1544,14 @@ function aplicarEstadoTraslado() {
     );
 
   ocultarBotones();
+  const bloqueFoto =
+  document.getElementById(
+    'bloqueFotoTraslado'
+  );
+
+bloqueFoto.classList.add(
+  'oculto'
+);
 
   /*
    * Todavía no existe ningún evento.
@@ -1354,7 +1585,23 @@ function aplicarEstadoTraslado() {
     );
 
     iniciarCronometroActivo();
+    bloqueFoto.classList.remove(
+  'oculto'
+);
 
+document
+  .getElementById(
+    'tituloFotoTraslado'
+  )
+  .textContent =
+    '📷 Evidencia del punto de detención o destino';
+
+document
+  .getElementById(
+    'ayudaFotoTraslado'
+  )
+  .textContent =
+    'La fotografía es opcional si vas a pausar y obligatoria si el material llegó al destino.';
     return;
   }
 
@@ -1532,7 +1779,260 @@ function detenerCronometro() {
     null;
 }
 
+function seleccionarFotoTraslado() {
+  document
+    .getElementById(
+      'inputFotoTraslado'
+    )
+    .click();
+}
 
+
+async function cargarFotoTraslado(
+  input
+) {
+  const archivo =
+    input &&
+    input.files &&
+    input.files[0];
+
+  if (!archivo) {
+    return;
+  }
+
+  if (
+    !archivo.type.startsWith(
+      'image/'
+    )
+  ) {
+    mostrarMensaje(
+      'El archivo seleccionado no es una imagen.',
+      'error'
+    );
+
+    return;
+  }
+
+  if (
+    archivo.size >
+    15 * 1024 * 1024
+  ) {
+    mostrarMensaje(
+      'La fotografía supera el límite de 15 MB.',
+      'error'
+    );
+
+    return;
+  }
+
+  try {
+    mostrarMensaje(
+      'Preparando fotografía...'
+    );
+
+    const comprimida =
+      await comprimirFotoTraslado(
+        archivo,
+        1280,
+        0.80
+      );
+
+    fotoTrasladoActual = {
+      nombre:
+        `${ID_SERVICIO}_${Date.now()}.jpg`,
+
+      imagenBase64:
+        comprimida.imagenBase64
+    };
+
+    document
+      .getElementById(
+        'imagenFotoTraslado'
+      )
+      .src =
+        comprimida.imagenBase64;
+
+    document
+      .getElementById(
+        'nombreFotoTraslado'
+      )
+      .textContent =
+        archivo.name;
+
+    document
+      .getElementById(
+        'selectorFotoTraslado'
+      )
+      .classList.add(
+        'oculto'
+      );
+
+    document
+      .getElementById(
+        'previewFotoTraslado'
+      )
+      .classList.add(
+        'activa'
+      );
+
+    mostrarMensaje(
+      'Fotografía preparada.',
+      'exito'
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    mostrarMensaje(
+      'No se pudo preparar la fotografía.',
+      'error'
+    );
+  }
+}
+
+
+function quitarFotoTraslado() {
+  fotoTrasladoActual =
+    null;
+
+  document
+    .getElementById(
+      'inputFotoTraslado'
+    )
+    .value = '';
+
+  document
+    .getElementById(
+      'imagenFotoTraslado'
+    )
+    .src = '';
+
+  document
+    .getElementById(
+      'nombreFotoTraslado'
+    )
+    .textContent = '';
+
+  document
+    .getElementById(
+      'selectorFotoTraslado'
+    )
+    .classList.remove(
+      'oculto'
+    );
+
+  document
+    .getElementById(
+      'previewFotoTraslado'
+    )
+    .classList.remove(
+      'activa'
+    );
+}
+
+
+function comprimirFotoTraslado(
+  archivo,
+  dimensionMaxima = 1280,
+  calidad = 0.80
+) {
+  return new Promise(
+    (resolver, rechazar) => {
+
+      const lector =
+        new FileReader();
+
+      lector.onload =
+        evento => {
+
+          const imagen =
+            new Image();
+
+          imagen.onload = () => {
+            try {
+              let ancho =
+                imagen.naturalWidth;
+
+              let alto =
+                imagen.naturalHeight;
+
+              const proporcion =
+                Math.min(
+                  1,
+                  dimensionMaxima /
+                  Math.max(
+                    ancho,
+                    alto
+                  )
+                );
+
+              ancho =
+                Math.round(
+                  ancho *
+                  proporcion
+                );
+
+              alto =
+                Math.round(
+                  alto *
+                  proporcion
+                );
+
+              const canvas =
+                document.createElement(
+                  'canvas'
+                );
+
+              canvas.width =
+                ancho;
+
+              canvas.height =
+                alto;
+
+              const contexto =
+                canvas.getContext(
+                  '2d'
+                );
+
+              contexto.drawImage(
+                imagen,
+                0,
+                0,
+                ancho,
+                alto
+              );
+
+              const imagenBase64 =
+                canvas.toDataURL(
+                  'image/jpeg',
+                  calidad
+                );
+
+              resolver({
+                imagenBase64
+              });
+
+            } catch (error) {
+              rechazar(error);
+            }
+          };
+
+          imagen.onerror =
+            rechazar;
+
+          imagen.src =
+            evento.target.result;
+        };
+
+      lector.onerror =
+        rechazar;
+
+      lector.readAsDataURL(
+        archivo
+      );
+    }
+  );
+}
 async function registrarEvento(
   tipoEvento
 ) {
@@ -1595,6 +2095,26 @@ async function registrarEvento(
     return;
   }
 
+  if (
+  tipoEvento === 'LLEGADA' &&
+  !fotoTrasladoActual
+) {
+  mostrarMensaje(
+    'Debes registrar una fotografía del material en el destino.',
+    'error'
+  );
+
+  document
+    .getElementById(
+      'bloqueFotoTraslado'
+    )
+    .scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+
+  return;
+}
   let pregunta = '';
 
   switch (tipoEvento) {
@@ -1691,6 +2211,73 @@ if (
         'No se pudo registrar el evento.'
       );
     }
+    if (
+  (
+    tipoEvento === 'PAUSA' ||
+    tipoEvento === 'LLEGADA'
+  ) &&
+  fotoTrasladoActual
+) {
+  mostrarMensaje(
+    'Guardando fotografía...'
+  );
+
+  const tipoFoto =
+    tipoEvento === 'PAUSA'
+      ? 'PAUSA TRASLADO'
+      : 'LLEGADA A DESTINO';
+
+  const respuestaFoto =
+    await fetch(
+      API_URL,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body:
+          JSON.stringify({
+            accion:
+              'subirFotografiaTraslado',
+
+            idServicio:
+              ID_SERVICIO,
+
+            idEvento:
+              datos.idEvento,
+
+            tipoFoto,
+
+            nombreArchivo:
+              fotoTrasladoActual.nombre,
+
+            imagenBase64:
+              fotoTrasladoActual.imagenBase64,
+
+            descripcion:
+              observacion ||
+              ubicacion ||
+              tipoFoto,
+
+            usuario:
+              responsable
+          })
+      }
+    );
+
+  const datosFoto =
+    await respuestaFoto.json();
+
+  if (!datosFoto.ok) {
+    throw new Error(
+      datosFoto.mensaje ||
+      'El evento fue registrado, pero no se pudo guardar la fotografía.'
+    );
+  }
+}
 
     mostrarMensaje(
       datos.mensaje ||
@@ -1710,6 +2297,7 @@ if (
       )
       .value = '';
 
+ quitarFotoTraslado();   
 actualizarTrasladoLocal(
   datos
 );
@@ -1727,12 +2315,19 @@ actualizarTrasladoLocal(
    * rechazó la operación, el traslado sigue activo.
    * Volvemos a poner en marcha el cronómetro.
    */
-  if (
-    tipoEvento === 'PAUSA' ||
-    tipoEvento === 'LLEGADA'
-  ) {
-    aplicarEstadoTraslado();
+if (
+  tipoEvento === 'PAUSA' ||
+  tipoEvento === 'LLEGADA'
+) {
+  try {
+    await cargarTraslado();
+  } catch (errorRecarga) {
+    console.error(
+      'No se pudo sincronizar nuevamente el traslado:',
+      errorRecarga
+    );
   }
+}
 
 } finally {
     bloquearBotones(
