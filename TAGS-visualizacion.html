@@ -1,1 +1,4806 @@
+<!DOCTYPE html>
+<html lang="es">
 
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+  Visualización de TAGS | DIMARZA
+</title>
+
+
+<style>
+
+:root{
+
+  --azul:#163f63;
+  --azul2:#2f6d9b;
+  --azul-claro:#eaf3fa;
+
+  --naranja:#f28c28;
+  --naranja2:#d96f0b;
+
+  --verde:#1f8f5f;
+  --verde-claro:#e9f7f1;
+
+  --amarillo:#b7790c;
+  --amarillo-claro:#fff6dc;
+
+  --rojo:#c83f49;
+  --rojo-claro:#fff0f1;
+
+  --gris:#667784;
+  --gris-claro:#f5f7f9;
+
+  --borde:#d7e0e7;
+
+  --texto:#1f2d36;
+
+  --sombra:
+    0 10px 28px
+    rgba(26,54,76,.10);
+
+  --radio:16px;
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+body{
+
+  margin:0;
+
+  color:var(--texto);
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  background:
+    linear-gradient(
+      180deg,
+      #edf4f8 0%,
+      #f8fafb 260px,
+      #f5f7f9 100%
+    );
+
+}
+
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+
+button{
+  cursor:pointer;
+}
+
+
+.oculto{
+  display:none !important;
+}
+
+
+/* =========================================================
+   CONTENEDOR
+========================================================= */
+
+.contenedor{
+
+  width:min(
+    1500px,
+    calc(100% - 28px)
+  );
+
+  margin:0 auto;
+
+  padding:
+    22px 0 45px;
+
+}
+
+
+/* =========================================================
+   CABECERA
+========================================================= */
+
+.cabecera{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  align-items:center;
+
+  gap:18px;
+
+  margin-bottom:18px;
+
+  padding:22px;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(22,63,99,.98),
+      rgba(47,109,155,.94)
+    );
+
+  border-radius:var(--radio);
+
+  box-shadow:var(--sombra);
+
+}
+
+
+.cabecera h1{
+
+  margin:
+    0 0 7px;
+
+  font-size:
+    clamp(
+      25px,
+      3vw,
+      38px
+    );
+
+}
+
+
+.cabecera p{
+
+  margin:0;
+
+  opacity:.92;
+
+  line-height:1.45;
+
+}
+
+
+.btn-volver{
+
+  padding:
+    11px 17px;
+
+  color:white;
+
+  font-weight:bold;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .12
+    );
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .35
+    );
+
+  border-radius:10px;
+
+}
+
+
+.btn-volver:hover{
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .20
+    );
+
+}
+
+
+/* =========================================================
+   BUSCADOR Y FILTROS
+========================================================= */
+
+.panel{
+
+  margin-bottom:18px;
+
+  padding:20px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:
+    var(--radio);
+
+  box-shadow:
+    var(--sombra);
+
+}
+
+
+.filtros{
+
+  display:grid;
+
+  grid-template-columns:
+    minmax(260px,2fr)
+    minmax(180px,1fr)
+    minmax(180px,1fr);
+
+  gap:12px;
+
+}
+
+
+.campo{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:7px;
+
+}
+
+
+.campo label{
+
+  color:var(--gris);
+
+  font-size:12px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.campo input,
+.campo select{
+
+  width:100%;
+
+  padding:
+    12px 13px;
+
+  color:var(--texto);
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:10px;
+
+  outline:none;
+
+}
+
+
+.campo input:focus,
+.campo select:focus{
+
+  border-color:
+    var(--azul2);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(
+      47,
+      109,
+      155,
+      .12
+    );
+
+}
+
+
+/* =========================================================
+   INDICADORES
+========================================================= */
+
+.resumen{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(150px,1fr)
+    );
+
+  gap:12px;
+
+  margin-bottom:18px;
+
+}
+
+
+.indicador{
+
+  padding:17px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-top:
+    4px solid
+    var(--azul2);
+
+  border-radius:12px;
+
+  box-shadow:
+    var(--sombra);
+
+}
+
+
+.indicador.operativo{
+  border-top-color:
+    var(--verde);
+}
+
+
+.indicador.armado{
+  border-top-color:
+    var(--naranja);
+}
+
+
+.indicador.traslado{
+  border-top-color:
+    var(--amarillo);
+}
+
+
+.indicador span{
+
+  display:block;
+
+  margin-bottom:7px;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.indicador strong{
+
+  color:var(--azul);
+
+  font-size:29px;
+
+}
+
+
+/* =========================================================
+   TITULO SECCIÓN
+========================================================= */
+
+.titulo-seccion{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:
+    space-between;
+
+  gap:15px;
+
+  margin:
+    8px 0 14px;
+
+}
+
+
+.titulo-seccion h2{
+
+  margin:0;
+
+  color:var(--azul);
+
+}
+
+
+.titulo-seccion span{
+
+  color:var(--gris);
+
+  font-size:13px;
+
+}
+
+
+/* =========================================================
+   TARJETAS TAG
+========================================================= */
+
+.rejilla-tags{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(290px,1fr)
+    );
+
+  gap:15px;
+
+}
+
+
+.tag-card{
+
+  position:relative;
+
+  display:flex;
+
+  flex-direction:column;
+
+  overflow:hidden;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:
+    15px;
+
+  box-shadow:
+    var(--sombra);
+
+  transition:
+    transform .2s,
+    box-shadow .2s;
+
+}
+
+
+.tag-card:hover{
+
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 15px 32px
+    rgba(26,54,76,.14);
+
+}
+
+
+.tag-cabecera{
+
+  display:flex;
+
+  align-items:flex-start;
+
+  justify-content:
+    space-between;
+
+  gap:12px;
+
+  padding:
+    17px 17px 12px;
+
+}
+
+
+.tag-nombre{
+
+  margin:
+    0 0 4px;
+
+  color:var(--azul);
+
+  font-size:22px;
+
+  font-weight:900;
+
+}
+
+
+.tag-servicio{
+
+  color:var(--gris);
+
+  font-size:12px;
+
+  font-weight:bold;
+
+}
+
+
+.estado{
+
+  display:inline-flex;
+
+  align-items:center;
+
+  padding:
+    7px 9px;
+
+  border-radius:
+    999px;
+
+  font-size:10px;
+
+  font-weight:bold;
+
+  text-align:center;
+
+}
+
+
+.estado-general{
+
+  color:var(--azul);
+
+  background:
+    var(--azul-claro);
+
+}
+
+
+.estado-previos{
+
+  color:#765800;
+
+  background:#fff4ce;
+
+}
+
+
+.estado-traslado{
+
+  color:#8a5700;
+
+  background:
+    var(--amarillo-claro);
+
+}
+
+
+.estado-armado{
+
+  color:#a44e00;
+
+  background:#fff0df;
+
+}
+
+
+.estado-operativo{
+
+  color:var(--verde);
+
+  background:
+    var(--verde-claro);
+
+}
+
+
+.estado-cerrado{
+
+  color:var(--gris);
+
+  background:#edf0f2;
+
+}
+
+
+.tag-datos{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:10px;
+
+  padding:
+    0 17px 16px;
+
+}
+
+
+.tag-dato{
+
+  min-width:0;
+
+  padding:10px;
+
+  background:
+    var(--gris-claro);
+
+  border-radius:9px;
+
+}
+
+
+.tag-dato span{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--gris);
+
+  font-size:9px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.tag-dato strong{
+
+  display:block;
+
+  overflow:hidden;
+
+  font-size:12px;
+
+  line-height:1.35;
+
+  text-overflow:ellipsis;
+
+}
+
+
+.btn-ver{
+
+  margin:
+    auto 17px 17px;
+
+  padding:
+    11px 14px;
+
+  color:white;
+
+  font-weight:bold;
+
+  background:
+    var(--azul);
+
+  border:0;
+
+  border-radius:9px;
+
+}
+
+
+.btn-ver:hover{
+
+  background:
+    var(--azul2);
+
+}
+
+
+/* =========================================================
+   CARGA / SIN DATOS
+========================================================= */
+
+.cargando,
+.sin-datos,
+.error{
+
+  padding:35px 20px;
+
+  text-align:center;
+
+  border-radius:12px;
+
+}
+
+
+.cargando{
+
+  color:var(--azul);
+
+  background:
+    var(--azul-claro);
+
+}
+
+
+.sin-datos{
+
+  color:var(--gris);
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+}
+
+
+.error{
+
+  color:var(--rojo);
+
+  background:
+    var(--rojo-claro);
+
+  border:
+    1px solid
+    #ecc1c5;
+
+}
+
+
+/* =========================================================
+   MODAL DETALLE
+========================================================= */
+
+.modal-fondo{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:3000;
+
+  display:none;
+
+  align-items:flex-start;
+
+  justify-content:center;
+
+  overflow-y:auto;
+
+  padding:24px;
+
+  background:
+    rgba(
+      12,
+      27,
+      39,
+      .72
+    );
+
+}
+
+
+.modal-fondo.activo{
+  display:flex;
+}
+
+
+.modal{
+
+  width:
+    min(
+      1250px,
+      100%
+    );
+
+  margin:auto;
+
+  overflow:hidden;
+
+  background:white;
+
+  border-radius:18px;
+
+  box-shadow:
+    0 25px 60px
+    rgba(0,0,0,.30);
+
+}
+
+
+.modal-cabecera{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:
+    space-between;
+
+  gap:15px;
+
+  padding:
+    20px 22px;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--azul),
+      var(--azul2)
+    );
+
+}
+
+
+.modal-cabecera h2{
+
+  margin:
+    0 0 4px;
+
+}
+
+
+.modal-cabecera p{
+
+  margin:0;
+
+  opacity:.85;
+
+  font-size:13px;
+
+}
+
+
+.btn-cerrar{
+
+  width:42px;
+
+  height:42px;
+
+  flex:
+    0 0 42px;
+
+  color:white;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .15
+    );
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .3
+    );
+
+  border-radius:10px;
+
+  font-size:24px;
+
+}
+
+
+/* =========================================================
+   CABECERA SERVICIO DETALLE
+========================================================= */
+
+.detalle-resumen{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      6,
+      minmax(120px,1fr)
+    );
+
+  gap:10px;
+
+  padding:
+    18px 20px;
+
+  background:
+    #f7fafc;
+
+  border-bottom:
+    1px solid
+    var(--borde);
+
+}
+
+
+.detalle-dato{
+
+  min-width:0;
+
+  padding:11px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:9px;
+
+}
+
+
+.detalle-dato span{
+
+  display:block;
+
+  margin-bottom:5px;
+
+  color:var(--gris);
+
+  font-size:9px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.detalle-dato strong{
+
+  display:block;
+
+  word-break:
+    break-word;
+
+  line-height:1.35;
+
+  font-size:12px;
+
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.tabs{
+
+  display:flex;
+
+  gap:6px;
+
+  overflow-x:auto;
+
+  padding:
+    13px 18px;
+
+  background:white;
+
+  border-bottom:
+    1px solid
+    var(--borde);
+
+}
+
+
+.tab{
+
+  flex:
+    0 0 auto;
+
+  padding:
+    10px 15px;
+
+  color:var(--gris);
+
+  font-weight:bold;
+
+  background:
+    var(--gris-claro);
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:9px;
+
+}
+
+
+.tab.activo{
+
+  color:white;
+
+  background:
+    var(--azul);
+
+  border-color:
+    var(--azul);
+
+}
+
+
+.tab-contenido{
+
+  min-height:350px;
+
+  padding:20px;
+
+}
+
+
+/* =========================================================
+   INFORMACIÓN GENERAL
+========================================================= */
+
+.info-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(180px,1fr)
+    );
+
+  gap:12px;
+
+}
+
+
+.info-card{
+
+  padding:14px;
+
+  background:
+    var(--gris-claro);
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:10px;
+
+}
+
+
+.info-card span{
+
+  display:block;
+
+  margin-bottom:6px;
+
+  color:var(--gris);
+
+  font-size:10px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.info-card strong{
+
+  display:block;
+
+  line-height:1.4;
+
+}
+
+
+.descripcion-completa{
+
+  grid-column:
+    1 / -1;
+
+}
+
+
+/* =========================================================
+   TABLAS
+========================================================= */
+
+.tabla-wrap{
+
+  width:100%;
+
+  overflow-x:auto;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:11px;
+
+}
+
+
+table{
+
+  width:100%;
+
+  min-width:850px;
+
+  border-collapse:
+    collapse;
+
+}
+
+
+th,
+td{
+
+  padding:
+    11px 10px;
+
+  border-bottom:
+    1px solid
+    var(--borde);
+
+  text-align:left;
+
+  vertical-align:middle;
+
+}
+
+
+th{
+
+  color:white;
+
+  background:
+    var(--azul);
+
+  font-size:10px;
+
+  text-transform:uppercase;
+
+}
+
+
+td{
+
+  font-size:12px;
+
+}
+
+
+tbody tr:last-child td{
+  border-bottom:0;
+}
+
+
+tbody tr:nth-child(even){
+  background:#fafcfd;
+}
+
+
+/* =========================================================
+   EVENTOS
+========================================================= */
+
+.eventos{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:10px;
+
+}
+
+
+.evento{
+
+  display:grid;
+
+  grid-template-columns:
+    135px
+    145px
+    1fr;
+
+  gap:13px;
+
+  align-items:start;
+
+  padding:13px;
+
+  background:
+    var(--gris-claro);
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-left:
+    4px solid
+    var(--azul2);
+
+  border-radius:10px;
+
+}
+
+
+.evento-tipo{
+
+  color:var(--azul);
+
+  font-weight:bold;
+
+}
+
+
+.evento-fecha{
+
+  color:var(--gris);
+
+  font-size:11px;
+
+}
+
+
+.evento-detalle{
+
+  line-height:1.45;
+
+  font-size:12px;
+
+}
+
+
+.evento-detalle strong{
+
+  color:var(--azul);
+
+}
+
+
+/* =========================================================
+   MÉTRICAS
+========================================================= */
+
+.metricas{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(150px,1fr)
+    );
+
+  gap:10px;
+
+  margin-bottom:16px;
+
+}
+
+
+.metrica{
+
+  padding:14px;
+
+  background:
+    var(--azul-claro);
+
+  border:
+    1px solid
+    #c7ddeb;
+
+  border-radius:10px;
+
+}
+
+
+.metrica span{
+
+  display:block;
+
+  margin-bottom:5px;
+
+  color:var(--gris);
+
+  font-size:10px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.metrica strong{
+
+  color:var(--azul);
+
+  font-size:20px;
+
+}
+
+
+/* =========================================================
+   FOTOGRAFÍAS
+========================================================= */
+
+.titulo-bloque{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:
+    space-between;
+
+  gap:12px;
+
+  margin:
+    22px 0 12px;
+
+}
+
+
+.titulo-bloque:first-child{
+  margin-top:0;
+}
+
+
+.titulo-bloque h3{
+
+  margin:0;
+
+  color:var(--azul);
+
+}
+
+
+.contador-fotos{
+
+  display:inline-flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  min-width:28px;
+
+  height:28px;
+
+  padding:
+    0 9px;
+
+  color:white;
+
+  background:
+    var(--azul2);
+
+  border-radius:
+    999px;
+
+  font-size:11px;
+
+  font-weight:bold;
+
+}
+
+
+.fotos-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(220px,1fr)
+    );
+
+  gap:13px;
+
+}
+
+
+.foto-card{
+
+  overflow:hidden;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:11px;
+
+}
+
+
+.foto-imagen{
+
+  width:100%;
+
+  height:170px;
+
+  display:grid;
+
+  place-items:center;
+
+  overflow:hidden;
+
+  color:var(--gris);
+
+  background:
+    #e9eef2;
+
+}
+
+
+.foto-imagen img{
+
+  width:100%;
+
+  height:100%;
+
+  object-fit:cover;
+
+}
+
+
+.foto-info{
+
+  padding:12px;
+
+}
+
+
+.foto-info strong{
+
+  display:block;
+
+  margin-bottom:6px;
+
+  color:var(--azul);
+
+}
+
+
+.foto-info p{
+
+  margin:
+    5px 0;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+  line-height:1.4;
+
+}
+
+
+.btn-foto{
+
+  display:block;
+
+  width:100%;
+
+  margin-top:9px;
+
+  padding:8px 10px;
+
+  color:var(--azul);
+
+  font-size:11px;
+
+  font-weight:bold;
+
+  text-align:center;
+
+  text-decoration:none;
+
+  background:
+    var(--azul-claro);
+
+  border:
+    1px solid
+    #bfd7e8;
+
+  border-radius:7px;
+
+}
+
+
+/* =========================================================
+   MENSAJE ETAPA FUTURA
+========================================================= */
+
+.etapa-futura{
+
+  padding:30px;
+
+  color:var(--gris);
+
+  text-align:center;
+
+  background:
+    var(--gris-claro);
+
+  border:
+    1px dashed
+    #bdc8cf;
+
+  border-radius:12px;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(
+  max-width:1100px
+){
+
+  .detalle-resumen{
+    grid-template-columns:
+      repeat(3,1fr);
+  }
+
+  .resumen{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+}
+
+
+@media(
+  max-width:760px
+){
+
+  .contenedor{
+
+    width:
+      min(
+        100% - 18px,
+        1500px
+      );
+
+    padding-top:10px;
+
+  }
+
+  .cabecera{
+    grid-template-columns:1fr;
+  }
+
+  .btn-volver{
+    width:100%;
+  }
+
+  .filtros{
+    grid-template-columns:1fr;
+  }
+
+  .resumen{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .rejilla-tags{
+    grid-template-columns:1fr;
+  }
+
+  .detalle-resumen{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .info-grid{
+    grid-template-columns:1fr;
+  }
+
+  .descripcion-completa{
+    grid-column:auto;
+  }
+
+  .metricas{
+    grid-template-columns:1fr;
+  }
+
+  .evento{
+    grid-template-columns:1fr;
+  }
+
+  .modal-fondo{
+    padding:8px;
+  }
+
+}
+
+
+@media(
+  max-width:480px
+){
+
+  .resumen{
+    grid-template-columns:1fr;
+  }
+
+  .detalle-resumen{
+    grid-template-columns:1fr;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<main class="contenedor">
+
+
+  <section class="cabecera">
+
+    <div>
+
+      <h1>
+        🏗️ Visualización de TAGS
+      </h1>
+
+      <p>
+        Consulta el estado actual de cada andamio,
+        materiales, eventos y evidencias fotográficas.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-volver"
+      onclick="volverVisualizacion()"
+    >
+      ← Volver a Visualización
+    </button>
+
+  </section>
+
+
+  <section class="panel">
+
+    <div class="filtros">
+
+      <div class="campo">
+
+        <label for="buscador">
+          Buscar
+        </label>
+
+        <input
+          id="buscador"
+          type="text"
+          placeholder="TAG, OT, servicio, área, mina, supervisor..."
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label for="filtroEstado">
+          Estado
+        </label>
+
+        <select id="filtroEstado">
+
+          <option value="">
+            Todos los estados
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label for="filtroMina">
+          Mina
+        </label>
+
+        <select id="filtroMina">
+
+          <option value="">
+            Todas las minas
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="resumen">
+
+    <article class="indicador">
+
+      <span>
+        Servicios / TAGS
+      </span>
+
+      <strong id="totalTags">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="indicador traslado">
+
+      <span>
+        En traslado
+      </span>
+
+      <strong id="totalTraslado">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="indicador armado">
+
+      <span>
+        En armado
+      </span>
+
+      <strong id="totalArmado">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="indicador operativo">
+
+      <span>
+        Andamios operativos
+      </span>
+
+      <strong id="totalOperativo">
+        0
+      </strong>
+
+    </article>
+
+  </section>
+
+
+  <section>
+
+    <div class="titulo-seccion">
+
+      <h2>
+        Estado actual de TAGS
+      </h2>
+
+      <span id="contadorResultados">
+        Cargando...
+      </span>
+
+    </div>
+
+
+    <div
+      id="contenedorTags"
+      class="rejilla-tags"
+    >
+
+      <div class="cargando">
+        Consultando servicios...
+      </div>
+
+    </div>
+
+  </section>
+
+
+</main>
+
+
+<!-- ======================================================
+     MODAL DETALLE
+====================================================== -->
+
+<div
+  id="modalDetalle"
+  class="modal-fondo"
+  onclick="cerrarModalDesdeFondo(event)"
+>
+
+  <div class="modal">
+
+
+    <div class="modal-cabecera">
+
+      <div>
+
+        <h2 id="detalleTag">
+          TAG
+        </h2>
+
+        <p id="detalleSubtitulo">
+          Servicio
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="btn-cerrar"
+        onclick="cerrarDetalle()"
+        aria-label="Cerrar"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      id="detalleResumen"
+      class="detalle-resumen"
+    >
+    </div>
+
+
+    <div class="tabs">
+
+      <button
+        type="button"
+        class="tab activo"
+        data-tab="resumen"
+        onclick="cambiarTab('resumen')"
+      >
+        📋 Resumen
+      </button>
+
+
+      <button
+        type="button"
+        class="tab"
+        data-tab="previos"
+        onclick="cambiarTab('previos')"
+      >
+        📦 Previos
+      </button>
+
+
+      <button
+        type="button"
+        class="tab"
+        data-tab="traslado"
+        onclick="cambiarTab('traslado')"
+      >
+        🚚 Traslado
+      </button>
+
+
+      <button
+        type="button"
+        class="tab"
+        data-tab="armado"
+        onclick="cambiarTab('armado')"
+      >
+        🔨 Armado
+      </button>
+
+
+      <button
+        type="button"
+        class="tab"
+        data-tab="postparada"
+        onclick="cambiarTab('postparada')"
+      >
+        🔄 Postparada
+      </button>
+
+    </div>
+
+
+    <div
+      id="contenidoDetalle"
+      class="tab-contenido"
+    >
+
+      <div class="cargando">
+        Cargando información...
+      </div>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let serviciosOriginales = [];
+
+let serviciosFiltrados = [];
+
+let servicioActual = null;
+
+let datosDetalle = {
+
+  previos:null,
+
+  traslado:null,
+
+  armado:null,
+
+  eventosArmado:null,
+
+  postparada:null,
+
+  fotografias:[]
+
+};
+
+let tabActual =
+  'resumen';
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  iniciarPagina
+);
+
+
+async function iniciarPagina(){
+
+  document
+    .getElementById(
+      'buscador'
+    )
+    .addEventListener(
+      'input',
+      aplicarFiltros
+    );
+
+
+  document
+    .getElementById(
+      'filtroEstado'
+    )
+    .addEventListener(
+      'change',
+      aplicarFiltros
+    );
+
+
+  document
+    .getElementById(
+      'filtroMina'
+    )
+    .addEventListener(
+      'change',
+      aplicarFiltros
+    );
+
+
+  await cargarServicios();
+
+}
+
+
+/* =========================================================
+   CARGAR SERVICIOS
+========================================================= */
+
+async function cargarServicios(){
+
+  const contenedor =
+    document.getElementById(
+      'contenedorTags'
+    );
+
+  try{
+
+    const respuesta =
+      await fetch(
+        `${API_URL}?accion=listarServicios&t=${Date.now()}`
+      );
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        `Error HTTP ${respuesta.status}`
+      );
+
+    }
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.mensaje ||
+        'No fue posible consultar los servicios.'
+      );
+
+    }
+
+
+    serviciosOriginales =
+      Array.isArray(
+        resultado.servicios
+      )
+        ? resultado.servicios
+        : [];
+
+
+    cargarFiltros();
+
+    aplicarFiltros();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    contenedor.innerHTML = `
+
+      <div class="error">
+
+        No se pudo cargar la información.<br>
+
+        ${escaparHTML(
+          error.message
+        )}
+
+      </div>
+
+    `;
+
+
+    document
+      .getElementById(
+        'contadorResultados'
+      )
+      .textContent =
+        'Error de conexión';
+
+  }
+
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+function cargarFiltros(){
+
+  const estados =
+    [
+      ...new Set(
+        serviciosOriginales
+          .map(
+            x =>
+              String(
+                x.estado || ''
+              ).trim()
+          )
+          .filter(Boolean)
+      )
+    ]
+      .sort();
+
+
+  const minas =
+    [
+      ...new Set(
+        serviciosOriginales
+          .map(
+            x =>
+              String(
+                x.faena ||
+                x.mina ||
+                ''
+              ).trim()
+          )
+          .filter(Boolean)
+      )
+    ]
+      .sort();
+
+
+  const filtroEstado =
+    document.getElementById(
+      'filtroEstado'
+    );
+
+
+  estados.forEach(
+    estado => {
+
+      const option =
+        document.createElement(
+          'option'
+        );
+
+      option.value =
+        estado;
+
+      option.textContent =
+        estado;
+
+      filtroEstado.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  const filtroMina =
+    document.getElementById(
+      'filtroMina'
+    );
+
+
+  minas.forEach(
+    mina => {
+
+      const option =
+        document.createElement(
+          'option'
+        );
+
+      option.value =
+        mina;
+
+      option.textContent =
+        mina;
+
+      filtroMina.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+function aplicarFiltros(){
+
+  const busqueda =
+    normalizarTexto(
+      document
+        .getElementById(
+          'buscador'
+        )
+        .value
+    );
+
+
+  const estado =
+    normalizarTexto(
+      document
+        .getElementById(
+          'filtroEstado'
+        )
+        .value
+    );
+
+
+  const mina =
+    normalizarTexto(
+      document
+        .getElementById(
+          'filtroMina'
+        )
+        .value
+    );
+
+
+  serviciosFiltrados =
+    serviciosOriginales
+      .filter(
+        servicio => {
+
+          const texto =
+            normalizarTexto(
+              [
+                servicio.idServicio,
+                servicio.tag,
+                servicio.ot,
+                servicio.faena,
+                servicio.mina,
+                servicio.servicio,
+                servicio.servicioMina,
+                servicio.area,
+                servicio.descripcion,
+                servicio.supervisor,
+                servicio.responsablePrevios,
+                servicio.responsableArmado,
+                servicio.estado
+              ].join(' ')
+            );
+
+
+          const estadoServicio =
+            normalizarTexto(
+              servicio.estado
+            );
+
+
+          const minaServicio =
+            normalizarTexto(
+              servicio.faena ||
+              servicio.mina
+            );
+
+
+          return (
+            (
+              !busqueda ||
+              texto.includes(
+                busqueda
+              )
+            ) &&
+            (
+              !estado ||
+              estadoServicio ===
+              estado
+            ) &&
+            (
+              !mina ||
+              minaServicio ===
+              mina
+            )
+          );
+
+        }
+      );
+
+
+  pintarResumen();
+
+  pintarServicios();
+
+}
+
+
+/* =========================================================
+   RESUMEN
+========================================================= */
+
+function pintarResumen(){
+
+  document
+    .getElementById(
+      'totalTags'
+    )
+    .textContent =
+      serviciosFiltrados.length;
+
+
+  const totalTraslado =
+    serviciosFiltrados.filter(
+      x => {
+
+        const estado =
+          normalizarTexto(
+            x.estado
+          );
+
+        return (
+          estado ===
+            'EN TRASLADO' ||
+          estado ===
+            'TRASLADO PAUSADO'
+        );
+
+      }
+    ).length;
+
+
+  const totalArmado =
+    serviciosFiltrados.filter(
+      x =>
+        normalizarTexto(
+          x.estado
+        ) ===
+        'EN ARMADO'
+    ).length;
+
+
+  const totalOperativo =
+    serviciosFiltrados.filter(
+      x =>
+        normalizarTexto(
+          x.estado
+        ) ===
+        'ANDAMIO OPERATIVO'
+    ).length;
+
+
+  document
+    .getElementById(
+      'totalTraslado'
+    )
+    .textContent =
+      totalTraslado;
+
+
+  document
+    .getElementById(
+      'totalArmado'
+    )
+    .textContent =
+      totalArmado;
+
+
+  document
+    .getElementById(
+      'totalOperativo'
+    )
+    .textContent =
+      totalOperativo;
+
+}
+
+
+/* =========================================================
+   TARJETAS
+========================================================= */
+
+function pintarServicios(){
+
+  const contenedor =
+    document.getElementById(
+      'contenedorTags'
+    );
+
+
+  document
+    .getElementById(
+      'contadorResultados'
+    )
+    .textContent =
+      `${serviciosFiltrados.length} resultado(s)`;
+
+
+  if(
+    !serviciosFiltrados.length
+  ){
+
+    contenedor.innerHTML = `
+
+      <div class="sin-datos">
+
+        No existen servicios
+        que coincidan con los filtros.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  contenedor.innerHTML =
+    serviciosFiltrados
+      .map(
+        servicio => {
+
+          const estado =
+            servicio.estado ||
+            'SIN ESTADO';
+
+
+          return `
+
+            <article class="tag-card">
+
+              <div class="tag-cabecera">
+
+                <div>
+
+                  <div class="tag-nombre">
+                    ${
+                      escaparHTML(
+                        servicio.tag ||
+                        'SIN TAG'
+                      )
+                    }
+                  </div>
+
+                  <div class="tag-servicio">
+
+                    ${
+                      escaparHTML(
+                        servicio.idServicio ||
+                        ''
+                      )
+                    }
+
+                  </div>
+
+                </div>
+
+
+                <span
+                  class="estado ${
+                    claseEstado(
+                      estado
+                    )
+                  }"
+                >
+
+                  ${
+                    escaparHTML(
+                      estado
+                    )
+                  }
+
+                </span>
+
+              </div>
+
+
+              <div class="tag-datos">
+
+                ${crearDatoTag(
+                  'OT',
+                  servicio.ot ||
+                  'S/O'
+                )}
+
+                ${crearDatoTag(
+                  'Mina',
+                  servicio.faena ||
+                  servicio.mina ||
+                  '-'
+                )}
+
+                ${crearDatoTag(
+                  'Área',
+                  servicio.area ||
+                  '-'
+                )}
+
+                ${crearDatoTag(
+                  'Supervisor',
+                  servicio.supervisor ||
+                  '-'
+                )}
+
+              </div>
+
+
+              <button
+                type="button"
+                class="btn-ver"
+                onclick="abrirDetalle('${
+                  escaparAtributo(
+                    servicio.idServicio
+                  )
+                }')"
+              >
+
+                Ver expediente del TAG
+
+              </button>
+
+            </article>
+
+          `;
+
+        }
+      )
+      .join('');
+
+}
+
+
+function crearDatoTag(
+  etiqueta,
+  valor
+){
+
+  return `
+
+    <div class="tag-dato">
+
+      <span>
+        ${escaparHTML(etiqueta)}
+      </span>
+
+      <strong>
+        ${escaparHTML(valor)}
+      </strong>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   ABRIR DETALLE
+========================================================= */
+
+async function abrirDetalle(
+  idServicio
+){
+
+  servicioActual =
+    serviciosOriginales.find(
+      x =>
+        String(
+          x.idServicio || ''
+        )
+          .trim()
+          .toUpperCase() ===
+        String(
+          idServicio || ''
+        )
+          .trim()
+          .toUpperCase()
+    );
+
+
+  if(!servicioActual){
+    return;
+  }
+
+
+  datosDetalle = {
+
+    previos:null,
+    traslado:null,
+    armado:null,
+    eventosArmado:null,
+    postparada:null,
+    fotografias:[]
+
+  };
+
+
+  tabActual =
+    'resumen';
+
+
+  document
+    .getElementById(
+      'modalDetalle'
+    )
+    .classList.add(
+      'activo'
+    );
+
+
+  document.body.style.overflow =
+    'hidden';
+
+
+  pintarCabeceraDetalle();
+
+
+  cambiarTab(
+    'resumen',
+    false
+  );
+
+
+  document
+    .getElementById(
+      'contenidoDetalle'
+    )
+    .innerHTML = `
+
+      <div class="cargando">
+
+        Cargando expediente del TAG...
+
+      </div>
+
+    `;
+
+
+  try{
+
+    const id =
+      encodeURIComponent(
+        servicioActual.idServicio
+      );
+
+
+    const tiempo =
+      Date.now();
+
+
+    const respuestas =
+      await Promise.allSettled([
+
+        fetch(
+          `${API_URL}?accion=obtenerPrevios&idServicio=${id}&t=${tiempo}`
+        ),
+
+        fetch(
+          `${API_URL}?accion=obtenerTraslado&idServicio=${id}&t=${tiempo}`
+        ),
+
+        fetch(
+          `${API_URL}?accion=obtenerArmado&idServicio=${id}&t=${tiempo}`
+        ),
+
+        fetch(
+          `${API_URL}?accion=obtenerEventosArmado&idServicio=${id}&t=${tiempo}`
+        ),
+
+        fetch(
+          `${API_URL}?accion=obtenerPostparada&idServicio=${id}&t=${tiempo}`
+        ),
+
+        fetch(
+          `${API_URL}?accion=obtenerFotografiasVisualizacion&idServicio=${id}&t=${tiempo}`
+        )
+
+      ]);
+
+
+    const resultados =
+      await Promise.all(
+        respuestas.map(
+          async respuesta => {
+
+            if(
+              respuesta.status !==
+              'fulfilled'
+            ){
+
+              return null;
+
+            }
+
+            try{
+
+              return await
+                respuesta
+                  .value
+                  .json();
+
+            }catch(error){
+
+              return null;
+
+            }
+
+          }
+        )
+      );
+
+
+    datosDetalle.previos =
+      resultados[0];
+
+    datosDetalle.traslado =
+      resultados[1];
+
+    datosDetalle.armado =
+      resultados[2];
+
+    datosDetalle.eventosArmado =
+      resultados[3];
+
+    datosDetalle.postparada =
+      resultados[4];
+
+    datosDetalle.fotografias =
+      (
+        resultados[5] &&
+        Array.isArray(
+          resultados[5]
+            .fotografias
+        )
+      )
+        ? resultados[5]
+            .fotografias
+        : [];
+
+
+    renderizarTab();
+
+  }catch(error){
+
+    console.error(error);
+
+    document
+      .getElementById(
+        'contenidoDetalle'
+      )
+      .innerHTML = `
+
+        <div class="error">
+
+          ${
+            escaparHTML(
+              error.message
+            )
+          }
+
+        </div>
+
+      `;
+
+  }
+
+}
+
+
+/* =========================================================
+   CABECERA DETALLE
+========================================================= */
+
+function pintarCabeceraDetalle(){
+
+  document
+    .getElementById(
+      'detalleTag'
+    )
+    .textContent =
+      servicioActual.tag ||
+      'SIN TAG';
+
+
+  document
+    .getElementById(
+      'detalleSubtitulo'
+    )
+    .textContent =
+      `${
+        servicioActual.idServicio ||
+        ''
+      } · ${
+        servicioActual.estado ||
+        'SIN ESTADO'
+      }`;
+
+
+  const datos = [
+
+    [
+      'ID Servicio',
+      servicioActual.idServicio
+    ],
+
+    [
+      'OT',
+      servicioActual.ot
+    ],
+
+    [
+      'Mina',
+      servicioActual.faena ||
+      servicioActual.mina
+    ],
+
+    [
+      'Servicio',
+      servicioActual.servicioMina ||
+      servicioActual.servicio
+    ],
+
+    [
+      'Área',
+      servicioActual.area
+    ],
+
+    [
+      'Estado actual',
+      servicioActual.estado
+    ]
+
+  ];
+
+
+  document
+    .getElementById(
+      'detalleResumen'
+    )
+    .innerHTML =
+      datos
+        .map(
+          ([etiqueta,valor]) => `
+
+            <div class="detalle-dato">
+
+              <span>
+                ${
+                  escaparHTML(
+                    etiqueta
+                  )
+                }
+              </span>
+
+              <strong>
+                ${
+                  escaparHTML(
+                    valor ||
+                    '-'
+                  )
+                }
+              </strong>
+
+            </div>
+
+          `
+        )
+        .join('');
+
+}
+
+
+/* =========================================================
+   CAMBIAR TAB
+========================================================= */
+
+function cambiarTab(
+  tab,
+  renderizar = true
+){
+
+  tabActual =
+    tab;
+
+
+  document
+    .querySelectorAll(
+      '.tab'
+    )
+    .forEach(
+      boton => {
+
+        boton.classList.toggle(
+          'activo',
+          boton.dataset.tab ===
+          tab
+        );
+
+      }
+    );
+
+
+  if(renderizar){
+
+    renderizarTab();
+
+  }
+
+}
+
+
+function renderizarTab(){
+
+  switch(
+    tabActual
+  ){
+
+    case 'previos':
+      renderizarPrevios();
+      break;
+
+    case 'traslado':
+      renderizarTraslado();
+      break;
+
+    case 'armado':
+      renderizarArmado();
+      break;
+
+    case 'postparada':
+      renderizarPostparada();
+      break;
+
+    default:
+      renderizarResumen();
+      break;
+
+  }
+
+}
+
+
+/* =========================================================
+   RESUMEN
+========================================================= */
+
+function renderizarResumen(){
+
+  const fotos =
+    datosDetalle.fotografias ||
+    [];
+
+
+  const descripcion =
+    servicioActual.descripcion ||
+    servicioActual.descripcionTrabajo ||
+    '-';
+
+
+  document
+    .getElementById(
+      'contenidoDetalle'
+    )
+    .innerHTML = `
+
+      <div class="info-grid">
+
+        ${crearInfo(
+          'Supervisor',
+          servicioActual.supervisor
+        )}
+
+        ${crearInfo(
+          'Responsable Previos',
+          servicioActual.responsablePrevios
+        )}
+
+        ${crearInfo(
+          'Responsable Armado',
+          servicioActual.responsableArmado
+        )}
+
+        ${crearInfo(
+          'Responsable Postparada',
+          servicioActual.responsablePostparada
+        )}
+
+        ${crearInfo(
+          'Fecha programada',
+          servicioActual.fechaProgramada
+        )}
+
+        ${crearInfo(
+          'Fecha registro',
+          servicioActual.fechaRegistro
+        )}
+
+        <div class="info-card descripcion-completa">
+
+          <span>
+            Descripción del trabajo
+          </span>
+
+          <strong>
+            ${
+              escaparHTML(
+                descripcion
+              )
+            }
+          </strong>
+
+        </div>
+
+
+        <div class="info-card descripcion-completa">
+
+          <span>
+            Observaciones
+          </span>
+
+          <strong>
+            ${
+              escaparHTML(
+                servicioActual.observaciones ||
+                '-'
+              )
+            }
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="titulo-bloque">
+
+        <h3>
+          Evidencias registradas
+        </h3>
+
+        <span class="contador-fotos">
+          ${fotos.length}
+        </span>
+
+      </div>
+
+
+      ${
+        renderizarFotos(
+          fotos
+        )
+      }
+
+    `;
+
+}
+
+
+/* =========================================================
+   PREVIOS
+========================================================= */
+
+function renderizarPrevios(){
+
+  const datos =
+    datosDetalle.previos;
+
+
+  const materiales =
+    (
+      datos &&
+      Array.isArray(
+        datos.materiales
+      )
+    )
+      ? datos.materiales
+      : [];
+
+
+  const fotos =
+    filtrarFotosPorEtapas(
+      [
+        'PREVIOS'
+      ]
+    );
+
+
+  let totalAlistado = 0;
+
+  let totalDespachado = 0;
+
+
+  materiales.forEach(
+    material => {
+
+      totalAlistado +=
+        Number(
+          material.cantidadAlistada
+        ) || 0;
+
+      totalDespachado +=
+        Number(
+          material.cantidadDespachada
+        ) || 0;
+
+    }
+  );
+
+
+  document
+    .getElementById(
+      'contenidoDetalle'
+    )
+    .innerHTML = `
+
+      <div class="metricas">
+
+        ${crearMetrica(
+          'Tipos de material',
+          materiales.length
+        )}
+
+        ${crearMetrica(
+          'Cantidad alistada',
+          numero(totalAlistado)
+        )}
+
+        ${crearMetrica(
+          'Cantidad despachada',
+          numero(totalDespachado)
+        )}
+
+      </div>
+
+
+      ${
+        materiales.length
+          ? `
+
+            <div class="tabla-wrap">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>Material</th>
+
+                    <th>Código</th>
+
+                    <th>Grupo</th>
+
+                    <th>Alistado</th>
+
+                    <th>Despachado</th>
+
+                    <th>Observación</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  ${
+                    materiales
+                      .map(
+                        material => `
+
+                          <tr>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.descripcion ||
+                                  material.subgrupo ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.codigo ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.grupo ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadAlistada
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadDespachada
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.observacionPrevios ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join('')
+                  }
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          `
+          : mensajeSinDatos(
+              'No existen materiales de Previos registrados.'
+            )
+      }
+
+
+      ${bloqueFotos(
+        'Fotografías de Previos',
+        fotos
+      )}
+
+    `;
+
+}
+
+
+/* =========================================================
+   TRASLADO
+========================================================= */
+
+function renderizarTraslado(){
+
+  const datos =
+    datosDetalle.traslado;
+
+
+  const eventos =
+    (
+      datos &&
+      Array.isArray(
+        datos.eventos
+      )
+    )
+      ? datos.eventos
+      : [];
+
+
+  const fotos =
+    filtrarFotosPorEtapas(
+      [
+        'TRASLADO',
+        'RECEPCION EN TAG'
+      ]
+    );
+
+
+  document
+    .getElementById(
+      'contenidoDetalle'
+    )
+    .innerHTML = `
+
+      <div class="metricas">
+
+        ${crearMetrica(
+          'Estado traslado',
+          datos?.estadoTraslado ||
+          'PENDIENTE'
+        )}
+
+        ${crearMetrica(
+          'Eventos',
+          eventos.length
+        )}
+
+        ${crearMetrica(
+          'Tiempo efectivo',
+          datos?.tiempoEfectivo ||
+          formatearSegundos(
+            datos?.tiempoEfectivoSegundos
+          )
+        )}
+
+      </div>
+
+
+      <div class="titulo-bloque">
+
+        <h3>
+          Historial de Traslado
+        </h3>
+
+      </div>
+
+
+      ${
+        eventos.length
+          ? `
+
+            <div class="eventos">
+
+              ${
+                eventos
+                  .map(
+                    evento => `
+
+                      <div class="evento">
+
+                        <div>
+
+                          <div class="evento-tipo">
+
+                            ${
+                              escaparHTML(
+                                evento.tipoEvento ||
+                                '-'
+                              )
+                            }
+
+                          </div>
+
+                          <div class="evento-fecha">
+
+                            ${
+                              escaparHTML(
+                                evento.fechaHora ||
+                                '-'
+                              )
+                            }
+
+                          </div>
+
+                        </div>
+
+
+                        <div class="evento-detalle">
+
+                          <strong>
+                            Responsable
+                          </strong>
+
+                          <br>
+
+                          ${
+                            escaparHTML(
+                              evento.responsable ||
+                              '-'
+                            )
+                          }
+
+                        </div>
+
+
+                        <div class="evento-detalle">
+
+                          ${
+                            evento.ubicacion
+                              ? `
+
+                                <strong>
+                                  Punto / ubicación:
+                                </strong>
+
+                                ${
+                                  escaparHTML(
+                                    evento.ubicacion
+                                  )
+                                }
+
+                                <br>
+
+                              `
+                              : ''
+                          }
+
+                          ${
+                            evento.motivoObservacion
+                              ? `
+
+                                <strong>
+                                  Observación:
+                                </strong>
+
+                                ${
+                                  escaparHTML(
+                                    evento.motivoObservacion
+                                  )
+                                }
+
+                                <br>
+
+                              `
+                              : ''
+                          }
+
+                          ${
+                            Number(
+                              evento.tiempoTramoSegundos
+                            ) > 0
+                              ? `
+
+                                <strong>
+                                  Tiempo tramo:
+                                </strong>
+
+                                ${
+                                  formatearSegundos(
+                                    evento.tiempoTramoSegundos
+                                  )
+                                }
+
+                              `
+                              : ''
+                          }
+
+                        </div>
+
+                      </div>
+
+                    `
+                  )
+                  .join('')
+              }
+
+            </div>
+
+          `
+          : mensajeSinDatos(
+              'Todavía no existen eventos de Traslado.'
+            )
+      }
+
+
+      ${bloqueFotos(
+        'Evidencias de Traslado',
+        fotos
+      )}
+
+    `;
+
+}
+
+
+/* =========================================================
+   ARMADO
+========================================================= */
+
+function renderizarArmado(){
+
+  const armado =
+    datosDetalle.armado;
+
+
+  const eventosDatos =
+    datosDetalle
+      .eventosArmado;
+
+
+  const materiales =
+    (
+      armado &&
+      Array.isArray(
+        armado.materiales
+      )
+    )
+      ? armado.materiales
+      : [];
+
+
+  const eventos =
+    (
+      eventosDatos &&
+      Array.isArray(
+        eventosDatos.eventos
+      )
+    )
+      ? eventosDatos.eventos
+      : [];
+
+
+  const fotosPausa =
+    filtrarFotosPorEtapas(
+      [
+        'ARMADO PAUSA'
+      ]
+    );
+
+
+  const fotosFinales =
+    filtrarFotosPorEtapas(
+      [
+        'ARMADO',
+        'ANDAMIO TERMINADO'
+      ]
+    );
+
+
+  const utilizados =
+    materiales.filter(
+      x =>
+        Number(
+          x.cantidadUtilizada
+        ) > 0
+    );
+
+
+  const totalUtilizado =
+    utilizados.reduce(
+      (
+        total,
+        material
+      ) =>
+        total +
+        (
+          Number(
+            material.cantidadUtilizada
+          ) || 0
+        ),
+      0
+    );
+
+
+  document
+    .getElementById(
+      'contenidoDetalle'
+    )
+    .innerHTML = `
+
+      <div class="metricas">
+
+        ${crearMetrica(
+          'Estado Armado',
+          eventosDatos?.estadoArmado ||
+          'NO INICIADO'
+        )}
+
+        ${crearMetrica(
+          'Tiempo efectivo',
+          formatearMinutos(
+            eventosDatos
+              ?.tiempoEfectivoMinutos
+          )
+        )}
+
+        ${crearMetrica(
+          'Tiempo pausado',
+          formatearMinutos(
+            eventosDatos
+              ?.tiempoPausadoMinutos
+          )
+        )}
+
+      </div>
+
+
+      <div class="titulo-bloque">
+
+        <h3>
+          Historial de Armado
+        </h3>
+
+      </div>
+
+
+      ${
+        eventos.length
+          ? `
+
+            <div class="eventos">
+
+              ${
+                eventos
+                  .map(
+                    evento => `
+
+                      <div class="evento">
+
+                        <div>
+
+                          <div class="evento-tipo">
+
+                            ${
+                              escaparHTML(
+                                evento.tipoEvento ||
+                                '-'
+                              )
+                            }
+
+                          </div>
+
+                          <div class="evento-fecha">
+
+                            ${
+                              escaparHTML(
+                                evento.fechaHora ||
+                                '-'
+                              )
+                            }
+
+                          </div>
+
+                        </div>
+
+
+                        <div class="evento-detalle">
+
+                          <strong>
+                            Responsable
+                          </strong>
+
+                          <br>
+
+                          ${
+                            escaparHTML(
+                              evento.responsable ||
+                              '-'
+                            )
+                          }
+
+                        </div>
+
+
+                        <div class="evento-detalle">
+
+                          ${
+                            evento.motivo
+                              ? `
+
+                                <strong>
+                                  Motivo:
+                                </strong>
+
+                                ${
+                                  escaparHTML(
+                                    evento.motivo
+                                  )
+                                }
+
+                                <br>
+
+                              `
+                              : ''
+                          }
+
+                          ${
+                            evento.observacion
+                              ? `
+
+                                <strong>
+                                  Observación:
+                                </strong>
+
+                                ${
+                                  escaparHTML(
+                                    evento.observacion
+                                  )
+                                }
+
+                                <br>
+
+                              `
+                              : ''
+                          }
+
+                          ${
+                            Number(
+                              evento.tiempoTramoMinutos
+                            ) > 0
+                              ? `
+
+                                <strong>
+                                  Tiempo tramo:
+                                </strong>
+
+                                ${
+                                  formatearMinutos(
+                                    evento.tiempoTramoMinutos
+                                  )
+                                }
+
+                              `
+                              : ''
+                          }
+
+                        </div>
+
+                      </div>
+
+                    `
+                  )
+                  .join('')
+              }
+
+            </div>
+
+          `
+          : mensajeSinDatos(
+              'Todavía no existen eventos de Armado.'
+            )
+      }
+
+
+      <div class="titulo-bloque">
+
+        <h3>
+          Material realmente utilizado
+        </h3>
+
+      </div>
+
+
+      ${
+        utilizados.length
+          ? `
+
+            <div class="tabla-wrap">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>Material</th>
+
+                    <th>Código</th>
+
+                    <th>Despachado</th>
+
+                    <th>Utilizado</th>
+
+                    <th>Sobrante</th>
+
+                    <th>Observación</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  ${
+                    utilizados
+                      .map(
+                        material => `
+
+                          <tr>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.descripcion ||
+                                  material.subgrupo ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.codigo ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadDespachada
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              <strong>
+                                ${
+                                  numero(
+                                    material.cantidadUtilizada
+                                  )
+                                }
+                              </strong>
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadSobrante ??
+                                  Math.max(
+                                    (
+                                      Number(
+                                        material.cantidadDespachada
+                                      ) || 0
+                                    ) -
+                                    (
+                                      Number(
+                                        material.cantidadUtilizada
+                                      ) || 0
+                                    ),
+                                    0
+                                  )
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.observacionArmado ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join('')
+                  }
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+
+            <div
+              style="
+                margin-top:12px;
+                text-align:right;
+                font-weight:bold;
+                color:var(--azul);
+              "
+            >
+
+              Total utilizado:
+              ${numero(totalUtilizado)}
+
+            </div>
+
+          `
+          : mensajeSinDatos(
+              'Todavía no existe material utilizado registrado.'
+            )
+      }
+
+
+      ${bloqueFotos(
+        'Fotografías de pausas',
+        fotosPausa
+      )}
+
+
+      ${bloqueFotos(
+        'Fotografías finales del Armado',
+        fotosFinales
+      )}
+
+    `;
+
+}
+
+
+/* =========================================================
+   POSTPARADA
+========================================================= */
+
+function renderizarPostparada(){
+
+  const datos =
+    datosDetalle.postparada;
+
+
+  const materiales =
+    (
+      datos &&
+      Array.isArray(
+        datos.materiales
+      )
+    )
+      ? datos.materiales
+      : [];
+
+
+  const fotos =
+    filtrarFotosPorEtapas(
+      [
+        'DESMONTAJE',
+        'RETORNO',
+        'CIERRE',
+        'POSTPARADA'
+      ]
+    );
+
+
+  if(
+    !materiales.length &&
+    !fotos.length
+  ){
+
+    document
+      .getElementById(
+        'contenidoDetalle'
+      )
+      .innerHTML = `
+
+        <div class="etapa-futura">
+
+          <h3>
+            Postparada
+          </h3>
+
+          <p>
+            Este TAG todavía no tiene información
+            registrada en esta etapa.
+          </p>
+
+        </div>
+
+      `;
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      'contenidoDetalle'
+    )
+    .innerHTML = `
+
+      ${
+        materiales.length
+          ? `
+
+            <div class="tabla-wrap">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>Material</th>
+
+                    <th>Utilizado</th>
+
+                    <th>Desmontado</th>
+
+                    <th>Retornado</th>
+
+                    <th>Dañado</th>
+
+                    <th>Faltante</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  ${
+                    materiales
+                      .map(
+                        material => `
+
+                          <tr>
+
+                            <td>
+                              ${
+                                escaparHTML(
+                                  material.descripcion ||
+                                  material.subgrupo ||
+                                  '-'
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadUtilizada
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadDesmontada
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadRetornada
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadDanada ??
+                                  material.cantidadDañada
+                                )
+                              }
+                            </td>
+
+                            <td>
+                              ${
+                                numero(
+                                  material.cantidadFaltante
+                                )
+                              }
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join('')
+                  }
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          `
+          : mensajeSinDatos(
+              'No existen materiales de Postparada.'
+            )
+      }
+
+
+      ${bloqueFotos(
+        'Fotografías de Postparada',
+        fotos
+      )}
+
+    `;
+
+}
+
+
+/* =========================================================
+   FOTOGRAFÍAS
+========================================================= */
+
+function filtrarFotosPorEtapas(
+  etapas
+){
+
+  const permitidas =
+    etapas.map(
+      normalizarTexto
+    );
+
+
+  return (
+    datosDetalle.fotografias ||
+    []
+  )
+    .filter(
+      foto =>
+        permitidas.includes(
+          normalizarTexto(
+            foto.etapa
+          )
+        )
+    );
+
+}
+
+
+function bloqueFotos(
+  titulo,
+  fotos
+){
+
+  return `
+
+    <div class="titulo-bloque">
+
+      <h3>
+        ${escaparHTML(titulo)}
+      </h3>
+
+      <span class="contador-fotos">
+        ${fotos.length}
+      </span>
+
+    </div>
+
+    ${renderizarFotos(fotos)}
+
+  `;
+
+}
+
+
+function renderizarFotos(
+  fotos
+){
+
+  if(!fotos.length){
+
+    return mensajeSinDatos(
+      'No existen fotografías registradas en esta etapa.'
+    );
+
+  }
+
+
+  return `
+
+    <div class="fotos-grid">
+
+      ${
+        fotos
+          .map(
+            foto => {
+
+              const miniatura =
+                obtenerMiniaturaFoto(
+                  foto
+                );
+
+
+              return `
+
+                <article class="foto-card">
+
+                  <div class="foto-imagen">
+
+                    ${
+                      miniatura
+                        ? `
+
+                          <img
+                            src="${escaparAtributo(
+                              miniatura
+                            )}"
+                            alt="Evidencia fotográfica"
+                            loading="lazy"
+                            onerror="this.style.display='none';this.parentElement.innerHTML='📷 Fotografía registrada';"
+                          >
+
+                        `
+                        : '📷 Fotografía registrada'
+                    }
+
+                  </div>
+
+
+                  <div class="foto-info">
+
+                    <strong>
+                      ${
+                        escaparHTML(
+                          foto.tipoFoto ||
+                          foto.etapa ||
+                          'Fotografía'
+                        )
+                      }
+                    </strong>
+
+
+                    <p>
+                      Etapa:
+                      ${
+                        escaparHTML(
+                          foto.etapa ||
+                          '-'
+                        )
+                      }
+                    </p>
+
+
+                    ${
+                      foto.descripcion
+                        ? `
+
+                          <p>
+                            ${
+                              escaparHTML(
+                                foto.descripcion
+                              )
+                            }
+                          </p>
+
+                        `
+                        : ''
+                    }
+
+
+                    ${
+                      foto.fechaHora
+                        ? `
+
+                          <p>
+                            ${
+                              escaparHTML(
+                                foto.fechaHora
+                              )
+                            }
+                          </p>
+
+                        `
+                        : ''
+                    }
+
+
+                    ${
+                      foto.subidoPor
+                        ? `
+
+                          <p>
+                            Subido por:
+                            ${
+                              escaparHTML(
+                                foto.subidoPor
+                              )
+                            }
+                          </p>
+
+                        `
+                        : ''
+                    }
+
+
+                    ${
+                      foto.idEvento
+                        ? `
+
+                          <p>
+                            Evento:
+                            ${
+                              escaparHTML(
+                                foto.idEvento
+                              )
+                            }
+                          </p>
+
+                        `
+                        : ''
+                    }
+
+
+                    ${
+                      foto.enlaceFoto
+                        ? `
+
+                          <a
+                            class="btn-foto"
+                            href="${escaparAtributo(
+                              foto.enlaceFoto
+                            )}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+
+                            🔎 Abrir fotografía
+
+                          </a>
+
+                        `
+                        : ''
+                    }
+
+                  </div>
+
+                </article>
+
+              `;
+
+            }
+          )
+          .join('')
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+function obtenerMiniaturaFoto(
+  foto
+){
+
+  const id =
+    String(
+      foto.idArchivoDrive ||
+      ''
+    ).trim();
+
+
+  if(id){
+
+    return (
+      'https://drive.google.com/thumbnail?id=' +
+      encodeURIComponent(id) +
+      '&sz=w800'
+    );
+
+  }
+
+
+  return (
+    foto.enlaceFoto ||
+    ''
+  );
+
+}
+
+
+/* =========================================================
+   COMPONENTES
+========================================================= */
+
+function crearInfo(
+  etiqueta,
+  valor
+){
+
+  return `
+
+    <div class="info-card">
+
+      <span>
+        ${escaparHTML(etiqueta)}
+      </span>
+
+      <strong>
+        ${
+          escaparHTML(
+            valor ||
+            '-'
+          )
+        }
+      </strong>
+
+    </div>
+
+  `;
+
+}
+
+
+function crearMetrica(
+  etiqueta,
+  valor
+){
+
+  return `
+
+    <div class="metrica">
+
+      <span>
+        ${escaparHTML(etiqueta)}
+      </span>
+
+      <strong>
+        ${
+          escaparHTML(
+            String(
+              valor ??
+              '-'
+            )
+          )
+        }
+      </strong>
+
+    </div>
+
+  `;
+
+}
+
+
+function mensajeSinDatos(
+  texto
+){
+
+  return `
+
+    <div class="sin-datos">
+
+      ${escaparHTML(texto)}
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   ESTADOS
+========================================================= */
+
+function claseEstado(
+  estado
+){
+
+  const valor =
+    normalizarTexto(
+      estado
+    );
+
+
+  if(
+    valor ===
+      'EN PREPARACION' ||
+    valor ===
+      'DESPACHADO'
+  ){
+
+    return 'estado-previos';
+
+  }
+
+
+  if(
+    valor ===
+      'EN TRASLADO' ||
+    valor ===
+      'TRASLADO PAUSADO' ||
+    valor ===
+      'RECIBIDO EN TAG'
+  ){
+
+    return 'estado-traslado';
+
+  }
+
+
+  if(
+    valor ===
+    'EN ARMADO'
+  ){
+
+    return 'estado-armado';
+
+  }
+
+
+  if(
+    valor ===
+    'ANDAMIO OPERATIVO'
+  ){
+
+    return 'estado-operativo';
+
+  }
+
+
+  if(
+    valor ===
+      'CERRADO' ||
+    valor ===
+      'CANCELADO'
+  ){
+
+    return 'estado-cerrado';
+
+  }
+
+
+  return 'estado-general';
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function cerrarDetalle(){
+
+  document
+    .getElementById(
+      'modalDetalle'
+    )
+    .classList.remove(
+      'activo'
+    );
+
+
+  document.body.style.overflow =
+    '';
+
+
+  servicioActual =
+    null;
+
+}
+
+
+function cerrarModalDesdeFondo(
+  evento
+){
+
+  if(
+    evento.target.id ===
+    'modalDetalle'
+  ){
+
+    cerrarDetalle();
+
+  }
+
+}
+
+
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
+
+function volverVisualizacion(){
+
+  window.location.href =
+    'visualizacion.html';
+
+}
+
+
+/* =========================================================
+   FORMATO
+========================================================= */
+
+function numero(
+  valor
+){
+
+  const numero =
+    Number(valor);
+
+
+  if(
+    !Number.isFinite(
+      numero
+    )
+  ){
+
+    return '0';
+
+  }
+
+
+  return numero.toLocaleString(
+    'es-PE',
+    {
+      maximumFractionDigits:2
+    }
+  );
+
+}
+
+
+function formatearSegundos(
+  segundos
+){
+
+  let total =
+    Math.max(
+      0,
+      Math.floor(
+        Number(segundos) ||
+        0
+      )
+    );
+
+
+  const horas =
+    Math.floor(
+      total / 3600
+    );
+
+
+  total =
+    total % 3600;
+
+
+  const minutos =
+    Math.floor(
+      total / 60
+    );
+
+
+  const segundosFinales =
+    total % 60;
+
+
+  return [
+    horas,
+    minutos,
+    segundosFinales
+  ]
+    .map(
+      x =>
+        String(x)
+          .padStart(
+            2,
+            '0'
+          )
+    )
+    .join(':');
+
+}
+
+
+function formatearMinutos(
+  minutos
+){
+
+  const valor =
+    Number(minutos) ||
+    0;
+
+
+  const horas =
+    Math.floor(
+      valor / 60
+    );
+
+
+  const minutosRestantes =
+    Math.round(
+      valor -
+      horas * 60
+    );
+
+
+  if(horas <= 0){
+
+    return (
+      `${minutosRestantes} min`
+    );
+
+  }
+
+
+  return (
+    `${horas} h ${minutosRestantes} min`
+  );
+
+}
+
+
+/* =========================================================
+   NORMALIZACIÓN Y SEGURIDAD
+========================================================= */
+
+function normalizarTexto(
+  valor
+){
+
+  return String(
+    valor ||
+    ''
+  )
+    .trim()
+    .toUpperCase()
+    .normalize(
+      'NFD'
+    )
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    )
+    .replace(
+      /\s+/g,
+      ' '
+    );
+
+}
+
+
+function escaparHTML(
+  valor
+){
+
+  return String(
+    valor ??
+    ''
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+
+}
+
+
+function escaparAtributo(
+  valor
+){
+
+  return escaparHTML(
+    valor
+  );
+
+}
+
+</script>
+
+
+</body>
+
+</html>
