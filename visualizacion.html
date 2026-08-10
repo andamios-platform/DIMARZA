@@ -444,9 +444,13 @@ font-weight:bold;
     filter .25s,
     transform .25s;
 }
+.tags-visualizacion{
+  background:linear-gradient(135deg,#0284c7,#0369a1);
+}
 .actualizar{
 background:linear-gradient(135deg,#0891b2,#0e7490);
 }
+
 @media(max-width:768px){
 
 .botones{
@@ -597,6 +601,7 @@ Centro de consultas y visualización
 
 </div>
 <div class="botones">
+
   <a
     class="btn supervisor modulo-protegido"
     data-permiso="AMBOS"
@@ -616,7 +621,26 @@ Centro de consultas y visualización
 
   </a>
 
-    
+
+  <a
+    class="btn tags-visualizacion modulo-protegido"
+    data-permiso="AMBOS"
+    href="TAGS-visualizacion.html"
+  >
+
+    <div class="etiqueta-bloqueo">
+      🔒 Residente / Supervisor
+    </div>
+
+    <img
+      src="img/visualizacion-andamios.png"
+      class="icono icono-ajustado"
+    >
+
+    <span>Visualización de TAGS</span>
+
+  </a>
+
   <a
     class="btn inventario modulo-protegido"
     data-permiso="RESIDENTE"
@@ -626,7 +650,6 @@ Centro de consultas y visualización
     <div class="etiqueta-bloqueo">
       🔒 Solo residente
     </div>
-
     <img
       src="img/lista-herramientas.png"
       class="icono"
