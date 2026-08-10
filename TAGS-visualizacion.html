@@ -3954,12 +3954,15 @@ function renderizarPostparada(){
       : [];
 
 
+  /*
+   * En tu sistema actual las fotografías
+   * de Postparada se guardan con:
+   *
+   * ETAPA = POSTPARADA
+   */
   const fotos =
     filtrarFotosPorEtapas(
       [
-        'DESMONTAJE',
-        'RETORNO',
-        'CIERRE',
         'POSTPARADA'
       ]
     );
@@ -3984,7 +3987,7 @@ function renderizarPostparada(){
 
           <p>
             Este TAG todavía no tiene información
-            registrada en esta etapa.
+            registrada en Postparada.
           </p>
 
         </div>
@@ -3996,11 +3999,42 @@ function renderizarPostparada(){
   }
 
 
+  const resumen =
+    datos?.resumen ||
+    {};
+
+
   document
     .getElementById(
       'contenidoDetalle'
     )
     .innerHTML = `
+
+      <div class="metricas">
+
+        ${crearMetrica(
+          'Cantidad utilizada',
+          numero(
+            resumen.cantidadUtilizada
+          )
+        )}
+
+        ${crearMetrica(
+          'Cantidad desmontada',
+          numero(
+            resumen.cantidadDesmontada
+          )
+        )}
+
+        ${crearMetrica(
+          'Cantidad faltante',
+          numero(
+            resumen.cantidadFaltante
+          )
+        )}
+
+      </div>
+
 
       ${
         materiales.length
@@ -4014,21 +4048,38 @@ function renderizarPostparada(){
 
                   <tr>
 
-                    <th>Material</th>
+                    <th>
+                      Material
+                    </th>
 
-                    <th>Utilizado</th>
+                    <th>
+                      Código
+                    </th>
 
-                    <th>Desmontado</th>
+                    <th>
+                      Utilizado
+                    </th>
 
-                    <th>Retornado</th>
+                    <th>
+                      Desmontado
+                    </th>
 
-                    <th>Dañado</th>
+                    <th>
+                      Dañado
+                    </th>
 
-                    <th>Faltante</th>
+                    <th>
+                      Faltante
+                    </th>
+
+                    <th>
+                      Observación
+                    </th>
 
                   </tr>
 
                 </thead>
+
 
                 <tbody>
 
@@ -4040,6 +4091,7 @@ function renderizarPostparada(){
                           <tr>
 
                             <td>
+
                               ${
                                 escaparHTML(
                                   material.descripcion ||
@@ -4047,47 +4099,75 @@ function renderizarPostparada(){
                                   '-'
                                 )
                               }
+
                             </td>
 
+
                             <td>
+
+                              ${
+                                escaparHTML(
+                                  material.codigo ||
+                                  '-'
+                                )
+                              }
+
+                            </td>
+
+
+                            <td>
+
                               ${
                                 numero(
                                   material.cantidadUtilizada
                                 )
                               }
+
                             </td>
 
+
                             <td>
+
                               ${
                                 numero(
                                   material.cantidadDesmontada
                                 )
                               }
+
                             </td>
 
+
                             <td>
+
                               ${
                                 numero(
-                                  material.cantidadRetornada
+                                  material.cantidadDanada
                                 )
                               }
+
                             </td>
 
-                            <td>
-                              ${
-                                numero(
-                                  material.cantidadDanada ??
-                                  material.cantidadDañada
-                                )
-                              }
-                            </td>
 
                             <td>
+
                               ${
                                 numero(
                                   material.cantidadFaltante
                                 )
                               }
+
+                            </td>
+
+
+                            <td>
+
+                              ${
+                                escaparHTML(
+                                  material.observacionPostparada ||
+                                  '-'
+                                )
+                              }
+
                             </td>
 
                           </tr>
@@ -4105,8 +4185,38 @@ function renderizarPostparada(){
 
           `
           : mensajeSinDatos(
-              'No existen materiales de Postparada.'
+              'No existen materiales registrados en Postparada.'
             )
+      }
+
+
+      ${
+        datos?.observacionPostparada
+          ? `
+
+            <div
+              class="info-card"
+              style="margin-top:15px;"
+            >
+
+              <span>
+                Observación de Postparada
+              </span>
+
+              <strong>
+
+                ${
+                  escaparHTML(
+                    datos.observacionPostparada
+                  )
+                }
+
+              </strong>
+
+            </div>
+
+          `
+          : ''
       }
 
 
@@ -4118,7 +4228,6 @@ function renderizarPostparada(){
     `;
 
 }
-
 
 /* =========================================================
    FOTOGRAFÍAS
