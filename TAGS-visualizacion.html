@@ -3564,13 +3564,22 @@ function renderizarArmado(){
     );
 
 
-  const utilizados =
-    materiales.filter(
-      x =>
-        Number(
-          x.cantidadUtilizada
-        ) > 0
-    );
+const armadoFinalizado =
+  materiales.some(
+    material =>
+      material.armadoRegistrado === true
+  );
+
+
+const utilizados =
+  armadoFinalizado
+    ? materiales.filter(
+        material =>
+          Number(
+            material.cantidadUtilizada
+          ) > 0
+      )
+    : [];
 
 
   const totalUtilizado =
@@ -3911,9 +3920,15 @@ function renderizarArmado(){
             </div>
 
           `
-          : mensajeSinDatos(
-              'Todavía no existe material utilizado registrado.'
-            )
+: (
+    armadoFinalizado
+      ? mensajeSinDatos(
+          'No existen materiales utilizados registrados.'
+        )
+      : mensajeSinDatos(
+          'El Armado todavía no ha sido finalizado. Las cantidades reales utilizadas aparecerán aquí al finalizarlo.'
+        )
+  )
       }
 
 
