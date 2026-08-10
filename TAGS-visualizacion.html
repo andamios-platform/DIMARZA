@@ -249,8 +249,11 @@ button{
   display:grid;
 
   grid-template-columns:
-    minmax(260px,2fr)
-    repeat(3,minmax(170px,1fr));
+    minmax(250px,2fr)
+    repeat(
+      4,
+      minmax(155px,1fr)
+    );
 
   gap:12px;
 
@@ -1882,7 +1885,7 @@ tbody tr:nth-child(even){
         </select>
 
       </div>
-<div class="campo">
+      <div class="campo">
 
   <label for="filtroServicio">
     Servicio
@@ -1897,6 +1900,20 @@ tbody tr:nth-child(even){
   </select>
 
 </div>
+
+<div class="campo">
+
+  <label for="filtroFechaServicio">
+    Fecha de evidencia
+  </label>
+
+  <input
+    id="filtroFechaServicio"
+    type="date"
+  >
+
+</div>
+
     </div>
 
   </section>
@@ -2220,14 +2237,24 @@ async function iniciarPagina(){
       'change',
       aplicarFiltros
     );
-    document
-    .getElementById(
-      'filtroServicio'
-    )
-    .addEventListener(
-      'change',
-      aplicarFiltros
-    );
+document
+  .getElementById(
+    'filtroServicio'
+  )
+  .addEventListener(
+    'change',
+    aplicarFiltros
+  );
+
+
+document
+  .getElementById(
+    'filtroFechaServicio'
+  )
+  .addEventListener(
+    'change',
+    aplicarFiltros
+  );
 
 
   await cargarServicios();
@@ -2250,7 +2277,7 @@ async function cargarServicios(){
 
     const respuesta =
       await fetch(
-        `${API_URL}?accion=listarServicios&t=${Date.now()}`
+        `${API_URL}?accion=listarServiciosVisualizacion&t=${Date.now()}`
       );
 
     if(!respuesta.ok){
@@ -2497,6 +2524,16 @@ const servicioSeleccionado =
       )
       .value
   );
+
+  const fechaSeleccionada =
+  document
+    .getElementById(
+      'filtroFechaServicio'
+    )
+    .value ||
+  '';
+
+  
   serviciosFiltrados =
     serviciosOriginales
       .filter(
@@ -2539,6 +2576,13 @@ const tipoServicio =
     servicio.servicio
   );
 
+  const fechasEvidencia =
+  Array.isArray(
+    servicio.fechasEvidencia
+  )
+    ? servicio.fechasEvidencia
+    : [];
+
           return (
             (
               !busqueda ||
@@ -2560,6 +2604,12 @@ const tipoServicio =
   !servicioSeleccionado ||
   tipoServicio ===
   servicioSeleccionado
+) &&
+(
+  !fechaSeleccionada ||
+  fechasEvidencia.includes(
+    fechaSeleccionada
+  )
 )
           );
 
