@@ -32,8 +32,8 @@
     .progreso-superior,.panel-titulo{display:flex;justify-content:space-between;gap:15px;align-items:center}
     .progreso-superior{margin-bottom:12px;font-weight:bold;color:var(--azul)}
     .progreso-barra,.coincidencia-barra{height:11px;overflow:hidden;background:#e6edf2;border-radius:999px}
-    .progreso-relleno{width:60%;height:100%;background:linear-gradient(90deg,var(--naranja),#ffb45e)}
-    .progreso-etapas{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;color:var(--gris);font-size:12px;text-align:center}
+    .progreso-relleno{width:66.67%;height:100%;background:linear-gradient(90deg,var(--naranja),#ffb45e)}
+    .progreso-etapas{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:12px;color:var(--gris);font-size:12px;text-align:center}
     .progreso-etapas .completada{color:var(--verde);font-weight:bold}
     .progreso-etapas .actual{color:var(--naranja2);font-weight:bold}
     .panel-titulo{margin-bottom:16px}
@@ -434,6 +434,8 @@
 }
 
 .btn-iniciar-armado,
+.btn-pausar-armado,
+.btn-reanudar-armado,
 .btn-terminar-montaje {
   width: 100%;
   padding: 15px 20px;
@@ -451,7 +453,21 @@
     #147548
   );
 }
+.btn-pausar-armado {
+  background: linear-gradient(
+    135deg,
+    #d89b20,
+    #b7790c
+  );
+}
 
+.btn-reanudar-armado {
+  background: linear-gradient(
+    135deg,
+    var(--verde),
+    #147548
+  );
+}
 .btn-terminar-montaje {
   background: linear-gradient(
     135deg,
@@ -461,6 +477,8 @@
 }
 
 .btn-iniciar-armado:disabled,
+.btn-pausar-armado:disabled,
+.btn-reanudar-armado:disabled,
 .btn-terminar-montaje:disabled {
   cursor: not-allowed;
   opacity: .55;
@@ -483,8 +501,83 @@
   font-size: 13px;
   line-height: 1.5;
 }
+/* ======================================================
+   PAUSA DEL ARMADO
+   ====================================================== */
 
+.texto-ayuda {
+  margin: -6px 0 16px;
+  color: var(--gris);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.campo-completo {
+  grid-column: 1 / -1;
+}
+
+.form-grid small {
+  color: var(--gris);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+#fotoPausaArmado {
+  padding: 10px;
+  background: var(--gris-claro);
+  border: 1px dashed #b7c8d4;
+  border-radius: 9px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.boton-principal,
+.boton-secundario {
+  padding: 11px 16px;
+  border-radius: 9px;
+  font-weight: bold;
+}
+
+.boton-principal {
+  color: #fff;
+  background: var(--azul);
+  border: 1px solid var(--azul);
+}
+
+.boton-secundario {
+  color: var(--azul);
+  background: var(--azul-claro);
+  border: 1px solid #bfd7e8;
+}
+
+.boton-principal:disabled,
+.boton-secundario:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
 @media(max-width:760px) {
+  .form-grid {
+  grid-template-columns: 1fr;
+}
+
+.acciones {
+  flex-direction: column-reverse;
+}
+
+.acciones button {
+  width: 100%;
+}
   .control-armado {
     grid-template-columns: 1fr;
   }
@@ -835,8 +928,12 @@ body.modo-historial
     <div class="progreso-superior"><span>Avance del servicio</span><span>Etapa: Armado</span></div>
     <div class="progreso-barra"><div class="progreso-relleno"></div></div>
     <div class="progreso-etapas">
-      <span class="completada">Solicitado</span><span class="completada">Previos</span>
-      <span class="actual">Armado</span><span>Postparada</span><span>Finalizado</span>
+      <span class="completada">Solicitado</span>
+      <span class="completada">Previos</span>
+      <span class="completada">Traslado</span>
+      <span class="actual">Armado</span>
+      <span>Postparada</span>
+      <span>Finalizado</span>
     </div>
   </section>
 
@@ -939,32 +1036,170 @@ body.modo-historial
 
     </div>
 
-    <div class="control-armado-acciones">
+<div class="control-armado-acciones">
 
-      <button
-        id="btnIniciarArmado"
-        type="button"
-        class="btn-iniciar-armado oculto"
-        onclick="iniciarArmado()"
-      >
-        ▶ Iniciar Armado
-      </button>
+  <button
+    id="btnIniciarArmado"
+    type="button"
+    class="btn-iniciar-armado oculto"
+    onclick="iniciarArmado()"
+  >
+    ▶ Iniciar Armado
+  </button>
 
-      <button
-        id="btnTerminarMontaje"
-        type="button"
-        class="btn-terminar-montaje oculto"
-        onclick="terminarMontaje()"
-      >
-        ⏹ Terminar Montaje
-      </button>
+  <button
+    id="btnPausarArmado"
+    type="button"
+    class="btn-pausar-armado oculto"
+    onclick="abrirPausaArmado()"
+  >
+    ⏸ Pausar Armado
+  </button>
 
-    </div>
+  <button
+    id="btnReanudarArmado"
+    type="button"
+    class="btn-reanudar-armado oculto"
+    onclick="reanudarArmado()"
+  >
+    ▶ Reanudar Armado
+  </button>
+
+  <button
+    id="btnTerminarMontaje"
+    type="button"
+    class="btn-terminar-montaje oculto"
+    onclick="terminarMontaje()"
+  >
+    ⏹ Terminar Montaje
+  </button>
+
+</div>
 
   </div>
 </section>
 
+<section
+  id="panelPausaArmado"
+  class="panel oculto"
+>
+  <div class="panel-titulo">
+    <h2>⏸ Registrar pausa del armado</h2>
+  </div>
 
+  <p class="texto-ayuda">
+    Registra el motivo de la interrupción y adjunta
+    una fotografía como evidencia de la pausa.
+  </p>
+
+  <div class="form-grid">
+
+    <div class="campo">
+      <label for="motivoPausaArmado">
+        Motivo de la pausa *
+      </label>
+
+      <select id="motivoPausaArmado">
+        <option value="">
+          Seleccionar motivo
+        </option>
+
+        <option value="ESPERA DE GRUA / EQUIPO">
+          Espera de grúa / equipo
+        </option>
+
+        <option value="INTERFERENCIA OPERACIONAL">
+          Interferencia operacional
+        </option>
+
+        <option value="FALTA DE MATERIAL">
+          Falta de material
+        </option>
+
+        <option value="CONDICION DE SEGURIDAD">
+          Condición de seguridad
+        </option>
+
+        <option value="FALTA DE ACCESO">
+          Falta de acceso
+        </option>
+
+        <option value="ESPERA DE AUTORIZACION">
+          Espera de autorización
+        </option>
+
+        <option value="CONDICIONES CLIMATICAS">
+          Condiciones climáticas
+        </option>
+
+        <option value="CAMBIO DE TURNO">
+          Cambio de turno
+        </option>
+
+        <option value="FALLA DE EQUIPO / HERRAMIENTA">
+          Falla de equipo / herramienta
+        </option>
+
+        <option value="OTRO">
+          Otro
+        </option>
+      </select>
+    </div>
+
+    <div class="campo campo-completo">
+      <label for="observacionPausaArmado">
+        Detalle de la pausa *
+      </label>
+
+      <textarea
+        id="observacionPausaArmado"
+        rows="3"
+        placeholder="Describe brevemente por qué se detiene el armado..."
+      ></textarea>
+    </div>
+
+    <div class="campo campo-completo">
+
+      <label>
+        Fotografía de evidencia *
+      </label>
+
+      <input
+        id="fotoPausaArmado"
+        type="file"
+        accept="image/*"
+        capture="environment"
+      >
+
+      <small>
+        Debe registrarse una fotografía por cada pausa.
+      </small>
+
+    </div>
+
+  </div>
+
+  <div class="acciones">
+
+    <button
+      type="button"
+      class="boton-secundario"
+      onclick="cancelarPausaArmado()"
+    >
+      Cancelar
+    </button>
+
+    <button
+      id="btnConfirmarPausaArmado"
+      type="button"
+      class="boton-principal"
+      onclick="confirmarPausaArmado()"
+    >
+      ⏸ Confirmar pausa
+    </button>
+
+  </div>
+</section>
 <section
   id="panelResumenArmado"
   class="panel"
@@ -1636,6 +1871,15 @@ let montajeIniciado = false;
 let montajeTerminado = false;
 let armadoFinalizado = false;
 
+let eventosArmado = [];
+
+let estadoArmadoEventos =
+  'NO INICIADO';
+
+let tiempoEfectivoArmadoMinutos = 0;
+
+let tiempoPausadoArmadoMinutos = 0;
+  
 const gruposContraidos = {};
 
 const evidenciasArmado = {
@@ -1754,7 +1998,8 @@ async function iniciarModulo() {
     await Promise.all([
       cargarArmado(),
       cargarCatalogo(),
-      cargarPersonalArmado()
+      cargarPersonalArmado(),
+      cargarEventosArmado()
     ]);
     
     completarResponsables();
@@ -1806,7 +2051,45 @@ async function cargarArmado(){
   determinarEstadoMontaje();
   aplicarFlujoArmado();
 }
+async function cargarEventosArmado() {
+  const respuesta =
+    await fetch(
+      `${API_URL}?accion=obtenerEventosArmado&idServicio=${
+        encodeURIComponent(
+          ID_SERVICIO
+        )
+      }&t=${Date.now()}`
+    );
 
+  const datos =
+    await respuesta.json();
+
+  if (!datos.ok) {
+    throw new Error(
+      datos.mensaje ||
+      'No se pudo cargar el control de eventos del Armado.'
+    );
+  }
+
+  eventosArmado =
+    Array.isArray(datos.eventos)
+      ? datos.eventos
+      : [];
+
+  estadoArmadoEventos =
+    datos.estadoArmado ||
+    'NO INICIADO';
+
+  tiempoEfectivoArmadoMinutos =
+    Number(
+      datos.tiempoEfectivoMinutos
+    ) || 0;
+
+  tiempoPausadoArmadoMinutos =
+    Number(
+      datos.tiempoPausadoMinutos
+    ) || 0;
+}
 async function cargarCatalogo(){
   const respuesta=await fetch(`${API_URL}?accion=catalogoPrevios`);
   const datos=await respuesta.json();
@@ -3212,6 +3495,43 @@ function formatearTamanoArchivo(bytes){
     ).toFixed(2)
   } MB`;
 }
+
+function formatearMinutosArmado(
+  minutos
+) {
+  const totalSegundos =
+    Math.max(
+      0,
+      Math.round(
+        (Number(minutos) || 0) *
+        60
+      )
+    );
+
+  const horas =
+    Math.floor(
+      totalSegundos / 3600
+    );
+
+  const minutosRestantes =
+    Math.floor(
+      (
+        totalSegundos % 3600
+      ) / 60
+    );
+
+  const segundos =
+    totalSegundos % 60;
+
+  return (
+    `${String(horas)
+      .padStart(2, '0')}:` +
+    `${String(minutosRestantes)
+      .padStart(2, '0')}:` +
+    `${String(segundos)
+      .padStart(2, '0')}`
+  );
+}
 function determinarEstadoMontaje() {
   montajeIniciado =
     Boolean(
@@ -3262,11 +3582,19 @@ function aplicarFlujoArmado() {
   escribirTexto(
     'duracionArmado',
     montajeTerminado
-      ? (
-          servicioActual.duracionArmado ||
-          'Registrada'
+      ? formatearMinutosArmado(
+          tiempoEfectivoArmadoMinutos
         )
-      : 'Pendiente'
+      : (
+          estadoArmadoEventos ===
+            'EN ARMADO' ||
+          estadoArmadoEventos ===
+            'PAUSADO'
+        )
+          ? formatearMinutosArmado(
+              tiempoEfectivoArmadoMinutos
+            )
+          : 'Pendiente'
   );
 
   const btnIniciar =
@@ -3274,25 +3602,41 @@ function aplicarFlujoArmado() {
       'btnIniciarArmado'
     );
 
+  const btnPausar =
+    document.getElementById(
+      'btnPausarArmado'
+    );
+
+  const btnReanudar =
+    document.getElementById(
+      'btnReanudarArmado'
+    );
+
   const btnTerminar =
     document.getElementById(
       'btnTerminarMontaje'
     );
 
-  btnIniciar.classList.add(
-    'oculto'
-  );
+  [
+    btnIniciar,
+    btnPausar,
+    btnReanudar,
+    btnTerminar
+  ].forEach(boton => {
+    boton.classList.add(
+      'oculto'
+    );
+  });
 
-  btnTerminar.classList.add(
-    'oculto'
-  );
-
+  /*
+   * Armado todavía no iniciado.
+   */
   if (
-    [
-      'DESPACHADO',
-      'RECIBIDO EN TAG'
-    ].includes(estado) &&
-    !montajeIniciado
+    estadoArmadoEventos ===
+      'NO INICIADO' &&
+    estado ===
+      'RECIBIDO EN TAG' &&
+    !armadoFinalizado
   ) {
     btnIniciar.classList.remove(
       'oculto'
@@ -3315,11 +3659,18 @@ function aplicarFlujoArmado() {
     return;
   }
 
+  /*
+   * Armado trabajando.
+   */
   if (
-    estado === 'EN ARMADO' &&
-    montajeIniciado &&
+    estadoArmadoEventos ===
+      'EN ARMADO' &&
     !montajeTerminado
   ) {
+    btnPausar.classList.remove(
+      'oculto'
+    );
+
     btnTerminar.classList.remove(
       'oculto'
     );
@@ -3331,7 +3682,7 @@ function aplicarFlujoArmado() {
 
     escribirTexto(
       'descripcionControlArmado',
-      'El tiempo del montaje está siendo registrado. Presiona Terminar Montaje apenas concluya físicamente el armado.'
+      'El tiempo efectivo del montaje está siendo registrado. Puedes pausar el Armado o terminar el montaje.'
     );
 
     bloquearMateriales(false);
@@ -3341,9 +3692,48 @@ function aplicarFlujoArmado() {
     return;
   }
 
+  /*
+   * Armado pausado.
+   */
   if (
-    estado === 'EN ARMADO' &&
-    montajeTerminado
+    estadoArmadoEventos ===
+      'PAUSADO'
+  ) {
+    btnReanudar.classList.remove(
+      'oculto'
+    );
+
+    escribirTexto(
+      'tituloControlArmado',
+      'Montaje pausado'
+    );
+
+    escribirTexto(
+      'descripcionControlArmado',
+      `El Armado se encuentra detenido. Tiempo efectivo acumulado: ${
+        formatearMinutosArmado(
+          tiempoEfectivoArmadoMinutos
+        )
+      }.`
+    );
+
+    bloquearMateriales(false);
+    bloquearEvidencias(true);
+    habilitarFinalizacion(false);
+
+    return;
+  }
+
+  /*
+   * El montaje físico terminó.
+   */
+  if (
+    estadoArmadoEventos ===
+      'MONTAJE TERMINADO' ||
+    (
+      estado === 'EN ARMADO' &&
+      montajeTerminado
+    )
   ) {
     escribirTexto(
       'tituloControlArmado',
@@ -3352,7 +3742,11 @@ function aplicarFlujoArmado() {
 
     escribirTexto(
       'descripcionControlArmado',
-      'La duración quedó registrada. Completa los materiales, fotografías y finaliza el Armado.'
+      `Tiempo efectivo del montaje: ${
+        formatearMinutosArmado(
+          tiempoEfectivoArmadoMinutos
+        )
+      }. Completa materiales y fotografías para finalizar el Armado.`
     );
 
     bloquearMateriales(false);
@@ -3386,7 +3780,6 @@ function aplicarFlujoArmado() {
   bloquearEvidencias(true);
   habilitarFinalizacion(false);
 }
-
 
 function bloquearMateriales(bloquear) {
   const paneles =
@@ -3487,7 +3880,7 @@ function normalizarEstado(valor) {
       ''
     );
 }
-  async function iniciarArmado() {
+async function iniciarArmado() {
   const responsable =
     document
       .getElementById(
@@ -3511,18 +3904,12 @@ function normalizarEstado(valor) {
       'error'
     );
 
-    document
-      .getElementById(
-        'responsableArmado'
-      )
-      .focus();
-
     return;
   }
 
   if (
     !confirm(
-      '¿Confirmas que el montaje comenzará en este momento?'
+      '¿Confirmas que el Armado comenzará en este momento?'
     )
   ) {
     return;
@@ -3539,22 +3926,36 @@ function normalizarEstado(valor) {
 
   try {
     const respuesta =
-      await fetch(API_URL, {
-        method: 'POST',
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
 
-        headers: {
-          'Content-Type':
-            'text/plain;charset=utf-8'
-        },
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
 
-        body: JSON.stringify({
-          accion: 'iniciarArmado',
-          idServicio: ID_SERVICIO,
-          responsableArmado:
+          body: JSON.stringify({
+            accion:
+              'registrarEventoArmado',
+
+            idServicio:
+              ID_SERVICIO,
+
+            tipoEvento:
+              'INICIO',
+
             responsable,
-          usuario
-        })
-      });
+
+            motivo: '',
+
+            observacion: '',
+
+            usuario
+          })
+        }
+      );
 
     const datos =
       await respuesta.json();
@@ -3566,21 +3967,43 @@ function normalizarEstado(valor) {
       );
     }
 
+    if (datos.evento) {
+      eventosArmado.push(
+        datos.evento
+      );
+    }
+
+    estadoArmadoEventos =
+      datos.estadoArmado ||
+      'EN ARMADO';
+
+    tiempoEfectivoArmadoMinutos =
+      Number(
+        datos.tiempoEfectivoMinutos
+      ) || 0;
+
+    tiempoPausadoArmadoMinutos =
+      Number(
+        datos.tiempoPausadoMinutos
+      ) || 0;
+
     servicioActual.estado =
-      datos.estado;
+      'EN ARMADO';
 
     servicioActual.responsableArmado =
-      datos.responsableArmado;
+      responsable;
 
     servicioActual.fechaInicioArmado =
-      datos.fechaInicioArmado;
+      datos.fechaHora;
 
-    determinarEstadoMontaje();
+    montajeIniciado = true;
+
     mostrarServicio();
     aplicarFlujoArmado();
 
     mostrarMensaje(
-      datos.mensaje,
+      datos.mensaje ||
+      'Armado iniciado correctamente.',
       'exito'
     );
 
@@ -3593,18 +4016,88 @@ function normalizarEstado(valor) {
 
   } finally {
     boton.disabled = false;
+
     boton.textContent =
       '▶ Iniciar Armado';
   }
 }
-async function terminarMontaje() {
-  const usuario =
+
+function abrirPausaArmado() {
+  document
+    .getElementById(
+      'panelPausaArmado'
+    )
+    .classList.remove(
+      'oculto'
+    );
+
+  document
+    .getElementById(
+      'panelPausaArmado'
+    )
+    .scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+}
+
+
+function cancelarPausaArmado() {
+  document
+    .getElementById(
+      'panelPausaArmado'
+    )
+    .classList.add(
+      'oculto'
+    );
+
+  document
+    .getElementById(
+      'motivoPausaArmado'
+    )
+    .value = '';
+
+  document
+    .getElementById(
+      'observacionPausaArmado'
+    )
+    .value = '';
+
+  document
+    .getElementById(
+      'fotoPausaArmado'
+    )
+    .value = '';
+}
+
+
+async function confirmarPausaArmado() {
+  const motivo =
     document
       .getElementById(
-        'usuarioRegistro'
+        'motivoPausaArmado'
       )
       .value
-      .trim() ||
+      .trim();
+
+  const observacion =
+    document
+      .getElementById(
+        'observacionPausaArmado'
+      )
+      .value
+      .trim();
+
+  const inputFoto =
+    document.getElementById(
+      'fotoPausaArmado'
+    );
+
+  const archivo =
+    inputFoto.files &&
+    inputFoto.files[0];
+
+  const responsable =
     document
       .getElementById(
         'responsableArmado'
@@ -3612,9 +4105,395 @@ async function terminarMontaje() {
       .value
       .trim();
 
+  const usuario =
+    document
+      .getElementById(
+        'usuarioRegistro'
+      )
+      .value
+      .trim() ||
+    responsable;
+
+  if (!motivo) {
+    mostrarMensaje(
+      'Debes seleccionar el motivo de la pausa.',
+      'error'
+    );
+
+    return;
+  }
+
+  if (!observacion) {
+    mostrarMensaje(
+      'Debes explicar brevemente por qué se detiene el Armado.',
+      'error'
+    );
+
+    return;
+  }
+
+  if (!archivo) {
+    mostrarMensaje(
+      'Debes registrar una fotografía como evidencia de la pausa.',
+      'error'
+    );
+
+    return;
+  }
+
+  if (
+    !archivo.type ||
+    !archivo.type.startsWith(
+      'image/'
+    )
+  ) {
+    mostrarMensaje(
+      'El archivo seleccionado no es una fotografía válida.',
+      'error'
+    );
+
+    return;
+  }
+
+  const boton =
+    document.getElementById(
+      'btnConfirmarPausaArmado'
+    );
+
+  boton.disabled = true;
+
+  try {
+    boton.textContent =
+      'Preparando fotografía...';
+
+    const foto =
+      await comprimirImagen(
+        archivo,
+        1280,
+        0.80
+      );
+
+    boton.textContent =
+      'Registrando pausa...';
+
+    /*
+     * Primero registramos el evento.
+     */
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body: JSON.stringify({
+            accion:
+              'registrarEventoArmado',
+
+            idServicio:
+              ID_SERVICIO,
+
+            tipoEvento:
+              'PAUSA',
+
+            responsable,
+
+            motivo,
+
+            observacion,
+
+            usuario
+          })
+        }
+      );
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo registrar la pausa.'
+      );
+    }
+
+    /*
+     * Luego guardamos la fotografía
+     * asociada al ID EVENTO.
+     */
+    boton.textContent =
+      'Guardando fotografía...';
+
+    const respuestaFoto =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body: JSON.stringify({
+            accion:
+              'subirFotografiaArmadoPausa',
+
+            idServicio:
+              ID_SERVICIO,
+
+            idEvento:
+              datos.idEvento,
+
+            nombreArchivo:
+              `${
+                ID_SERVICIO
+              }_${
+                datos.idEvento
+              }_PAUSA_ARMADO.jpg`,
+
+            imagenBase64:
+              foto.imagenBase64,
+
+            descripcion:
+              `${motivo} - ${observacion}`,
+
+            usuario
+          })
+        }
+      );
+
+    const datosFoto =
+      await respuestaFoto.json();
+
+    if (!datosFoto.ok) {
+      /*
+       * El evento ya fue registrado.
+       * Recargamos para no dejar la pantalla
+       * mostrando un estado incorrecto.
+       */
+      await cargarEventosArmado();
+
+      aplicarFlujoArmado();
+
+      throw new Error(
+        datosFoto.mensaje ||
+        'La pausa fue registrada, pero no se pudo guardar la fotografía.'
+      );
+    }
+
+    if (datos.evento) {
+      eventosArmado.push(
+        datos.evento
+      );
+    }
+
+    estadoArmadoEventos =
+      datos.estadoArmado ||
+      'PAUSADO';
+
+    tiempoEfectivoArmadoMinutos =
+      Number(
+        datos.tiempoEfectivoMinutos
+      ) || 0;
+
+    tiempoPausadoArmadoMinutos =
+      Number(
+        datos.tiempoPausadoMinutos
+      ) || 0;
+
+    cancelarPausaArmado();
+
+    aplicarFlujoArmado();
+
+    mostrarMensaje(
+      'Armado pausado y evidencia registrada correctamente.',
+      'exito'
+    );
+
+  } catch (error) {
+    mostrarMensaje(
+      error.message ||
+      'No se pudo registrar la pausa.',
+      'error'
+    );
+
+  } finally {
+    boton.disabled = false;
+
+    boton.textContent =
+      '⏸ Confirmar pausa';
+  }
+}
+
+
+async function reanudarArmado() {
+  const responsable =
+    document
+      .getElementById(
+        'responsableArmado'
+      )
+      .value
+      .trim();
+
+  const usuario =
+    document
+      .getElementById(
+        'usuarioRegistro'
+      )
+      .value
+      .trim() ||
+    responsable;
+
+  if (!responsable) {
+    mostrarMensaje(
+      'Debes indicar el responsable del montaje.',
+      'error'
+    );
+
+    return;
+  }
+
   if (
     !confirm(
-      '¿Confirmas que el montaje físico terminó en este momento? Esta hora se utilizará para calcular la duración.'
+      '¿Confirmas que el Armado se reanudará en este momento?'
+    )
+  ) {
+    return;
+  }
+
+  const boton =
+    document.getElementById(
+      'btnReanudarArmado'
+    );
+
+  boton.disabled = true;
+
+  boton.textContent =
+    'Reanudando...';
+
+  try {
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body: JSON.stringify({
+            accion:
+              'registrarEventoArmado',
+
+            idServicio:
+              ID_SERVICIO,
+
+            tipoEvento:
+              'REANUDACION',
+
+            responsable,
+
+            motivo: '',
+
+            observacion: '',
+
+            usuario
+          })
+        }
+      );
+
+    const datos =
+      await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo reanudar el Armado.'
+      );
+    }
+
+    if (datos.evento) {
+      eventosArmado.push(
+        datos.evento
+      );
+    }
+
+    estadoArmadoEventos =
+      datos.estadoArmado ||
+      'EN ARMADO';
+
+    tiempoEfectivoArmadoMinutos =
+      Number(
+        datos.tiempoEfectivoMinutos
+      ) || 0;
+
+    tiempoPausadoArmadoMinutos =
+      Number(
+        datos.tiempoPausadoMinutos
+      ) || 0;
+
+    aplicarFlujoArmado();
+
+    mostrarMensaje(
+      datos.mensaje ||
+      'Armado reanudado correctamente.',
+      'exito'
+    );
+
+  } catch (error) {
+    mostrarMensaje(
+      error.message ||
+      'No se pudo reanudar el Armado.',
+      'error'
+    );
+
+  } finally {
+    boton.disabled = false;
+
+    boton.textContent =
+      '▶ Reanudar Armado';
+  }
+}
+async function terminarMontaje() {
+  const responsable =
+    document
+      .getElementById(
+        'responsableArmado'
+      )
+      .value
+      .trim();
+
+  const usuario =
+    document
+      .getElementById(
+        'usuarioRegistro'
+      )
+      .value
+      .trim() ||
+    responsable;
+
+  if (
+    estadoArmadoEventos ===
+      'PAUSADO'
+  ) {
+    mostrarMensaje(
+      'Primero debes reanudar el Armado antes de terminar el montaje.',
+      'error'
+    );
+
+    return;
+  }
+
+  if (
+    !confirm(
+      '¿Confirmas que el montaje físico terminó en este momento?'
     )
   ) {
     return;
@@ -3626,25 +4505,42 @@ async function terminarMontaje() {
     );
 
   boton.disabled = true;
+
   boton.textContent =
     'Registrando término...';
 
   try {
     const respuesta =
-      await fetch(API_URL, {
-        method: 'POST',
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
 
-        headers: {
-          'Content-Type':
-            'text/plain;charset=utf-8'
-        },
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
 
-        body: JSON.stringify({
-          accion: 'terminarMontaje',
-          idServicio: ID_SERVICIO,
-          usuario
-        })
-      });
+          body: JSON.stringify({
+            accion:
+              'registrarEventoArmado',
+
+            idServicio:
+              ID_SERVICIO,
+
+            tipoEvento:
+              'FIN MONTAJE',
+
+            responsable,
+
+            motivo: '',
+
+            observacion: '',
+
+            usuario
+          })
+        }
+      );
 
     const datos =
       await respuesta.json();
@@ -3656,14 +4552,28 @@ async function terminarMontaje() {
       );
     }
 
-    servicioActual.fechaInicioArmado =
-      datos.fechaInicioArmado;
+    if (datos.evento) {
+      eventosArmado.push(
+        datos.evento
+      );
+    }
+
+    estadoArmadoEventos =
+      datos.estadoArmado ||
+      'MONTAJE TERMINADO';
+
+    tiempoEfectivoArmadoMinutos =
+      Number(
+        datos.tiempoEfectivoMinutos
+      ) || 0;
+
+    tiempoPausadoArmadoMinutos =
+      Number(
+        datos.tiempoPausadoMinutos
+      ) || 0;
 
     servicioActual.fechaFinMontaje =
-      datos.fechaFinMontaje;
-
-    servicioActual.duracionArmado =
-      datos.duracionFormateada;
+      datos.fechaHora;
 
     montajeIniciado = true;
     montajeTerminado = true;
@@ -3671,7 +4581,8 @@ async function terminarMontaje() {
     aplicarFlujoArmado();
 
     mostrarMensaje(
-      datos.mensaje,
+      datos.mensaje ||
+      'Montaje terminado correctamente.',
       'exito'
     );
 
@@ -3693,11 +4604,11 @@ async function terminarMontaje() {
 
   } finally {
     boton.disabled = false;
+
     boton.textContent =
       '⏹ Terminar Montaje';
   }
-}  
-
+}
 function aplicarModoHistorial() {
   if (!ES_HISTORIAL) {
     return;
