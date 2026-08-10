@@ -3969,24 +3969,62 @@ function renderizarPostparada(){
       : [];
 
 
-  /*
-   * En tu sistema actual las fotografías
-   * de Postparada se guardan con:
-   *
-   * ETAPA = POSTPARADA
-   */
-  const fotos =
-    filtrarFotosPorEtapas(
-      [
-        'POSTPARADA'
-      ]
-    );
+const fotos =
+  filtrarFotosPorEtapas(
+    [
+      'POSTPARADA'
+    ]
+  );
 
 
-  if(
-    !materiales.length &&
-    !fotos.length
-  ){
+const postparadaRegistrada =
+  datos?.postparadaRegistrada === true;
+
+
+if(
+  !postparadaRegistrada
+){
+
+  document
+    .getElementById(
+      'contenidoDetalle'
+    )
+    .innerHTML = `
+
+      <div class="etapa-futura">
+
+        <h3>
+          Postparada
+        </h3>
+
+        <p>
+          La Postparada de este TAG todavía
+          no ha sido finalizada.
+        </p>
+
+      </div>
+
+
+      ${
+        fotos.length
+          ? bloqueFotos(
+              'Fotografías de Postparada',
+              fotos
+            )
+          : ''
+      }
+
+    `;
+
+  return;
+
+}
+
+
+if(
+  !materiales.length &&
+  !fotos.length
+){
 
     document
       .getElementById(
