@@ -528,20 +528,116 @@
   line-height: 1.4;
 }
 
-#fotoPausaArmado {
-  padding: 10px;
-  background: var(--gris-claro);
-  border: 1px dashed #b7c8d4;
-  border-radius: 9px;
-}
-
 .acciones {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 18px;
 }
+.acciones-foto-pausa {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
 
+.btn-foto-pausa {
+  flex: 1;
+  min-height: 48px;
+  padding: 12px 16px;
+
+  border: 1px solid #bfd7e8;
+  border-radius: 10px;
+
+  background: var(--azul-claro);
+  color: var(--azul);
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.btn-foto-pausa:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 12px rgba(15, 59, 92, .10);
+}
+
+
+/* Miniatura */
+
+.preview-foto-pausa {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 12px;
+
+  margin-bottom: 10px;
+
+  border: 1px solid #c8d8e4;
+  border-radius: 12px;
+
+  background: #f7fafc;
+}
+
+.preview-foto-pausa img {
+  width: 95px;
+  height: 75px;
+
+  object-fit: cover;
+
+  border-radius: 9px;
+
+  border: 1px solid #d4dee6;
+}
+
+.preview-foto-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.preview-foto-info strong {
+  color: var(--azul);
+  font-size: 13px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-foto-info span {
+  color: var(--verde);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-quitar-foto-pausa {
+  width: fit-content;
+
+  padding: 5px 8px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: #fdeaea;
+  color: var(--rojo);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
 .boton-principal,
 .boton-secundario {
   padding: 11px 16px;
@@ -570,7 +666,19 @@
   .form-grid {
   grid-template-columns: 1fr;
 }
+.acciones-foto-pausa {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
 
+.preview-foto-pausa {
+  align-items: flex-start;
+}
+
+.preview-foto-pausa img {
+  width: 85px;
+  height: 70px;
+}
 .acciones {
   flex-direction: column-reverse;
 }
@@ -1158,25 +1266,84 @@ body.modo-historial
       ></textarea>
     </div>
 
-    <div class="campo campo-completo">
+<div class="campo campo-completo">
 
-      <label>
-        Fotografía de evidencia *
-      </label>
+  <label>
+    Fotografía de evidencia *
+  </label>
 
-      <input
-        id="fotoPausaArmado"
-        type="file"
-        accept="image/*"
-        capture="environment"
+  <div class="acciones-foto-pausa">
+
+    <button
+      type="button"
+      class="btn-foto-pausa"
+      onclick="tomarFotoPausaArmado()"
+    >
+      📷 Tomar foto
+    </button>
+
+    <button
+      type="button"
+      class="btn-foto-pausa"
+      onclick="subirFotoPausaArmado()"
+    >
+      🖼️ Subir foto
+    </button>
+
+  </div>
+
+  <!-- Cámara -->
+  <input
+    id="fotoPausaArmadoCamara"
+    type="file"
+    accept="image/*"
+    capture="environment"
+    class="oculto"
+    onchange="seleccionarFotoPausaArmado(this)"
+  >
+
+  <!-- Galería / archivos -->
+  <input
+    id="fotoPausaArmadoGaleria"
+    type="file"
+    accept="image/*"
+    class="oculto"
+    onchange="seleccionarFotoPausaArmado(this)"
+  >
+
+  <div
+    id="previewFotoPausaArmado"
+    class="preview-foto-pausa oculto"
+  >
+    <img
+      id="imagenPreviewPausaArmado"
+      alt="Evidencia de la pausa"
+    >
+
+    <div class="preview-foto-info">
+
+      <strong id="nombreFotoPausaArmado"></strong>
+
+      <span>
+        Fotografía lista para registrar
+      </span>
+
+      <button
+        type="button"
+        class="btn-quitar-foto-pausa"
+        onclick="quitarFotoPausaArmado()"
       >
-
-      <small>
-        Debe registrarse una fotografía por cada pausa.
-      </small>
+        ✕ Quitar fotografía
+      </button>
 
     </div>
+  </div>
 
+  <small>
+    Debe registrarse una fotografía por cada pausa.
+  </small>
+
+</div>
   </div>
 
   <div class="acciones">
@@ -1872,6 +2039,7 @@ let montajeTerminado = false;
 let armadoFinalizado = false;
 
 let eventosArmado = [];
+let archivoFotoPausaArmado = null;
 
 let estadoArmadoEventos =
   'NO INICIADO';
@@ -4021,7 +4189,91 @@ async function iniciarArmado() {
       '▶ Iniciar Armado';
   }
 }
+function tomarFotoPausaArmado() {
+  document
+    .getElementById('fotoPausaArmadoCamara')
+    .click();
+}
 
+
+function subirFotoPausaArmado() {
+  document
+    .getElementById('fotoPausaArmadoGaleria')
+    .click();
+}
+
+
+function seleccionarFotoPausaArmado(input) {
+  const archivo =
+    input.files &&
+    input.files[0];
+
+  if (!archivo) {
+    return;
+  }
+
+  if (
+    !archivo.type ||
+    !archivo.type.startsWith('image/')
+  ) {
+    mostrarMensaje(
+      'Debes seleccionar una fotografía válida.',
+      'error'
+    );
+
+    input.value = '';
+    return;
+  }
+
+  archivoFotoPausaArmado = archivo;
+
+  const urlTemporal =
+    URL.createObjectURL(archivo);
+
+  const imagen =
+    document.getElementById(
+      'imagenPreviewPausaArmado'
+    );
+
+  imagen.src = urlTemporal;
+
+  imagen.onload = function() {
+    URL.revokeObjectURL(urlTemporal);
+  };
+
+  document.getElementById(
+    'nombreFotoPausaArmado'
+  ).textContent = archivo.name;
+
+  document.getElementById(
+    'previewFotoPausaArmado'
+  ).classList.remove('oculto');
+}
+
+
+function quitarFotoPausaArmado() {
+  archivoFotoPausaArmado = null;
+
+  document.getElementById(
+    'fotoPausaArmadoCamara'
+  ).value = '';
+
+  document.getElementById(
+    'fotoPausaArmadoGaleria'
+  ).value = '';
+
+  document.getElementById(
+    'imagenPreviewPausaArmado'
+  ).removeAttribute('src');
+
+  document.getElementById(
+    'nombreFotoPausaArmado'
+  ).textContent = '';
+
+  document.getElementById(
+    'previewFotoPausaArmado'
+  ).classList.add('oculto');
+}
 function abrirPausaArmado() {
   document
     .getElementById(
@@ -4063,11 +4315,7 @@ function cancelarPausaArmado() {
     )
     .value = '';
 
-  document
-    .getElementById(
-      'fotoPausaArmado'
-    )
-    .value = '';
+quitarFotoPausaArmado();
 }
 
 
@@ -4088,14 +4336,8 @@ async function confirmarPausaArmado() {
       .value
       .trim();
 
-  const inputFoto =
-    document.getElementById(
-      'fotoPausaArmado'
-    );
-
-  const archivo =
-    inputFoto.files &&
-    inputFoto.files[0];
+const archivo =
+  archivoFotoPausaArmado;
 
   const responsable =
     document
