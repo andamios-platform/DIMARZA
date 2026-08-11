@@ -3525,7 +3525,11 @@ function obtenerNombreVisibleEvidencia(
       evidenciasArmado
     ).filter(
       ([, evidencia]) =>
-        Boolean(evidencia)
+        Boolean(
+          evidencia &&
+          !evidencia.registrada &&
+          evidencia.imagenBase64
+        )
     );
 
   const resultados = [];
