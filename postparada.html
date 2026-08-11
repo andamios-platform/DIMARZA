@@ -3282,42 +3282,125 @@
     }
 
 
-    function aplicarBloqueoSegunEstado() {
-      const estado =
-        normalizar(
-          servicioActual.estado
-        );
+function aplicarBloqueoSegunEstado() {
 
-      const editable = [
-        'andamio operativo',
-        'en desmontaje'
-      ].includes(estado);
+  const estado =
+    normalizar(
+      servicioActual.estado
+    );
 
-      if (
-        postparadaRegistrada ||
-        estado === 'cerrado' ||
-        !editable
-      ) {
-        document
-          .querySelectorAll(
-            '#contenidoPrincipal input,' +
-            '#contenidoPrincipal select,' +
-            '#contenidoPrincipal textarea'
-          )
-          .forEach(elemento => {
-            elemento.disabled = true;
-          });
+  const aviso =
+    document.getElementById(
+      'avisoLectura'
+    );
 
-        document.getElementById(
-          'btnFinalizar'
-        ).disabled = true;
 
-        document.getElementById(
-          'avisoLectura'
-        ).classList.remove('oculto');
+  /*
+   * =====================================================
+   * POSTPARADA YA FINALIZADA
+   * =====================================================
+   */
+  if (
+    postparadaRegistrada ||
+    estado === 'cerrado'
+  ) {
+
+    bloquearPostparada();
+
+    aviso.textContent =
+      'La Postparada ya fue finalizada. El módulo está disponible únicamente para consulta.';
+
+    aviso.classList.remove(
+      'oculto'
+    );
+
+    return;
+  }
+
+
+  /*
+   * =====================================================
+   * ARMADO TODAVÍA NO FINALIZADO
+   * =====================================================
+   */
+  if (
+    estado === 'recibido en tag' ||
+    estado === 'en armado'
+  ) {
+
+    bloquearPostparada();
+
+    aviso.textContent =
+      'Postparada aún no está disponible. Primero debe finalizarse el Armado y el servicio debe quedar como ANDAMIO OPERATIVO.';
+
+    aviso.classList.remove(
+      'oculto'
+    );
+
+    return;
+  }
+
+
+  /*
+   * =====================================================
+   * POSTPARADA HABILITADA
+   * =====================================================
+   */
+  if (
+    estado === 'andamio operativo' ||
+    estado === 'en desmontaje'
+  ) {
+
+    aviso.classList.add(
+      'oculto'
+    );
+
+    return;
+  }
+
+
+  /*
+   * =====================================================
+   * CUALQUIER OTRO ESTADO
+   * =====================================================
+   */
+  bloquearPostparada();
+
+  aviso.textContent =
+    `Postparada no está disponible mientras el servicio se encuentre en estado ${servicioActual.estado || 'SIN ESTADO'}.`;
+
+  aviso.classList.remove(
+    'oculto'
+  );
+
+}
+    function bloquearPostparada() {
+
+  document
+    .querySelectorAll(
+      '#contenidoPrincipal input,' +
+      '#contenidoPrincipal select,' +
+      '#contenidoPrincipal textarea'
+    )
+    .forEach(
+      elemento => {
+        elemento.disabled = true;
       }
-    }
+    );
 
+
+  const botonFinalizar =
+    document.getElementById(
+      'btnFinalizar'
+    );
+
+  if(
+    botonFinalizar
+  ){
+    botonFinalizar.disabled = true;
+  }
+
+}
 
     function volverDetalle() {
       window.location.href =
