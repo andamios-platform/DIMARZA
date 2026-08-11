@@ -541,7 +541,18 @@ button{
 
 }
 
+.tag-fecha{
 
+  margin:
+    4px 0 3px;
+
+  color:#52697d;
+
+  font-size:12px;
+
+  font-weight:700;
+
+}
 .tag-servicio{
 
   color:var(--gris);
@@ -2761,26 +2772,34 @@ function pintarServicios(){
               <div class="tag-cabecera">
 
                 <div>
+<div class="tag-nombre">
+  ${
+    escaparHTML(
+      servicio.tag ||
+      'SIN TAG'
+    )
+  }
+</div>
 
-                  <div class="tag-nombre">
-                    ${
-                      escaparHTML(
-                        servicio.tag ||
-                        'SIN TAG'
-                      )
-                    }
-                  </div>
+<div class="tag-fecha">
+  📅 ${
+    escaparHTML(
+      servicio.fechaProgramada ||
+      'Sin fecha'
+    )
+  }
+</div>
 
-                  <div class="tag-servicio">
+<div class="tag-servicio">
 
-                    ${
-                      escaparHTML(
-                        servicio.idServicio ||
-                        ''
-                      )
-                    }
+  ${
+    escaparHTML(
+      servicio.idServicio ||
+      ''
+    )
+  }
 
-                  </div>
+</div>
 
                 </div>
 
