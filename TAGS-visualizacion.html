@@ -249,10 +249,10 @@ button{
   display:grid;
 
   grid-template-columns:
-    minmax(250px,2fr)
+    minmax(240px,2fr)
     repeat(
-      4,
-      minmax(155px,1fr)
+      5,
+      minmax(145px,1fr)
     );
 
   gap:12px;
@@ -323,7 +323,69 @@ button{
     );
 
 }
+.campo-check{
 
+  justify-content:flex-end;
+
+}
+
+
+.check-filtro{
+
+  min-height:45px;
+
+  display:flex !important;
+
+  align-items:center;
+
+  gap:9px;
+
+  padding:
+    10px 12px;
+
+  color:var(--azul) !important;
+
+  background:
+    #f8fafc;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+  text-transform:none !important;
+
+}
+
+
+.check-filtro input{
+
+  width:18px !important;
+
+  height:18px;
+
+  margin:0;
+
+  padding:0;
+
+  accent-color:
+    var(--azul2);
+
+  cursor:pointer;
+
+}
+
+
+.check-filtro span{
+
+  font-size:12px;
+
+  font-weight:bold;
+
+}
 
 /* =========================================================
    INDICADORES
@@ -1924,6 +1986,27 @@ tbody tr:nth-child(even){
   >
 
 </div>
+      <div class="campo campo-check">
+
+  <label>
+    Visualización
+  </label>
+
+  <label class="check-filtro">
+
+    <input
+      id="ocultarCerrados"
+      type="checkbox"
+      checked
+    >
+
+    <span>
+      Ocultar TAG cerrados
+    </span>
+
+  </label>
+
+</div>
 
     </div>
 
@@ -2267,6 +2350,15 @@ document
     aplicarFiltros
   );
 
+document
+  .getElementById(
+    'ocultarCerrados'
+  )
+  .addEventListener(
+    'change',
+    aplicarFiltros
+  );
+
 
   await cargarServicios();
 
@@ -2544,6 +2636,13 @@ const servicioSeleccionado =
     .value ||
   '';
 
+  const ocultarCerrados =
+  document
+    .getElementById(
+      'ocultarCerrados'
+    )
+    .checked;
+
   
   serviciosFiltrados =
     serviciosOriginales
@@ -2621,6 +2720,11 @@ const tipoServicio =
   fechasEvidencia.includes(
     fechaSeleccionada
   )
+) &&
+(
+  !ocultarCerrados ||
+  estadoServicio !==
+  'CERRADO'
 )
           );
 
