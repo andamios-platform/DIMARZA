@@ -890,6 +890,217 @@
     width: 100%;
   }
 }
+
+/* ======================================================
+   CARGA MASIVA EXCEL
+   ====================================================== */
+
+.modal-carga-masiva {
+  width: min(1180px, 100%);
+}
+
+.carga-masiva-config {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.carga-masiva-archivo {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 2px dashed #b9cbd8;
+  border-radius: 12px;
+  background: #f8fbfd;
+}
+
+.carga-masiva-archivo input {
+  margin-top: 10px;
+}
+
+.carga-masiva-ayuda {
+  margin-top: 8px;
+  color: var(--gris);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.resumen-importacion {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.resumen-importacion-card {
+  padding: 15px;
+  background: #f5f8fa;
+  border: 1px solid var(--borde);
+  border-radius: 11px;
+}
+
+.resumen-importacion-card span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--gris);
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.resumen-importacion-card strong {
+  color: var(--azul);
+  font-size: 24px;
+}
+
+.resumen-importacion-card.valido {
+  border-left: 4px solid var(--verde);
+}
+
+.resumen-importacion-card.descartado {
+  border-left: 4px solid var(--rojo);
+}
+
+.resumen-importacion-card.advertencia {
+  border-left: 4px solid var(--amarillo);
+}
+
+.preview-masivo {
+  margin-top: 18px;
+}
+
+.preview-masivo-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.preview-masivo-cabecera h4 {
+  margin: 0;
+  color: var(--azul);
+}
+
+.tabla-masiva-contenedor {
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid var(--borde);
+  border-radius: 11px;
+}
+
+.tabla-masiva {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 12px;
+}
+
+.tabla-masiva th,
+.tabla-masiva td {
+  padding: 10px;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabla-masiva th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: white;
+  background: var(--azul);
+  white-space: nowrap;
+}
+
+.tabla-masiva tbody tr:hover {
+  background: #f7fafc;
+}
+
+.fila-masiva-advertencia {
+  background: #fff8df;
+}
+
+.estado-fila-ok {
+  color: var(--verde);
+  font-weight: bold;
+}
+
+.estado-fila-error {
+  color: var(--rojo);
+  font-weight: bold;
+}
+
+.estado-fila-advertencia {
+  color: #9a7100;
+  font-weight: bold;
+}
+
+.mensaje-carga-masiva {
+  display: none;
+  margin-top: 15px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.mensaje-carga-masiva.error {
+  display: block;
+  color: #a62835;
+  background: #fde5e7;
+  border: 1px solid #f4bcc2;
+}
+
+.mensaje-carga-masiva.exito {
+  display: block;
+  color: #166b3b;
+  background: #dff3e7;
+  border: 1px solid #b8dfc8;
+}
+
+.oculto-masivo {
+  display: none !important;
+}
+
+.acciones-carga-masiva {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+@media (max-width: 760px) {
+
+  .carga-masiva-config {
+    grid-template-columns: 1fr;
+  }
+
+  .carga-masiva-archivo {
+    grid-column: auto;
+  }
+
+  .resumen-importacion {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 520px) {
+
+  .resumen-importacion {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-carga-masiva {
+    flex-direction: column-reverse;
+  }
+
+  .acciones-carga-masiva button {
+    width: 100%;
+  }
+
+}
   </style>
 </head>
 
@@ -905,23 +1116,31 @@
 
 <div style="display:flex; gap:10px; flex-wrap:wrap;">
 
-      <button
-        type="button"
-        class="boton-secundario"
-        onclick="volverAtras()"
-      >
-        ← Volver
-      </button>
-    
-      <button
-        class="boton-principal"
-        type="button"
-        onclick="irNuevoServicio()"
-      >
-        ＋ Nueva Actividad
-      </button>
-    
-    </div>
+  <button
+    type="button"
+    class="boton-secundario"
+    onclick="volverAtras()"
+  >
+    ← Volver
+  </button>
+
+  <button
+    type="button"
+    class="boton-secundario"
+    onclick="abrirCargaMasiva()"
+  >
+    📥 Carga masiva Excel
+  </button>
+
+  <button
+    class="boton-principal"
+    type="button"
+    onclick="irNuevoServicio()"
+  >
+    ＋ Nueva Actividad
+  </button>
+
+</div>
 
     </div>
   </header>
@@ -1072,6 +1291,329 @@
     </div>
   </div>
 
+  <!-- =====================================================
+     MODAL CARGA MASIVA EXCEL
+     ===================================================== -->
+
+<div
+  id="modalCargaMasiva"
+  class="modal-fondo"
+  onclick="cerrarCargaMasivaDesdeFondo(event)"
+>
+
+  <div class="modal modal-carga-masiva">
+
+    <div class="modal-cabecera">
+
+      <div>
+        <h3>
+          📥 Carga masiva de actividades
+        </h3>
+
+        <p>
+          Importación de actividades de andamios desde Excel
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="cerrar-modal"
+        onclick="cerrarCargaMasiva()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="modal-contenido">
+
+      <div class="carga-masiva-config">
+
+
+        <div class="campo">
+
+          <label for="faenaMasiva">
+            Unidad minera *
+          </label>
+
+          <select
+            id="faenaMasiva"
+            onchange="cargarServiciosMinaMasivo()"
+          >
+            <option value="">
+              Seleccionar unidad minera
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="servicioMasivo">
+            Servicio *
+          </label>
+
+          <select
+            id="servicioMasivo"
+            disabled
+          >
+            <option value="">
+              Primero seleccione una unidad minera
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="areaMasiva">
+            Área *
+          </label>
+
+          <input
+            id="areaMasiva"
+            type="text"
+            placeholder="Ejemplo: Chancado"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="supervisorMasivo">
+            Supervisor *
+          </label>
+
+          <select id="supervisorMasivo">
+
+            <option value="">
+              Seleccionar supervisor
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="responsablePreviosMasivo">
+            Responsable de previos *
+          </label>
+
+          <select id="responsablePreviosMasivo">
+
+            <option value="">
+              Seleccionar responsable
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="carga-masiva-archivo">
+
+          <strong>
+            Archivo Excel
+          </strong>
+
+          <input
+            id="archivoExcelMasivo"
+            type="file"
+            accept=".xlsx,.xls,.xlsm"
+            onchange="procesarArchivoExcelMasivo(event)"
+          >
+
+          <div class="carga-masiva-ayuda">
+
+            Solo se considerarán las filas donde
+            <strong>EMPRESA = DIMARZA</strong>
+            y
+            <strong>ANDAMIO = X</strong>.
+
+            La fecha programada se obtendrá de la
+            primera columna TD o TN que tenga
+            programación.
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="mensajeCargaMasiva"
+        class="mensaje-carga-masiva"
+      ></div>
+
+
+      <div
+        id="resultadoCargaMasiva"
+        class="oculto-masivo"
+      >
+
+        <div class="resumen-importacion">
+
+          <div class="resumen-importacion-card">
+
+            <span>
+              Filas revisadas
+            </span>
+
+            <strong id="masivoTotalFilas">
+              0
+            </strong>
+
+          </div>
+
+
+          <div
+            class="resumen-importacion-card valido"
+          >
+
+            <span>
+              DIMARZA + X
+            </span>
+
+            <strong id="masivoCandidatas">
+              0
+            </strong>
+
+          </div>
+
+
+          <div
+            class="resumen-importacion-card descartado"
+          >
+
+            <span>
+              Descartadas
+            </span>
+
+            <strong id="masivoDescartadas">
+              0
+            </strong>
+
+          </div>
+
+
+          <div
+            class="resumen-importacion-card advertencia"
+          >
+
+            <span>
+              Con observación
+            </span>
+
+            <strong id="masivoObservadas">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="preview-masivo">
+
+          <div class="preview-masivo-cabecera">
+
+            <h4>
+              Vista previa
+            </h4>
+
+            <span id="textoCantidadImportable">
+              0 actividades listas
+            </span>
+
+          </div>
+
+
+          <div class="tabla-masiva-contenedor">
+
+            <table class="tabla-masiva">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Importar
+                  </th>
+
+                  <th>
+                    TAG / Equipo
+                  </th>
+
+                  <th>
+                    OT
+                  </th>
+
+                  <th>
+                    Actividad
+                  </th>
+
+                  <th>
+                    Fecha programada
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody id="tbodyCargaMasiva">
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="acciones-carga-masiva">
+
+        <button
+          type="button"
+          class="boton-cancelar"
+          onclick="cerrarCargaMasiva()"
+        >
+          Cancelar
+        </button>
+
+
+        <button
+          id="btnImportarMasivo"
+          type="button"
+          class="boton-principal"
+          disabled
+        >
+          Importar actividades
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+  <!-- Librería para leer archivos Excel -->
+<script
+  src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+></script>
   <script>
     const API_URL =
       'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
@@ -1084,6 +1626,16 @@
       relaciones: []
     };
 
+    let actividadesCargaMasiva = [];
+
+let resumenCargaMasiva = {
+  totalFilas: 0,
+  candidatas: 0,
+  descartadasEmpresa: 0,
+  descartadasAndamio: 0,
+  observadas: 0,
+  importables: 0
+};
     const estadosCerrados = [
       'CERRADO',
       'CANCELADO'
@@ -2040,6 +2592,1493 @@ function actualizarIndicadores(
 
 function volverAtras() {
   window.location.href = 'index.html';
+}
+/* ======================================================
+   CARGA MASIVA EXCEL
+   ====================================================== */
+
+function abrirCargaMasiva() {
+
+  const modal =
+    document.getElementById(
+      'modalCargaMasiva'
+    );
+
+  limpiarCargaMasiva();
+
+  cargarMinasMasivo();
+
+  copiarSelectMasivo(
+    'supervisor',
+    'supervisorMasivo'
+  );
+
+  copiarSelectMasivo(
+    'responsablePrevios',
+    'responsablePreviosMasivo'
+  );
+
+  modal.classList.add(
+    'activo'
+  );
+
+}
+
+
+function cerrarCargaMasiva() {
+
+  document
+    .getElementById(
+      'modalCargaMasiva'
+    )
+    .classList.remove(
+      'activo'
+    );
+
+}
+
+
+function cerrarCargaMasivaDesdeFondo(
+  evento
+) {
+
+  if (
+    evento.target.id ===
+    'modalCargaMasiva'
+  ) {
+
+    cerrarCargaMasiva();
+
+  }
+
+}
+
+
+function limpiarCargaMasiva() {
+
+  actividadesCargaMasiva = [];
+
+  resumenCargaMasiva = {
+    totalFilas: 0,
+    candidatas: 0,
+    descartadasEmpresa: 0,
+    descartadasAndamio: 0,
+    observadas: 0,
+    importables: 0
+  };
+
+
+  document.getElementById(
+    'archivoExcelMasivo'
+  ).value = '';
+
+
+  document.getElementById(
+    'areaMasiva'
+  ).value = '';
+
+
+  document.getElementById(
+    'mensajeCargaMasiva'
+  ).className =
+    'mensaje-carga-masiva';
+
+
+  document.getElementById(
+    'mensajeCargaMasiva'
+  ).textContent = '';
+
+
+  document.getElementById(
+    'resultadoCargaMasiva'
+  ).classList.add(
+    'oculto-masivo'
+  );
+
+
+  document.getElementById(
+    'tbodyCargaMasiva'
+  ).innerHTML = '';
+
+
+  document.getElementById(
+    'btnImportarMasivo'
+  ).disabled = true;
+
+}
+
+
+function copiarSelectMasivo(
+  origenId,
+  destinoId
+) {
+
+  const origen =
+    document.getElementById(
+      origenId
+    );
+
+  const destino =
+    document.getElementById(
+      destinoId
+    );
+
+  destino.innerHTML =
+    origen.innerHTML;
+
+  destino.value = '';
+
+}
+
+
+function cargarMinasMasivo() {
+
+  const selector =
+    document.getElementById(
+      'faenaMasiva'
+    );
+
+  selector.innerHTML = `
+    <option value="">
+      Seleccionar unidad minera
+    </option>
+  `;
+
+
+  const minas =
+    Array.isArray(
+      configuracionMinas.minas
+    )
+      ? configuracionMinas.minas
+      : [];
+
+
+  minas.forEach(
+    mina => {
+
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value =
+        mina;
+
+      opcion.textContent =
+        mina;
+
+      selector.appendChild(
+        opcion
+      );
+
+    }
+  );
+
+
+  document.getElementById(
+    'servicioMasivo'
+  ).innerHTML = `
+    <option value="">
+      Primero seleccione una unidad minera
+    </option>
+  `;
+
+
+  document.getElementById(
+    'servicioMasivo'
+  ).disabled = true;
+
+}
+
+
+function cargarServiciosMinaMasivo() {
+
+  const mina =
+    document
+      .getElementById(
+        'faenaMasiva'
+      )
+      .value
+      .trim();
+
+
+  const selector =
+    document.getElementById(
+      'servicioMasivo'
+    );
+
+
+  if (!mina) {
+
+    selector.disabled = true;
+
+    selector.innerHTML = `
+      <option value="">
+        Primero seleccione una unidad minera
+      </option>
+    `;
+
+    return;
+
+  }
+
+
+  const relaciones =
+    Array.isArray(
+      configuracionMinas.relaciones
+    )
+      ? configuracionMinas.relaciones
+      : [];
+
+
+  const servicios =
+    [
+      ...new Set(
+        relaciones
+          .filter(
+            item =>
+              normalizarTexto(
+                item.mina
+              ) ===
+              normalizarTexto(
+                mina
+              )
+          )
+          .map(
+            item =>
+              item.servicio
+          )
+          .filter(Boolean)
+      )
+    ];
+
+
+  selector.innerHTML = `
+    <option value="">
+      Seleccionar servicio
+    </option>
+  `;
+
+
+  servicios.forEach(
+    servicio => {
+
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value =
+        servicio;
+
+      opcion.textContent =
+        servicio;
+
+      selector.appendChild(
+        opcion
+      );
+
+    }
+  );
+
+
+  selector.disabled = false;
+
+
+  if (
+    servicios.length === 1
+  ) {
+
+    selector.value =
+      servicios[0];
+
+  }
+
+}
+
+
+async function procesarArchivoExcelMasivo(
+  evento
+) {
+
+  const archivo =
+    evento.target.files &&
+    evento.target.files[0];
+
+
+  if (!archivo) {
+    return;
+  }
+
+
+  const mensaje =
+    document.getElementById(
+      'mensajeCargaMasiva'
+    );
+
+
+  mensaje.className =
+    'mensaje-carga-masiva';
+
+
+  mensaje.textContent = '';
+
+
+  document.getElementById(
+    'resultadoCargaMasiva'
+  ).classList.add(
+    'oculto-masivo'
+  );
+
+
+  try {
+
+    if (
+      typeof XLSX ===
+      'undefined'
+    ) {
+
+      throw new Error(
+        'No se pudo cargar la librería para leer Excel.'
+      );
+
+    }
+
+
+    const extension =
+      archivo.name
+        .split('.')
+        .pop()
+        .toLowerCase();
+
+
+    if (
+      ![
+        'xlsx',
+        'xls',
+        'xlsm'
+      ].includes(extension)
+    ) {
+
+      throw new Error(
+        'Selecciona un archivo Excel válido.'
+      );
+
+    }
+
+
+    const buffer =
+      await archivo.arrayBuffer();
+
+
+    const libro =
+      XLSX.read(
+        buffer,
+        {
+          type: 'array',
+          cellDates: true
+        }
+      );
+
+
+    if (
+      !libro.SheetNames ||
+      libro.SheetNames.length === 0
+    ) {
+
+      throw new Error(
+        'El archivo Excel no contiene hojas.'
+      );
+
+    }
+
+
+    const nombreHoja =
+      libro.SheetNames.find(
+        nombre =>
+          normalizarTexto(
+            nombre
+          ) ===
+          'ACTIVIDADES'
+      ) ||
+      libro.SheetNames[0];
+
+
+    const hoja =
+      libro.Sheets[
+        nombreHoja
+      ];
+
+
+    const matriz =
+      XLSX.utils.sheet_to_json(
+        hoja,
+        {
+          header: 1,
+          raw: true,
+          defval: null
+        }
+      );
+
+
+    analizarMatrizExcelMasivo(
+      matriz
+    );
+
+
+    mensaje.className =
+      'mensaje-carga-masiva exito';
+
+
+    mensaje.textContent =
+      `Archivo "${archivo.name}" leído correctamente. Hoja utilizada: ${nombreHoja}.`;
+
+
+  } catch (error) {
+
+    console.error(
+      'Error leyendo Excel:',
+      error
+    );
+
+
+    actividadesCargaMasiva =
+      [];
+
+
+    mensaje.className =
+      'mensaje-carga-masiva error';
+
+
+    mensaje.textContent =
+      error.message ||
+      'No se pudo leer el archivo Excel.';
+
+  }
+
+}
+
+
+function analizarMatrizExcelMasivo(
+  matriz
+) {
+
+  if (
+    !Array.isArray(matriz) ||
+    matriz.length === 0
+  ) {
+
+    throw new Error(
+      'El archivo no contiene información.'
+    );
+
+  }
+
+
+  const filaEncabezado =
+    buscarFilaEncabezadoMasivo(
+      matriz
+    );
+
+
+  if (
+    filaEncabezado === -1
+  ) {
+
+    throw new Error(
+      'No pude localizar las columnas Empresa, Andamio y Actividad.'
+    );
+
+  }
+
+
+  const encabezados =
+    matriz[
+      filaEncabezado
+    ].map(
+      valor =>
+        normalizarEncabezadoMasivo(
+          valor
+        )
+    );
+
+
+  const columnaEquipo =
+    buscarColumnaMasiva(
+      encabezados,
+      [
+        'EQUIPO',
+        'EQUIP'
+      ]
+    );
+
+
+  const columnaOT =
+    buscarColumnaMasiva(
+      encabezados,
+      [
+        'OT'
+      ],
+      true
+    );
+
+
+  const columnaActividad =
+    buscarColumnaMasiva(
+      encabezados,
+      [
+        'ACTIVIDAD'
+      ]
+    );
+
+
+  const columnaEmpresa =
+    buscarColumnaMasiva(
+      encabezados,
+      [
+        'EMPRESA'
+      ]
+    );
+
+
+  const columnaAndamio =
+    buscarColumnaMasiva(
+      encabezados,
+      [
+        'ANDAMIO',
+        'ANDAMIOS'
+      ]
+    );
+
+
+  if (
+    columnaEquipo === -1 ||
+    columnaActividad === -1 ||
+    columnaEmpresa === -1 ||
+    columnaAndamio === -1
+  ) {
+
+    throw new Error(
+      'Faltan columnas obligatorias en el Excel: Equipo, Actividad, Empresa o Andamio.'
+    );
+
+  }
+
+
+  const columnasProgramacion =
+    [];
+
+
+  encabezados.forEach(
+    (
+      encabezado,
+      columna
+    ) => {
+
+      if (
+        encabezado === 'TD' ||
+        encabezado === 'TN'
+      ) {
+
+        const fecha =
+          obtenerFechaProgramacionMasiva(
+            matriz,
+            filaEncabezado,
+            columna
+          );
+
+
+        if (fecha) {
+
+          columnasProgramacion.push({
+            columna,
+            turno:
+              encabezado,
+            fecha
+          });
+
+        }
+
+      }
+
+    }
+  );
+
+
+  if (
+    columnasProgramacion.length === 0
+  ) {
+
+    throw new Error(
+      'No pude localizar las columnas TD/TN con sus fechas de programación.'
+    );
+
+  }
+
+
+  actividadesCargaMasiva =
+    [];
+
+
+  resumenCargaMasiva = {
+    totalFilas: 0,
+    candidatas: 0,
+    descartadasEmpresa: 0,
+    descartadasAndamio: 0,
+    observadas: 0,
+    importables: 0
+  };
+
+
+  for (
+    let fila =
+      filaEncabezado + 1;
+
+    fila <
+      matriz.length;
+
+    fila++
+  ) {
+
+    const datosFila =
+      matriz[fila] || [];
+
+
+    const equipo =
+      limpiarCeldaMasiva(
+        datosFila[
+          columnaEquipo
+        ]
+      );
+
+
+    const ot =
+      columnaOT !== -1
+        ? limpiarCeldaMasiva(
+            datosFila[
+              columnaOT
+            ]
+          )
+        : '';
+
+
+    const actividad =
+      limpiarCeldaMasiva(
+        datosFila[
+          columnaActividad
+        ]
+      );
+
+
+    const empresa =
+      normalizarTexto(
+        datosFila[
+          columnaEmpresa
+        ]
+      );
+
+
+    const andamio =
+      normalizarTexto(
+        datosFila[
+          columnaAndamio
+        ]
+      );
+
+
+    const filaTieneDatos =
+      Boolean(
+        equipo ||
+        ot ||
+        actividad ||
+        empresa ||
+        andamio
+      );
+
+
+    if (!filaTieneDatos) {
+      continue;
+    }
+
+
+    resumenCargaMasiva
+      .totalFilas++;
+
+
+    if (
+      empresa !==
+      'DIMARZA'
+    ) {
+
+      resumenCargaMasiva
+        .descartadasEmpresa++;
+
+      continue;
+
+    }
+
+
+    if (
+      andamio !==
+      'X'
+    ) {
+
+      resumenCargaMasiva
+        .descartadasAndamio++;
+
+      continue;
+
+    }
+
+
+    resumenCargaMasiva
+      .candidatas++;
+
+
+    const fechaProgramada =
+      buscarPrimeraFechaFilaMasiva(
+        datosFila,
+        columnasProgramacion
+      );
+
+
+    const observaciones =
+      [];
+
+
+    if (!equipo) {
+
+      observaciones.push(
+        'Sin TAG / Equipo'
+      );
+
+    }
+
+
+    if (!actividad) {
+
+      observaciones.push(
+        'Sin actividad'
+      );
+
+    }
+
+
+    if (!fechaProgramada) {
+
+      observaciones.push(
+        'Sin fecha programada'
+      );
+
+    }
+
+
+    const importable =
+      observaciones.length ===
+      0;
+
+
+    if (importable) {
+
+      resumenCargaMasiva
+        .importables++;
+
+    } else {
+
+      resumenCargaMasiva
+        .observadas++;
+
+    }
+
+
+    actividadesCargaMasiva.push({
+      filaExcel:
+        fila + 1,
+
+      tag:
+        equipo,
+
+      ot,
+
+      descripcion:
+        actividad,
+
+      empresa,
+
+      andamio,
+
+      fechaProgramada,
+
+      importable,
+
+      seleccionado:
+        importable,
+
+      observacion:
+        observaciones.join(
+          ', '
+        )
+    });
+
+  }
+
+
+  mostrarVistaPreviaMasiva();
+
+}
+
+
+function buscarFilaEncabezadoMasivo(
+  matriz
+) {
+
+  const limite =
+    Math.min(
+      matriz.length,
+      25
+    );
+
+
+  for (
+    let fila = 0;
+    fila < limite;
+    fila++
+  ) {
+
+    const valores =
+      (matriz[fila] || [])
+        .map(
+          valor =>
+            normalizarEncabezadoMasivo(
+              valor
+            )
+        );
+
+
+    const tieneEmpresa =
+      valores.some(
+        valor =>
+          valor.includes(
+            'EMPRESA'
+          )
+      );
+
+
+    const tieneAndamio =
+      valores.some(
+        valor =>
+          valor.includes(
+            'ANDAMI'
+          )
+      );
+
+
+    const tieneActividad =
+      valores.some(
+        valor =>
+          valor.includes(
+            'ACTIVIDAD'
+          )
+      );
+
+
+    if (
+      tieneEmpresa &&
+      tieneAndamio &&
+      tieneActividad
+    ) {
+
+      return fila;
+
+    }
+
+  }
+
+
+  return -1;
+
+}
+
+
+function buscarColumnaMasiva(
+  encabezados,
+  opciones,
+  exacto = false
+) {
+
+  return encabezados.findIndex(
+    encabezado =>
+
+      opciones.some(
+        opcion => {
+
+          if (exacto) {
+
+            return (
+              encabezado ===
+              opcion
+            );
+
+          }
+
+
+          return (
+            encabezado ===
+              opcion ||
+            encabezado.startsWith(
+              opcion
+            ) ||
+            encabezado.includes(
+              opcion
+            )
+          );
+
+        }
+      )
+  );
+
+}
+
+
+function normalizarEncabezadoMasivo(
+  valor
+) {
+
+  return normalizarTexto(
+    valor
+  )
+    .replace(
+      /\s+/g,
+      ' '
+    );
+
+}
+
+
+function limpiarCeldaMasiva(
+  valor
+) {
+
+  if (
+    valor === null ||
+    valor === undefined
+  ) {
+
+    return '';
+
+  }
+
+
+  return String(
+    valor
+  ).trim();
+
+}
+
+
+function celdaTieneProgramacionMasiva(
+  valor
+) {
+
+  if (
+    valor === null ||
+    valor === undefined
+  ) {
+
+    return false;
+
+  }
+
+
+  const texto =
+    String(
+      valor
+    ).trim();
+
+
+  if (!texto) {
+    return false;
+  }
+
+
+  if (
+    Number(valor) === 0
+  ) {
+
+    return false;
+  }
+
+
+  return true;
+
+}
+
+
+function buscarPrimeraFechaFilaMasiva(
+  fila,
+  columnasProgramacion
+) {
+
+  for (
+    const programacion
+    of columnasProgramacion
+  ) {
+
+    const valor =
+      fila[
+        programacion.columna
+      ];
+
+
+    if (
+      celdaTieneProgramacionMasiva(
+        valor
+      )
+    ) {
+
+      return programacion.fecha;
+
+    }
+
+  }
+
+
+  return '';
+
+}
+
+
+function obtenerFechaProgramacionMasiva(
+  matriz,
+  filaEncabezado,
+  columna
+) {
+
+  for (
+    let fila =
+      filaEncabezado - 1;
+
+    fila >= 0;
+
+    fila--
+  ) {
+
+    const valor =
+      matriz[fila]
+        ? matriz[fila][columna]
+        : null;
+
+
+    const fecha =
+      convertirFechaExcelMasivaAISO(
+        valor
+      );
+
+
+    if (fecha) {
+      return fecha;
+    }
+
+  }
+
+
+  return '';
+
+}
+
+
+function convertirFechaExcelMasivaAISO(
+  valor
+) {
+
+  if (!valor) {
+    return '';
+  }
+
+
+  if (
+    valor instanceof Date &&
+    !Number.isNaN(
+      valor.getTime()
+    )
+  ) {
+
+    const anio =
+      valor.getFullYear();
+
+    const mes =
+      String(
+        valor.getMonth() + 1
+      ).padStart(
+        2,
+        '0'
+      );
+
+    const dia =
+      String(
+        valor.getDate()
+      ).padStart(
+        2,
+        '0'
+      );
+
+
+    return `${anio}-${mes}-${dia}`;
+
+  }
+
+
+  if (
+    typeof valor ===
+    'number'
+  ) {
+
+    /*
+     * Evita interpretar números pequeños
+     * de horas o cantidades como fechas.
+     */
+    if (
+      valor < 20000
+    ) {
+
+      return '';
+
+    }
+
+
+    const fecha =
+      XLSX.SSF.parse_date_code(
+        valor
+      );
+
+
+    if (!fecha) {
+      return '';
+    }
+
+
+    return [
+      fecha.y,
+      String(
+        fecha.m
+      ).padStart(
+        2,
+        '0'
+      ),
+      String(
+        fecha.d
+      ).padStart(
+        2,
+        '0'
+      )
+    ].join('-');
+
+  }
+
+
+  const texto =
+    String(
+      valor
+    ).trim();
+
+
+  const coincidencia =
+    texto.match(
+      /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/
+    );
+
+
+  if (
+    coincidencia
+  ) {
+
+    return [
+      coincidencia[3],
+      String(
+        coincidencia[2]
+      ).padStart(
+        2,
+        '0'
+      ),
+      String(
+        coincidencia[1]
+      ).padStart(
+        2,
+        '0'
+      )
+    ].join('-');
+
+  }
+
+
+  return '';
+
+}
+
+
+function formatearFechaMasiva(
+  fechaISO
+) {
+
+  if (!fechaISO) {
+    return 'SIN FECHA';
+  }
+
+
+  const partes =
+    fechaISO.split('-');
+
+
+  if (
+    partes.length !== 3
+  ) {
+
+    return fechaISO;
+  }
+
+
+  return (
+    `${partes[2]}/` +
+    `${partes[1]}/` +
+    `${partes[0]}`
+  );
+
+}
+
+
+function mostrarVistaPreviaMasiva() {
+
+  const tbody =
+    document.getElementById(
+      'tbodyCargaMasiva'
+    );
+
+
+  document.getElementById(
+    'masivoTotalFilas'
+  ).textContent =
+    resumenCargaMasiva
+      .totalFilas;
+
+
+  document.getElementById(
+    'masivoCandidatas'
+  ).textContent =
+    resumenCargaMasiva
+      .candidatas;
+
+
+  const totalDescartadas =
+    resumenCargaMasiva
+      .descartadasEmpresa +
+    resumenCargaMasiva
+      .descartadasAndamio;
+
+
+  document.getElementById(
+    'masivoDescartadas'
+  ).textContent =
+    totalDescartadas;
+
+
+  document.getElementById(
+    'masivoObservadas'
+  ).textContent =
+    resumenCargaMasiva
+      .observadas;
+
+
+  document.getElementById(
+    'textoCantidadImportable'
+  ).textContent =
+    `${resumenCargaMasiva.importables} actividades listas`;
+
+
+  if (
+    actividadesCargaMasiva.length ===
+    0
+  ) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          No se encontraron actividades que cumplan
+          EMPRESA = DIMARZA y ANDAMIO = X.
+        </td>
+      </tr>
+    `;
+
+  } else {
+
+    tbody.innerHTML =
+      actividadesCargaMasiva
+        .map(
+          (
+            actividad,
+            indice
+          ) => {
+
+            const claseFila =
+              actividad.importable
+                ? ''
+                : 'fila-masiva-advertencia';
+
+
+            const estado =
+              actividad.importable
+                ? `
+                  <span class="estado-fila-ok">
+                    ✓ Lista
+                  </span>
+                `
+                : `
+                  <span class="estado-fila-advertencia">
+                    ⚠ ${escaparHTML(
+                      actividad.observacion
+                    )}
+                  </span>
+                `;
+
+
+            return `
+              <tr class="${claseFila}">
+
+                <td>
+
+                  <input
+                    type="checkbox"
+                    ${actividad.seleccionado
+                      ? 'checked'
+                      : ''}
+                    ${actividad.importable
+                      ? ''
+                      : 'disabled'}
+                    onchange="cambiarSeleccionMasiva(
+                      ${indice},
+                      this.checked
+                    )"
+                  >
+
+                </td>
+
+
+                <td>
+                  ${escaparHTML(
+                    actividad.tag ||
+                    'SIN TAG'
+                  )}
+                </td>
+
+
+                <td>
+                  ${escaparHTML(
+                    actividad.ot ||
+                    'S/N'
+                  )}
+                </td>
+
+
+                <td>
+                  ${escaparHTML(
+                    actividad.descripcion ||
+                    'SIN ACTIVIDAD'
+                  )}
+                </td>
+
+
+                <td>
+                  ${escaparHTML(
+                    formatearFechaMasiva(
+                      actividad.fechaProgramada
+                    )
+                  )}
+                </td>
+
+
+                <td>
+                  ${estado}
+                </td>
+
+              </tr>
+            `;
+
+          }
+        )
+        .join('');
+
+  }
+
+
+  document.getElementById(
+    'resultadoCargaMasiva'
+  ).classList.remove(
+    'oculto-masivo'
+  );
+
+
+  actualizarCantidadSeleccionadaMasiva();
+
+}
+
+
+function cambiarSeleccionMasiva(
+  indice,
+  seleccionado
+) {
+
+  if (
+    !actividadesCargaMasiva[
+      indice
+    ]
+  ) {
+    return;
+  }
+
+
+  actividadesCargaMasiva[
+    indice
+  ].seleccionado =
+    Boolean(
+      seleccionado
+    );
+
+
+  actualizarCantidadSeleccionadaMasiva();
+
+}
+
+
+function actualizarCantidadSeleccionadaMasiva() {
+
+  const cantidad =
+    actividadesCargaMasiva
+      .filter(
+        actividad =>
+          actividad.importable &&
+          actividad.seleccionado
+      )
+      .length;
+
+
+  document.getElementById(
+    'textoCantidadImportable'
+  ).textContent =
+    `${cantidad} ${
+      cantidad === 1
+        ? 'actividad seleccionada'
+        : 'actividades seleccionadas'
+    }`;
+
+
+  /*
+   * Aún lo dejamos deshabilitado.
+   * Lo activaremos cuando conectemos
+   * la importación con Apps Script.
+   */
+  document.getElementById(
+    'btnImportarMasivo'
+  ).disabled = true;
+
 }
     function irNuevoServicio() {
       abrirModalNuevoServicio();
