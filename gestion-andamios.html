@@ -903,6 +903,16 @@
         <p>Biblioteca Técnica y Gestión de Andamios</p>
       </div>
 
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+      <button
+        type="button"
+        class="boton-secundario"
+        onclick="volverAtras()"
+      >
+        ← Volver
+      </button>
+    
       <button
         class="boton-principal"
         type="button"
@@ -910,6 +920,8 @@
       >
         ＋ Nueva Actividad
       </button>
+    
+    </div>
 
     </div>
   </header>
@@ -2026,7 +2038,9 @@ function actualizarIndicadores(
       }
     }
 
-
+function volverAtras() {
+  window.location.href = 'index.html';
+}
     function irNuevoServicio() {
       abrirModalNuevoServicio();
     }
