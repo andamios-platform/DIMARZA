@@ -1078,20 +1078,48 @@
     ];
 
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      document
-        .getElementById('buscador')
-        .addEventListener('input', filtrarServicios);
-    
-      await cargarConfiguracionMinas();
-      await cargarServicios();
-    });
+      document.addEventListener(
+        'DOMContentLoaded',
+        async () => {
+      
+          document
+            .getElementById('buscador')
+            .addEventListener(
+              'input',
+              filtrarServicios
+            );
+      
+          await Promise.all([
+            cargarConfiguracionMinas(),
+            cargarServicios(),
+            cargarSupervisores(),
+            cargarResponsablesPrevios()
+          ]);
+      
+        }
+      );
 
-    async function cargarConfiguracionMinas() {
-  try {
-    const respuesta = await fetch(
-      `${API_URL}?accion=configuracion&t=${Date.now()}`
+async function cargarConfiguracionMinas() {
+
+  const selector =
+    document.getElementById(
+      'faena'
     );
+
+  selector.innerHTML = `
+    <option value="">
+      Cargando unidades mineras...
+    </option>
+  `;
+
+  selector.disabled = true;
+
+  try {
+
+    const respuesta =
+      await fetch(
+        `${API_URL}?accion=configuracion&t=${Date.now()}`
+      );
 
     if (!respuesta.ok) {
       throw new Error(
@@ -1118,6 +1146,7 @@
     cargarMinasFormulario();
 
   } catch (error) {
+
     console.error(
       'Error cargando configuración:',
       error
@@ -1127,7 +1156,19 @@
       minas: [],
       relaciones: []
     };
+
+    selector.innerHTML = `
+      <option value="">
+        Error al cargar unidades mineras
+      </option>
+    `;
+
+  } finally {
+
+    selector.disabled = false;
+
   }
+
 }
     function cargarMinasFormulario() {
   const selector =
@@ -2050,8 +2091,6 @@ function actualizarIndicadores(
   if (!fecha.value) {
     fecha.value = obtenerFechaActualISO();
   }
-cargarSupervisores();
-cargarResponsablesPrevios();
 
 modal.classList.add('activo');
 
@@ -2360,8 +2399,6 @@ document
     'servicioMina'
   )
   .disabled = true;
-    cargarSupervisores();
-    cargarResponsablesPrevios();
 
     document.getElementById(
       'fechaProgramada'
@@ -2424,9 +2461,15 @@ function obtenerFechaActualISO() {
   window.location.href =
     `detalle-servicio.html?id=${encodeURIComponent(idServicio)}`;
 }
-    async function actualizarTodo() {
-  await cargarConfiguracionMinas();
-  await cargarServicios();
+async function actualizarTodo() {
+
+  await Promise.all([
+    cargarConfiguracionMinas(),
+    cargarServicios(),
+    cargarSupervisores(),
+    cargarResponsablesPrevios()
+  ]);
+
 }
   </script>
 <div
