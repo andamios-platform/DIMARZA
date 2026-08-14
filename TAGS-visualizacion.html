@@ -4232,32 +4232,55 @@ const utilizados =
 
                 <thead>
 
-                  <tr>
+                 <tr>
 
-                    <th>Material</th>
-
-                    <th>Código</th>
-
-                    <th>Despachado</th>
-
-                    <th>Utilizado</th>
-
-                    <th>Sobrante</th>
-
-                    <th>Observación</th>
-
-                  </tr>
+                  <th>Material</th>
+                
+                  <th>Código</th>
+                
+                  <th>Despachado</th>
+                
+                  <th>Utilizado</th>
+                
+                  <th>P. Unit. kg</th>
+                
+                  <th>Peso total kg</th>
+                
+                  <th>Sobrante</th>
+                
+                  <th>Observación</th>
+                
+                </tr>
 
                 </thead>
 
                 <tbody>
 
                   ${
-                    utilizados
-                      .map(
-                        material => `
+utilizados
+  .map(
+    material => {
 
-                          <tr>
+      const detallePeso =
+        pesoAndamio?.ok &&
+        Array.isArray(
+          pesoAndamio.materiales
+        )
+          ? pesoAndamio.materiales.find(
+              item =>
+                normalizarTexto(
+                  item.codigo
+                ) ===
+                normalizarTexto(
+                  material.codigo
+                )
+            )
+          : null;
+
+
+      return `
+
+        <tr>
 
                             <td>
                               ${
@@ -4295,7 +4318,29 @@ const utilizados =
                                 }
                               </strong>
                             </td>
+                            <td>
+  ${
+    detallePeso &&
+    detallePeso.pesoUnitario !== null
+      ? `${numero(
+          detallePeso.pesoUnitario
+        )} kg`
+      : '-'
+  }
+</td>
 
+<td>
+  <strong>
+    ${
+      detallePeso &&
+      detallePeso.pesoTotalKg !== null
+        ? `${numero(
+            detallePeso.pesoTotalKg
+          )} kg`
+        : '-'
+    }
+  </strong>
+</td>
                             <td>
                               ${
                                 numero(
