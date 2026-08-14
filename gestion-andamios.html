@@ -1366,22 +1366,6 @@
 
         </div>
 
-
-        <div class="campo">
-
-          <label for="areaMasiva">
-            Área *
-          </label>
-
-          <input
-            id="areaMasiva"
-            type="text"
-            placeholder="Ejemplo: Chancado"
-          >
-
-        </div>
-
-
         <div class="campo">
 
           <label for="supervisorMasivo">
@@ -1554,15 +1538,17 @@
                   <th>
                     OT
                   </th>
-
                   <th>
                     Actividad
                   </th>
-
+                  
+                  <th>
+                    Área
+                  </th>
+                  
                   <th>
                     Fecha programada
                   </th>
-
                   <th>
                     Estado
                   </th>
@@ -2672,12 +2658,6 @@ function limpiarCargaMasiva() {
     'archivoExcelMasivo'
   ).value = '';
 
-
-  document.getElementById(
-    'areaMasiva'
-  ).value = '';
-
-
   document.getElementById(
     'mensajeCargaMasiva'
   ).className =
@@ -3400,11 +3380,13 @@ function analizarMatrizExcelMasivo(
 
       ot,
 
-      descripcion:
-        actividad,
+    descripcion:
+  actividad,
 
-      empresa,
+area:
+  '',
 
+empresa,
       andamio,
 
       fechaProgramada,
@@ -3901,7 +3883,7 @@ function mostrarVistaPreviaMasiva() {
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="6">
+        <td colspan="7">
           No se encontraron actividades que cumplan
           EMPRESA = DIMARZA y ANDAMIO = X.
         </td>
@@ -3978,21 +3960,44 @@ function mostrarVistaPreviaMasiva() {
                 </td>
 
 
-                <td>
-                  ${escaparHTML(
-                    actividad.descripcion ||
-                    'SIN ACTIVIDAD'
-                  )}
-                </td>
+<td>
+  ${escaparHTML(
+    actividad.descripcion ||
+    'SIN ACTIVIDAD'
+  )}
+</td>
 
 
-                <td>
-                  ${escaparHTML(
-                    formatearFechaMasiva(
-                      actividad.fechaProgramada
-                    )
-                  )}
-                </td>
+<td>
+
+  <input
+    type="text"
+    value="${escaparHTML(
+      actividad.area || ''
+    )}"
+    placeholder="Área o dejar vacío"
+    style="
+      min-width:150px;
+      padding:8px 9px;
+      border:1px solid #dce4ea;
+      border-radius:7px;
+    "
+    onchange="cambiarAreaMasiva(
+      ${indice},
+      this.value
+    )"
+  >
+
+</td>
+
+
+<td>
+  ${escaparHTML(
+    formatearFechaMasiva(
+      actividad.fechaProgramada
+    )
+  )}
+</td>
 
 
                 <td>
@@ -4020,7 +4025,27 @@ function mostrarVistaPreviaMasiva() {
 
 }
 
+function cambiarAreaMasiva(
+  indice,
+  area
+) {
 
+  if (
+    !actividadesCargaMasiva[
+      indice
+    ]
+  ) {
+    return;
+  }
+
+  actividadesCargaMasiva[
+    indice
+  ].area =
+    String(
+      area || ''
+    ).trim();
+
+}
 function cambiarSeleccionMasiva(
   indice,
   seleccionado
