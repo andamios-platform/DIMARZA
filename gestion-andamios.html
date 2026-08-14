@@ -1579,11 +1579,11 @@
           Cancelar
         </button>
 
-
         <button
           id="btnImportarMasivo"
           type="button"
           class="boton-principal"
+          onclick="importarActividadesMasivas()"
           disabled
         >
           Importar actividades
@@ -2681,9 +2681,14 @@ function limpiarCargaMasiva() {
   ).innerHTML = '';
 
 
+const botonImportar =
   document.getElementById(
     'btnImportarMasivo'
-  ).disabled = true;
+  );
+
+botonImportar.disabled = true;
+botonImportar.textContent =
+  'Importar actividades';
 
 }
 
@@ -4024,7 +4029,316 @@ function mostrarVistaPreviaMasiva() {
   actualizarCantidadSeleccionadaMasiva();
 
 }
+async function importarActividadesMasivas() {
 
+  const boton =
+    document.getElementById(
+      'btnImportarMasivo'
+    );
+
+
+  const mensaje =
+    document.getElementById(
+      'mensajeCargaMasiva'
+    );
+
+
+  const faena =
+    document
+      .getElementById(
+        'faenaMasiva'
+      )
+      .value
+      .trim();
+
+
+  const servicioMina =
+    document
+      .getElementById(
+        'servicioMasivo'
+      )
+      .value
+      .trim();
+
+
+  const supervisor =
+    document
+      .getElementById(
+        'supervisorMasivo'
+      )
+      .value
+      .trim();
+
+
+  const responsablePrevios =
+    document
+      .getElementById(
+        'responsablePreviosMasivo'
+      )
+      .value
+      .trim();
+
+
+  if (!faena) {
+
+    mensaje.className =
+      'mensaje-carga-masiva error';
+
+    mensaje.textContent =
+      'Selecciona la unidad minera.';
+
+    return;
+
+  }
+
+
+  if (!servicioMina) {
+
+    mensaje.className =
+      'mensaje-carga-masiva error';
+
+    mensaje.textContent =
+      'Selecciona el servicio.';
+
+    return;
+
+  }
+
+
+  if (!supervisor) {
+
+    mensaje.className =
+      'mensaje-carga-masiva error';
+
+    mensaje.textContent =
+      'Selecciona el supervisor.';
+
+    return;
+
+  }
+
+
+  if (!responsablePrevios) {
+
+    mensaje.className =
+      'mensaje-carga-masiva error';
+
+    mensaje.textContent =
+      'Selecciona el responsable de previos.';
+
+    return;
+
+  }
+
+
+  const seleccionadas =
+    actividadesCargaMasiva
+      .filter(
+        actividad =>
+          actividad.importable &&
+          actividad.seleccionado
+      )
+      .map(
+        actividad => ({
+
+          tag:
+            actividad.tag,
+
+          ot:
+            actividad.ot,
+
+          descripcion:
+            actividad.descripcion,
+
+          area:
+            actividad.area || '',
+
+          fechaProgramada:
+            actividad.fechaProgramada
+
+        })
+      );
+
+
+  if (
+    seleccionadas.length ===
+    0
+  ) {
+
+    mensaje.className =
+      'mensaje-carga-masiva error';
+
+    mensaje.textContent =
+      'No hay actividades seleccionadas para importar.';
+
+    return;
+
+  }
+
+
+  boton.disabled = true;
+
+  boton.textContent =
+    `Importando ${seleccionadas.length}...`;
+
+
+  mensaje.className =
+    'mensaje-carga-masiva';
+
+  mensaje.textContent = '';
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+
+          method:
+            'POST',
+
+          redirect:
+            'follow',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body:
+            JSON.stringify({
+
+              accion:
+                'crearServiciosMasivos',
+
+              datosGenerales: {
+
+                faena,
+
+                servicioMina,
+
+                supervisor,
+
+                responsablePrevios
+
+              },
+
+              actividades:
+                seleccionadas
+
+            })
+
+        }
+      );
+
+
+    const textoRespuesta =
+      await respuesta.text();
+
+
+    if (
+      !respuesta.ok
+    ) {
+
+      throw new Error(
+        `Error HTTP ${respuesta.status}`
+      );
+
+    }
+
+
+    let resultado;
+
+
+    try {
+
+      resultado =
+        JSON.parse(
+          textoRespuesta
+        );
+
+    } catch (error) {
+
+      console.error(
+        'Respuesta Apps Script:',
+        textoRespuesta
+      );
+
+      throw new Error(
+        'Apps Script respondió en un formato inesperado.'
+      );
+
+    }
+
+
+    if (
+      !resultado.ok
+    ) {
+
+      throw new Error(
+        resultado.mensaje ||
+        'No fue posible importar las actividades.'
+      );
+
+    }
+
+
+    mensaje.className =
+      'mensaje-carga-masiva exito';
+
+
+    mensaje.textContent =
+      `${resultado.cantidad} actividades fueron importadas correctamente.`;
+
+
+    boton.textContent =
+      'Importación completada';
+
+
+    /*
+     * Actualizamos las tarjetas
+     * con los nuevos servicios.
+     */
+    await cargarServicios();
+
+
+    setTimeout(
+      () => {
+
+        cerrarCargaMasiva();
+
+      },
+      1800
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    mensaje.className =
+      'mensaje-carga-masiva error';
+
+
+    mensaje.textContent =
+      error.message;
+
+
+    boton.disabled =
+      false;
+
+
+    boton.textContent =
+      'Importar actividades';
+
+  }
+
+}
+    
 function cambiarAreaMasiva(
   indice,
   area
@@ -4093,16 +4407,10 @@ function actualizarCantidadSeleccionadaMasiva() {
         ? 'actividad seleccionada'
         : 'actividades seleccionadas'
     }`;
-
-
-  /*
-   * Aún lo dejamos deshabilitado.
-   * Lo activaremos cuando conectemos
-   * la importación con Apps Script.
-   */
-  document.getElementById(
-    'btnImportarMasivo'
-  ).disabled = true;
+    document.getElementById(
+      'btnImportarMasivo'
+    ).disabled =
+      cantidad === 0;
 
 }
     function irNuevoServicio() {
