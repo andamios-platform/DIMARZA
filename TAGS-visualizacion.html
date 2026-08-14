@@ -2281,10 +2281,11 @@ let datosDetalle = {
 
   postparada:null,
 
+  pesoAndamio:null,
+
   fotografias:[]
 
 };
-
 let tabActual =
   'resumen';
 
@@ -3035,16 +3036,17 @@ async function abrirDetalle(
   }
 
 
-  datosDetalle = {
+datosDetalle = {
 
-    previos:null,
-    traslado:null,
-    armado:null,
-    eventosArmado:null,
-    postparada:null,
-    fotografias:[]
+  previos:null,
+  traslado:null,
+  armado:null,
+  eventosArmado:null,
+  postparada:null,
+  pesoAndamio:null,
+  fotografias:[]
 
-  };
+};
 
 
   tabActual =
@@ -3132,7 +3134,9 @@ if(filtroFecha){
         fetch(
           `${API_URL}?accion=obtenerPostparada&idServicio=${id}&t=${tiempo}`
         ),
-
+        fetch(
+          `${API_URL}?accion=obtenerPesoAndamio&idServicio=${id}&t=${tiempo}`
+        ),
         fetch(
           `${API_URL}?accion=obtenerFotografiasVisualizacion&idServicio=${id}&t=${tiempo}`
         )
@@ -3184,20 +3188,23 @@ if(filtroFecha){
     datosDetalle.eventosArmado =
       resultados[3];
 
-    datosDetalle.postparada =
-      resultados[4];
+datosDetalle.postparada =
+  resultados[4];
 
-    datosDetalle.fotografias =
-      (
-        resultados[5] &&
-        Array.isArray(
-          resultados[5]
-            .fotografias
-        )
-      )
-        ? resultados[5]
-            .fotografias
-        : [];
+datosDetalle.pesoAndamio =
+  resultados[5];
+
+datosDetalle.fotografias =
+  (
+    resultados[6] &&
+    Array.isArray(
+      resultados[6]
+        .fotografias
+    )
+  )
+    ? resultados[6]
+        .fotografias
+    : [];
 
 
     renderizarTab();
@@ -3943,7 +3950,9 @@ function renderizarArmado(){
   const armado =
     datosDetalle.armado;
 
-
+  const pesoAndamio =
+  datosDetalle.pesoAndamio;
+  
   const eventosDatos =
     datosDetalle
       .eventosArmado;
@@ -4028,31 +4037,33 @@ const utilizados =
     )
     .innerHTML = `
 
-      <div class="metricas">
+<div class="metricas">
 
-        ${crearMetrica(
-          'Estado Armado',
-          eventosDatos?.estadoArmado ||
-          'NO INICIADO'
-        )}
+  ${crearMetrica(
+    'Estado Armado',
+    eventosDatos?.estadoArmado ||
+    'NO INICIADO'
+  )}
 
-        ${crearMetrica(
-          'Tiempo efectivo',
-          formatearMinutos(
-            eventosDatos
-              ?.tiempoEfectivoMinutos
-          )
-        )}
+  ${crearMetrica(
+    'Peso del andamio',
+    pesoAndamio?.ok
+      ? `${numero(
+          pesoAndamio.pesoTotalKg
+        )} kg`
+      : '-'
+  )}
 
-        ${crearMetrica(
-          'Tiempo pausado',
-          formatearMinutos(
-            eventosDatos
-              ?.tiempoPausadoMinutos
-          )
-        )}
+  ${crearMetrica(
+    'Toneladas',
+    pesoAndamio?.ok
+      ? `${formatearToneladas(
+          pesoAndamio.pesoTotalToneladas
+        )} t`
+      : '-'
+  )}
 
-      </div>
+</div>
 
 
       <div class="titulo-bloque">
@@ -5344,7 +5355,30 @@ function numero(
 
 }
 
+function formatearToneladas(
+  valor
+){
 
+  const cantidad =
+    Number(valor);
+
+  if(
+    !Number.isFinite(
+      cantidad
+    )
+  ){
+    return '0';
+  }
+
+  return cantidad.toLocaleString(
+    'es-PE',
+    {
+      minimumFractionDigits:3,
+      maximumFractionDigits:3
+    }
+  );
+
+}
 function formatearSegundos(
   segundos
 ){
