@@ -9,319 +9,1006 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
+
       background-image:
-      linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)),
-      url("img/fondo.png");
-      
+        linear-gradient(
+          rgba(0,0,0,0.55),
+          rgba(0,0,0,0.65)
+        ),
+        url("img/fondo.png");
+
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
+
       display: flex;
       justify-content: center;
       align-items: center;
+
       min-height: 100vh;
+
       padding: 20px;
       box-sizing: border-box;
     }
 
-      .contenedor {
-        text-align: center;
-      
-        background-image: url("img/fondoclaro.png");
-      
-        background-size: cover;
-        background-position: center;
-      
-        background-color: rgba(255,255,255,0.08);
-        background-blend-mode: soft-light;
 
-        background-repeat: no-repeat;
-      
-        backdrop-filter: blur(2px);
-      
-        padding: 40px;
-      
-        border-radius: 28px;
-      
-        border: 1px solid rgba(255,255,255,0.25);
-      
-        box-shadow: 0 18px 45px rgba(0,0,0,0.35);
-      
-        width: 100%;
-        max-width: 850px;
-      }
+    /* =====================================================
+       LOGIN
+       ===================================================== */
 
-       .titulo-principal {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        
-          gap: 28px;
-        
-          margin-bottom: 10px;
-        }
-        
-        .logo {
-          width: 180px;
-          height: auto;
-        }
-        
-        .textos-titulo {
-          display: flex;
-          flex-direction: column;
-        
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .empresa {
-          color: #0d3f8f;
-        
-          font-size: 30px;
-          font-weight: 800;
-        
-          letter-spacing: 6px;
-        
-          margin-bottom: 2px;
-        
-          text-align: center;
-        }
-        
-        h1 {
-          margin: 0;
-        
-          color: #1565c0;
-        
-          font-size: 78px;
-          font-weight: 900;
-        
-          letter-spacing: 2px;
-        
-          line-height: 1;
-        
-          text-align: center;
-        
-          text-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        }
-    
-           .sub {
-          margin-top: 12px;
-        
-          color: #6b7280;
-        
-          font-size: 18px;
-        
-          letter-spacing: 1px;
-        }
-      
-        .botones {
-        display: flex;
-        gap: 20px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
+    .pantalla-login {
+      position: fixed;
+      inset: 0;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      padding: 20px;
+
+      background-image:
+        linear-gradient(
+          rgba(0,0,0,0.60),
+          rgba(0,0,0,0.72)
+        ),
+        url("img/fondo.png");
+
+      background-size: cover;
+      background-position: center;
+
+      z-index: 9999;
+
+      box-sizing: border-box;
+    }
+
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+
+      padding: 40px 35px;
+
+      text-align: center;
+
+      background-image:
+        url("img/fondoclaro.png");
+
+      background-size: cover;
+      background-position: center;
+
+      background-color:
+        rgba(255,255,255,0.12);
+
+      background-blend-mode:
+        soft-light;
+
+      backdrop-filter:
+        blur(5px);
+
+      border-radius: 26px;
+
+      border:
+        1px solid
+        rgba(255,255,255,0.30);
+
+      box-shadow:
+        0 18px 45px
+        rgba(0,0,0,0.40);
+    }
+
+
+    .login-logo {
+      width: 130px;
+      height: auto;
+
+      margin-bottom: 15px;
+    }
+
+
+    .login-empresa {
+      color: #0d3f8f;
+
+      font-size: 22px;
+      font-weight: 800;
+
+      letter-spacing: 5px;
+
+      margin-bottom: 4px;
+    }
+
+
+    .login-titulo {
+      color: #1565c0;
+
+      font-size: 38px;
+      font-weight: 900;
+
+      margin-bottom: 8px;
+    }
+
+
+    .login-subtitulo {
+      color: #6b7280;
+
+      font-size: 15px;
+
+      margin-bottom: 28px;
+    }
+
+
+    .campo-clave {
+      width: 100%;
+
+      padding: 15px 16px;
+
+      font-size: 18px;
+
+      text-align: center;
+
+      border-radius: 12px;
+
+      border:
+        2px solid
+        #d1d5db;
+
+      outline: none;
+
+      box-sizing: border-box;
+
+      transition: 0.2s;
+    }
+
+
+    .campo-clave:focus {
+      border-color:
+        #1565c0;
+
+      box-shadow:
+        0 0 0 3px
+        rgba(21,101,192,0.15);
+    }
+
+
+    .btn-ingresar {
+      width: 100%;
+
+      margin-top: 18px;
+
+      padding: 15px;
+
+      border: none;
+
+      border-radius: 12px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #1565c0,
+          #0d47a1
+        );
+
+      color: white;
+
+      font-size: 16px;
+      font-weight: bold;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 8px 18px
+        rgba(0,0,0,0.20);
+
+      transition: 0.2s;
+    }
+
+
+    .btn-ingresar:hover {
+      transform:
+        translateY(-2px);
+    }
+
+
+    .btn-ingresar:disabled {
+      opacity: 0.6;
+      cursor: wait;
+
+      transform: none;
+    }
+
+
+    .mensaje-login {
+      min-height: 22px;
+
+      margin-top: 15px;
+
+      font-size: 14px;
+      font-weight: bold;
+
+      color: #c62828;
+    }
+
+
+    /* =====================================================
+       SISTEMA
+       ===================================================== */
+
+    .contenedor {
+      display: none;
+
+      text-align: center;
+
+      background-image:
+        url("img/fondoclaro.png");
+
+      background-size: cover;
+      background-position: center;
+
+      background-color:
+        rgba(255,255,255,0.08);
+
+      background-blend-mode:
+        soft-light;
+
+      background-repeat:
+        no-repeat;
+
+      backdrop-filter:
+        blur(2px);
+
+      padding: 40px;
+
+      border-radius: 28px;
+
+      border:
+        1px solid
+        rgba(255,255,255,0.25);
+
+      box-shadow:
+        0 18px 45px
+        rgba(0,0,0,0.35);
+
+      width: 100%;
+      max-width: 850px;
+    }
+
+
+    .titulo-principal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 28px;
+
+      margin-bottom: 10px;
+    }
+
+
+    .logo {
+      width: 180px;
+      height: auto;
+    }
+
+
+    .textos-titulo {
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+    }
+
+
+    .empresa {
+      color: #0d3f8f;
+
+      font-size: 30px;
+      font-weight: 800;
+
+      letter-spacing: 6px;
+
+      margin-bottom: 2px;
+
+      text-align: center;
+    }
+
+
+    h1 {
+      margin: 0;
+
+      color: #1565c0;
+
+      font-size: 78px;
+      font-weight: 900;
+
+      letter-spacing: 2px;
+
+      line-height: 1;
+
+      text-align: center;
+
+      text-shadow:
+        0 4px 12px
+        rgba(0,0,0,0.12);
+    }
+
+
+    .sub {
+      margin-top: 12px;
+
+      color: #6b7280;
+
+      font-size: 18px;
+
+      letter-spacing: 1px;
+    }
+
+
+    .botones {
+      display: flex;
+
+      gap: 20px;
+
+      justify-content: center;
+
+      flex-wrap: wrap;
+    }
+
 
     a {
       text-decoration: none;
       flex: 1;
     }
 
-      .btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      
-        gap: 14px;
-      
-        padding: 25px 18px;
-      
-        border-radius: 16px;
-      
-        color: white;
-        font-weight: bold;
-        font-size: 17px;
-      
-        transition: 0.25s;
-      
-        box-shadow: 0 8px 20px rgba(0,0,0,0.20);
-      }
-      
-      .btn:hover {
-        transform: translateY(-6px) scale(1.03);
-      }
-      
-      .icono {
-        width: 64px;
-        height: 64px;
-      }
-      
-      /* COLORES */
-      
-      .inventario {
-        background: linear-gradient(135deg, #1565c0, #0d47a1);
-      }
-      
-      .desempeno {
-        background: linear-gradient(135deg, #00897b, #00695c);
-      }
-      
-      .herramientas {
-        background: linear-gradient(135deg, #ef6c00, #e65100);
-      }
-    .edps {
-        background: linear-gradient(135deg, #7b1fa2, #4a148c);
-      }
-   .planificacion {
-      background: linear-gradient(135deg, #c62828, #8e0000);
-    }  
-    .visualizacion {
-      background: linear-gradient(135deg, #0f766e, #115e59);
+
+    .btn {
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      gap: 14px;
+
+      padding: 25px 18px;
+
+      border-radius: 16px;
+
+      color: white;
+
+      font-weight: bold;
+      font-size: 17px;
+
+      transition: 0.25s;
+
+      box-shadow:
+        0 8px 20px
+        rgba(0,0,0,0.20);
     }
+
+
+    .btn:hover {
+      transform:
+        translateY(-6px)
+        scale(1.03);
+    }
+
+
+    .icono {
+      width: 64px;
+      height: 64px;
+    }
+
+
+    /* COLORES */
+
+    .inventario {
+      background:
+        linear-gradient(
+          135deg,
+          #1565c0,
+          #0d47a1
+        );
+    }
+
+
+    .desempeno {
+      background:
+        linear-gradient(
+          135deg,
+          #00897b,
+          #00695c
+        );
+    }
+
+
+    .herramientas {
+      background:
+        linear-gradient(
+          135deg,
+          #ef6c00,
+          #e65100
+        );
+    }
+
+
+    .edps {
+      background:
+        linear-gradient(
+          135deg,
+          #7b1fa2,
+          #4a148c
+        );
+    }
+
+
+    .planificacion {
+      background:
+        linear-gradient(
+          135deg,
+          #c62828,
+          #8e0000
+        );
+    }
+
+
+    .visualizacion {
+      background:
+        linear-gradient(
+          135deg,
+          #0f766e,
+          #115e59
+        );
+    }
+
+
     .gestion-andamios {
-        background: linear-gradient(
+      background:
+        linear-gradient(
           145deg,
           #34495e,
           #1f2f3d
         );
-      }
+    }
+
 
     /* 📱 MODO CELULAR */
+
     @media (max-width: 768px) {
+
       .contenedor {
         padding: 25px 20px;
       }
 
-      
+
       .titulo-principal {
         flex-direction: column;
         gap: 10px;
       }
-      
+
+
       .textos-titulo {
         align-items: center;
         text-align: center;
       }
-      
+
+
       .logo {
         width: 90px;
       }
-      
+
+
       h1 {
         font-size: 42px;
       }
-      
+
+
       .empresa {
         font-size: 18px;
         letter-spacing: 4px;
       }
 
+
       .sub {
         font-size: 14px;
       }
+
 
       .botones {
         flex-direction: column;
         gap: 14px;
       }
 
+
       .btn {
         padding: 14px;
         font-size: 15px;
       }
+
+
+      .login-card {
+        padding: 30px 22px;
+      }
+
+
+      .login-logo {
+        width: 100px;
+      }
+
+
+      .login-titulo {
+        font-size: 32px;
+      }
     }
 
+
     /* 📱 CELULARES PEQUEÑOS */
+
     @media (max-width: 480px) {
+
       body {
         padding: 10px;
       }
+
 
       .contenedor {
         padding: 20px 15px;
       }
 
+
       h1 {
         font-size: 34px;
       }
+
+
       .empresa {
         font-size: 16px;
         letter-spacing: 3px;
       }
-      
+
+
       .logo {
         width: 90px;
       }
+
 
       .btn {
         padding: 12px;
         font-size: 14px;
       }
+
+
+      .login-card {
+        padding: 28px 18px;
+      }
     }
 
   </style>
 </head>
+
+
 <body>
 
-  <div class="contenedor">
-    
-    <div class="titulo-principal">
-    
-      <img src="img/mini-logo.png" class="logo">
-    
-      <div class="textos-titulo">
-      <div class="empresa">DIMARZA</div>
-      <h1>ANDAMIOS</h1>
-    
-      <div class="sub">
-        Sistema de Gestión y Control
+
+  <!-- =====================================================
+       PANTALLA DE ACCESO
+       ===================================================== -->
+
+  <div
+    id="pantallaLogin"
+    class="pantalla-login"
+  >
+
+    <div class="login-card">
+
+      <img
+        src="img/mini-logo.png"
+        class="login-logo"
+        alt="DIMARZA"
+      >
+
+      <div class="login-empresa">
+        DIMARZA
       </div>
-    </div>
-    
-    </div>
-    <div class="botones">
 
-      <a class="btn inventario" href="inventario.html">
-        <img src="img/icon-inventario.svg" class="icono">
-        <span>Inventario</span>
-      </a>
+      <div class="login-titulo">
+        ANDAMIOS
+      </div>
 
-      <a class="btn desempeno" href="evaluacion.html">
-        <img src="img/icon-desempeno.svg" class="icono">
-        <span>Evaluación de Desempeño</span>
-      </a>
+      <div class="login-subtitulo">
+        Acceso al Sistema de Gestión y Control
+      </div>
 
-      <a class="btn herramientas" href="herramientas.html">
-        <img src="img/icon-herramientas.svg" class="icono">
-        <span>Herramientas</span>
-      </a>
-      <a class="btn edps" href="edps.html">
-        <img src="img/edps.png" class="icono">
-        <span>EDPS</span>
-      </a>
-      <a class="btn planificacion" href="planificacion.html">
-        <img src="img/planificacion.png" class="icono">
-        <span>Planificación</span>
-      </a>
-      <a class="btn visualizacion" href="visualizacion.html">
-        <img src="img/visualizacion.png" class="icono">
-        <span>Visualización</span>
-      </a>
-      <a class="btn gestion-andamios" href="gestion-andamios.html">
-        <img src="img/gestion-andamios.png" class="icono">
-        <span>Gestión de Andamios</span>
-      </a>        
+      <input
+        type="password"
+        id="claveAcceso"
+        class="campo-clave"
+        placeholder="Ingrese su contraseña"
+        autocomplete="current-password"
+      >
+
+      <button
+        id="btnIngresar"
+        class="btn-ingresar"
+        onclick="validarAcceso()"
+      >
+        INGRESAR
+      </button>
+
+      <div
+        id="mensajeLogin"
+        class="mensaje-login"
+      ></div>
 
     </div>
 
   </div>
 
+
+  <!-- =====================================================
+       MENÚ PRINCIPAL
+       ===================================================== -->
+
+  <div
+    class="contenedor"
+    id="contenedorSistema"
+  >
+
+    <div class="titulo-principal">
+
+      <img
+        src="img/mini-logo.png"
+        class="logo"
+      >
+
+      <div class="textos-titulo">
+
+        <div class="empresa">
+          DIMARZA
+        </div>
+
+        <h1>
+          ANDAMIOS
+        </h1>
+
+        <div class="sub">
+          Sistema de Gestión y Control
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="botones">
+
+      <a
+        class="btn inventario"
+        href="inventario.html"
+      >
+        <img
+          src="img/icon-inventario.svg"
+          class="icono"
+        >
+        <span>
+          Inventario
+        </span>
+      </a>
+
+
+      <a
+        class="btn desempeno"
+        href="evaluacion.html"
+      >
+        <img
+          src="img/icon-desempeno.svg"
+          class="icono"
+        >
+        <span>
+          Evaluación de Desempeño
+        </span>
+      </a>
+
+
+      <a
+        class="btn herramientas"
+        href="herramientas.html"
+      >
+        <img
+          src="img/icon-herramientas.svg"
+          class="icono"
+        >
+        <span>
+          Herramientas
+        </span>
+      </a>
+
+
+      <a
+        class="btn edps"
+        href="edps.html"
+      >
+        <img
+          src="img/edps.png"
+          class="icono"
+        >
+        <span>
+          EDPS
+        </span>
+      </a>
+
+
+      <a
+        class="btn planificacion"
+        href="planificacion.html"
+      >
+        <img
+          src="img/planificacion.png"
+          class="icono"
+        >
+        <span>
+          Planificación
+        </span>
+      </a>
+
+
+      <a
+        class="btn visualizacion"
+        href="visualizacion.html"
+      >
+        <img
+          src="img/visualizacion.png"
+          class="icono"
+        >
+        <span>
+          Visualización
+        </span>
+      </a>
+
+
+      <a
+        class="btn gestion-andamios"
+        href="gestion-andamios.html"
+      >
+        <img
+          src="img/gestion-andamios.png"
+          class="icono"
+        >
+        <span>
+          Gestión de Andamios
+        </span>
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    /* =====================================================
+       CONFIGURACIÓN
+       ===================================================== */
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+
+    /* =====================================================
+       VALIDAR CONTRASEÑA
+       ===================================================== */
+
+    async function validarAcceso() {
+
+      const input =
+        document.getElementById(
+          'claveAcceso'
+        );
+
+      const boton =
+        document.getElementById(
+          'btnIngresar'
+        );
+
+      const mensaje =
+        document.getElementById(
+          'mensajeLogin'
+        );
+
+
+      const clave =
+        input.value.trim();
+
+
+      if (!clave) {
+
+        mensaje.textContent =
+          'Ingrese su contraseña.';
+
+        input.focus();
+
+        return;
+
+      }
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        'VALIDANDO...';
+
+      mensaje.textContent = '';
+
+
+      try {
+
+        const url =
+          API_URL +
+          '?accion=validarAccesoGeneral' +
+          '&clave=' +
+          encodeURIComponent(
+            clave
+          );
+
+
+        const respuesta =
+          await fetch(
+            url,
+            {
+              method: 'GET',
+              cache: 'no-store'
+            }
+          );
+
+
+        if (!respuesta.ok) {
+
+          throw new Error(
+            'No se pudo conectar con el servidor.'
+          );
+
+        }
+
+
+        const datos =
+          await respuesta.json();
+
+
+        if (
+          datos.ok === true &&
+          datos.acceso === true
+        ) {
+
+          /*
+           * Guardamos únicamente que esta pestaña
+           * ya fue autenticada.
+           *
+           * NO guardamos la contraseña.
+           */
+          sessionStorage.setItem(
+            'dimarzaAccesoGeneral',
+            'SI'
+          );
+
+
+          mostrarSistema();
+
+        } else {
+
+          mensaje.textContent =
+            datos.mensaje ||
+            'Contraseña incorrecta.';
+
+          input.value = '';
+
+          input.focus();
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+        mensaje.textContent =
+          'No se pudo validar el acceso. Intente nuevamente.';
+
+      } finally {
+
+        boton.disabled = false;
+
+        boton.textContent =
+          'INGRESAR';
+
+      }
+
+    }
+
+
+    /* =====================================================
+       MOSTRAR SISTEMA
+       ===================================================== */
+
+    function mostrarSistema() {
+
+      document
+        .getElementById(
+          'pantallaLogin'
+        )
+        .style.display =
+          'none';
+
+
+      document
+        .getElementById(
+          'contenedorSistema'
+        )
+        .style.display =
+          'block';
+
+    }
+
+
+    /* =====================================================
+       ENTER PARA INGRESAR
+       ===================================================== */
+
+    document
+      .getElementById(
+        'claveAcceso'
+      )
+      .addEventListener(
+        'keydown',
+        function(evento) {
+
+          if (
+            evento.key ===
+            'Enter'
+          ) {
+
+            validarAcceso();
+
+          }
+
+        }
+      );
+
+
+    /* =====================================================
+       COMPROBAR SESIÓN
+       ===================================================== */
+
+    window.addEventListener(
+      'DOMContentLoaded',
+      function() {
+
+        const acceso =
+          sessionStorage.getItem(
+            'dimarzaAccesoGeneral'
+          );
+
+
+        if (
+          acceso === 'SI'
+        ) {
+
+          mostrarSistema();
+
+        } else {
+
+          document
+            .getElementById(
+              'claveAcceso'
+            )
+            .focus();
+
+        }
+
+      }
+    );
+
+  </script>
+
+
 </body>
 </html>
-
-
-
-
-
-
