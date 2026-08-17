@@ -3936,21 +3936,16 @@ function renderizarTraslado(){
 }
 
 
-/* =========================================================
-   ARMADO
-========================================================= */
-
 function renderizarArmado(){
 
   const armado =
     datosDetalle.armado;
 
   const pesoAndamio =
-  datosDetalle.pesoAndamio;
+    datosDetalle.pesoAndamio;
   
   const eventosDatos =
-    datosDetalle
-      .eventosArmado;
+    datosDetalle.eventosArmado;
 
 
   const materiales =
@@ -3992,22 +3987,22 @@ function renderizarArmado(){
     );
 
 
-const armadoFinalizado =
-  materiales.some(
-    material =>
-      material.armadoRegistrado === true
-  );
+  const armadoFinalizado =
+    materiales.some(
+      material =>
+        material.armadoRegistrado === true
+    );
 
 
-const utilizados =
-  armadoFinalizado
-    ? materiales.filter(
-        material =>
-          Number(
-            material.cantidadUtilizada
-          ) > 0
-      )
-    : [];
+  const utilizados =
+    armadoFinalizado
+      ? materiales.filter(
+          material =>
+            Number(
+              material.cantidadUtilizada
+            ) > 0
+        )
+      : [];
 
 
   const totalUtilizado =
@@ -4032,33 +4027,33 @@ const utilizados =
     )
     .innerHTML = `
 
-<div class="metricas">
+      <div class="metricas">
 
-  ${crearMetrica(
-    'Estado Armado',
-    eventosDatos?.estadoArmado ||
-    'NO INICIADO'
-  )}
+        ${crearMetrica(
+          'Estado Armado',
+          eventosDatos?.estadoArmado ||
+          'NO INICIADO'
+        )}
 
-  ${crearMetrica(
-    'Peso del andamio',
-    pesoAndamio?.ok
-      ? `${numero(
-          pesoAndamio.pesoTotalKg
-        )} kg`
-      : '-'
-  )}
+        ${crearMetrica(
+          'Peso del andamio',
+          pesoAndamio?.ok
+            ? `${numero(
+                pesoAndamio.pesoTotalKg
+              )} kg`
+            : '-'
+        )}
 
-  ${crearMetrica(
-    'Toneladas',
-    pesoAndamio?.ok
-      ? `${formatearToneladas(
-          pesoAndamio.pesoTotalToneladas
-        )} t`
-      : '-'
-  )}
+        ${crearMetrica(
+          'Toneladas',
+          pesoAndamio?.ok
+            ? `${formatearToneladas(
+                pesoAndamio.pesoTotalToneladas
+              )} t`
+            : '-'
+        )}
 
-</div>
+      </div>
 
 
       <div class="titulo-bloque">
@@ -4227,148 +4222,180 @@ const utilizados =
 
                 <thead>
 
-                 <tr>
+                  <tr>
 
-                  <th>Material</th>
-                
-                  <th>Código</th>
-                
-                  <th>Despachado</th>
-                
-                  <th>Utilizado</th>
-                
-                  <th>P. Unit. kg</th>
-                
-                  <th>Peso total kg</th>
-                
-                  <th>Sobrante</th>
-                
-                  <th>Observación</th>
-                
-                </tr>
+                    <th>Material</th>
+
+                    <th>Código</th>
+
+                    <th>Despachado</th>
+
+                    <th>Utilizado</th>
+
+                    <th>P. Unit. kg</th>
+
+                    <th>Peso total kg</th>
+
+                    <th>Sobrante</th>
+
+                    <th>Observación</th>
+
+                  </tr>
 
                 </thead>
+
 
                 <tbody>
 
                   ${
-utilizados
-  .map(
-    material => {
+                    utilizados
+                      .map(
+                        material => {
 
-      const detallePeso =
-        pesoAndamio?.ok &&
-        Array.isArray(
-          pesoAndamio.materiales
-        )
-          ? pesoAndamio.materiales.find(
-              item =>
-                normalizarTexto(
-                  item.codigo
-                ) ===
-                normalizarTexto(
-                  material.codigo
-                )
-            )
-          : null;
-
-
-      return `
-
-        <tr>
-
-                            <td>
-                              ${
-                                escaparHTML(
-                                  material.descripcion ||
-                                  material.subgrupo ||
-                                  '-'
+                          const detallePeso =
+                            pesoAndamio?.ok &&
+                            Array.isArray(
+                              pesoAndamio.materiales
+                            )
+                              ? pesoAndamio.materiales.find(
+                                  item =>
+                                    normalizarTexto(
+                                      item.codigo
+                                    ) ===
+                                    normalizarTexto(
+                                      material.codigo
+                                    )
                                 )
-                              }
-                            </td>
+                              : null;
 
-                            <td>
-                              ${
-                                escaparHTML(
-                                  material.codigo ||
-                                  '-'
-                                )
-                              }
-                            </td>
 
-                            <td>
-                              ${
-                                numero(
-                                  material.cantidadDespachada
-                                )
-                              }
-                            </td>
+                          return `
 
-                            <td>
-                              <strong>
+                            <tr>
+
+                              <td>
+
                                 ${
-                                  numero(
-                                    material.cantidadUtilizada
+                                  escaparHTML(
+                                    material.descripcion ||
+                                    material.subgrupo ||
+                                    '-'
                                   )
                                 }
-                              </strong>
-                            </td>
-                            <td>
-  ${
-    detallePeso &&
-    detallePeso.pesoUnitario !== null
-      ? `${numero(
-          detallePeso.pesoUnitario
-        )} kg`
-      : '-'
-  }
-</td>
 
-<td>
-  <strong>
-    ${
-      detallePeso &&
-      detallePeso.pesoTotalKg !== null
-        ? `${numero(
-            detallePeso.pesoTotalKg
-          )} kg`
-        : '-'
-    }
-  </strong>
-</td>
-                            <td>
-                              ${
-                                numero(
-                                  material.cantidadSobrante ??
-                                  Math.max(
-                                    (
-                                      Number(
-                                        material.cantidadDespachada
-                                      ) || 0
-                                    ) -
-                                    (
-                                      Number(
-                                        material.cantidadUtilizada
-                                      ) || 0
-                                    ),
-                                    0
+                              </td>
+
+
+                              <td>
+
+                                ${
+                                  escaparHTML(
+                                    material.codigo ||
+                                    '-'
                                   )
-                                )
-                              }
-                            </td>
+                                }
 
-                            <td>
-                              ${
-                                escaparHTML(
-                                  material.observacionArmado ||
-                                  '-'
-                                )
-                              }
-                            </td>
+                              </td>
 
-                          </tr>
 
-                        `
+                              <td>
+
+                                ${
+                                  numero(
+                                    material.cantidadDespachada
+                                  )
+                                }
+
+                              </td>
+
+
+                              <td>
+
+                                <strong>
+
+                                  ${
+                                    numero(
+                                      material.cantidadUtilizada
+                                    )
+                                  }
+
+                                </strong>
+
+                              </td>
+
+
+                              <td>
+
+                                ${
+                                  detallePeso &&
+                                  detallePeso.pesoUnitario !== null
+                                    ? `${numero(
+                                        detallePeso.pesoUnitario
+                                      )} kg`
+                                    : '-'
+                                }
+
+                              </td>
+
+
+                              <td>
+
+                                <strong>
+
+                                  ${
+                                    detallePeso &&
+                                    detallePeso.pesoTotalKg !== null
+                                      ? `${numero(
+                                          detallePeso.pesoTotalKg
+                                        )} kg`
+                                      : '-'
+                                  }
+
+                                </strong>
+
+                              </td>
+
+
+                              <td>
+
+                                ${
+                                  numero(
+                                    material.cantidadSobrante ??
+                                    Math.max(
+                                      (
+                                        Number(
+                                          material.cantidadDespachada
+                                        ) || 0
+                                      ) -
+                                      (
+                                        Number(
+                                          material.cantidadUtilizada
+                                        ) || 0
+                                      ),
+                                      0
+                                    )
+                                  )
+                                }
+
+                              </td>
+
+
+                              <td>
+
+                                ${
+                                  escaparHTML(
+                                    material.observacionArmado ||
+                                    '-'
+                                  )
+                                }
+
+                              </td>
+
+                            </tr>
+
+                          `;
+
+                        }
                       )
                       .join('')
                   }
@@ -4395,15 +4422,15 @@ utilizados
             </div>
 
           `
-: (
-    armadoFinalizado
-      ? mensajeSinDatos(
-          'No existen materiales utilizados registrados.'
-        )
-      : mensajeSinDatos(
-          'El Armado todavía no ha sido finalizado. Las cantidades reales utilizadas aparecerán aquí al finalizarlo.'
-        )
-  )
+          : (
+              armadoFinalizado
+                ? mensajeSinDatos(
+                    'No existen materiales utilizados registrados.'
+                  )
+                : mensajeSinDatos(
+                    'El Armado todavía no ha sido finalizado. Las cantidades reales utilizadas aparecerán aquí al finalizarlo.'
+                  )
+            )
       }
 
 
@@ -4421,7 +4448,6 @@ utilizados
     `;
 
 }
-
 
 /* =========================================================
    POSTPARADA
