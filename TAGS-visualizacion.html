@@ -5441,6 +5441,7 @@ async function exportarExcelAndamio(){
     return;
   }
 
+
   if(
     typeof ExcelJS ===
     'undefined'
@@ -5451,8 +5452,10 @@ async function exportarExcelAndamio(){
     return;
   }
 
+
   const peso =
     datosDetalle.pesoAndamio;
+
 
   const materiales =
     Array.isArray(
@@ -5466,6 +5469,7 @@ async function exportarExcelAndamio(){
         )
       : [];
 
+
   if(
     !materiales.length
   ){
@@ -5476,10 +5480,81 @@ async function exportarExcelAndamio(){
   }
 
 
+  /*
+   * =====================================================
+   * CARGAR LOGO DIMARZA
+   * =====================================================
+   */
+
+  async function cargarImagenBase64(
+    ruta
+  ){
+
+    const respuesta =
+      await fetch(
+        encodeURI(ruta),
+        {
+          cache:'no-store'
+        }
+      );
+
+
+    if(
+      !respuesta.ok
+    ){
+
+      throw new Error(
+        `No se pudo cargar el logo. HTTP ${respuesta.status}`
+      );
+
+    }
+
+
+    const blob =
+      await respuesta.blob();
+
+
+    return await new Promise(
+      (
+        resolve,
+        reject
+      ) => {
+
+        const lector =
+          new FileReader();
+
+
+        lector.onload =
+          () =>
+            resolve(
+              lector.result
+            );
+
+
+        lector.onerror =
+          () =>
+            reject(
+              new Error(
+                'No se pudo procesar el logo.'
+              )
+            );
+
+
+        lector.readAsDataURL(
+          blob
+        );
+
+      }
+    );
+
+  }
+
+
   try{
 
     const workbook =
       new ExcelJS.Workbook();
+
 
     workbook.creator =
       'DIMARZA';
@@ -5503,7 +5578,7 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * ANCHOS DE COLUMNAS
+     * ANCHOS
      * =====================================================
      */
 
@@ -5511,17 +5586,17 @@ async function exportarExcelAndamio(){
 
       {
         key:'grupo',
-        width:24
+        width:23
       },
 
       {
         key:'material',
-        width:44
+        width:42
       },
 
       {
         key:'codigo',
-        width:18
+        width:17
       },
 
       {
@@ -5572,6 +5647,9 @@ async function exportarExcelAndamio(){
     const TEXTO =
       '1F2D36';
 
+    const GRIS =
+      '667784';
+
     const BORDE =
       'D7E0E7';
 
@@ -5611,42 +5689,57 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * TÍTULO PRINCIPAL
+     * CABECERA CORPORATIVA
      * =====================================================
      */
 
     hoja.mergeCells(
-      'A1:F2'
+      'A1:B2'
     );
 
-    const titulo =
-      hoja.getCell(
-        'A1'
-      );
+    hoja.mergeCells(
+      'C1:E2'
+    );
 
-    titulo.value =
-      'DIMARZA';
+    hoja.mergeCells(
+      'F1:F2'
+    );
 
-    titulo.font = {
-      bold:true,
-      size:22,
-      color:{
-        argb:BLANCO
+
+    /*
+     * Pintar toda la cabecera azul.
+     */
+    for(
+      let fila = 1;
+      fila <= 2;
+      fila++
+    ){
+
+      for(
+        let columna = 1;
+        columna <= 6;
+        columna++
+      ){
+
+        const celda =
+          hoja.getCell(
+            fila,
+            columna
+          );
+
+
+        celda.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:AZUL
+          }
+        };
+
       }
-    };
 
-    titulo.alignment = {
-      vertical:'middle',
-      horizontal:'left'
-    };
+    }
 
-    titulo.fill = {
-      type:'pattern',
-      pattern:'solid',
-      fgColor:{
-        argb:AZUL
-      }
-    };
 
     hoja.getRow(
       1
@@ -5656,53 +5749,218 @@ async function exportarExcelAndamio(){
     hoja.getRow(
       2
     ).height =
-      22;
+      32;
 
 
     /*
-     * SUBTÍTULO
+     * =====================================================
+     * LOGO DIMARZA
+     * =====================================================
      */
 
-    hoja.mergeCells(
-      'A3:F3'
-    );
+    let logoCargado =
+      false;
 
-    const subtitulo =
-      hoja.getCell(
-        'A3'
+
+    try{
+
+      const logoBase64 =
+        await cargarImagenBase64(
+          'img/logodmz (2).png'
+        );
+
+
+      const logoId =
+        workbook.addImage({
+          base64:
+            logoBase64,
+          extension:
+            'png'
+        });
+
+
+      hoja.addImage(
+        logoId,
+        {
+          tl:{
+            col:0.15,
+            row:0.20
+          },
+
+          ext:{
+            width:125,
+            height:48
+          }
+        }
       );
 
-    subtitulo.value =
+
+      logoCargado =
+        true;
+
+
+    }catch(errorLogo){
+
+      console.warn(
+        'No se pudo insertar el logo:',
+        errorLogo
+      );
+
+    }
+
+
+    /*
+     * Si por algún motivo el PNG
+     * no carga, mostramos DIMARZA
+     * como texto.
+     */
+    if(
+      !logoCargado
+    ){
+
+      const celdaLogo =
+        hoja.getCell(
+          'A1'
+        );
+
+
+      celdaLogo.value =
+        'DIMARZA';
+
+
+      celdaLogo.font = {
+        bold:true,
+        size:18,
+        color:{
+          argb:BLANCO
+        }
+      };
+
+
+      celdaLogo.alignment = {
+        horizontal:'center',
+        vertical:'middle'
+      };
+
+    }
+
+
+    /*
+     * TÍTULO CENTRAL
+     */
+
+    const titulo =
+      hoja.getCell(
+        'C1'
+      );
+
+
+    titulo.value =
       'CUANTIFICACIÓN DE ANDAMIO';
 
-    subtitulo.font = {
+
+    titulo.font = {
       bold:true,
-      size:13,
+      size:17,
       color:{
-        argb:AZUL
+        argb:BLANCO
       }
     };
 
-    subtitulo.alignment = {
+
+    titulo.alignment = {
+      horizontal:'center',
+      vertical:'middle',
+      wrapText:true
+    };
+
+
+    /*
+     * TAG A LA DERECHA
+     */
+
+    const tagCabecera =
+      hoja.getCell(
+        'F1'
+      );
+
+
+    tagCabecera.value =
+      `TAG\n${
+        servicioActual.tag ||
+        '-'
+      }`;
+
+
+    tagCabecera.font = {
+      bold:true,
+      size:11,
+      color:{
+        argb:BLANCO
+      }
+    };
+
+
+    tagCabecera.alignment = {
+      horizontal:'center',
+      vertical:'middle',
+      wrapText:true
+    };
+
+
+    /*
+     * =====================================================
+     * SECCIÓN DATOS DEL SERVICIO
+     * =====================================================
+     */
+
+    hoja.mergeCells(
+      'A4:F4'
+    );
+
+
+    const tituloDatos =
+      hoja.getCell(
+        'A4'
+      );
+
+
+    tituloDatos.value =
+      'DATOS DEL SERVICIO';
+
+
+    tituloDatos.font = {
+      bold:true,
+      size:11,
+      color:{
+        argb:BLANCO
+      }
+    };
+
+
+    tituloDatos.fill = {
+      type:'pattern',
+      pattern:'solid',
+      fgColor:{
+        argb:AZUL2
+      }
+    };
+
+
+    tituloDatos.alignment = {
       horizontal:'left',
       vertical:'middle'
     };
 
-    subtitulo.fill = {
-      type:'pattern',
-      pattern:'solid',
-      fgColor:{
-        argb:AZUL_CLARO
-      }
-    };
 
-    subtitulo.border =
+    tituloDatos.border =
       bordeFino;
 
+
     hoja.getRow(
-      3
+      4
     ).height =
-      26;
+      23;
 
 
     /*
@@ -5784,15 +6042,18 @@ async function exportarExcelAndamio(){
         ).value =
           fila[0];
 
+
         hoja.getCell(
           `B${filaActual}`
         ).value =
           fila[1];
 
+
         hoja.getCell(
           `D${filaActual}`
         ).value =
           fila[2];
+
 
         hoja.getCell(
           `E${filaActual}`
@@ -5800,6 +6061,9 @@ async function exportarExcelAndamio(){
           fila[3];
 
 
+        /*
+         * Etiquetas.
+         */
         [
           `A${filaActual}`,
           `D${filaActual}`
@@ -5812,12 +6076,14 @@ async function exportarExcelAndamio(){
                   referencia
                 );
 
+
               celda.font = {
                 bold:true,
                 color:{
                   argb:AZUL
                 }
               };
+
 
               celda.fill = {
                 type:'pattern',
@@ -5827,8 +6093,10 @@ async function exportarExcelAndamio(){
                 }
               };
 
+
               celda.border =
                 bordeFino;
+
 
               celda.alignment = {
                 vertical:'middle',
@@ -5839,6 +6107,9 @@ async function exportarExcelAndamio(){
           );
 
 
+        /*
+         * Valores.
+         */
         [
           `B${filaActual}`,
           `C${filaActual}`,
@@ -5853,8 +6124,10 @@ async function exportarExcelAndamio(){
                   referencia
                 );
 
+
               celda.border =
                 bordeFino;
+
 
               celda.alignment = {
                 vertical:'middle',
@@ -5944,6 +6217,7 @@ async function exportarExcelAndamio(){
           celda.border =
             bordeFino;
 
+
           celda.alignment = {
             vertical:'middle',
             wrapText:true
@@ -5955,7 +6229,7 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * TÍTULO DE MATERIALES
+     * DETALLE DE MATERIALES
      * =====================================================
      */
 
@@ -5973,8 +6247,10 @@ async function exportarExcelAndamio(){
         `A${filaActual}`
       );
 
+
     tituloMateriales.value =
       'DETALLE DE MATERIAL REALMENTE UTILIZADO';
+
 
     tituloMateriales.font = {
       bold:true,
@@ -5984,10 +6260,12 @@ async function exportarExcelAndamio(){
       }
     };
 
+
     tituloMateriales.alignment = {
       horizontal:'center',
       vertical:'middle'
     };
+
 
     tituloMateriales.fill = {
       type:'pattern',
@@ -5997,8 +6275,10 @@ async function exportarExcelAndamio(){
       }
     };
 
+
     tituloMateriales.border =
       bordeFino;
+
 
     hoja.getRow(
       filaActual
@@ -6091,7 +6371,7 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * MATERIALES
+     * FILAS DE MATERIALES
      * =====================================================
      */
 
@@ -6143,6 +6423,7 @@ async function exportarExcelAndamio(){
             celda.border =
               bordeFino;
 
+
             celda.alignment = {
               vertical:'middle',
               wrapText:true
@@ -6152,6 +6433,9 @@ async function exportarExcelAndamio(){
         );
 
 
+        /*
+         * Filas alternadas.
+         */
         if(
           indice % 2 === 1
         ){
@@ -6239,19 +6523,23 @@ async function exportarExcelAndamio(){
     filaActual++;
 
 
+    const filaPeso =
+      filaActual;
+
+
     hoja.mergeCells(
-      `A${filaActual}:D${filaActual}`
+      `A${filaPeso}:D${filaPeso}`
     );
 
 
     hoja.getCell(
-      `A${filaActual}`
+      `A${filaPeso}`
     ).value =
       'PESO TOTAL DEL ANDAMIO';
 
 
     hoja.getCell(
-      `A${filaActual}`
+      `A${filaPeso}`
     ).font = {
       bold:true,
       color:{
@@ -6261,7 +6549,7 @@ async function exportarExcelAndamio(){
 
 
     hoja.getCell(
-      `A${filaActual}`
+      `A${filaPeso}`
     ).fill = {
       type:'pattern',
       pattern:'solid',
@@ -6272,13 +6560,13 @@ async function exportarExcelAndamio(){
 
 
     hoja.getCell(
-      `E${filaActual}`
+      `E${filaPeso}`
     ).value =
       'KG';
 
 
     hoja.getCell(
-      `F${filaActual}`
+      `F${filaPeso}`
     ).value =
       Number(
         peso.pesoTotalKg
@@ -6286,7 +6574,7 @@ async function exportarExcelAndamio(){
 
 
     hoja.getCell(
-      `F${filaActual}`
+      `F${filaPeso}`
     ).numFmt =
       '#,##0.00';
 
@@ -6294,19 +6582,23 @@ async function exportarExcelAndamio(){
     filaActual++;
 
 
+    const filaTonelaje =
+      filaActual;
+
+
     hoja.mergeCells(
-      `A${filaActual}:D${filaActual}`
+      `A${filaTonelaje}:D${filaTonelaje}`
     );
 
 
     hoja.getCell(
-      `A${filaActual}`
+      `A${filaTonelaje}`
     ).value =
       'TONELAJE TOTAL';
 
 
     hoja.getCell(
-      `A${filaActual}`
+      `A${filaTonelaje}`
     ).font = {
       bold:true,
       color:{
@@ -6316,7 +6608,7 @@ async function exportarExcelAndamio(){
 
 
     hoja.getCell(
-      `A${filaActual}`
+      `A${filaTonelaje}`
     ).fill = {
       type:'pattern',
       pattern:'solid',
@@ -6327,13 +6619,13 @@ async function exportarExcelAndamio(){
 
 
     hoja.getCell(
-      `E${filaActual}`
+      `E${filaTonelaje}`
     ).value =
       'TM';
 
 
     hoja.getCell(
-      `F${filaActual}`
+      `F${filaTonelaje}`
     ).value =
       Number(
         peso.pesoTotalToneladas
@@ -6341,14 +6633,14 @@ async function exportarExcelAndamio(){
 
 
     hoja.getCell(
-      `F${filaActual}`
+      `F${filaTonelaje}`
     ).numFmt =
       '0.000';
 
 
     [
-      filaActual - 1,
-      filaActual
+      filaPeso,
+      filaTonelaje
     ]
       .forEach(
         numeroFila => {
@@ -6364,6 +6656,7 @@ async function exportarExcelAndamio(){
 
                 celda.border =
                   bordeFino;
+
 
                 celda.alignment = {
                   vertical:'middle',
@@ -6385,6 +6678,7 @@ async function exportarExcelAndamio(){
                     }
                   };
 
+
                   celda.fill = {
                     type:'pattern',
                     pattern:'solid',
@@ -6398,6 +6692,7 @@ async function exportarExcelAndamio(){
               }
             );
 
+
           hoja.getRow(
             numeroFila
           ).height =
@@ -6409,7 +6704,7 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * PIE DE REPORTE
+     * PIE DEL REPORTE
      * =====================================================
      */
 
@@ -6429,14 +6724,19 @@ async function exportarExcelAndamio(){
 
 
     pie.value =
-      `Reporte generado automáticamente por DIMARZA · ${new Date().toLocaleDateString('es-PE')}`;
+      `Reporte generado automáticamente por DIMARZA · ${
+        new Date()
+          .toLocaleDateString(
+            'es-PE'
+          )
+      }`;
 
 
     pie.font = {
       italic:true,
       size:9,
       color:{
-        argb:'667784'
+        argb:GRIS
       }
     };
 
@@ -6449,20 +6749,7 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * CONGELAR ENCABEZADO DE TABLA
-     * =====================================================
-     */
-
-    hoja.views = [
-      {
-        showGridLines:false
-      }
-    ];
-
-
-    /*
-     * =====================================================
-     * CONFIGURACIÓN DE IMPRESIÓN
+     * IMPRESIÓN
      * =====================================================
      */
 
@@ -6486,11 +6773,11 @@ async function exportarExcelAndamio(){
 
         right:0.25,
 
-        top:0.4,
+        top:0.35,
 
         bottom:0.4,
 
-        header:0.2,
+        header:0.15,
 
         footer:0.2
 
@@ -6509,7 +6796,7 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * GENERAR ARCHIVO
+     * GENERAR XLSX
      * =====================================================
      */
 
