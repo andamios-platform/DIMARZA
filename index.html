@@ -791,7 +791,7 @@
        ===================================================== */
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+  'https://script.google.com/macros/s/AKfycbwvueeUnXA1khv-qj-xxZnPi8jq_MzBygE__2TI3w7GMK3-4ev5pMNQ5KIam8mMMlQb/exec';
 
     /* =====================================================
        VALIDAR CONTRASEÑA
@@ -841,14 +841,13 @@ const API_URL =
 
       try {
 
-        const url =
-          API_URL +
-          '?accion=validarAccesoGeneral' +
-          '&clave=' +
-          encodeURIComponent(
-            clave
-          );
-
+      const url =
+        API_URL +
+        '?action=validarClave' +
+        '&clave=' +
+        encodeURIComponent(
+          clave
+        );
 
         const respuesta =
           await fetch(
@@ -875,7 +874,8 @@ const API_URL =
 
         if (
           datos.ok === true &&
-          datos.acceso === true
+          datos.autorizado === true &&
+          datos.rol === 'TODOS'
         ) {
 
           /*
