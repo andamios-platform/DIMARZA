@@ -5744,7 +5744,38 @@ async function exportarExcelAndamio(){
       }
 
     }
+/*
+ * Fondo especial para el área del logo
+ */
+for(
+  let fila = 1;
+  fila <= 2;
+  fila++
+){
 
+  for(
+    let columna = 1;
+    columna <= 2;
+    columna++
+  ){
+
+    const celda =
+      hoja.getCell(
+        fila,
+        columna
+      );
+
+    celda.fill = {
+      type:'pattern',
+      pattern:'solid',
+      fgColor:{
+        argb:'FFFFFF'
+      }
+    };
+
+  }
+
+}
 
     hoja.getRow(
       1
@@ -5787,7 +5818,7 @@ hoja.addImage(
   logoId,
   {
     tl:{
-      col:0.12,
+      col:0.28,
       row:0.10
     },
 
