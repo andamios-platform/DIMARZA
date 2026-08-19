@@ -4003,7 +4003,15 @@ function renderizarResumen(){
           'PAUSA'
         )
     ).length;
-
+  const pausasArmado =
+  eventos.filter(
+    evento =>
+      normalizarTexto(
+        evento.tipoEvento
+      ).includes(
+        'PAUSA'
+      )
+  );
 
   /*
    * =====================================================
@@ -4644,7 +4652,178 @@ function renderizarResumen(){
 
       </div>
 
+<!-- ===============================================
+     PAUSAS DE ARMADO
+=============================================== -->
 
+<div class="titulo-bloque">
+
+  <h3>
+    Pausas de Armado
+  </h3>
+
+  <span class="contador-fotos">
+    ${pausasArmado.length}
+  </span>
+
+</div>
+
+
+${
+  pausasArmado.length
+    ? `
+
+      <div class="eventos">
+
+        ${
+          pausasArmado
+            .map(
+              evento => `
+
+                <div class="evento">
+
+                  <div>
+
+                    <div class="evento-tipo">
+                      ⏸️ Pausa
+                    </div>
+
+                    <div class="evento-fecha">
+
+                      ${
+                        escaparHTML(
+                          evento.fechaHora ||
+                          '-'
+                        )
+                      }
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="evento-detalle">
+
+                    <strong>
+                      Responsable
+                    </strong>
+
+                    <br>
+
+                    ${
+                      escaparHTML(
+                        evento.responsable ||
+                        '-'
+                      )
+                    }
+
+                  </div>
+
+
+                  <div class="evento-detalle">
+
+                    ${
+                      evento.motivo
+                        ? `
+
+                          <strong>
+                            Motivo:
+                          </strong>
+
+                          ${
+                            escaparHTML(
+                              evento.motivo
+                            )
+                          }
+
+                          <br>
+
+                        `
+                        : ''
+                    }
+
+
+                    ${
+                      evento.observacion
+                        ? `
+
+                          <strong>
+                            Observación:
+                          </strong>
+
+                          ${
+                            escaparHTML(
+                              evento.observacion
+                            )
+                          }
+
+                          <br>
+
+                        `
+                        : ''
+                    }
+
+
+                    ${
+                      Number(
+                        evento.tiempoTramoMinutos
+                      ) > 0
+                        ? `
+
+                          <strong>
+                            Tiempo:
+                          </strong>
+
+                          ${
+                            formatearMinutos(
+                              evento.tiempoTramoMinutos
+                            )
+                          }
+
+                        `
+                        : ''
+                    }
+
+                  </div>
+
+                </div>
+
+              `
+            )
+            .join('')
+        }
+
+      </div>
+
+    `
+    : mensajeSinDatos(
+        'No se registraron pausas durante el Armado.'
+      )
+}
+
+
+<!-- ===============================================
+     EVIDENCIAS FOTOGRÁFICAS
+=============================================== -->
+
+<div class="titulo-bloque">
+
+  <h3>
+    Evidencias fotográficas del TAG
+  </h3>
+
+  <span class="contador-fotos">
+    ${fotos.length}
+  </span>
+
+</div>
+
+
+${
+  renderizarFotos(
+    fotos
+  )
+}
       <!-- ===============================================
            INFORMACIÓN GENERAL
       ================================================ -->
