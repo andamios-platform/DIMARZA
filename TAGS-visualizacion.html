@@ -3574,15 +3574,6 @@ function renderizarPrevios(){
       ? datos.materiales
       : [];
 
-
-  const fotos =
-    filtrarFotosPorEtapas(
-      [
-        'PREVIOS'
-      ]
-    );
-
-
   let totalAlistado = 0;
 
   let totalDespachado = 0;
@@ -3740,11 +3731,6 @@ function renderizarPrevios(){
             )
       }
 
-
-      ${bloqueFotos(
-        'Fotografías de Previos',
-        fotos
-      )}
 
     `;
 
@@ -5924,20 +5910,30 @@ for(
       );
 
 
-    tagCabecera.value =
-      `TAG\n${
-        servicioActual.tag ||
-        '-'
-      }`;
-
-
-    tagCabecera.font = {
-      bold:true,
-      size:14,
-      color:{
-        argb:BLANCO
+tagCabecera.value = {
+  richText: [
+    {
+      text: 'TAG\n',
+      font: {
+        bold: true,
+        size: 10,
+        color: {
+          argb: BLANCO
+        }
       }
-    };
+    },
+    {
+      text: limpiarTexto(s.tag) || '-',
+      font: {
+        bold: true,
+        size: 14,
+        color: {
+          argb: BLANCO
+        }
+      }
+    }
+  ]
+};
 
 
     tagCabecera.alignment = {
