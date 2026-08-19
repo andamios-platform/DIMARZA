@@ -2267,7 +2267,97 @@ tbody tr:nth-child(even){
     #fff8ef;
 
 }
+.cronologia-evento-con-fotos{
 
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    auto;
+
+  gap:10px;
+
+  align-items:stretch;
+
+}
+
+
+.cronologia-evento-pausa{
+
+  padding:5px;
+
+  background:
+    #fff0f1;
+
+  border:
+    1px solid
+    #ecc1c5;
+
+  border-radius:10px;
+
+}
+
+
+.cronologia-evento-pausa
+.cronologia-evento{
+
+  background:
+    #fff7f7;
+
+  border-left-color:
+    var(--rojo);
+
+}
+
+
+.cronologia-fotos-evento{
+
+  display:flex;
+
+  gap:8px;
+
+  align-items:stretch;
+
+}
+
+
+.cronologia-fotos-evento
+.cronologia-foto{
+
+  width:240px;
+
+  grid-template-columns:
+    90px 1fr;
+
+}
+
+
+@media(
+  max-width:760px
+){
+
+  .cronologia-evento-con-fotos{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .cronologia-fotos-evento{
+
+    flex-direction:column;
+
+  }
+
+
+  .cronologia-fotos-evento
+  .cronologia-foto{
+
+    width:100%;
+
+  }
+
+}
 
 .cronologia-fotos{
 
@@ -2381,6 +2471,7 @@ tbody tr:nth-child(even){
   text-decoration:none;
 
 }
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -4777,155 +4868,210 @@ const eventosTraslado =
       </span>
 
 
-      ${
-        eventosTraslado.length
-          ? `
+${
+  eventosTraslado.length
+    ? `
 
-            <div class="cronologia-eventos">
+      <div class="cronologia-eventos">
 
-              ${
-                eventosTraslado
-                  .map(
-                    evento => `
+        ${
+          eventosTraslado
+            .map(
+              evento => {
 
-                      <div class="cronologia-evento">
+                const esPausa =
+                  normalizarTexto(
+                    evento.tipoEvento
+                  ).includes(
+                    'PAUSA'
+                  );
 
-                        <div class="cronologia-hora">
 
-                          🕒 ${
-                            escaparHTML(
-                              evento.fechaHora ||
-                              '-'
-                            )
-                          }
+                const fotosEvento =
+                  obtenerFotosDelEvento(
+                    fotosTraslado,
+                    evento
+                  );
 
-                        </div>
 
-                        <strong>
+                return `
 
-                          ${
-                            escaparHTML(
-                              evento.tipoEvento ||
-                              'EVENTO'
-                            )
-                          }
+                  <div
+                    class="
+                      cronologia-evento-con-fotos
+                      ${
+                        esPausa
+                          ? 'cronologia-evento-pausa'
+                          : ''
+                      }
+                    "
+                  >
 
-                        </strong>
-
+                    <div
+                      class="
+                        cronologia-evento
                         ${
-                          evento.responsable
-                            ? `
-
-                              <div>
-                                Responsable:
-                                ${
-                                  escaparHTML(
-                                    evento.responsable
-                                  )
-                                }
-                              </div>
-
-                            `
+                          esPausa
+                            ? 'cronologia-pausa'
                             : ''
                         }
+                      "
+                    >
 
+                      <div class="cronologia-hora">
 
-                        ${
-                          evento.ubicacion
-                            ? `
-
-                              <div>
-                                Ubicación:
-                                ${
-                                  escaparHTML(
-                                    evento.ubicacion
-                                  )
-                                }
-                              </div>
-
-                            `
-                            : ''
-                        }
-
-
-                        ${
-                          evento.motivoObservacion
-                            ? `
-
-                              <div>
-                                Observación:
-                                ${
-                                  escaparHTML(
-                                    evento.motivoObservacion
-                                  )
-                                }
-                              </div>
-
-                            `
-                            : ''
-                        }
-
-
-                        ${
-                          Number(
-                            evento.tiempoTramoSegundos
-                          ) > 0
-                            ? `
-
-                              <div>
-                                Tiempo tramo:
-                                ${
-                                  formatearSegundos(
-                                    evento.tiempoTramoSegundos
-                                  )
-                                }
-                              </div>
-
-                            `
-                            : ''
+                        🕒 ${
+                          escaparHTML(
+                            evento.fechaHora ||
+                            '-'
+                          )
                         }
 
                       </div>
 
-                    `
-                  )
-                  .join('')
+
+                      <strong>
+
+                        ${
+                          esPausa
+                            ? '⏸️ '
+                            : ''
+                        }
+
+                        ${
+                          escaparHTML(
+                            evento.tipoEvento ||
+                            'EVENTO'
+                          )
+                        }
+
+                      </strong>
+
+
+                      ${
+                        evento.responsable
+                          ? `
+
+                            <div>
+
+                              Responsable:
+                              ${
+                                escaparHTML(
+                                  evento.responsable
+                                )
+                              }
+
+                            </div>
+
+                          `
+                          : ''
+                      }
+
+
+                      ${
+                        evento.ubicacion
+                          ? `
+
+                            <div>
+
+                              Ubicación:
+                              ${
+                                escaparHTML(
+                                  evento.ubicacion
+                                )
+                              }
+
+                            </div>
+
+                          `
+                          : ''
+                      }
+
+
+                      ${
+                        evento.motivoObservacion
+                          ? `
+
+                            <div>
+
+                              Observación:
+                              ${
+                                escaparHTML(
+                                  evento.motivoObservacion
+                                )
+                              }
+
+                            </div>
+
+                          `
+                          : ''
+                      }
+
+
+                      ${
+                        Number(
+                          evento.tiempoTramoSegundos
+                        ) > 0
+                          ? `
+
+                            <div>
+
+                              Tiempo tramo:
+                              ${
+                                formatearSegundos(
+                                  evento.tiempoTramoSegundos
+                                )
+                              }
+
+                            </div>
+
+                          `
+                          : ''
+                      }
+
+                    </div>
+
+
+                    ${
+                      fotosEvento.length
+                        ? `
+
+                          <div class="cronologia-fotos-evento">
+
+                            ${
+                              fotosEvento
+                                .map(
+                                  foto =>
+                                    renderizarFotoCronologia(
+                                      foto
+                                    )
+                                )
+                                .join('')
+                            }
+
+                          </div>
+
+                        `
+                        : ''
+                    }
+
+                  </div>
+
+                `;
+
               }
+            )
+            .join('')
+        }
 
-            </div>
+      </div>
 
-          `
-          : ''
-      }
-
-
-      ${
-        fotosTraslado.length
-          ? `
-
-            <div class="cronologia-fotos">
-
-              ${
-                fotosTraslado
-                  .map(
-                    foto =>
-                      renderizarFotoCronologia(
-                        foto
-                      )
-                  )
-                  .join('')
-              }
-
-            </div>
-
-          `
-          : ''
-      }
-
+    `
+    : ''
+}
     </div>
 
   </div>
-
 
   <!-- =============================================
        ARMADO
@@ -5424,9 +5570,11 @@ function renderizarFotoCronologia(
 
           `
           : `
+
             <div class="cronologia-foto-vacia">
               📷
             </div>
+
           `
       }
 
@@ -5451,11 +5599,13 @@ function renderizarFotoCronologia(
             ? `
 
               <span>
+
                 🕒 ${
                   escaparHTML(
                     foto.fechaHora
                   )
                 }
+
               </span>
 
             `
@@ -5495,7 +5645,9 @@ function renderizarFotoCronologia(
                 target="_blank"
                 rel="noopener noreferrer"
               >
+
                 Abrir fotografía
+
               </a>
 
             `
@@ -5510,6 +5662,50 @@ function renderizarFotoCronologia(
 
 }
 
+
+/* =========================================================
+   RELACIONAR FOTO CON EVENTO
+========================================================= */
+
+function obtenerFotosDelEvento(
+  fotos,
+  evento
+){
+
+  const lista =
+    Array.isArray(
+      fotos
+    )
+      ? fotos
+      : [];
+
+
+  const idEvento =
+    normalizarTexto(
+      evento.idEvento ||
+      evento.id ||
+      ''
+    );
+
+
+  if(
+    !idEvento
+  ){
+
+    return [];
+
+  }
+
+
+  return lista.filter(
+    foto =>
+      normalizarTexto(
+        foto.idEvento
+      ) ===
+      idEvento
+  );
+
+}
 function renderizarPrevios(){
 
   const datos =
