@@ -1769,7 +1769,433 @@ tbody tr:nth-child(even){
 
 }
 
+/* =========================================================
+   RESUMEN EJECUTIVO DEL TAG
+========================================================= */
 
+.resumen-tag-cabecera{
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+
+  margin-bottom:18px;
+
+  padding:18px;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--azul),
+      var(--azul2)
+    );
+
+  border-radius:13px;
+
+}
+
+.resumen-tag-cabecera h3{
+
+  margin:0 0 4px;
+
+  font-size:22px;
+
+}
+
+.resumen-tag-cabecera p{
+
+  margin:0;
+
+  opacity:.85;
+
+  font-size:12px;
+
+}
+
+.resumen-estado{
+
+  padding:9px 13px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .15
+    );
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .3
+    );
+
+  border-radius:999px;
+
+  font-size:11px;
+
+  font-weight:bold;
+
+  text-align:center;
+
+}
+
+
+/* =========================================================
+   ETAPAS
+========================================================= */
+
+.resumen-etapas{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(140px,1fr)
+    );
+
+  gap:10px;
+
+  margin-bottom:18px;
+
+}
+
+.resumen-etapa{
+
+  position:relative;
+
+  padding:15px;
+
+  text-align:center;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:11px;
+
+}
+
+.resumen-etapa-icono{
+
+  width:42px;
+  height:42px;
+
+  display:grid;
+  place-items:center;
+
+  margin:
+    0 auto 8px;
+
+  background:
+    var(--gris-claro);
+
+  border-radius:50%;
+
+  font-size:20px;
+
+}
+
+.resumen-etapa strong{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--azul);
+
+  font-size:12px;
+
+}
+
+.resumen-etapa span{
+
+  display:block;
+
+  color:var(--gris);
+
+  font-size:10px;
+
+  font-weight:bold;
+
+}
+
+.resumen-etapa.completada{
+
+  border-color:
+    #acd8c5;
+
+  background:
+    var(--verde-claro);
+
+}
+
+.resumen-etapa.completada
+.resumen-etapa-icono{
+
+  color:white;
+
+  background:
+    var(--verde);
+
+}
+
+.resumen-etapa.activa{
+
+  border-color:
+    #f3c48f;
+
+  background:
+    #fff7ed;
+
+}
+
+.resumen-etapa.activa
+.resumen-etapa-icono{
+
+  color:white;
+
+  background:
+    var(--naranja);
+
+}
+
+
+/* =========================================================
+   INDICADORES DEL TAG
+========================================================= */
+
+.resumen-indicadores{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(130px,1fr)
+    );
+
+  gap:10px;
+
+  margin-bottom:20px;
+
+}
+
+.resumen-indicador{
+
+  padding:14px;
+
+  background:
+    var(--azul-claro);
+
+  border:
+    1px solid
+    #c7ddeb;
+
+  border-radius:10px;
+
+}
+
+.resumen-indicador span{
+
+  display:block;
+
+  margin-bottom:6px;
+
+  color:var(--gris);
+
+  font-size:9px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+.resumen-indicador strong{
+
+  color:var(--azul);
+
+  font-size:20px;
+
+}
+
+
+/* =========================================================
+   CRONOLOGÍA
+========================================================= */
+
+.cronologia-tag{
+
+  position:relative;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:0;
+
+  margin-top:12px;
+
+}
+
+.cronologia-item{
+
+  position:relative;
+
+  display:grid;
+
+  grid-template-columns:
+    40px 1fr;
+
+  gap:10px;
+
+  padding-bottom:17px;
+
+}
+
+.cronologia-item:not(:last-child)::before{
+
+  content:'';
+
+  position:absolute;
+
+  left:19px;
+  top:35px;
+  bottom:0;
+
+  width:2px;
+
+  background:
+    var(--borde);
+
+}
+
+.cronologia-icono{
+
+  z-index:1;
+
+  width:38px;
+  height:38px;
+
+  display:grid;
+  place-items:center;
+
+  background:
+    var(--azul-claro);
+
+  border:
+    2px solid
+    var(--azul2);
+
+  border-radius:50%;
+
+}
+
+.cronologia-info{
+
+  padding:11px 13px;
+
+  background:
+    var(--gris-claro);
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:9px;
+
+}
+
+.cronologia-info strong{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--azul);
+
+}
+
+.cronologia-info span{
+
+  display:block;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+  line-height:1.5;
+
+}
+
+
+/* =========================================================
+   ACCIONES RESUMEN
+========================================================= */
+
+.resumen-acciones{
+
+  display:flex;
+
+  justify-content:flex-end;
+
+  gap:10px;
+
+  margin-top:18px;
+
+}
+
+
+@media(
+  max-width:760px
+){
+
+  .resumen-tag-cabecera{
+
+    flex-direction:column;
+    align-items:flex-start;
+
+  }
+
+  .resumen-etapas{
+
+    grid-template-columns:
+      1fr 1fr;
+
+  }
+
+  .resumen-indicadores{
+
+    grid-template-columns:
+      1fr 1fr;
+
+  }
+
+}
+
+
+@media(
+  max-width:480px
+){
+
+  .resumen-etapas,
+  .resumen-indicadores{
+
+    grid-template-columns:1fr;
+
+  }
+
+}
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -3440,18 +3866,201 @@ function renderizarTab(){
 }
 
 
-/* =========================================================
-   RESUMEN
-========================================================= */
-
 function renderizarResumen(){
 
-const fotos =
-  filtrarFotosPorFecha(
-    datosDetalle.fotografias ||
-    []
-  );
+  const previos =
+    datosDetalle.previos;
 
+  const traslado =
+    datosDetalle.traslado;
+
+  const armado =
+    datosDetalle.armado;
+
+  const eventosArmado =
+    datosDetalle.eventosArmado;
+
+  const postparada =
+    datosDetalle.postparada;
+
+  const peso =
+    datosDetalle.pesoAndamio;
+
+
+  /*
+   * =====================================================
+   * MATERIALES PREVIOS
+   * =====================================================
+   */
+
+  const materialesPrevios =
+    (
+      previos &&
+      Array.isArray(
+        previos.materiales
+      )
+    )
+      ? previos.materiales
+      : [];
+
+
+  const totalDespachado =
+    materialesPrevios.reduce(
+      (
+        total,
+        material
+      ) =>
+        total +
+        (
+          Number(
+            material.cantidadDespachada
+          ) || 0
+        ),
+      0
+    );
+
+
+  /*
+   * =====================================================
+   * ARMADO
+   * =====================================================
+   */
+
+  const materialesArmado =
+    (
+      armado &&
+      Array.isArray(
+        armado.materiales
+      )
+    )
+      ? armado.materiales
+      : [];
+
+
+  const armadoFinalizado =
+    materialesArmado.some(
+      material =>
+        material.armadoRegistrado === true
+    );
+
+
+  const totalUtilizado =
+    materialesArmado.reduce(
+      (
+        total,
+        material
+      ) =>
+        total +
+        (
+          Number(
+            material.cantidadUtilizada
+          ) || 0
+        ),
+      0
+    );
+
+
+  /*
+   * =====================================================
+   * FOTOGRAFÍAS
+   * =====================================================
+   */
+
+  const fotos =
+    filtrarFotosPorFecha(
+      datosDetalle.fotografias ||
+      []
+    );
+
+
+  const totalFotos =
+    fotos.length;
+
+
+  /*
+   * =====================================================
+   * PAUSAS DE ARMADO
+   * =====================================================
+   */
+
+  const eventos =
+    (
+      eventosArmado &&
+      Array.isArray(
+        eventosArmado.eventos
+      )
+    )
+      ? eventosArmado.eventos
+      : [];
+
+
+  const totalPausas =
+    eventos.filter(
+      evento =>
+        normalizarTexto(
+          evento.tipoEvento
+        ).includes(
+          'PAUSA'
+        )
+    ).length;
+
+
+  /*
+   * =====================================================
+   * ESTADO DE LAS ETAPAS
+   * =====================================================
+   */
+
+  const previosCompletado =
+    materialesPrevios.length > 0;
+
+
+  const estadoTraslado =
+    normalizarTexto(
+      traslado?.estadoTraslado
+    );
+
+
+  const trasladoCompletado =
+    estadoTraslado.includes(
+      'RECIBIDO'
+    ) ||
+    estadoTraslado.includes(
+      'FINALIZ'
+    ) ||
+    [
+      'EN ARMADO',
+      'ANDAMIO OPERATIVO',
+      'CERRADO'
+    ].includes(
+      normalizarTexto(
+        servicioActual.estado
+      )
+    );
+
+
+  const armadoCompletado =
+    armadoFinalizado ||
+    [
+      'ANDAMIO OPERATIVO',
+      'CERRADO'
+    ].includes(
+      normalizarTexto(
+        servicioActual.estado
+      )
+    );
+
+
+  const postparadaCompletada =
+    postparada?.postparadaRegistrada ===
+    true;
+
+
+  /*
+   * =====================================================
+   * DESCRIPCIÓN
+   * =====================================================
+   */
 
   const descripcion =
     servicioActual.descripcion ||
@@ -3459,99 +4068,714 @@ const fotos =
     '-';
 
 
+  /*
+   * =====================================================
+   * RENDER
+   * =====================================================
+   */
+
   document
     .getElementById(
       'contenidoDetalle'
     )
     .innerHTML = `
 
+
+      <!-- ===============================================
+           CABECERA DEL RESUMEN
+      ================================================ -->
+
+      <div class="resumen-tag-cabecera">
+
+        <div>
+
+          <h3>
+
+            ${
+              escaparHTML(
+                servicioActual.tag ||
+                'SIN TAG'
+              )
+            }
+
+          </h3>
+
+          <p>
+
+            ${
+              escaparHTML(
+                servicioActual.idServicio ||
+                ''
+              )
+            }
+
+            ·
+
+            ${
+              escaparHTML(
+                servicioActual.faena ||
+                servicioActual.mina ||
+                '-'
+              )
+            }
+
+          </p>
+
+        </div>
+
+
+        <div class="resumen-estado">
+
+          ${
+            escaparHTML(
+              servicioActual.estado ||
+              'SIN ESTADO'
+            )
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- ===============================================
+           ETAPAS
+      ================================================ -->
+
+      <div class="resumen-etapas">
+
+
+        <div
+          class="
+            resumen-etapa
+            ${
+              previosCompletado
+                ? 'completada'
+                : ''
+            }
+          "
+        >
+
+          <div class="resumen-etapa-icono">
+            📦
+          </div>
+
+          <strong>
+            Previos
+          </strong>
+
+          <span>
+
+            ${
+              previosCompletado
+                ? 'COMPLETADO'
+                : 'PENDIENTE'
+            }
+
+          </span>
+
+        </div>
+
+
+        <div
+          class="
+            resumen-etapa
+            ${
+              trasladoCompletado
+                ? 'completada'
+                : (
+                    estadoTraslado
+                      ? 'activa'
+                      : ''
+                  )
+            }
+          "
+        >
+
+          <div class="resumen-etapa-icono">
+            🚚
+          </div>
+
+          <strong>
+            Traslado
+          </strong>
+
+          <span>
+
+            ${
+              trasladoCompletado
+                ? 'COMPLETADO'
+                : (
+                    traslado?.estadoTraslado ||
+                    'PENDIENTE'
+                  )
+            }
+
+          </span>
+
+        </div>
+
+
+        <div
+          class="
+            resumen-etapa
+            ${
+              armadoCompletado
+                ? 'completada'
+                : (
+                    normalizarTexto(
+                      servicioActual.estado
+                    ) ===
+                    'EN ARMADO'
+                      ? 'activa'
+                      : ''
+                  )
+            }
+          "
+        >
+
+          <div class="resumen-etapa-icono">
+            🔨
+          </div>
+
+          <strong>
+            Armado
+          </strong>
+
+          <span>
+
+            ${
+              armadoCompletado
+                ? 'COMPLETADO'
+                : (
+                    eventosArmado?.estadoArmado ||
+                    'PENDIENTE'
+                  )
+            }
+
+          </span>
+
+        </div>
+
+
+        <div
+          class="
+            resumen-etapa
+            ${
+              postparadaCompletada
+                ? 'completada'
+                : ''
+            }
+          "
+        >
+
+          <div class="resumen-etapa-icono">
+            🔄
+          </div>
+
+          <strong>
+            Postparada
+          </strong>
+
+          <span>
+
+            ${
+              postparadaCompletada
+                ? 'COMPLETADO'
+                : 'PENDIENTE'
+            }
+
+          </span>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- ===============================================
+           INDICADORES
+      ================================================ -->
+
+      <div class="resumen-indicadores">
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Material despachado
+          </span>
+
+          <strong>
+            ${numero(totalDespachado)}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Material utilizado
+          </span>
+
+          <strong>
+            ${numero(totalUtilizado)}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Peso del andamio
+          </span>
+
+          <strong>
+
+            ${
+              peso?.ok
+                ? `${numero(
+                    peso.pesoTotalKg
+                  )} kg`
+                : '-'
+            }
+
+          </strong>
+
+        </div>
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Tonelaje
+          </span>
+
+          <strong>
+
+            ${
+              peso?.ok
+                ? `${formatearToneladas(
+                    peso.pesoTotalToneladas
+                  )} t`
+                : '-'
+            }
+
+          </strong>
+
+        </div>
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Tiempo traslado
+          </span>
+
+          <strong>
+
+            ${
+              traslado?.tiempoEfectivo ||
+              formatearSegundos(
+                traslado?.tiempoEfectivoSegundos
+              )
+            }
+
+          </strong>
+
+        </div>
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Pausas de armado
+          </span>
+
+          <strong>
+            ${totalPausas}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Evidencias
+          </span>
+
+          <strong>
+            ${totalFotos}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen-indicador">
+
+          <span>
+            Estado
+          </span>
+
+          <strong
+            style="
+              font-size:14px;
+            "
+          >
+
+            ${
+              escaparHTML(
+                servicioActual.estado ||
+                '-'
+              )
+            }
+
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- ===============================================
+           CRONOLOGÍA
+      ================================================ -->
+
+      <div class="titulo-bloque">
+
+        <h3>
+          Cronología del servicio
+        </h3>
+
+      </div>
+
+
+      <div class="cronologia-tag">
+
+
+        <div class="cronologia-item">
+
+          <div class="cronologia-icono">
+            📦
+          </div>
+
+          <div class="cronologia-info">
+
+            <strong>
+              Previos
+            </strong>
+
+            <span>
+
+              ${
+                previosCompletado
+                  ? `
+                    ${materialesPrevios.length}
+                    tipos de material registrados.
+                    Total despachado:
+                    ${numero(totalDespachado)}.
+                  `
+                  : 'Sin registro finalizado.'
+              }
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="cronologia-item">
+
+          <div class="cronologia-icono">
+            🚚
+          </div>
+
+          <div class="cronologia-info">
+
+            <strong>
+              Traslado
+            </strong>
+
+            <span>
+
+              Estado:
+              ${
+                escaparHTML(
+                  traslado?.estadoTraslado ||
+                  'PENDIENTE'
+                )
+              }.
+
+              <br>
+
+              Tiempo efectivo:
+              ${
+                escaparHTML(
+                  traslado?.tiempoEfectivo ||
+                  formatearSegundos(
+                    traslado?.tiempoEfectivoSegundos
+                  )
+                )
+              }.
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="cronologia-item">
+
+          <div class="cronologia-icono">
+            🔨
+          </div>
+
+          <div class="cronologia-info">
+
+            <strong>
+              Armado
+            </strong>
+
+            <span>
+
+              Estado:
+              ${
+                escaparHTML(
+                  eventosArmado?.estadoArmado ||
+                  (
+                    armadoCompletado
+                      ? 'FINALIZADO'
+                      : 'PENDIENTE'
+                  )
+                )
+              }.
+
+              <br>
+
+              Responsable:
+              ${
+                escaparHTML(
+                  servicioActual.responsableArmado ||
+                  '-'
+                )
+              }.
+
+              <br>
+
+              Material utilizado:
+              ${numero(totalUtilizado)}.
+
+              ${
+                peso?.ok
+                  ? `
+                    <br>
+                    Peso:
+                    ${numero(
+                      peso.pesoTotalKg
+                    )} kg
+                    ·
+                    ${formatearToneladas(
+                      peso.pesoTotalToneladas
+                    )} t.
+                  `
+                  : ''
+              }
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="cronologia-item">
+
+          <div class="cronologia-icono">
+            🔄
+          </div>
+
+          <div class="cronologia-info">
+
+            <strong>
+              Postparada
+            </strong>
+
+            <span>
+
+              ${
+                postparadaCompletada
+                  ? `
+                    Postparada finalizada.
+
+                    ${
+                      postparada?.resumen
+                        ? `
+                          <br>
+                          Desmontado:
+                          ${numero(
+                            postparada.resumen
+                              .cantidadDesmontada
+                          )}
+
+                          · Faltante:
+                          ${numero(
+                            postparada.resumen
+                              .cantidadFaltante
+                          )}
+                        `
+                        : ''
+                    }
+                  `
+                  : 'Pendiente de ejecución.'
+              }
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- ===============================================
+           INFORMACIÓN GENERAL
+      ================================================ -->
+
+      <div class="titulo-bloque">
+
+        <h3>
+          Información general
+        </h3>
+
+      </div>
+
+
       <div class="info-grid">
+
 
         ${crearInfo(
           'Supervisor',
           servicioActual.supervisor
         )}
 
+
         ${crearInfo(
           'Responsable Previos',
           servicioActual.responsablePrevios
         )}
+
 
         ${crearInfo(
           'Responsable Armado',
           servicioActual.responsableArmado
         )}
 
+
         ${crearInfo(
           'Responsable Postparada',
           servicioActual.responsablePostparada
         )}
+
 
         ${crearInfo(
           'Fecha programada',
           servicioActual.fechaProgramada
         )}
 
+
         ${crearInfo(
           'Fecha registro',
           servicioActual.fechaRegistro
         )}
 
-        <div class="info-card descripcion-completa">
+
+        <div
+          class="
+            info-card
+            descripcion-completa
+          "
+        >
 
           <span>
             Descripción del trabajo
           </span>
 
           <strong>
+
             ${
               escaparHTML(
                 descripcion
               )
             }
+
           </strong>
 
         </div>
 
 
-        <div class="info-card descripcion-completa">
+        <div
+          class="
+            info-card
+            descripcion-completa
+          "
+        >
 
           <span>
             Observaciones
           </span>
 
           <strong>
+
             ${
               escaparHTML(
                 servicioActual.observaciones ||
                 '-'
               )
             }
+
           </strong>
 
         </div>
 
-      </div>
-
-
-      <div class="titulo-bloque">
-
-        <h3>
-          Evidencias registradas
-        </h3>
-
-        <span class="contador-fotos">
-          ${fotos.length}
-        </span>
 
       </div>
 
+
+      <!-- ===============================================
+           ACCIONES
+      ================================================ -->
 
       ${
-        renderizarFotos(
-          fotos
-        )
+        peso?.ok &&
+        totalUtilizado > 0
+          ? `
+
+            <div class="resumen-acciones">
+
+              <button
+                type="button"
+                class="btn-exportar-excel"
+                onclick="exportarExcelAndamio()"
+              >
+
+                📊 Exportar cuantificación
+
+              </button>
+
+            </div>
+
+          `
+          : ''
       }
+
 
     `;
 
