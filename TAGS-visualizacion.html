@@ -2196,6 +2196,191 @@ tbody tr:nth-child(even){
   }
 
 }
+
+.cronologia-eventos{
+
+  display:flex;
+  flex-direction:column;
+
+  gap:7px;
+
+  margin-top:12px;
+
+}
+
+
+.cronologia-evento{
+
+  padding:10px 12px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-left:
+    3px solid
+    var(--azul2);
+
+  border-radius:8px;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+  line-height:1.5;
+
+}
+
+
+.cronologia-evento strong{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--azul);
+
+}
+
+
+.cronologia-hora{
+
+  margin-bottom:5px;
+
+  color:var(--gris);
+
+  font-size:10px;
+
+  font-weight:bold;
+
+}
+
+
+.cronologia-pausa{
+
+  border-left-color:
+    var(--naranja);
+
+  background:
+    #fff8ef;
+
+}
+
+
+.cronologia-fotos{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(230px,1fr)
+    );
+
+  gap:10px;
+
+  margin-top:12px;
+
+}
+
+
+.cronologia-foto{
+
+  display:grid;
+
+  grid-template-columns:
+    90px 1fr;
+
+  gap:10px;
+
+  overflow:hidden;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:9px;
+
+}
+
+
+.cronologia-foto img,
+.cronologia-foto-vacia{
+
+  width:90px;
+  height:90px;
+
+  object-fit:cover;
+
+}
+
+
+.cronologia-foto-vacia{
+
+  display:grid;
+  place-items:center;
+
+  background:
+    var(--gris-claro);
+
+  font-size:25px;
+
+}
+
+
+.cronologia-foto > div:last-child{
+
+  padding:
+    9px 9px 9px 0;
+
+}
+
+
+.cronologia-foto strong{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--azul);
+
+  font-size:11px;
+
+}
+
+
+.cronologia-foto span{
+
+  display:block;
+
+  margin-top:3px;
+
+  color:var(--gris);
+
+  font-size:10px;
+
+}
+
+
+.cronologia-foto a{
+
+  display:inline-block;
+
+  margin-top:6px;
+
+  color:var(--azul2);
+
+  font-size:10px;
+
+  font-weight:bold;
+
+  text-decoration:none;
+
+}
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -3975,7 +4160,51 @@ function renderizarResumen(){
 
   const totalFotos =
     fotos.length;
+const fotosTraslado =
+  fotos.filter(
+    foto => {
 
+      const etapa =
+        normalizarTexto(
+          foto.etapa
+        );
+
+      return (
+        etapa === 'TRASLADO' ||
+        etapa === 'RECEPCION EN TAG'
+      );
+
+    }
+  );
+
+
+const fotosArmado =
+  fotos.filter(
+    foto => {
+
+      const etapa =
+        normalizarTexto(
+          foto.etapa
+        );
+
+      return (
+        etapa === 'ARMADO' ||
+        etapa === 'ARMADO PAUSA' ||
+        etapa === 'ANDAMIO TERMINADO'
+      );
+
+    }
+  );
+
+
+const fotosPostparada =
+  fotos.filter(
+    foto =>
+      normalizarTexto(
+        foto.etapa
+      ) ===
+      'POSTPARADA'
+  );
 
   /*
    * =====================================================
@@ -3992,7 +4221,15 @@ function renderizarResumen(){
     )
       ? eventosArmado.eventos
       : [];
-
+const eventosTraslado =
+  (
+    traslado &&
+    Array.isArray(
+      traslado.eventos
+    )
+  )
+    ? traslado.eventos
+    : [];
 
   const totalPausas =
     eventos.filter(
@@ -4003,15 +4240,7 @@ function renderizarResumen(){
           'PAUSA'
         )
     ).length;
-  const pausasArmado =
-  eventos.filter(
-    evento =>
-      normalizarTexto(
-        evento.tipoEvento
-      ).includes(
-        'PAUSA'
-      )
-  );
+
 
   /*
    * =====================================================
@@ -4449,381 +4678,587 @@ function renderizarResumen(){
       </div>
 
 
-      <!-- ===============================================
-           CRONOLOGÍA
-      ================================================ -->
+   <!-- ===============================================
+     CRONOLOGÍA
+=============================================== -->
 
-      <div class="titulo-bloque">
+<div class="titulo-bloque">
 
-        <h3>
-          Cronología del servicio
-        </h3>
+  <h3>
+    Cronología del servicio
+  </h3>
 
-      </div>
-
-
-      <div class="cronologia-tag">
+</div>
 
 
-        <div class="cronologia-item">
+<div class="cronologia-tag">
 
-          <div class="cronologia-icono">
-            📦
-          </div>
 
-          <div class="cronologia-info">
+  <!-- =============================================
+       PREVIOS
+  ============================================== -->
 
-            <strong>
-              Previos
-            </strong>
+  <div class="cronologia-item">
 
-            <span>
+    <div class="cronologia-icono">
+      📦
+    </div>
+
+    <div class="cronologia-info">
+
+      <strong>
+        Previos
+      </strong>
+
+      <span>
+
+        ${
+          previosCompletado
+            ? `
+              Estado: COMPLETADO
+              <br>
+
+              ${materialesPrevios.length}
+              tipos de material.
+
+              <br>
+
+              Material despachado:
+              ${numero(totalDespachado)}
+            `
+            : 'Pendiente.'
+        }
+
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- =============================================
+       TRASLADO
+  ============================================== -->
+
+  <div class="cronologia-item">
+
+    <div class="cronologia-icono">
+      🚚
+    </div>
+
+    <div class="cronologia-info">
+
+      <strong>
+        Traslado
+      </strong>
+
+      <span>
+
+        Estado:
+        ${
+          escaparHTML(
+            traslado?.estadoTraslado ||
+            'PENDIENTE'
+          )
+        }
+
+        <br>
+
+        Tiempo efectivo:
+        ${
+          escaparHTML(
+            traslado?.tiempoEfectivo ||
+            formatearSegundos(
+              traslado?.tiempoEfectivoSegundos
+            )
+          )
+        }
+
+      </span>
+
+
+      ${
+        eventosTraslado.length
+          ? `
+
+            <div class="cronologia-eventos">
 
               ${
-                previosCompletado
-                  ? `
-                    ${materialesPrevios.length}
-                    tipos de material registrados.
-                    Total despachado:
-                    ${numero(totalDespachado)}.
-                  `
-                  : 'Sin registro finalizado.'
+                eventosTraslado
+                  .map(
+                    evento => `
+
+                      <div class="cronologia-evento">
+
+                        <div class="cronologia-hora">
+
+                          🕒 ${
+                            escaparHTML(
+                              evento.fechaHora ||
+                              '-'
+                            )
+                          }
+
+                        </div>
+
+                        <strong>
+
+                          ${
+                            escaparHTML(
+                              evento.tipoEvento ||
+                              'EVENTO'
+                            )
+                          }
+
+                        </strong>
+
+                        ${
+                          evento.responsable
+                            ? `
+
+                              <div>
+                                Responsable:
+                                ${
+                                  escaparHTML(
+                                    evento.responsable
+                                  )
+                                }
+                              </div>
+
+                            `
+                            : ''
+                        }
+
+
+                        ${
+                          evento.ubicacion
+                            ? `
+
+                              <div>
+                                Ubicación:
+                                ${
+                                  escaparHTML(
+                                    evento.ubicacion
+                                  )
+                                }
+                              </div>
+
+                            `
+                            : ''
+                        }
+
+
+                        ${
+                          evento.motivoObservacion
+                            ? `
+
+                              <div>
+                                Observación:
+                                ${
+                                  escaparHTML(
+                                    evento.motivoObservacion
+                                  )
+                                }
+                              </div>
+
+                            `
+                            : ''
+                        }
+
+
+                        ${
+                          Number(
+                            evento.tiempoTramoSegundos
+                          ) > 0
+                            ? `
+
+                              <div>
+                                Tiempo tramo:
+                                ${
+                                  formatearSegundos(
+                                    evento.tiempoTramoSegundos
+                                  )
+                                }
+                              </div>
+
+                            `
+                            : ''
+                        }
+
+                      </div>
+
+                    `
+                  )
+                  .join('')
               }
 
-            </span>
+            </div>
 
-          </div>
+          `
+          : ''
+      }
 
-        </div>
 
+      ${
+        fotosTraslado.length
+          ? `
 
-        <div class="cronologia-item">
+            <div class="cronologia-fotos">
 
-          <div class="cronologia-icono">
-            🚚
-          </div>
-
-          <div class="cronologia-info">
-
-            <strong>
-              Traslado
-            </strong>
-
-            <span>
-
-              Estado:
               ${
-                escaparHTML(
-                  traslado?.estadoTraslado ||
-                  'PENDIENTE'
-                )
-              }.
-
-              <br>
-
-              Tiempo efectivo:
-              ${
-                escaparHTML(
-                  traslado?.tiempoEfectivo ||
-                  formatearSegundos(
-                    traslado?.tiempoEfectivoSegundos
+                fotosTraslado
+                  .map(
+                    foto =>
+                      renderizarFotoCronologia(
+                        foto
+                      )
                   )
-                )
-              }.
+                  .join('')
+              }
 
-            </span>
+            </div>
 
-          </div>
+          `
+          : ''
+      }
 
-        </div>
+    </div>
+
+  </div>
 
 
-        <div class="cronologia-item">
+  <!-- =============================================
+       ARMADO
+  ============================================== -->
 
-          <div class="cronologia-icono">
-            🔨
-          </div>
+  <div class="cronologia-item">
 
-          <div class="cronologia-info">
+    <div class="cronologia-icono">
+      🔨
+    </div>
 
-            <strong>
-              Armado
-            </strong>
+    <div class="cronologia-info">
 
-            <span>
+      <strong>
+        Armado
+      </strong>
 
-              Estado:
+      <span>
+
+        Estado:
+        ${
+          escaparHTML(
+            eventosArmado?.estadoArmado ||
+            (
+              armadoCompletado
+                ? 'FINALIZADO'
+                : 'PENDIENTE'
+            )
+          )
+        }
+
+        <br>
+
+        Responsable:
+        ${
+          escaparHTML(
+            servicioActual.responsableArmado ||
+            '-'
+          )
+        }
+
+        ${
+          peso?.ok
+            ? `
+
+              <br>
+
+              Peso:
+              ${numero(
+                peso.pesoTotalKg
+              )} kg
+
+              ·
+
+              ${formatearToneladas(
+                peso.pesoTotalToneladas
+              )} t
+
+            `
+            : ''
+        }
+
+      </span>
+
+
+      ${
+        eventos.length
+          ? `
+
+            <div class="cronologia-eventos">
+
               ${
-                escaparHTML(
-                  eventosArmado?.estadoArmado ||
-                  (
-                    armadoCompletado
-                      ? 'FINALIZADO'
-                      : 'PENDIENTE'
+                eventos
+                  .map(
+                    evento => {
+
+                      const esPausa =
+                        normalizarTexto(
+                          evento.tipoEvento
+                        ).includes(
+                          'PAUSA'
+                        );
+
+
+                      return `
+
+                        <div
+                          class="
+                            cronologia-evento
+                            ${
+                              esPausa
+                                ? 'cronologia-pausa'
+                                : ''
+                            }
+                          "
+                        >
+
+                          <div class="cronologia-hora">
+
+                            🕒 ${
+                              escaparHTML(
+                                evento.fechaHora ||
+                                '-'
+                              )
+                            }
+
+                          </div>
+
+
+                          <strong>
+
+                            ${
+                              esPausa
+                                ? '⏸️ '
+                                : ''
+                            }
+
+                            ${
+                              escaparHTML(
+                                evento.tipoEvento ||
+                                'EVENTO'
+                              )
+                            }
+
+                          </strong>
+
+
+                          ${
+                            evento.responsable
+                              ? `
+
+                                <div>
+                                  Responsable:
+                                  ${
+                                    escaparHTML(
+                                      evento.responsable
+                                    )
+                                  }
+                                </div>
+
+                              `
+                              : ''
+                          }
+
+
+                          ${
+                            evento.motivo
+                              ? `
+
+                                <div>
+                                  Motivo:
+                                  ${
+                                    escaparHTML(
+                                      evento.motivo
+                                    )
+                                  }
+                                </div>
+
+                              `
+                              : ''
+                          }
+
+
+                          ${
+                            evento.observacion
+                              ? `
+
+                                <div>
+                                  Observación:
+                                  ${
+                                    escaparHTML(
+                                      evento.observacion
+                                    )
+                                  }
+                                </div>
+
+                              `
+                              : ''
+                          }
+
+
+                          ${
+                            Number(
+                              evento.tiempoTramoMinutos
+                            ) > 0
+                              ? `
+
+                                <div>
+                                  Tiempo tramo:
+                                  ${
+                                    formatearMinutos(
+                                      evento.tiempoTramoMinutos
+                                    )
+                                  }
+                                </div>
+
+                              `
+                              : ''
+                          }
+
+                        </div>
+
+                      `;
+
+                    }
                   )
-                )
-              }.
+                  .join('')
+              }
 
-              <br>
+            </div>
 
-              Responsable:
-              ${
-                escaparHTML(
-                  servicioActual.responsableArmado ||
-                  '-'
-                )
-              }.
+          `
+          : ''
+      }
 
-              <br>
 
-              Material utilizado:
-              ${numero(totalUtilizado)}.
+      ${
+        fotosArmado.length
+          ? `
+
+            <div class="cronologia-fotos">
 
               ${
-                peso?.ok
+                fotosArmado
+                  .map(
+                    foto =>
+                      renderizarFotoCronologia(
+                        foto
+                      )
+                  )
+                  .join('')
+              }
+
+            </div>
+
+          `
+          : ''
+      }
+
+    </div>
+
+  </div>
+
+
+  <!-- =============================================
+       POSTPARADA
+  ============================================== -->
+
+  <div class="cronologia-item">
+
+    <div class="cronologia-icono">
+      🔄
+    </div>
+
+    <div class="cronologia-info">
+
+      <strong>
+        Postparada
+      </strong>
+
+      <span>
+
+        ${
+          postparadaCompletada
+            ? `
+
+              Estado: COMPLETADO
+
+              ${
+                postparada?.resumen
                   ? `
+
                     <br>
-                    Peso:
-                    ${numero(
-                      peso.pesoTotalKg
-                    )} kg
-                    ·
-                    ${formatearToneladas(
-                      peso.pesoTotalToneladas
-                    )} t.
+
+                    Desmontado:
+                    ${
+                      numero(
+                        postparada
+                          .resumen
+                          .cantidadDesmontada
+                      )
+                    }
+
+                    · Faltante:
+                    ${
+                      numero(
+                        postparada
+                          .resumen
+                          .cantidadFaltante
+                      )
+                    }
+
                   `
                   : ''
               }
 
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <div class="cronologia-item">
-
-          <div class="cronologia-icono">
-            🔄
-          </div>
-
-          <div class="cronologia-info">
-
-            <strong>
-              Postparada
-            </strong>
-
-            <span>
-
-              ${
-                postparadaCompletada
-                  ? `
-                    Postparada finalizada.
-
-                    ${
-                      postparada?.resumen
-                        ? `
-                          <br>
-                          Desmontado:
-                          ${numero(
-                            postparada.resumen
-                              .cantidadDesmontada
-                          )}
-
-                          · Faltante:
-                          ${numero(
-                            postparada.resumen
-                              .cantidadFaltante
-                          )}
-                        `
-                        : ''
-                    }
-                  `
-                  : 'Pendiente de ejecución.'
-              }
-
-            </span>
-
-          </div>
-
-        </div>
-
-
-      </div>
-
-<!-- ===============================================
-     PAUSAS DE ARMADO
-=============================================== -->
-
-<div class="titulo-bloque">
-
-  <h3>
-    Pausas de Armado
-  </h3>
-
-  <span class="contador-fotos">
-    ${pausasArmado.length}
-  </span>
-
-</div>
-
-
-${
-  pausasArmado.length
-    ? `
-
-      <div class="eventos">
-
-        ${
-          pausasArmado
-            .map(
-              evento => `
-
-                <div class="evento">
-
-                  <div>
-
-                    <div class="evento-tipo">
-                      ⏸️ Pausa
-                    </div>
-
-                    <div class="evento-fecha">
-
-                      ${
-                        escaparHTML(
-                          evento.fechaHora ||
-                          '-'
-                        )
-                      }
-
-                    </div>
-
-                  </div>
-
-
-                  <div class="evento-detalle">
-
-                    <strong>
-                      Responsable
-                    </strong>
-
-                    <br>
-
-                    ${
-                      escaparHTML(
-                        evento.responsable ||
-                        '-'
-                      )
-                    }
-
-                  </div>
-
-
-                  <div class="evento-detalle">
-
-                    ${
-                      evento.motivo
-                        ? `
-
-                          <strong>
-                            Motivo:
-                          </strong>
-
-                          ${
-                            escaparHTML(
-                              evento.motivo
-                            )
-                          }
-
-                          <br>
-
-                        `
-                        : ''
-                    }
-
-
-                    ${
-                      evento.observacion
-                        ? `
-
-                          <strong>
-                            Observación:
-                          </strong>
-
-                          ${
-                            escaparHTML(
-                              evento.observacion
-                            )
-                          }
-
-                          <br>
-
-                        `
-                        : ''
-                    }
-
-
-                    ${
-                      Number(
-                        evento.tiempoTramoMinutos
-                      ) > 0
-                        ? `
-
-                          <strong>
-                            Tiempo:
-                          </strong>
-
-                          ${
-                            formatearMinutos(
-                              evento.tiempoTramoMinutos
-                            )
-                          }
-
-                        `
-                        : ''
-                    }
-
-                  </div>
-
-                </div>
-
-              `
-            )
-            .join('')
+            `
+            : 'Pendiente de ejecución.'
         }
 
-      </div>
-
-    `
-    : mensajeSinDatos(
-        'No se registraron pausas durante el Armado.'
-      )
-}
+      </span>
 
 
-<!-- ===============================================
-     EVIDENCIAS FOTOGRÁFICAS
-=============================================== -->
+      ${
+        fotosPostparada.length
+          ? `
 
-<div class="titulo-bloque">
+            <div class="cronologia-fotos">
 
-  <h3>
-    Evidencias fotográficas del TAG
-  </h3>
+              ${
+                fotosPostparada
+                  .map(
+                    foto =>
+                      renderizarFotoCronologia(
+                        foto
+                      )
+                  )
+                  .join('')
+              }
 
-  <span class="contador-fotos">
-    ${fotos.length}
-  </span>
+            </div>
+
+          `
+          : ''
+      }
+
+    </div>
+
+  </div>
+
 
 </div>
 
-
-${
-  renderizarFotos(
-    fotos
-  )
-}
       <!-- ===============================================
            INFORMACIÓN GENERAL
       ================================================ -->
@@ -4959,7 +5394,121 @@ ${
     `;
 
 }
+function renderizarFotoCronologia(
+  foto
+){
 
+  const miniatura =
+    obtenerMiniaturaFoto(
+      foto
+    );
+
+
+  return `
+
+    <div class="cronologia-foto">
+
+      ${
+        miniatura
+          ? `
+
+            <img
+              src="${
+                escaparAtributo(
+                  miniatura
+                )
+              }"
+              alt="Evidencia"
+              loading="lazy"
+            >
+
+          `
+          : `
+            <div class="cronologia-foto-vacia">
+              📷
+            </div>
+          `
+      }
+
+
+      <div>
+
+        <strong>
+
+          ${
+            escaparHTML(
+              foto.tipoFoto ||
+              foto.etapa ||
+              'Fotografía'
+            )
+          }
+
+        </strong>
+
+
+        ${
+          foto.fechaHora
+            ? `
+
+              <span>
+                🕒 ${
+                  escaparHTML(
+                    foto.fechaHora
+                  )
+                }
+              </span>
+
+            `
+            : ''
+        }
+
+
+        ${
+          foto.descripcion
+            ? `
+
+              <span>
+
+                ${
+                  escaparHTML(
+                    foto.descripcion
+                  )
+                }
+
+              </span>
+
+            `
+            : ''
+        }
+
+
+        ${
+          foto.enlaceFoto
+            ? `
+
+              <a
+                href="${
+                  escaparAtributo(
+                    foto.enlaceFoto
+                  )
+                }"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Abrir fotografía
+              </a>
+
+            `
+            : ''
+        }
+
+      </div>
+
+    </div>
+
+  `;
+
+}
 
 function renderizarPrevios(){
 
