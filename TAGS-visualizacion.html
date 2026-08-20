@@ -8247,7 +8247,10 @@ tagCabecera.value = {
       }
     },
     {
-      text: limpiarTexto(s.tag) || '-',
+      text: String(
+        servicioActual.tag ||
+        '-'
+      ).trim(),
       font: {
         bold: true,
         size: 14,
