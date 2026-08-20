@@ -2309,7 +2309,73 @@ tbody tr:nth-child(even){
 
 }
 
+.postparada-danado{
 
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    auto;
+
+  gap:10px;
+
+  margin-top:10px;
+
+  padding:10px;
+
+  background:
+    #fff0f1;
+
+  border:
+    1px solid
+    #ecc1c5;
+
+  border-left:
+    4px solid
+    var(--rojo);
+
+  border-radius:10px;
+
+}
+
+
+.postparada-danado-info{
+
+  padding:10px;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+  line-height:1.55;
+
+}
+
+
+.postparada-danado-info strong{
+
+  display:block;
+
+  margin-bottom:7px;
+
+  color:var(--rojo);
+
+  font-size:12px;
+
+}
+
+
+@media(
+  max-width:760px
+){
+
+  .postparada-danado{
+
+    grid-template-columns:1fr;
+
+  }
+
+}
 .cronologia-fotos-evento{
 
   display:grid;
@@ -4283,16 +4349,67 @@ const fotosArmado =
           foto.etapa
         );
 
+      const tipoFoto =
+        normalizarTexto(
+          foto.tipoFoto
+        );
+
+
+      /*
+       * Nunca traer fotografías
+       * de otras etapas.
+       */
+      if(
+        etapa === 'POSTPARADA' ||
+        etapa === 'TRASLADO' ||
+        etapa === 'RECEPCION EN TAG'
+      ){
+
+        return false;
+
+      }
+
+
       return (
+
         etapa === 'ARMADO' ||
+
         etapa === 'ARMADO PAUSA' ||
-        etapa === 'ANDAMIO TERMINADO'
+
+        etapa === 'ANDAMIO TERMINADO' ||
+
+        etapa.includes(
+          'ESTABILIZ'
+        ) ||
+
+        tipoFoto.includes(
+          'VISTA GENERAL'
+        ) ||
+
+        tipoFoto.includes(
+          'LADO IZQUIERDO'
+        ) ||
+
+        tipoFoto.includes(
+          'LADO DERECHO'
+        ) ||
+
+        tipoFoto.includes(
+          'ACCESO'
+        ) ||
+
+        tipoFoto.includes(
+          'ESTABILIZ'
+        ) ||
+
+        tipoFoto.includes(
+          'OTRA EVIDENCIA'
+        )
+
       );
 
     }
   );
-
-
 const fotosPostparada =
   fotos.filter(
     foto =>
@@ -4302,6 +4419,48 @@ const fotosPostparada =
       'POSTPARADA'
   );
 
+  const fotosMaterialDanado =
+  fotosPostparada.filter(
+    foto => {
+
+      const tipoFoto =
+        normalizarTexto(
+          foto.tipoFoto
+        );
+
+      return (
+        tipoFoto.includes(
+          'MATERIAL DANADO'
+        ) ||
+        tipoFoto.includes(
+          'MATERIAL DAÑADO'
+        )
+      );
+
+    }
+  );
+
+
+const fotosPostparadaGenerales =
+  fotosPostparada.filter(
+    foto =>
+      !fotosMaterialDanado.includes(
+        foto
+      )
+  );
+
+
+const totalMaterialDanado =
+  (
+    postparada &&
+    postparada.resumen
+  )
+    ? Number(
+        postparada
+          .resumen
+          .cantidadDanada
+      ) || 0
+    : 0;
   /*
    * =====================================================
    * PAUSAS DE ARMADO
@@ -5189,9 +5348,16 @@ if(
             foto.etapa
           );
 
+        const tipoFoto =
+          normalizarTexto(
+            foto.tipoFoto
+          );
+
         return (
-          etapa === 'ARMADO' ||
-          etapa === 'ANDAMIO TERMINADO'
+          etapa !== 'ARMADO PAUSA' &&
+          !tipoFoto.includes(
+            'PAUSA'
+          )
         );
 
       }
@@ -5517,33 +5683,92 @@ return `
               </div>
 
 
-              ${
-                fotosPostparada.length
-                  ? `
+             ${
+  fotosPostparadaGenerales.length
+    ? `
 
-                    <div class="cronologia-fotos-evento">
+      <div class="cronologia-fotos-evento">
 
-                      ${
-                        fotosPostparada
-                          .map(
-                            foto =>
-                              renderizarFotoCronologia(
-                                foto
-                              )
-                          )
-                          .join('')
-                      }
+        ${
+          fotosPostparadaGenerales
+            .map(
+              foto =>
+                renderizarFotoCronologia(
+                  foto
+                )
+            )
+            .join('')
+        }
 
-                    </div>
+      </div>
 
-                  `
-                  : ''
-              }
-
+    `
+    : ''
+}
             </div>
 
           </div>
+${
+  totalMaterialDanado > 0 ||
+  fotosMaterialDanado.length
+    ? `
 
+      <div class="postparada-danado">
+
+        <div class="postparada-danado-info">
+
+          <strong>
+            ⚠️ MATERIAL DAÑADO
+          </strong>
+
+          <div>
+
+            Cantidad dañada:
+            <b>
+              ${numero(
+                totalMaterialDanado
+              )}
+            </b>
+
+          </div>
+
+          <div>
+            Se identificó material
+            con daño durante la
+            Postparada.
+          </div>
+
+        </div>
+
+
+        ${
+          fotosMaterialDanado.length
+            ? `
+
+              <div class="cronologia-fotos-evento">
+
+                ${
+                  fotosMaterialDanado
+                    .map(
+                      foto =>
+                        renderizarFotoCronologia(
+                          foto
+                        )
+                    )
+                    .join('')
+                }
+
+              </div>
+
+            `
+            : ''
+        }
+
+      </div>
+
+    `
+    : ''
+}
         `
         : `
 
@@ -6319,14 +6544,77 @@ function renderizarArmado(){
     );
 
 
-  const fotosFinales =
-    filtrarFotosPorEtapas(
-      [
-        'ARMADO',
-        'ANDAMIO TERMINADO'
-      ]
-    );
+const fotosFinales =
+  filtrarFotosPorFecha(
+    (
+      datosDetalle.fotografias ||
+      []
+    )
+      .filter(
+        foto => {
 
+          const etapa =
+            normalizarTexto(
+              foto.etapa
+            );
+
+          const tipoFoto =
+            normalizarTexto(
+              foto.tipoFoto
+            );
+
+
+          if(
+            etapa === 'POSTPARADA' ||
+            etapa === 'TRASLADO' ||
+            etapa === 'RECEPCION EN TAG' ||
+            etapa === 'ARMADO PAUSA'
+          ){
+
+            return false;
+
+          }
+
+
+          return (
+
+            etapa === 'ARMADO' ||
+
+            etapa === 'ANDAMIO TERMINADO' ||
+
+            etapa.includes(
+              'ESTABILIZ'
+            ) ||
+
+            tipoFoto.includes(
+              'VISTA GENERAL'
+            ) ||
+
+            tipoFoto.includes(
+              'LADO IZQUIERDO'
+            ) ||
+
+            tipoFoto.includes(
+              'LADO DERECHO'
+            ) ||
+
+            tipoFoto.includes(
+              'ACCESO'
+            ) ||
+
+            tipoFoto.includes(
+              'ESTABILIZ'
+            ) ||
+
+            tipoFoto.includes(
+              'OTRA EVIDENCIA'
+            )
+
+          );
+
+        }
+      )
+  );
 
   const armadoFinalizado =
     materiales.some(
