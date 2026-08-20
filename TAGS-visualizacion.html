@@ -2312,7 +2312,13 @@ tbody tr:nth-child(even){
 
 .cronologia-fotos-evento{
 
-  display:flex;
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      240px
+    );
 
   gap:8px;
 
@@ -2345,7 +2351,7 @@ tbody tr:nth-child(even){
 
   .cronologia-fotos-evento{
 
-    flex-direction:column;
+    grid-template-columns:1fr;
 
   }
 
@@ -2358,7 +2364,6 @@ tbody tr:nth-child(even){
   }
 
 }
-
 .cronologia-fotos{
 
   display:grid;
@@ -5148,19 +5153,54 @@ ${
                   .map(
                     evento => {
 
-                      const esPausa =
-                        normalizarTexto(
-                          evento.tipoEvento
-                        ).includes(
-                          'PAUSA'
-                        );
+const esPausa =
+  normalizarTexto(
+    evento.tipoEvento
+  ).includes(
+    'PAUSA'
+  );
 
-                        const fotosEvento =
-                          obtenerFotosDelEvento(
-                            fotosArmado,
-                            evento
-                          );
-                      return `
+
+const tipoEvento =
+  normalizarTexto(
+    evento.tipoEvento
+  );
+
+
+let fotosEvento =
+  obtenerFotosDelEvento(
+    fotosArmado,
+    evento
+  );
+
+
+if(
+  tipoEvento.includes(
+    'FIN MONTAJE'
+  )
+){
+
+  fotosEvento =
+    fotosArmado.filter(
+      foto => {
+
+        const etapa =
+          normalizarTexto(
+            foto.etapa
+          );
+
+        return (
+          etapa === 'ARMADO' ||
+          etapa === 'ANDAMIO TERMINADO'
+        );
+
+      }
+    );
+
+}
+
+
+return `
 
 <div
   class="
@@ -5330,28 +5370,7 @@ ${
       }
 
 
-      ${
-        fotosArmado.length
-          ? `
 
-            <div class="cronologia-fotos">
-
-              ${
-                fotosArmado
-                  .map(
-                    foto =>
-                      renderizarFotoCronologia(
-                        foto
-                      )
-                  )
-                  .join('')
-              }
-
-            </div>
-
-          `
-          : ''
-      }
 
     </div>
 
