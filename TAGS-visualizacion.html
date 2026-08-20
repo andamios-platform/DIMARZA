@@ -5377,92 +5377,207 @@ return `
   </div>
 
 
-  <!-- =============================================
-       POSTPARADA
-  ============================================== -->
+<!-- =============================================
+     POSTPARADA
+============================================== -->
 
-  <div class="cronologia-item">
+<div class="cronologia-item">
 
-    <div class="cronologia-icono">
-      🔄
-    </div>
+  <div class="cronologia-icono">
+    🔄
+  </div>
 
-    <div class="cronologia-info">
+  <div class="cronologia-info">
 
-      <strong>
-        Postparada
-      </strong>
+    <strong>
+      Postparada
+    </strong>
 
-      <span>
 
-        ${
-          postparadaCompletada
-            ? `
+    ${
+      postparadaCompletada
+        ? `
 
-              Estado: COMPLETADO
+          <div class="cronologia-eventos">
+
+            <div class="cronologia-evento-con-fotos">
+
+              <div class="cronologia-evento">
+
+                <div class="cronologia-hora">
+
+                  🕒 ${
+                    escaparHTML(
+                      postparada?.fechaPostparada ||
+                      postparada?.fechaRegistro ||
+                      postparada?.fechaHora ||
+                      '-'
+                    )
+                  }
+
+                </div>
+
+
+                <strong>
+                  ✅ POSTPARADA FINALIZADA
+                </strong>
+
+
+                ${
+                  servicioActual.responsablePostparada
+                    ? `
+
+                      <div>
+
+                        Responsable:
+                        ${
+                          escaparHTML(
+                            servicioActual
+                              .responsablePostparada
+                          )
+                        }
+
+                      </div>
+
+                    `
+                    : ''
+                }
+
+
+                ${
+                  postparada?.resumen
+                    ? `
+
+                      <div>
+
+                        Desmontado:
+                        ${
+                          numero(
+                            postparada
+                              .resumen
+                              .cantidadDesmontada
+                          )
+                        }
+
+                      </div>
+
+
+                      <div>
+
+                        Dañado:
+                        ${
+                          numero(
+                            postparada
+                              .resumen
+                              .cantidadDanada
+                          )
+                        }
+
+                      </div>
+
+
+                      <div>
+
+                        Faltante:
+                        ${
+                          numero(
+                            postparada
+                              .resumen
+                              .cantidadFaltante
+                          )
+                        }
+
+                      </div>
+
+                    `
+                    : ''
+                }
+
+
+                ${
+                  postparada?.observacionPostparada
+                    ? `
+
+                      <div>
+
+                        Observación:
+                        ${
+                          escaparHTML(
+                            postparada
+                              .observacionPostparada
+                          )
+                        }
+
+                      </div>
+
+                    `
+                    : ''
+                }
+
+              </div>
+
 
               ${
-                postparada?.resumen
+                fotosPostparada.length
                   ? `
 
-                    <br>
+                    <div class="cronologia-fotos-evento">
 
-                    Desmontado:
-                    ${
-                      numero(
-                        postparada
-                          .resumen
-                          .cantidadDesmontada
-                      )
-                    }
+                      ${
+                        fotosPostparada
+                          .map(
+                            foto =>
+                              renderizarFotoCronologia(
+                                foto
+                              )
+                          )
+                          .join('')
+                      }
 
-                    · Faltante:
-                    ${
-                      numero(
-                        postparada
-                          .resumen
-                          .cantidadFaltante
-                      )
-                    }
+                    </div>
 
                   `
                   : ''
               }
 
-            `
-            : 'Pendiente de ejecución.'
-        }
-
-      </span>
-
-
-      ${
-        fotosPostparada.length
-          ? `
-
-            <div class="cronologia-fotos">
-
-              ${
-                fotosPostparada
-                  .map(
-                    foto =>
-                      renderizarFotoCronologia(
-                        foto
-                      )
-                  )
-                  .join('')
-              }
-
             </div>
 
-          `
-          : ''
-      }
+          </div>
 
-    </div>
+        `
+        : `
+
+          <span>
+            Pendiente de ejecución.
+          </span>
+
+          ${
+            fotosPostparada.length
+              ? `
+
+                <div class="cronologia-fotos">
+
+                  ${
+                    fotosPostparada
+                      .map(
+                        foto =>
+                          renderizarFotoCronologia(
+                            foto
+                          )
+                      )
+                      .join('')
+                  }
+
+                </div>
+
+              `
+              : ''
+          }
+
+        `
+    }
 
   </div>
-
 
 </div>
 
