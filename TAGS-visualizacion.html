@@ -5155,19 +5155,34 @@ ${
                           'PAUSA'
                         );
 
-
+                        const fotosEvento =
+                          obtenerFotosDelEvento(
+                            fotosArmado,
+                            evento
+                          );
                       return `
 
-                        <div
-                          class="
-                            cronologia-evento
-                            ${
-                              esPausa
-                                ? 'cronologia-pausa'
-                                : ''
-                            }
-                          "
-                        >
+<div
+  class="
+    cronologia-evento-con-fotos
+    ${
+      esPausa
+        ? 'cronologia-evento-pausa'
+        : ''
+    }
+  "
+>
+
+  <div
+    class="
+      cronologia-evento
+      ${
+        esPausa
+          ? 'cronologia-pausa'
+          : ''
+      }
+    "
+  >
 
                           <div class="cronologia-hora">
 
@@ -5273,6 +5288,33 @@ ${
                           }
 
                         </div>
+
+
+                        ${
+                          fotosEvento.length
+                            ? `
+
+                              <div class="cronologia-fotos-evento">
+
+                                ${
+                                  fotosEvento
+                                    .map(
+                                      foto =>
+                                        renderizarFotoCronologia(
+                                          foto
+                                        )
+                                    )
+                                    .join('')
+                                }
+
+                              </div>
+
+                            `
+                            : ''
+                        }
+
+
+                      </div>
 
                       `;
 
