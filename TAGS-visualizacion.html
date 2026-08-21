@@ -10626,10 +10626,13 @@ async function exportarExcelAndamio(){
     !servicioActual ||
     !datosDetalle.pesoAndamio?.ok
   ){
+
     alert(
       'No existe información suficiente para exportar este andamio.'
     );
+
     return;
+
   }
 
 
@@ -10637,15 +10640,91 @@ async function exportarExcelAndamio(){
     typeof ExcelJS ===
     'undefined'
   ){
+
     alert(
       'No se pudo cargar el generador de Excel.'
     );
+
     return;
+
   }
 
 
   const peso =
     datosDetalle.pesoAndamio;
+
+
+  const previos =
+    datosDetalle.previos ||
+    {};
+
+
+  const traslado =
+    datosDetalle.traslado ||
+    {};
+
+
+  const armado =
+    datosDetalle.armado ||
+    {};
+
+
+  const eventosArmado =
+    datosDetalle.eventosArmado ||
+    {};
+
+
+  const postparada =
+    datosDetalle.postparada ||
+    {};
+
+
+  const fotografias =
+    Array.isArray(
+      datosDetalle.fotografias
+    )
+      ? datosDetalle.fotografias
+      : [];
+
+
+  const materialesPrevios =
+    Array.isArray(
+      previos.materiales
+    )
+      ? previos.materiales
+      : [];
+
+
+  const materialesArmado =
+    Array.isArray(
+      armado.materiales
+    )
+      ? armado.materiales
+      : [];
+
+
+  const materialesPostparada =
+    Array.isArray(
+      postparada.materiales
+    )
+      ? postparada.materiales
+      : [];
+
+
+  const eventosTraslado =
+    Array.isArray(
+      traslado.eventos
+    )
+      ? traslado.eventos
+      : [];
+
+
+  const eventosMontaje =
+    Array.isArray(
+      eventosArmado.eventos
+    )
+      ? eventosArmado.eventos
+      : [];
 
 
   const materiales =
@@ -10664,16 +10743,92 @@ async function exportarExcelAndamio(){
   if(
     !materiales.length
   ){
+
     alert(
       'Este TAG no tiene materiales utilizados para exportar.'
     );
+
     return;
+
   }
+
+
+  const totalDespachado =
+    materialesPrevios.reduce(
+      (
+        total,
+        material
+      ) =>
+        total +
+        (
+          Number(
+            material.cantidadDespachada
+          ) || 0
+        ),
+      0
+    );
+
+
+  const totalUtilizado =
+    materialesArmado.reduce(
+      (
+        total,
+        material
+      ) =>
+        total +
+        (
+          Number(
+            material.cantidadUtilizada
+          ) || 0
+        ),
+      0
+    );
+
+
+  const totalPausasArmado =
+    eventosMontaje.filter(
+      evento =>
+        normalizarTexto(
+          evento.tipoEvento
+        ).includes(
+          'PAUSA'
+        )
+    ).length;
+
+
+  const totalDanado =
+    Number(
+      postparada?.resumen
+        ?.cantidadDanada
+    ) || 0;
+
+
+  const totalFaltante =
+    Number(
+      postparada?.resumen
+        ?.cantidadFaltante
+    ) || 0;
+
+
+  const materialesIncidencia =
+    materialesPostparada.filter(
+      material =>
+        (
+          Number(
+            material.cantidadDanada
+          ) || 0
+        ) > 0 ||
+        (
+          Number(
+            material.cantidadFaltante
+          ) || 0
+        ) > 0
+    );
 
 
   /*
    * =====================================================
-   * CARGAR LOGO DIMARZA
+   * CARGAR LOGO
    * =====================================================
    */
 
@@ -10683,7 +10838,9 @@ async function exportarExcelAndamio(){
 
     const respuesta =
       await fetch(
-        encodeURI(ruta),
+        encodeURI(
+          ruta
+        ),
         {
           cache:'no-store'
         }
@@ -10750,13 +10907,14 @@ async function exportarExcelAndamio(){
     workbook.creator =
       'DIMARZA';
 
+
     workbook.created =
       new Date();
 
 
     const hoja =
       workbook.addWorksheet(
-        'RESUMEN ANDAMIO',
+        'REPORTE ANDAMIO',
         {
           views:[
             {
@@ -10776,33 +10934,33 @@ async function exportarExcelAndamio(){
     hoja.columns = [
 
       {
-        key:'grupo',
+        key:'A',
         width:23
       },
 
       {
-        key:'material',
-        width:42
+        key:'B',
+        width:40
       },
 
       {
-        key:'codigo',
-        width:17
-      },
-
-      {
-        key:'cantidad',
-        width:18
-      },
-
-      {
-        key:'pesoUnitario',
-        width:18
-      },
-
-      {
-        key:'pesoTotal',
+        key:'C',
         width:20
+      },
+
+      {
+        key:'D',
+        width:23
+      },
+
+      {
+        key:'E',
+        width:24
+      },
+
+      {
+        key:'F',
+        width:28
       }
 
     ];
@@ -10823,14 +10981,20 @@ async function exportarExcelAndamio(){
     const AZUL_CLARO =
       'EAF3FA';
 
-    const GRIS_CLARO =
-      'F5F7F9';
-
     const VERDE =
       '1F8F5F';
 
     const VERDE_CLARO =
       'E9F7F1';
+
+    const ROJO =
+      'C83F49';
+
+    const ROJO_CLARO =
+      'FFF0F1';
+
+    const GRIS_CLARO =
+      'F5F7F9';
 
     const BLANCO =
       'FFFFFF';
@@ -10880,7 +11044,131 @@ async function exportarExcelAndamio(){
 
     /*
      * =====================================================
-     * CABECERA CORPORATIVA
+     * FUNCIONES AUXILIARES EXCEL
+     * =====================================================
+     */
+
+    function pintarTituloSeccion(
+      fila,
+      texto,
+      color = AZUL
+    ){
+
+      hoja.mergeCells(
+        `A${fila}:F${fila}`
+      );
+
+
+      const celda =
+        hoja.getCell(
+          `A${fila}`
+        );
+
+
+      celda.value =
+        texto;
+
+
+      celda.font = {
+        bold:true,
+        size:11,
+        color:{
+          argb:BLANCO
+        }
+      };
+
+
+      celda.fill = {
+        type:'pattern',
+        pattern:'solid',
+        fgColor:{
+          argb:color
+        }
+      };
+
+
+      celda.alignment = {
+        horizontal:'left',
+        vertical:'middle'
+      };
+
+
+      celda.border =
+        bordeFino;
+
+
+      hoja.getRow(
+        fila
+      ).height =
+        24;
+
+    }
+
+
+    function pintarEtiqueta(
+      referencia
+    ){
+
+      const celda =
+        hoja.getCell(
+          referencia
+        );
+
+
+      celda.font = {
+        bold:true,
+        color:{
+          argb:AZUL
+        }
+      };
+
+
+      celda.fill = {
+        type:'pattern',
+        pattern:'solid',
+        fgColor:{
+          argb:AZUL_CLARO
+        }
+      };
+
+
+      celda.border =
+        bordeFino;
+
+
+      celda.alignment = {
+        vertical:'middle',
+        wrapText:true
+      };
+
+    }
+
+
+    function pintarCeldaNormal(
+      referencia
+    ){
+
+      const celda =
+        hoja.getCell(
+          referencia
+        );
+
+
+      celda.border =
+        bordeFino;
+
+
+      celda.alignment = {
+        vertical:'middle',
+        wrapText:true
+      };
+
+    }
+
+
+    /*
+     * =====================================================
+     * CABECERA
      * =====================================================
      */
 
@@ -10888,18 +11176,17 @@ async function exportarExcelAndamio(){
       'A1:B2'
     );
 
+
     hoja.mergeCells(
       'C1:E2'
     );
+
 
     hoja.mergeCells(
       'F1:F2'
     );
 
 
-    /*
-     * Pintar toda la cabecera azul.
-     */
     for(
       let fila = 1;
       fila <= 2;
@@ -10930,43 +11217,45 @@ async function exportarExcelAndamio(){
       }
 
     }
-/*
- * Fondo especial para el área del logo
- */
-for(
-  let fila = 1;
-  fila <= 2;
-  fila++
-){
 
-  for(
-    let columna = 1;
-    columna <= 2;
-    columna++
-  ){
 
-    const celda =
-      hoja.getCell(
-        fila,
-        columna
-      );
+    /*
+     * Fondo blanco del logo.
+     */
 
-    celda.fill = {
-      type:'pattern',
-      pattern:'solid',
-      fgColor:{
-        argb:'FFFFFF'
+    for(
+      let fila = 1;
+      fila <= 2;
+      fila++
+    ){
+
+      for(
+        let columna = 1;
+        columna <= 2;
+        columna++
+      ){
+
+        hoja.getCell(
+          fila,
+          columna
+        ).fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:BLANCO
+          }
+        };
+
       }
-    };
 
-  }
+    }
 
-}
 
     hoja.getRow(
       1
     ).height =
       32;
+
 
     hoja.getRow(
       2
@@ -10976,7 +11265,7 @@ for(
 
     /*
      * =====================================================
-     * LOGO DIMARZA
+     * LOGO
      * =====================================================
      */
 
@@ -11000,6 +11289,7 @@ for(
             'png'
         });
 
+
       hoja.addImage(
         logoId,
         {
@@ -11009,12 +11299,12 @@ for(
             nativeRow:0,
             nativeRowOff:20000
           },
-      
+
           ext:{
             width:252,
             height:81
           },
-      
+
           editAs:'oneCell'
         }
       );
@@ -11022,7 +11312,6 @@ for(
 
       logoCargado =
         true;
-
 
     }catch(errorLogo){
 
@@ -11034,11 +11323,6 @@ for(
     }
 
 
-    /*
-     * Si por algún motivo el PNG
-     * no carga, mostramos DIMARZA
-     * como texto.
-     */
     if(
       !logoCargado
     ){
@@ -11057,7 +11341,7 @@ for(
         bold:true,
         size:18,
         color:{
-          argb:BLANCO
+          argb:AZUL
         }
       };
 
@@ -11071,7 +11355,9 @@ for(
 
 
     /*
+     * =====================================================
      * TÍTULO CENTRAL
+     * =====================================================
      */
 
     const titulo =
@@ -11081,7 +11367,7 @@ for(
 
 
     titulo.value =
-      'CUANTIFICACIÓN DE ANDAMIO';
+      'REPORTE DE ANDAMIO';
 
 
     titulo.font = {
@@ -11101,7 +11387,9 @@ for(
 
 
     /*
-     * TAG A LA DERECHA
+     * =====================================================
+     * TAG
+     * =====================================================
      */
 
     const tagCabecera =
@@ -11110,33 +11398,38 @@ for(
       );
 
 
-tagCabecera.value = {
-  richText: [
-    {
-      text: 'TAG\n',
-      font: {
-        bold: true,
-        size: 10,
-        color: {
-          argb: BLANCO
+    tagCabecera.value = {
+
+      richText:[
+
+        {
+          text:'TAG\n',
+          font:{
+            bold:true,
+            size:10,
+            color:{
+              argb:BLANCO
+            }
+          }
+        },
+
+        {
+          text:String(
+            servicioActual.tag ||
+            '-'
+          ),
+          font:{
+            bold:true,
+            size:14,
+            color:{
+              argb:BLANCO
+            }
+          }
         }
-      }
-    },
-    {
-      text: String(
-        servicioActual.tag ||
-        '-'
-      ).trim(),
-      font: {
-        bold: true,
-        size: 14,
-        color: {
-          argb: BLANCO
-        }
-      }
-    }
-  ]
-};
+
+      ]
+
+    };
 
 
     tagCabecera.alignment = {
@@ -11148,64 +11441,23 @@ tagCabecera.value = {
 
     /*
      * =====================================================
-     * SECCIÓN DATOS DEL SERVICIO
+     * 1. DATOS DEL SERVICIO
      * =====================================================
      */
 
-    hoja.mergeCells(
-      'A4:F4'
+    let filaActual =
+      4;
+
+
+    pintarTituloSeccion(
+      filaActual,
+      '1. DATOS DEL SERVICIO',
+      AZUL2
     );
 
 
-    const tituloDatos =
-      hoja.getCell(
-        'A4'
-      );
+    filaActual++;
 
-
-    tituloDatos.value =
-      'DATOS DEL SERVICIO';
-
-
-    tituloDatos.font = {
-      bold:true,
-      size:11,
-      color:{
-        argb:BLANCO
-      }
-    };
-
-
-    tituloDatos.fill = {
-      type:'pattern',
-      pattern:'solid',
-      fgColor:{
-        argb:AZUL2
-      }
-    };
-
-
-    tituloDatos.alignment = {
-      horizontal:'left',
-      vertical:'middle'
-    };
-
-
-    tituloDatos.border =
-      bordeFino;
-
-
-    hoja.getRow(
-      4
-    ).height =
-      23;
-
-
-    /*
-     * =====================================================
-     * DATOS GENERALES
-     * =====================================================
-     */
 
     const datosServicio = [
 
@@ -11248,8 +11500,17 @@ tagCabecera.value = {
       ],
 
       [
+        'Responsable Previos',
+        servicioActual.responsablePrevios ||
+        '-',
         'Responsable Armado',
         servicioActual.responsableArmado ||
+        '-'
+      ],
+
+      [
+        'Responsable Postparada',
+        servicioActual.responsablePostparada ||
         '-',
         'Fecha programada',
         servicioActual.fechaProgramada ||
@@ -11259,16 +11520,13 @@ tagCabecera.value = {
     ];
 
 
-    let filaActual =
-      5;
-
-
     datosServicio.forEach(
       fila => {
 
         hoja.mergeCells(
           `B${filaActual}:C${filaActual}`
         );
+
 
         hoja.mergeCells(
           `E${filaActual}:F${filaActual}`
@@ -11299,81 +11557,27 @@ tagCabecera.value = {
           fila[3];
 
 
-        /*
-         * Etiquetas.
-         */
-        [
-          `A${filaActual}`,
+        pintarEtiqueta(
+          `A${filaActual}`
+        );
+
+
+        pintarEtiqueta(
           `D${filaActual}`
-        ]
-          .forEach(
-            referencia => {
-
-              const celda =
-                hoja.getCell(
-                  referencia
-                );
+        );
 
 
-              celda.font = {
-                bold:true,
-                color:{
-                  argb:AZUL
-                }
-              };
-
-
-              celda.fill = {
-                type:'pattern',
-                pattern:'solid',
-                fgColor:{
-                  argb:AZUL_CLARO
-                }
-              };
-
-
-              celda.border =
-                bordeFino;
-
-
-              celda.alignment = {
-                vertical:'middle',
-                horizontal:'left'
-              };
-
-            }
-          );
-
-
-        /*
-         * Valores.
-         */
         [
-          `B${filaActual}`,
-          `C${filaActual}`,
-          `E${filaActual}`,
-          `F${filaActual}`
-        ]
-          .forEach(
-            referencia => {
-
-              const celda =
-                hoja.getCell(
-                  referencia
-                );
-
-
-              celda.border =
-                bordeFino;
-
-
-              celda.alignment = {
-                vertical:'middle',
-                wrapText:true
-              };
-
-            }
-          );
+          'B',
+          'C',
+          'E',
+          'F'
+        ].forEach(
+          columna =>
+            pintarCeldaNormal(
+              `${columna}${filaActual}`
+            )
+        );
 
 
         hoja.getRow(
@@ -11390,7 +11594,7 @@ tagCabecera.value = {
 
     /*
      * =====================================================
-     * DESCRIPCIÓN DEL TRABAJO
+     * DESCRIPCIÓN
      * =====================================================
      */
 
@@ -11401,6 +11605,265 @@ tagCabecera.value = {
       `A${filaActual}`
     ).value =
       'Descripción del trabajo';
+
+
+    pintarEtiqueta(
+      `A${filaActual}`
+    );
+
+
+    hoja.mergeCells(
+      `B${filaActual}:F${filaActual}`
+    );
+
+
+    hoja.getCell(
+      `B${filaActual}`
+    ).value =
+      servicioActual.descripcion ||
+      servicioActual.descripcionTrabajo ||
+      '-';
+
+
+    [
+      'B',
+      'C',
+      'D',
+      'E',
+      'F'
+    ].forEach(
+      columna =>
+        pintarCeldaNormal(
+          `${columna}${filaActual}`
+        )
+    );
+
+
+    hoja.getRow(
+      filaActual
+    ).height =
+      40;
+
+
+    /*
+     * =====================================================
+     * 2. RESUMEN EJECUTIVO
+     * =====================================================
+     */
+
+    filaActual +=
+      2;
+
+
+    pintarTituloSeccion(
+      filaActual,
+      '2. RESUMEN EJECUTIVO'
+    );
+
+
+    filaActual++;
+
+
+    const indicadores1 = [
+
+      'Material despachado',
+      totalDespachado,
+
+      'Material utilizado',
+      totalUtilizado,
+
+      'Peso kg',
+      Number(
+        peso.pesoTotalKg
+      ) || 0
+
+    ];
+
+
+    hoja.getRow(
+      filaActual
+    ).values =
+      indicadores1;
+
+
+    for(
+      let columna = 1;
+      columna <= 6;
+      columna++
+    ){
+
+      const celda =
+        hoja.getCell(
+          filaActual,
+          columna
+        );
+
+
+      celda.border =
+        bordeFino;
+
+
+      celda.alignment = {
+        vertical:'middle',
+        horizontal:
+          columna % 2 === 0
+            ? 'center'
+            : 'left',
+        wrapText:true
+      };
+
+
+      if(
+        columna % 2 === 1
+      ){
+
+        celda.font = {
+          bold:true,
+          color:{
+            argb:AZUL
+          }
+        };
+
+
+        celda.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:AZUL_CLARO
+          }
+        };
+
+      }
+
+    }
+
+
+    hoja.getRow(
+      filaActual
+    ).height =
+      28;
+
+
+    filaActual++;
+
+
+    const indicadores2 = [
+
+      'Tonelaje',
+      Number(
+        peso.pesoTotalToneladas
+      ) || 0,
+
+      'Tiempo traslado',
+      traslado.tiempoEfectivo ||
+      formatearSegundos(
+        traslado.tiempoEfectivoSegundos
+      ),
+
+      'Pausas armado',
+      totalPausasArmado
+
+    ];
+
+
+    hoja.getRow(
+      filaActual
+    ).values =
+      indicadores2;
+
+
+    for(
+      let columna = 1;
+      columna <= 6;
+      columna++
+    ){
+
+      const celda =
+        hoja.getCell(
+          filaActual,
+          columna
+        );
+
+
+      celda.border =
+        bordeFino;
+
+
+      celda.alignment = {
+        vertical:'middle',
+        horizontal:
+          columna % 2 === 0
+            ? 'center'
+            : 'left',
+        wrapText:true
+      };
+
+
+      if(
+        columna % 2 === 1
+      ){
+
+        celda.font = {
+          bold:true,
+          color:{
+            argb:AZUL
+          }
+        };
+
+
+        celda.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:AZUL_CLARO
+          }
+        };
+
+      }
+
+    }
+
+
+    hoja.getCell(
+      `B${filaActual}`
+    ).numFmt =
+      '0.000';
+
+
+    /*
+     * =====================================================
+     * 3. CRONOLOGÍA
+     * =====================================================
+     */
+
+    filaActual +=
+      2;
+
+
+    pintarTituloSeccion(
+      filaActual,
+      '3. CRONOLOGÍA DEL SERVICIO'
+    );
+
+
+    /*
+     * =====================================================
+     * PREVIOS
+     * =====================================================
+     */
+
+    filaActual++;
+
+
+    hoja.mergeCells(
+      `A${filaActual}:F${filaActual}`
+    );
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).value =
+      'PREVIOS';
 
 
     hoja.getCell(
@@ -11424,50 +11887,45 @@ tagCabecera.value = {
     };
 
 
+    hoja.getCell(
+      `A${filaActual}`
+    ).border =
+      bordeFino;
+
+
+    filaActual++;
+
+
     hoja.mergeCells(
-      `B${filaActual}:F${filaActual}`
+      `A${filaActual}:F${filaActual}`
     );
 
 
     hoja.getCell(
-      `B${filaActual}`
+      `A${filaActual}`
     ).value =
-      servicioActual.descripcion ||
-      servicioActual.descripcionTrabajo ||
-      '-';
+      materialesPrevios.length
+        ? `Estado: COMPLETADO | Tipos de material: ${materialesPrevios.length} | Material despachado: ${numero(totalDespachado)}`
+        : 'Estado: PENDIENTE';
 
 
-    hoja.getRow(
-      filaActual
-    ).height =
-      38;
+    hoja.getCell(
+      `A${filaActual}`
+    ).alignment = {
+      vertical:'middle',
+      wrapText:true
+    };
 
 
-    hoja.getRow(
-      filaActual
-    )
-      .eachCell(
-        {
-          includeEmpty:true
-        },
-        celda => {
-
-          celda.border =
-            bordeFino;
-
-
-          celda.alignment = {
-            vertical:'middle',
-            wrapText:true
-          };
-
-        }
-      );
+    hoja.getCell(
+      `A${filaActual}`
+    ).border =
+      bordeFino;
 
 
     /*
      * =====================================================
-     * DETALLE DE MATERIALES
+     * TRASLADO
      * =====================================================
      */
 
@@ -11480,92 +11938,70 @@ tagCabecera.value = {
     );
 
 
-    const tituloMateriales =
-      hoja.getCell(
-        `A${filaActual}`
-      );
+    hoja.getCell(
+      `A${filaActual}`
+    ).value =
+      `TRASLADO | Estado: ${
+        traslado.estadoTraslado ||
+        'PENDIENTE'
+      } | Tiempo efectivo: ${
+        traslado.tiempoEfectivo ||
+        formatearSegundos(
+          traslado.tiempoEfectivoSegundos
+        )
+      }`;
 
 
-    tituloMateriales.value =
-      'DETALLE DE MATERIAL REALMENTE UTILIZADO';
-
-
-    tituloMateriales.font = {
+    hoja.getCell(
+      `A${filaActual}`
+    ).font = {
       bold:true,
-      size:12,
       color:{
-        argb:BLANCO
-      }
-    };
-
-
-    tituloMateriales.alignment = {
-      horizontal:'center',
-      vertical:'middle'
-    };
-
-
-    tituloMateriales.fill = {
-      type:'pattern',
-      pattern:'solid',
-      fgColor:{
         argb:AZUL
       }
     };
 
 
-    tituloMateriales.border =
+    hoja.getCell(
+      `A${filaActual}`
+    ).fill = {
+      type:'pattern',
+      pattern:'solid',
+      fgColor:{
+        argb:AZUL_CLARO
+      }
+    };
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).border =
       bordeFino;
-
-
-    hoja.getRow(
-      filaActual
-    ).height =
-      28;
 
 
     filaActual++;
 
 
-    /*
-     * =====================================================
-     * ENCABEZADOS
-     * =====================================================
-     */
-
-    const encabezados = [
-
-      'GRUPO',
-
-      'MATERIAL',
-
-      'CÓDIGO',
-
-      'CANT. UTILIZADA',
-
-      'P. UNIT. KG',
-
-      'PESO TOTAL KG'
-
+    const cabeceraTraslado = [
+      'FECHA / HORA',
+      'EVENTO',
+      'RESPONSABLE',
+      'UBICACIÓN',
+      'OBSERVACIÓN',
+      'TIEMPO TRAMO'
     ];
 
 
-    encabezados.forEach(
-      (
-        texto,
-        indice
-      ) => {
-
-        const celda =
-          hoja.getCell(
-            filaActual,
-            indice + 1
-          );
+    hoja.getRow(
+      filaActual
+    ).values =
+      cabeceraTraslado;
 
 
-        celda.value =
-          texto;
-
+    hoja.getRow(
+      filaActual
+    ).eachCell(
+      celda => {
 
         celda.font = {
           bold:true,
@@ -11584,34 +12020,377 @@ tagCabecera.value = {
         };
 
 
+        celda.border =
+          bordeFino;
+
+
         celda.alignment = {
           horizontal:'center',
           vertical:'middle',
           wrapText:true
         };
 
-
-        celda.border =
-          bordeFino;
-
       }
     );
-
-
-    hoja.getRow(
-      filaActual
-    ).height =
-      30;
 
 
     filaActual++;
 
 
+    eventosTraslado.forEach(
+      evento => {
+
+        const esPausa =
+          normalizarTexto(
+            evento.tipoEvento
+          ).includes(
+            'PAUSA'
+          );
+
+
+        hoja.getRow(
+          filaActual
+        ).values = [
+
+          evento.fechaHora ||
+          '-',
+
+          evento.tipoEvento ||
+          '-',
+
+          evento.responsable ||
+          '-',
+
+          evento.ubicacion ||
+          '-',
+
+          evento.motivoObservacion ||
+          '-',
+
+          Number(
+            evento.tiempoTramoSegundos
+          ) > 0
+            ? formatearSegundos(
+                evento.tiempoTramoSegundos
+              )
+            : '-'
+
+        ];
+
+
+        hoja.getRow(
+          filaActual
+        ).eachCell(
+          {
+            includeEmpty:true
+          },
+          celda => {
+
+            celda.border =
+              bordeFino;
+
+
+            celda.alignment = {
+              vertical:'middle',
+              wrapText:true
+            };
+
+
+            if(
+              esPausa
+            ){
+
+              celda.fill = {
+                type:'pattern',
+                pattern:'solid',
+                fgColor:{
+                  argb:ROJO_CLARO
+                }
+              };
+
+            }
+
+          }
+        );
+
+
+        filaActual++;
+
+      }
+    );
+
+
     /*
      * =====================================================
-     * FILAS DE MATERIALES
+     * ARMADO
      * =====================================================
      */
+
+    filaActual++;
+
+
+    hoja.mergeCells(
+      `A${filaActual}:F${filaActual}`
+    );
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).value =
+      `ARMADO | Estado: ${
+        eventosArmado.estadoArmado ||
+        'PENDIENTE'
+      } | Responsable: ${
+        servicioActual.responsableArmado ||
+        '-'
+      }`;
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).font = {
+      bold:true,
+      color:{
+        argb:AZUL
+      }
+    };
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).fill = {
+      type:'pattern',
+      pattern:'solid',
+      fgColor:{
+        argb:AZUL_CLARO
+      }
+    };
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).border =
+      bordeFino;
+
+
+    filaActual++;
+
+
+    const cabeceraArmado = [
+
+      'FECHA / HORA',
+      'EVENTO',
+      'RESPONSABLE',
+      'MOTIVO',
+      'OBSERVACIÓN',
+      'TIEMPO TRAMO'
+
+    ];
+
+
+    hoja.getRow(
+      filaActual
+    ).values =
+      cabeceraArmado;
+
+
+    hoja.getRow(
+      filaActual
+    ).eachCell(
+      celda => {
+
+        celda.font = {
+          bold:true,
+          color:{
+            argb:BLANCO
+          }
+        };
+
+
+        celda.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:AZUL2
+          }
+        };
+
+
+        celda.border =
+          bordeFino;
+
+
+        celda.alignment = {
+          horizontal:'center',
+          vertical:'middle',
+          wrapText:true
+        };
+
+      }
+    );
+
+
+    filaActual++;
+
+
+    eventosMontaje.forEach(
+      evento => {
+
+        const esPausa =
+          normalizarTexto(
+            evento.tipoEvento
+          ).includes(
+            'PAUSA'
+          );
+
+
+        hoja.getRow(
+          filaActual
+        ).values = [
+
+          evento.fechaHora ||
+          '-',
+
+          evento.tipoEvento ||
+          '-',
+
+          evento.responsable ||
+          '-',
+
+          evento.motivo ||
+          '-',
+
+          evento.observacion ||
+          '-',
+
+          Number(
+            evento.tiempoTramoMinutos
+          ) > 0
+            ? formatearMinutos(
+                evento.tiempoTramoMinutos
+              )
+            : '-'
+
+        ];
+
+
+        hoja.getRow(
+          filaActual
+        ).eachCell(
+          {
+            includeEmpty:true
+          },
+          celda => {
+
+            celda.border =
+              bordeFino;
+
+
+            celda.alignment = {
+              vertical:'middle',
+              wrapText:true
+            };
+
+
+            if(
+              esPausa
+            ){
+
+              celda.fill = {
+                type:'pattern',
+                pattern:'solid',
+                fgColor:{
+                  argb:ROJO_CLARO
+                }
+              };
+
+            }
+
+          }
+        );
+
+
+        filaActual++;
+
+      }
+    );
+
+
+    /*
+     * =====================================================
+     * 4. CUANTIFICACIÓN
+     * =====================================================
+     */
+
+    filaActual +=
+      2;
+
+
+    pintarTituloSeccion(
+      filaActual,
+      '4. CUANTIFICACIÓN DEL ANDAMIO'
+    );
+
+
+    filaActual++;
+
+
+    const encabezadosMaterial = [
+
+      'GRUPO',
+      'MATERIAL',
+      'CÓDIGO',
+      'CANT. UTILIZADA',
+      'P. UNIT. KG',
+      'PESO TOTAL KG'
+
+    ];
+
+
+    hoja.getRow(
+      filaActual
+    ).values =
+      encabezadosMaterial;
+
+
+    hoja.getRow(
+      filaActual
+    ).eachCell(
+      celda => {
+
+        celda.font = {
+          bold:true,
+          color:{
+            argb:BLANCO
+          }
+        };
+
+
+        celda.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:AZUL2
+          }
+        };
+
+
+        celda.border =
+          bordeFino;
+
+
+        celda.alignment = {
+          horizontal:'center',
+          vertical:'middle',
+          wrapText:true
+        };
+
+      }
+    );
+
+
+    filaActual++;
+
 
     materiales.forEach(
       (
@@ -11671,9 +12450,6 @@ tagCabecera.value = {
         );
 
 
-        /*
-         * Filas alternadas.
-         */
         if(
           indice % 2 === 1
         ){
@@ -11879,70 +12655,573 @@ tagCabecera.value = {
     [
       filaPeso,
       filaTonelaje
-    ]
-      .forEach(
-        numeroFila => {
+    ].forEach(
+      numeroFila => {
 
-          hoja.getRow(
-            numeroFila
-          )
-            .eachCell(
-              {
-                includeEmpty:true
-              },
-              celda => {
+        hoja.getRow(
+          numeroFila
+        ).eachCell(
+          {
+            includeEmpty:true
+          },
+          celda => {
 
-                celda.border =
-                  bordeFino;
+            celda.border =
+              bordeFino;
 
 
-                celda.alignment = {
-                  vertical:'middle',
-                  horizontal:
-                    celda.col >= 5
-                      ? 'center'
-                      : 'left'
-                };
+            celda.alignment = {
+              vertical:'middle',
+              horizontal:
+                celda.col >= 5
+                  ? 'center'
+                  : 'left'
+            };
 
 
-                if(
-                  celda.col >= 5
-                ){
+            if(
+              celda.col >= 5
+            ){
 
-                  celda.font = {
-                    bold:true,
-                    color:{
-                      argb:TEXTO
-                    }
-                  };
-
-
-                  celda.fill = {
-                    type:'pattern',
-                    pattern:'solid',
-                    fgColor:{
-                      argb:VERDE_CLARO
-                    }
-                  };
-
+              celda.font = {
+                bold:true,
+                color:{
+                  argb:TEXTO
                 }
-
-              }
-            );
+              };
 
 
-          hoja.getRow(
-            numeroFila
-          ).height =
-            26;
+              celda.fill = {
+                type:'pattern',
+                pattern:'solid',
+                fgColor:{
+                  argb:VERDE_CLARO
+                }
+              };
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    /*
+     * =====================================================
+     * 5. POSTPARADA
+     * =====================================================
+     */
+
+    filaActual +=
+      2;
+
+
+    pintarTituloSeccion(
+      filaActual,
+      '5. POSTPARADA'
+    );
+
+
+    filaActual++;
+
+
+    hoja.mergeCells(
+      `A${filaActual}:F${filaActual}`
+    );
+
+
+    if(
+      postparada.postparadaRegistrada ===
+      true
+    ){
+
+      hoja.getCell(
+        `A${filaActual}`
+      ).value =
+        `Estado: FINALIZADA | Responsable: ${
+          servicioActual.responsablePostparada ||
+          '-'
+        } | Desmontado: ${
+          numero(
+            postparada?.resumen
+              ?.cantidadDesmontada
+          )
+        } | Dañado: ${
+          numero(
+            totalDanado
+          )
+        } | Faltante: ${
+          numero(
+            totalFaltante
+          )
+        }`;
+
+    }else{
+
+      hoja.getCell(
+        `A${filaActual}`
+      ).value =
+        'Estado: PENDIENTE';
+
+    }
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).border =
+      bordeFino;
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).alignment = {
+      vertical:'middle',
+      wrapText:true
+    };
+
+
+    /*
+     * =====================================================
+     * 6. INCIDENCIAS
+     * SOLO SI EXISTEN
+     * =====================================================
+     */
+
+    if(
+      materialesIncidencia.length
+    ){
+
+      filaActual +=
+        2;
+
+
+      pintarTituloSeccion(
+        filaActual,
+        '6. INCIDENCIAS DE POSTPARADA',
+        ROJO
+      );
+
+
+      filaActual++;
+
+
+      const encabezadosIncidencia = [
+
+        'MATERIAL',
+        'CÓDIGO',
+        'DAÑADO',
+        'FALTANTE',
+        'OBSERVACIÓN',
+        ''
+
+      ];
+
+
+      hoja.getRow(
+        filaActual
+      ).values =
+        encabezadosIncidencia;
+
+
+      hoja.getRow(
+        filaActual
+      ).eachCell(
+        celda => {
+
+          celda.font = {
+            bold:true,
+            color:{
+              argb:BLANCO
+            }
+          };
+
+
+          celda.fill = {
+            type:'pattern',
+            pattern:'solid',
+            fgColor:{
+              argb:ROJO
+            }
+          };
+
+
+          celda.border =
+            bordeFino;
+
+
+          celda.alignment = {
+            horizontal:'center',
+            vertical:'middle',
+            wrapText:true
+          };
 
         }
       );
 
 
+      filaActual++;
+
+
+      materialesIncidencia.forEach(
+        material => {
+
+          hoja.mergeCells(
+            `E${filaActual}:F${filaActual}`
+          );
+
+
+          hoja.getCell(
+            `A${filaActual}`
+          ).value =
+            material.descripcion ||
+            material.subgrupo ||
+            '-';
+
+
+          hoja.getCell(
+            `B${filaActual}`
+          ).value =
+            material.codigo ||
+            '-';
+
+
+          hoja.getCell(
+            `C${filaActual}`
+          ).value =
+            Number(
+              material.cantidadDanada
+            ) || 0;
+
+
+          hoja.getCell(
+            `D${filaActual}`
+          ).value =
+            Number(
+              material.cantidadFaltante
+            ) || 0;
+
+
+          hoja.getCell(
+            `E${filaActual}`
+          ).value =
+            material.observacionPostparada ||
+            '-';
+
+
+          hoja.getRow(
+            filaActual
+          ).eachCell(
+            {
+              includeEmpty:true
+            },
+            celda => {
+
+              celda.border =
+                bordeFino;
+
+
+              celda.fill = {
+                type:'pattern',
+                pattern:'solid',
+                fgColor:{
+                  argb:ROJO_CLARO
+                }
+              };
+
+
+              celda.alignment = {
+                vertical:'middle',
+                wrapText:true
+              };
+
+            }
+          );
+
+
+          filaActual++;
+
+        }
+      );
+
+    }
+
+
     /*
      * =====================================================
-     * PIE DEL REPORTE
+     * EVIDENCIAS
+     * =====================================================
+     */
+
+    filaActual +=
+      2;
+
+
+    pintarTituloSeccion(
+      filaActual,
+      materialesIncidencia.length
+        ? '7. EVIDENCIAS'
+        : '6. EVIDENCIAS'
+    );
+
+
+    filaActual++;
+
+
+    const encabezadosFotos = [
+
+      'ETAPA',
+      'TIPO',
+      'FECHA / HORA',
+      'DESCRIPCIÓN',
+      'SUBIDO POR',
+      'ENLACE'
+
+    ];
+
+
+    hoja.getRow(
+      filaActual
+    ).values =
+      encabezadosFotos;
+
+
+    hoja.getRow(
+      filaActual
+    ).eachCell(
+      celda => {
+
+        celda.font = {
+          bold:true,
+          color:{
+            argb:BLANCO
+          }
+        };
+
+
+        celda.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:AZUL2
+          }
+        };
+
+
+        celda.border =
+          bordeFino;
+
+
+        celda.alignment = {
+          horizontal:'center',
+          vertical:'middle',
+          wrapText:true
+        };
+
+      }
+    );
+
+
+    filaActual++;
+
+
+    if(
+      fotografias.length
+    ){
+
+      fotografias.forEach(
+        foto => {
+
+          hoja.getCell(
+            `A${filaActual}`
+          ).value =
+            foto.etapa ||
+            '-';
+
+
+          hoja.getCell(
+            `B${filaActual}`
+          ).value =
+            foto.tipoFoto ||
+            '-';
+
+
+          hoja.getCell(
+            `C${filaActual}`
+          ).value =
+            foto.fechaHora ||
+            '-';
+
+
+          hoja.getCell(
+            `D${filaActual}`
+          ).value =
+            foto.descripcion ||
+            '-';
+
+
+          hoja.getCell(
+            `E${filaActual}`
+          ).value =
+            foto.subidoPor ||
+            '-';
+
+
+          if(
+            foto.enlaceFoto
+          ){
+
+            hoja.getCell(
+              `F${filaActual}`
+            ).value = {
+              text:'Abrir fotografía',
+              hyperlink:
+                foto.enlaceFoto,
+              tooltip:
+                'Abrir evidencia fotográfica'
+            };
+
+
+            hoja.getCell(
+              `F${filaActual}`
+            ).font = {
+              color:{
+                argb:'0563C1'
+              },
+              underline:true
+            };
+
+          }else{
+
+            hoja.getCell(
+              `F${filaActual}`
+            ).value =
+              '-';
+
+          }
+
+
+          hoja.getRow(
+            filaActual
+          ).eachCell(
+            {
+              includeEmpty:true
+            },
+            celda => {
+
+              celda.border =
+                bordeFino;
+
+
+              celda.alignment = {
+                vertical:'middle',
+                wrapText:true
+              };
+
+            }
+          );
+
+
+          hoja.getRow(
+            filaActual
+          ).height =
+            28;
+
+
+          filaActual++;
+
+        }
+      );
+
+    }else{
+
+      hoja.mergeCells(
+        `A${filaActual}:F${filaActual}`
+      );
+
+
+      hoja.getCell(
+        `A${filaActual}`
+      ).value =
+        'No existen evidencias fotográficas registradas.';
+
+
+      hoja.getCell(
+        `A${filaActual}`
+      ).alignment = {
+        vertical:'middle',
+        horizontal:'center'
+      };
+
+
+      hoja.getCell(
+        `A${filaActual}`
+      ).border =
+        bordeFino;
+
+
+      filaActual++;
+
+    }
+
+
+    /*
+     * =====================================================
+     * OBSERVACIONES GENERALES
+     * =====================================================
+     */
+
+    filaActual +=
+      2;
+
+
+    pintarTituloSeccion(
+      filaActual,
+      materialesIncidencia.length
+        ? '8. OBSERVACIONES'
+        : '7. OBSERVACIONES'
+    );
+
+
+    filaActual++;
+
+
+    hoja.mergeCells(
+      `A${filaActual}:F${filaActual}`
+    );
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).value =
+      servicioActual.observaciones ||
+      'Sin observaciones generales.';
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).border =
+      bordeFino;
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).alignment = {
+      vertical:'top',
+      wrapText:true
+    };
+
+
+    hoja.getRow(
+      filaActual
+    ).height =
+      45;
+
+
+    /*
+     * =====================================================
+     * PIE
      * =====================================================
      */
 
@@ -11983,6 +13262,31 @@ tagCabecera.value = {
       horizontal:'right',
       vertical:'middle'
     };
+
+
+    /*
+     * =====================================================
+     * CONGELAR CABECERA
+     * =====================================================
+     */
+
+    hoja.views = [
+      {
+        state:'frozen',
+        ySplit:2,
+        showGridLines:false
+      }
+    ];
+
+
+    /*
+     * =====================================================
+     * FILTRO SOLO EN CUANTIFICACIÓN
+     *
+     * No lo ponemos porque la fila cambia dinámicamente
+     * según cantidad de eventos.
+     * =====================================================
+     */
 
 
     /*
@@ -12034,7 +13338,7 @@ tagCabecera.value = {
 
     /*
      * =====================================================
-     * GENERAR XLSX
+     * GENERAR ARCHIVO
      * =====================================================
      */
 
@@ -12083,8 +13387,8 @@ tagCabecera.value = {
 
     const nombreArchivo =
       fecha
-        ? `${tag}_${fecha}.xlsx`
-        : `${tag}.xlsx`;
+        ? `REPORTE_${tag}_${fecha}.xlsx`
+        : `REPORTE_${tag}.xlsx`;
 
 
     const url =
@@ -12130,6 +13434,7 @@ tagCabecera.value = {
   }catch(error){
 
     console.error(
+      'Error exportando Excel:',
       error
     );
 
