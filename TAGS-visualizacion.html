@@ -12604,10 +12604,6 @@ async function exportarExcelAndamio(){
       filaActual++;
 
 
-      /*
-       * Fotos asociadas exactamente
-       * a este evento de Traslado.
-       */
       const fotosEvento =
         obtenerFotosDelEvento(
           fotografias.filter(
@@ -12631,7 +12627,337 @@ async function exportarExcelAndamio(){
         );
 
 
-  
+      if(
+        fotosEvento.length
+      ){
+
+        filaActual =
+          await agregarFotosExcel(
+            fotosEvento,
+            filaActual,
+            'EVIDENCIA DE TRASLADO'
+          );
+
+      }
+
+    }
+
+
+    /*
+     * =====================================================
+     * ARMADO
+     * =====================================================
+     */
+
+    filaActual++;
+
+
+    hoja.mergeCells(
+      `A${filaActual}:F${filaActual}`
+    );
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).value =
+      `ARMADO | Estado: ${
+        eventosArmado.estadoArmado ||
+        'PENDIENTE'
+      } | Responsable: ${
+        servicioActual.responsableArmado ||
+        '-'
+      }`;
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).font = {
+      bold:true,
+      color:{
+        argb:AZUL
+      }
+    };
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).fill = {
+      type:'pattern',
+      pattern:'solid',
+      fgColor:{
+        argb:AZUL_CLARO
+      }
+    };
+
+
+    hoja.getCell(
+      `A${filaActual}`
+    ).border =
+      bordeFino;
+
+
+    filaActual++;
+
+
+    const cabeceraArmado = [
+
+      'FECHA / HORA',
+      'EVENTO',
+      'RESPONSABLE',
+      'MOTIVO',
+      'OBSERVACIÓN',
+      'TIEMPO TRAMO'
+
+    ];
+
+
+    hoja.getRow(
+      filaActual
+    ).values =
+      cabeceraArmado;
+
+
+    hoja.getRow(
+      filaActual
+    ).eachCell(
+      celda => {
+
+        celda.font = {
+          bold:true,
+          color:{
+            argb:BLANCO
+          }
+        };
+
+
+        celda.fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:AZUL2
+          }
+        };
+
+
+        celda.border =
+          bordeFino;
+
+
+        celda.alignment = {
+          horizontal:'center',
+          vertical:'middle',
+          wrapText:true
+        };
+
+      }
+    );
+
+
+    filaActual++;
+
+
+    const fotosArmadoExcel =
+      fotografias.filter(
+        foto => {
+
+          const etapa =
+            normalizarTexto(
+              foto.etapa
+            );
+
+          const tipo =
+            normalizarTexto(
+              foto.tipoFoto
+            );
+
+
+          if(
+            etapa === 'TRASLADO' ||
+            etapa === 'RECEPCION EN TAG' ||
+            etapa === 'POSTPARADA'
+          ){
+
+            return false;
+
+          }
+
+
+          return (
+            etapa === 'ARMADO' ||
+            etapa === 'ARMADO PAUSA' ||
+            etapa === 'ANDAMIO TERMINADO' ||
+            etapa.includes(
+              'ESTABILIZ'
+            ) ||
+            tipo.includes(
+              'VISTA GENERAL'
+            ) ||
+            tipo.includes(
+              'LADO IZQUIERDO'
+            ) ||
+            tipo.includes(
+              'LADO DERECHO'
+            ) ||
+            tipo.includes(
+              'ACCESO'
+            ) ||
+            tipo.includes(
+              'ESTABILIZ'
+            ) ||
+            tipo.includes(
+              'OTRA EVIDENCIA'
+            )
+          );
+
+        }
+      );
+
+
+    for(
+      const evento of eventosMontaje
+    ){
+
+      const tipoEvento =
+        normalizarTexto(
+          evento.tipoEvento
+        );
+
+
+      const esPausa =
+        tipoEvento.includes(
+          'PAUSA'
+        );
+
+
+      hoja.getRow(
+        filaActual
+      ).values = [
+
+        evento.fechaHora ||
+        '-',
+
+        evento.tipoEvento ||
+        '-',
+
+        evento.responsable ||
+        '-',
+
+        evento.motivo ||
+        '-',
+
+        evento.observacion ||
+        '-',
+
+        Number(
+          evento.tiempoTramoMinutos
+        ) > 0
+          ? formatearMinutos(
+              evento.tiempoTramoMinutos
+            )
+          : '-'
+
+      ];
+
+
+      hoja.getRow(
+        filaActual
+      ).eachCell(
+        {
+          includeEmpty:true
+        },
+        celda => {
+
+          celda.border =
+            bordeFino;
+
+
+          celda.alignment = {
+            vertical:'middle',
+            wrapText:true
+          };
+
+
+          if(
+            esPausa
+          ){
+
+            celda.fill = {
+              type:'pattern',
+              pattern:'solid',
+              fgColor:{
+                argb:ROJO_CLARO
+              }
+            };
+
+          }
+
+        }
+      );
+
+
+      filaActual++;
+
+
+      let fotosEvento =
+        obtenerFotosDelEvento(
+          fotosArmadoExcel,
+          evento
+        );
+
+
+      if(
+        tipoEvento.includes(
+          'FIN MONTAJE'
+        )
+      ){
+
+        fotosEvento =
+          fotosArmadoExcel.filter(
+            foto => {
+
+              const etapa =
+                normalizarTexto(
+                  foto.etapa
+                );
+
+              const tipoFoto =
+                normalizarTexto(
+                  foto.tipoFoto
+                );
+
+
+              return (
+                etapa !==
+                  'ARMADO PAUSA' &&
+                !tipoFoto.includes(
+                  'PAUSA'
+                )
+              );
+
+            }
+          );
+
+      }
+
+
+      if(
+        fotosEvento.length
+      ){
+
+        filaActual =
+          await agregarFotosExcel(
+            fotosEvento,
+            filaActual,
+            tipoEvento.includes(
+              'FIN MONTAJE'
+            )
+              ? 'EVIDENCIA FINAL DEL ARMADO'
+              : 'EVIDENCIA DE ARMADO'
+          );
+
+      }
+
+    }
 
     /*
      * =====================================================
