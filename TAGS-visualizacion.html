@@ -3051,7 +3051,13 @@ tbody tr:nth-child(even){
   async
   src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"
 ></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+</script>
 
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js">
+</script>
 
 <script>
 
@@ -5930,7 +5936,13 @@ ${
                 📊 Exportar cuantificación
 
               </button>
-
+              <button
+                type="button"
+                class="btn-exportar-excel"
+                onclick="exportarPDFAndamio()"
+              >
+                📄 Exportar PDF
+              </button>
             </div>
 
           `
@@ -8031,7 +8043,350 @@ function volverVisualizacion(){
     'visualizacion.html';
 
 }
+async function exportarPDFAndamio(){
 
+  if(
+    !servicioActual
+  ){
+
+    alert(
+      'No existe información del TAG para exportar.'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !window.jspdf ||
+    !window.jspdf.jsPDF
+  ){
+
+    alert(
+      'No se pudo cargar el generador de PDF.'
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const {
+      jsPDF
+    } = window.jspdf;
+
+
+    const pdf =
+      new jsPDF({
+        orientation:'portrait',
+        unit:'mm',
+        format:'a4'
+      });
+
+
+    const AZUL = [
+      22,
+      63,
+      99
+    ];
+
+
+    const GRIS = [
+      90,
+      100,
+      110
+    ];
+
+
+    /*
+     * ============================================
+     * CABECERA
+     * ============================================
+     */
+
+    pdf.setFillColor(
+      ...AZUL
+    );
+
+    pdf.rect(
+      10,
+      10,
+      190,
+      28,
+      'F'
+    );
+
+
+    pdf.setTextColor(
+      255,
+      255,
+      255
+    );
+
+    pdf.setFont(
+      'helvetica',
+      'bold'
+    );
+
+    pdf.setFontSize(
+      15
+    );
+
+    pdf.text(
+      'REPORTE DE ANDAMIO',
+      16,
+      20
+    );
+
+
+    pdf.setFontSize(
+      9
+    );
+
+    pdf.text(
+      'DIMARZA',
+      16,
+      27
+    );
+
+
+    /*
+     * ============================================
+     * TAG
+     * ============================================
+     */
+
+    pdf.setFontSize(
+      9
+    );
+
+    pdf.text(
+      'TAG',
+      194,
+      18,
+      {
+        align:'right'
+      }
+    );
+
+
+    pdf.setFontSize(
+      14
+    );
+
+    pdf.text(
+      String(
+        servicioActual.tag ||
+        '-'
+      ),
+      194,
+      27,
+      {
+        align:'right'
+      }
+    );
+
+
+    /*
+     * ============================================
+     * INFORMACIÓN GENERAL
+     * ============================================
+     */
+
+    pdf.setTextColor(
+      ...AZUL
+    );
+
+    pdf.setFontSize(
+      12
+    );
+
+    pdf.text(
+      'INFORMACIÓN GENERAL',
+      10,
+      49
+    );
+
+
+    const datosGenerales = [
+
+      [
+        'ID Servicio',
+        servicioActual.idServicio ||
+        '-'
+      ],
+
+      [
+        'OT',
+        servicioActual.ot ||
+        '-'
+      ],
+
+      [
+        'Mina',
+        servicioActual.faena ||
+        servicioActual.mina ||
+        '-'
+      ],
+
+      [
+        'Servicio',
+        servicioActual.servicioMina ||
+        servicioActual.servicio ||
+        '-'
+      ],
+
+      [
+        'Área',
+        servicioActual.area ||
+        '-'
+      ],
+
+      [
+        'Estado',
+        servicioActual.estado ||
+        '-'
+      ]
+
+    ];
+
+
+    pdf.autoTable({
+
+      startY:55,
+
+      margin:{
+        left:10,
+        right:10
+      },
+
+      theme:'grid',
+
+      head:[
+        [
+          'Dato',
+          'Información'
+        ]
+      ],
+
+      body:
+        datosGenerales,
+
+      styles:{
+        fontSize:9,
+        cellPadding:3
+      },
+
+      headStyles:{
+        fillColor:AZUL,
+        textColor:[
+          255,
+          255,
+          255
+        ]
+      },
+
+      columnStyles:{
+        0:{
+          cellWidth:45,
+          fontStyle:'bold'
+        }
+      }
+
+    });
+
+
+    /*
+     * ============================================
+     * PIE
+     * ============================================
+     */
+
+    const paginas =
+      pdf.internal
+        .getNumberOfPages();
+
+
+    for(
+      let pagina = 1;
+      pagina <= paginas;
+      pagina++
+    ){
+
+      pdf.setPage(
+        pagina
+      );
+
+      pdf.setTextColor(
+        ...GRIS
+      );
+
+      pdf.setFontSize(
+        7
+      );
+
+      pdf.text(
+        `DIMARZA | Reporte TAG ${
+          servicioActual.tag ||
+          '-'
+        }`,
+        10,
+        291
+      );
+
+
+      pdf.text(
+        `Página ${pagina} de ${paginas}`,
+        200,
+        291,
+        {
+          align:'right'
+        }
+      );
+
+    }
+
+
+    /*
+     * ============================================
+     * DESCARGAR
+     * ============================================
+     */
+
+    const nombreTAG =
+      String(
+        servicioActual.tag ||
+        'ANDAMIO'
+      )
+        .replace(
+          /[^a-zA-Z0-9_-]/g,
+          '_'
+        );
+
+
+    pdf.save(
+      `REPORTE_${nombreTAG}.pdf`
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'Error exportando PDF:',
+      error
+    );
+
+
+    alert(
+      'No se pudo generar el PDF.'
+    );
+
+  }
+
+}
 async function exportarExcelAndamio(){
 
   if(
