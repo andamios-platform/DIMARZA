@@ -8087,38 +8087,445 @@ async function exportarPDFAndamio(){
       });
 
 
+    /*
+     * =====================================================
+     * COLORES
+     * =====================================================
+     */
+
     const AZUL = [
       22,
       63,
       99
     ];
 
+    const AZUL2 = [
+      47,
+      109,
+      155
+    ];
+
+    const AZUL_CLARO = [
+      234,
+      243,
+      250
+    ];
+
+    const VERDE = [
+      31,
+      143,
+      95
+    ];
+
+    const ROJO = [
+      200,
+      63,
+      73
+    ];
+
+    const ROJO_CLARO = [
+      255,
+      240,
+      241
+    ];
 
     const GRIS = [
-      90,
-      100,
-      110
+      102,
+      119,
+      132
+    ];
+
+    const GRIS_CLARO = [
+      245,
+      247,
+      249
     ];
 
 
     /*
-     * ============================================
+     * =====================================================
+     * DATOS
+     * =====================================================
+     */
+
+    const previos =
+      datosDetalle.previos ||
+      {};
+
+    const traslado =
+      datosDetalle.traslado ||
+      {};
+
+    const armado =
+      datosDetalle.armado ||
+      {};
+
+    const eventosArmado =
+      datosDetalle.eventosArmado ||
+      {};
+
+    const postparada =
+      datosDetalle.postparada ||
+      {};
+
+    const peso =
+      datosDetalle.pesoAndamio ||
+      {};
+
+
+    const materialesPrevios =
+      Array.isArray(
+        previos.materiales
+      )
+        ? previos.materiales
+        : [];
+
+
+    const materialesArmado =
+      Array.isArray(
+        armado.materiales
+      )
+        ? armado.materiales
+        : [];
+
+
+    const materialesPostparada =
+      Array.isArray(
+        postparada.materiales
+      )
+        ? postparada.materiales
+        : [];
+
+
+    const eventosTraslado =
+      Array.isArray(
+        traslado.eventos
+      )
+        ? traslado.eventos
+        : [];
+
+
+    const eventosMontaje =
+      Array.isArray(
+        eventosArmado.eventos
+      )
+        ? eventosArmado.eventos
+        : [];
+
+
+    /*
+     * =====================================================
+     * TOTALES
+     * =====================================================
+     */
+
+    const totalDespachado =
+      materialesPrevios.reduce(
+        (
+          total,
+          material
+        ) =>
+          total +
+          (
+            Number(
+              material.cantidadDespachada
+            ) || 0
+          ),
+        0
+      );
+
+
+    const totalUtilizado =
+      materialesArmado.reduce(
+        (
+          total,
+          material
+        ) =>
+          total +
+          (
+            Number(
+              material.cantidadUtilizada
+            ) || 0
+          ),
+        0
+      );
+
+
+    const totalPausasArmado =
+      eventosMontaje.filter(
+        evento =>
+          normalizarTexto(
+            evento.tipoEvento
+          ).includes(
+            'PAUSA'
+          )
+      ).length;
+
+
+    const totalPausasTraslado =
+      eventosTraslado.filter(
+        evento =>
+          normalizarTexto(
+            evento.tipoEvento
+          ).includes(
+            'PAUSA'
+          )
+      ).length;
+
+
+    /*
+     * =====================================================
+     * CARGAR IMAGEN
+     * =====================================================
+     */
+
+    async function cargarImagenBase64PDF(
+      ruta
+    ){
+
+      const respuesta =
+        await fetch(
+          encodeURI(
+            ruta
+          ),
+          {
+            cache:'no-store'
+          }
+        );
+
+
+      if(
+        !respuesta.ok
+      ){
+
+        throw new Error(
+          `No se pudo cargar la imagen. HTTP ${respuesta.status}`
+        );
+
+      }
+
+
+      const blob =
+        await respuesta.blob();
+
+
+      return await new Promise(
+        (
+          resolve,
+          reject
+        ) => {
+
+          const lector =
+            new FileReader();
+
+
+          lector.onload =
+            () =>
+              resolve(
+                lector.result
+              );
+
+
+          lector.onerror =
+            () =>
+              reject(
+                new Error(
+                  'No se pudo procesar la imagen.'
+                )
+              );
+
+
+          lector.readAsDataURL(
+            blob
+          );
+
+        }
+      );
+
+    }
+
+
+    /*
+     * =====================================================
+     * CONTROL DE PÁGINA
+     * =====================================================
+     */
+
+    let y =
+      10;
+
+
+    function verificarPagina(
+      altoNecesario = 20
+    ){
+
+      if(
+        y + altoNecesario >
+        278
+      ){
+
+        pdf.addPage();
+
+        y =
+          15;
+
+      }
+
+    }
+
+
+    function tituloSeccion(
+      titulo
+    ){
+
+      verificarPagina(
+        15
+      );
+
+
+      pdf.setFillColor(
+        ...AZUL
+      );
+
+
+      pdf.rect(
+        10,
+        y,
+        190,
+        8,
+        'F'
+      );
+
+
+      pdf.setTextColor(
+        255,
+        255,
+        255
+      );
+
+
+      pdf.setFont(
+        'helvetica',
+        'bold'
+      );
+
+
+      pdf.setFontSize(
+        10
+      );
+
+
+      pdf.text(
+        titulo,
+        13,
+        y + 5.5
+      );
+
+
+      y +=
+        12;
+
+    }
+
+
+    /*
+     * =====================================================
      * CABECERA
-     * ============================================
+     * =====================================================
      */
 
     pdf.setFillColor(
       ...AZUL
     );
 
+
     pdf.rect(
       10,
       10,
       190,
-      28,
+      30,
       'F'
     );
 
+
+    /*
+     * Área blanca del logo.
+     */
+
+    pdf.setFillColor(
+      255,
+      255,
+      255
+    );
+
+
+    pdf.rect(
+      10,
+      10,
+      65,
+      30,
+      'F'
+    );
+
+
+    /*
+     * Logo DIMARZA.
+     */
+
+    try{
+
+      const logo =
+        await cargarImagenBase64PDF(
+          'img/logodmz (2).png'
+        );
+
+
+      pdf.addImage(
+        logo,
+        'PNG',
+        13,
+        14,
+        58,
+        19
+      );
+
+
+    }catch(errorLogo){
+
+      console.warn(
+        'No se pudo cargar el logo en PDF:',
+        errorLogo
+      );
+
+
+      pdf.setTextColor(
+        ...AZUL
+      );
+
+
+      pdf.setFont(
+        'helvetica',
+        'bold'
+      );
+
+
+      pdf.setFontSize(
+        15
+      );
+
+
+      pdf.text(
+        'DIMARZA',
+        20,
+        27
+      );
+
+    }
+
+
+    /*
+     * Título.
+     */
 
     pdf.setTextColor(
       255,
@@ -8126,47 +8533,41 @@ async function exportarPDFAndamio(){
       255
     );
 
+
     pdf.setFont(
       'helvetica',
       'bold'
     );
 
+
     pdf.setFontSize(
       15
     );
 
+
     pdf.text(
       'REPORTE DE ANDAMIO',
-      16,
-      20
-    );
-
-
-    pdf.setFontSize(
-      9
-    );
-
-    pdf.text(
-      'DIMARZA',
-      16,
-      27
+      115,
+      22,
+      {
+        align:'center'
+      }
     );
 
 
     /*
-     * ============================================
-     * TAG
-     * ============================================
+     * TAG.
      */
 
     pdf.setFontSize(
-      9
+      8
     );
+
 
     pdf.text(
       'TAG',
-      194,
-      18,
+      195,
+      19,
       {
         align:'right'
       }
@@ -8174,15 +8575,16 @@ async function exportarPDFAndamio(){
 
 
     pdf.setFontSize(
-      14
+      13
     );
+
 
     pdf.text(
       String(
         servicioActual.tag ||
         '-'
       ),
-      194,
+      195,
       27,
       {
         align:'right'
@@ -8190,73 +8592,240 @@ async function exportarPDFAndamio(){
     );
 
 
+    y =
+      47;
+
+
     /*
-     * ============================================
-     * INFORMACIÓN GENERAL
-     * ============================================
+     * =====================================================
+     * 1. DATOS DEL SERVICIO
+     * =====================================================
      */
+
+    tituloSeccion(
+      '1. DATOS DEL SERVICIO'
+    );
+
+
+    pdf.autoTable({
+
+      startY:y,
+
+      margin:{
+        left:10,
+        right:10
+      },
+
+      theme:'grid',
+
+      body:[
+
+        [
+          'ID Servicio',
+          servicioActual.idServicio ||
+          '-',
+          'TAG',
+          servicioActual.tag ||
+          '-'
+        ],
+
+        [
+          'OT',
+          servicioActual.ot ||
+          '-',
+          'Estado',
+          servicioActual.estado ||
+          '-'
+        ],
+
+        [
+          'Mina',
+          servicioActual.faena ||
+          servicioActual.mina ||
+          '-',
+          'Servicio',
+          servicioActual.servicioMina ||
+          servicioActual.servicio ||
+          '-'
+        ],
+
+        [
+          'Área',
+          servicioActual.area ||
+          '-',
+          'Supervisor',
+          servicioActual.supervisor ||
+          '-'
+        ],
+
+        [
+          'Responsable Previos',
+          servicioActual.responsablePrevios ||
+          '-',
+          'Responsable Armado',
+          servicioActual.responsableArmado ||
+          '-'
+        ],
+
+        [
+          'Responsable Postparada',
+          servicioActual.responsablePostparada ||
+          '-',
+          'Fecha programada',
+          servicioActual.fechaProgramada ||
+          '-'
+        ]
+
+      ],
+
+      styles:{
+        fontSize:7.8,
+        cellPadding:2.3,
+        valign:'middle'
+      },
+
+      columnStyles:{
+
+        0:{
+          cellWidth:30,
+          fontStyle:'bold',
+          fillColor:AZUL_CLARO,
+          textColor:AZUL
+        },
+
+        1:{
+          cellWidth:65
+        },
+
+        2:{
+          cellWidth:30,
+          fontStyle:'bold',
+          fillColor:AZUL_CLARO,
+          textColor:AZUL
+        },
+
+        3:{
+          cellWidth:65
+        }
+
+      }
+
+    });
+
+
+    y =
+      pdf.lastAutoTable.finalY +
+      5;
+
+
+    /*
+     * Descripción del trabajo.
+     */
+
+    verificarPagina(
+      25
+    );
+
+
+    pdf.setFillColor(
+      ...AZUL_CLARO
+    );
+
+
+    pdf.rect(
+      10,
+      y,
+      190,
+      8,
+      'F'
+    );
+
 
     pdf.setTextColor(
       ...AZUL
     );
 
-    pdf.setFontSize(
-      12
+
+    pdf.setFont(
+      'helvetica',
+      'bold'
     );
+
+
+    pdf.setFontSize(
+      8
+    );
+
 
     pdf.text(
-      'INFORMACIÓN GENERAL',
-      10,
-      49
+      'Descripción del trabajo',
+      13,
+      y + 5.3
     );
 
 
-    const datosGenerales = [
+    y +=
+      11;
 
-      [
-        'ID Servicio',
-        servicioActual.idServicio ||
-        '-'
-      ],
 
-      [
-        'OT',
-        servicioActual.ot ||
-        '-'
-      ],
+    pdf.setTextColor(
+      31,
+      45,
+      54
+    );
 
-      [
-        'Mina',
-        servicioActual.faena ||
-        servicioActual.mina ||
-        '-'
-      ],
 
-      [
-        'Servicio',
-        servicioActual.servicioMina ||
-        servicioActual.servicio ||
-        '-'
-      ],
+    pdf.setFont(
+      'helvetica',
+      'normal'
+    );
 
-      [
-        'Área',
-        servicioActual.area ||
-        '-'
-      ],
 
-      [
-        'Estado',
-        servicioActual.estado ||
-        '-'
-      ]
+    pdf.setFontSize(
+      8
+    );
 
-    ];
+
+    const descripcion =
+      pdf.splitTextToSize(
+        String(
+          servicioActual.descripcion ||
+          servicioActual.descripcionTrabajo ||
+          '-'
+        ),
+        184
+      );
+
+
+    pdf.text(
+      descripcion,
+      13,
+      y
+    );
+
+
+    y +=
+      (
+        descripcion.length *
+        4
+      ) +
+      5;
+
+
+    /*
+     * =====================================================
+     * 2. RESUMEN EJECUTIVO
+     * =====================================================
+     */
+
+    tituloSeccion(
+      '2. RESUMEN EJECUTIVO'
+    );
 
 
     pdf.autoTable({
 
-      startY:55,
+      startY:y,
 
       margin:{
         left:10,
@@ -8267,42 +8836,1347 @@ async function exportarPDFAndamio(){
 
       head:[
         [
-          'Dato',
-          'Información'
+          'Material despachado',
+          'Material utilizado',
+          'Peso',
+          'Tonelaje'
         ]
       ],
 
-      body:
-        datosGenerales,
+      body:[
+        [
+          numero(
+            totalDespachado
+          ),
+
+          numero(
+            totalUtilizado
+          ),
+
+          peso?.ok
+            ? `${numero(
+                peso.pesoTotalKg
+              )} kg`
+            : '-',
+
+          peso?.ok
+            ? `${formatearToneladas(
+                peso.pesoTotalToneladas
+              )} t`
+            : '-'
+        ]
+      ],
 
       styles:{
-        fontSize:9,
+        halign:'center',
+        fontSize:8,
         cellPadding:3
       },
 
       headStyles:{
-        fillColor:AZUL,
+        fillColor:AZUL2,
         textColor:[
           255,
           255,
           255
         ]
-      },
-
-      columnStyles:{
-        0:{
-          cellWidth:45,
-          fontStyle:'bold'
-        }
       }
 
     });
 
 
+    y =
+      pdf.lastAutoTable.finalY +
+      4;
+
+
+    pdf.autoTable({
+
+      startY:y,
+
+      margin:{
+        left:10,
+        right:10
+      },
+
+      theme:'grid',
+
+      head:[
+        [
+          'Tiempo traslado',
+          'Pausas traslado',
+          'Pausas armado',
+          'Evidencias'
+        ]
+      ],
+
+      body:[
+        [
+          traslado?.tiempoEfectivo ||
+          formatearSegundos(
+            traslado?.tiempoEfectivoSegundos
+          ),
+
+          totalPausasTraslado,
+
+          totalPausasArmado,
+
+          (
+            datosDetalle.fotografias ||
+            []
+          ).length
+        ]
+      ],
+
+      styles:{
+        halign:'center',
+        fontSize:8,
+        cellPadding:3
+      },
+
+      headStyles:{
+        fillColor:AZUL2,
+        textColor:[
+          255,
+          255,
+          255
+        ]
+      }
+
+    });
+
+
+    y =
+      pdf.lastAutoTable.finalY +
+      7;
+
+
     /*
-     * ============================================
-     * PIE
-     * ============================================
+     * =====================================================
+     * 3. PREVIOS
+     * =====================================================
+     */
+
+    tituloSeccion(
+      '3. PREVIOS'
+    );
+
+
+    if(
+      materialesPrevios.length
+    ){
+
+      pdf.autoTable({
+
+        startY:y,
+
+        margin:{
+          left:10,
+          right:10
+        },
+
+        theme:'grid',
+
+        head:[
+          [
+            'Material',
+            'Código',
+            'Grupo',
+            'Alistado',
+            'Despachado'
+          ]
+        ],
+
+        body:
+          materialesPrevios.map(
+            material => [
+
+              material.descripcion ||
+              material.subgrupo ||
+              '-',
+
+              material.codigo ||
+              '-',
+
+              material.grupo ||
+              '-',
+
+              numero(
+                material.cantidadAlistada
+              ),
+
+              numero(
+                material.cantidadDespachada
+              )
+
+            ]
+          ),
+
+        styles:{
+          fontSize:7,
+          cellPadding:2
+        },
+
+        headStyles:{
+          fillColor:AZUL,
+          textColor:[
+            255,
+            255,
+            255
+          ]
+        },
+
+        columnStyles:{
+
+          0:{
+            cellWidth:60
+          },
+
+          1:{
+            cellWidth:25
+          },
+
+          2:{
+            cellWidth:35
+          },
+
+          3:{
+            cellWidth:25,
+            halign:'center'
+          },
+
+          4:{
+            cellWidth:25,
+            halign:'center'
+          }
+
+        }
+
+      });
+
+
+      y =
+        pdf.lastAutoTable.finalY +
+        7;
+
+
+    }else{
+
+      pdf.setTextColor(
+        ...GRIS
+      );
+
+
+      pdf.setFontSize(
+        8
+      );
+
+
+      pdf.text(
+        'No existen materiales registrados en Previos.',
+        13,
+        y
+      );
+
+
+      y +=
+        8;
+
+    }
+
+
+    /*
+     * =====================================================
+     * 4. TRASLADO
+     * =====================================================
+     */
+
+    tituloSeccion(
+      '4. TRASLADO'
+    );
+
+
+    pdf.setTextColor(
+      ...AZUL
+    );
+
+
+    pdf.setFont(
+      'helvetica',
+      'bold'
+    );
+
+
+    pdf.setFontSize(
+      8
+    );
+
+
+    pdf.text(
+      `Estado: ${
+        traslado.estadoTraslado ||
+        'PENDIENTE'
+      }`,
+      13,
+      y
+    );
+
+
+    y +=
+      5;
+
+
+    pdf.text(
+      `Tiempo efectivo: ${
+        traslado.tiempoEfectivo ||
+        formatearSegundos(
+          traslado.tiempoEfectivoSegundos
+        )
+      }`,
+      13,
+      y
+    );
+
+
+    y +=
+      6;
+
+
+    if(
+      eventosTraslado.length
+    ){
+
+      pdf.autoTable({
+
+        startY:y,
+
+        margin:{
+          left:10,
+          right:10
+        },
+
+        theme:'grid',
+
+        head:[
+          [
+            'Fecha / Hora',
+            'Evento',
+            'Responsable',
+            'Ubicación',
+            'Observación',
+            'Tiempo'
+          ]
+        ],
+
+        body:
+          eventosTraslado.map(
+            evento => [
+
+              evento.fechaHora ||
+              '-',
+
+              evento.tipoEvento ||
+              '-',
+
+              evento.responsable ||
+              '-',
+
+              evento.ubicacion ||
+              '-',
+
+              evento.motivoObservacion ||
+              '-',
+
+              Number(
+                evento.tiempoTramoSegundos
+              ) > 0
+                ? formatearSegundos(
+                    evento.tiempoTramoSegundos
+                  )
+                : '-'
+
+            ]
+          ),
+
+        styles:{
+          fontSize:6.5,
+          cellPadding:1.8,
+          valign:'middle'
+        },
+
+        headStyles:{
+          fillColor:AZUL2,
+          textColor:[
+            255,
+            255,
+            255
+          ]
+        },
+
+        columnStyles:{
+
+          0:{
+            cellWidth:27
+          },
+
+          1:{
+            cellWidth:25
+          },
+
+          2:{
+            cellWidth:35
+          },
+
+          3:{
+            cellWidth:30
+          },
+
+          4:{
+            cellWidth:45
+          },
+
+          5:{
+            cellWidth:20
+          }
+
+        },
+
+        didParseCell(
+          data
+        ){
+
+          if(
+            data.section ===
+              'body' &&
+            normalizarTexto(
+              data.row.raw[1]
+            ).includes(
+              'PAUSA'
+            )
+          ){
+
+            data.cell.styles.fillColor =
+              ROJO_CLARO;
+
+            data.cell.styles.textColor =
+              ROJO;
+
+          }
+
+        }
+
+      });
+
+
+      y =
+        pdf.lastAutoTable.finalY +
+        7;
+
+
+    }else{
+
+      pdf.setTextColor(
+        ...GRIS
+      );
+
+
+      pdf.setFontSize(
+        8
+      );
+
+
+      pdf.text(
+        'No existen eventos de Traslado.',
+        13,
+        y
+      );
+
+
+      y +=
+        8;
+
+    }
+
+
+    /*
+     * =====================================================
+     * 5. ARMADO
+     * =====================================================
+     */
+
+    tituloSeccion(
+      '5. ARMADO'
+    );
+
+
+    pdf.setTextColor(
+      ...AZUL
+    );
+
+
+    pdf.setFont(
+      'helvetica',
+      'bold'
+    );
+
+
+    pdf.setFontSize(
+      8
+    );
+
+
+    pdf.text(
+      `Estado: ${
+        eventosArmado.estadoArmado ||
+        (
+          materialesArmado.length
+            ? 'REGISTRADO'
+            : 'PENDIENTE'
+        )
+      }`,
+      13,
+      y
+    );
+
+
+    y +=
+      5;
+
+
+    pdf.text(
+      `Responsable: ${
+        servicioActual.responsableArmado ||
+        '-'
+      }`,
+      13,
+      y
+    );
+
+
+    y +=
+      7;
+
+
+    if(
+      eventosMontaje.length
+    ){
+
+      pdf.autoTable({
+
+        startY:y,
+
+        margin:{
+          left:10,
+          right:10
+        },
+
+        theme:'grid',
+
+        head:[
+          [
+            'Fecha / Hora',
+            'Evento',
+            'Responsable',
+            'Motivo',
+            'Observación',
+            'Tiempo'
+          ]
+        ],
+
+        body:
+          eventosMontaje.map(
+            evento => [
+
+              evento.fechaHora ||
+              '-',
+
+              evento.tipoEvento ||
+              '-',
+
+              evento.responsable ||
+              '-',
+
+              evento.motivo ||
+              '-',
+
+              evento.observacion ||
+              '-',
+
+              Number(
+                evento.tiempoTramoMinutos
+              ) > 0
+                ? formatearMinutos(
+                    evento.tiempoTramoMinutos
+                  )
+                : '-'
+
+            ]
+          ),
+
+        styles:{
+          fontSize:6.5,
+          cellPadding:1.8,
+          valign:'middle'
+        },
+
+        headStyles:{
+          fillColor:AZUL2,
+          textColor:[
+            255,
+            255,
+            255
+          ]
+        },
+
+        columnStyles:{
+
+          0:{
+            cellWidth:27
+          },
+
+          1:{
+            cellWidth:25
+          },
+
+          2:{
+            cellWidth:35
+          },
+
+          3:{
+            cellWidth:30
+          },
+
+          4:{
+            cellWidth:45
+          },
+
+          5:{
+            cellWidth:20
+          }
+
+        },
+
+        didParseCell(
+          data
+        ){
+
+          if(
+            data.section ===
+              'body' &&
+            normalizarTexto(
+              data.row.raw[1]
+            ).includes(
+              'PAUSA'
+            )
+          ){
+
+            data.cell.styles.fillColor =
+              ROJO_CLARO;
+
+            data.cell.styles.textColor =
+              ROJO;
+
+          }
+
+        }
+
+      });
+
+
+      y =
+        pdf.lastAutoTable.finalY +
+        7;
+
+    }
+
+
+    /*
+     * Material realmente utilizado.
+     */
+
+    verificarPagina(
+      25
+    );
+
+
+    pdf.setTextColor(
+      ...AZUL
+    );
+
+
+    pdf.setFont(
+      'helvetica',
+      'bold'
+    );
+
+
+    pdf.setFontSize(
+      9
+    );
+
+
+    pdf.text(
+      'Material realmente utilizado',
+      13,
+      y
+    );
+
+
+    y +=
+      4;
+
+
+    const materialesUtilizados =
+      materialesArmado.filter(
+        material =>
+          Number(
+            material.cantidadUtilizada
+          ) > 0
+      );
+
+
+    if(
+      materialesUtilizados.length
+    ){
+
+      pdf.autoTable({
+
+        startY:y,
+
+        margin:{
+          left:10,
+          right:10
+        },
+
+        theme:'grid',
+
+        head:[
+          [
+            'Material',
+            'Código',
+            'Despachado',
+            'Utilizado',
+            'Sobrante'
+          ]
+        ],
+
+        body:
+          materialesUtilizados.map(
+            material => [
+
+              material.descripcion ||
+              material.subgrupo ||
+              '-',
+
+              material.codigo ||
+              '-',
+
+              numero(
+                material.cantidadDespachada
+              ),
+
+              numero(
+                material.cantidadUtilizada
+              ),
+
+              numero(
+                material.cantidadSobrante ??
+                Math.max(
+                  (
+                    Number(
+                      material.cantidadDespachada
+                    ) || 0
+                  ) -
+                  (
+                    Number(
+                      material.cantidadUtilizada
+                    ) || 0
+                  ),
+                  0
+                )
+              )
+
+            ]
+          ),
+
+        styles:{
+          fontSize:7,
+          cellPadding:2
+        },
+
+        headStyles:{
+          fillColor:AZUL,
+          textColor:[
+            255,
+            255,
+            255
+          ]
+        },
+
+        columnStyles:{
+
+          0:{
+            cellWidth:75
+          },
+
+          1:{
+            cellWidth:30
+          },
+
+          2:{
+            cellWidth:27,
+            halign:'center'
+          },
+
+          3:{
+            cellWidth:27,
+            halign:'center'
+          },
+
+          4:{
+            cellWidth:27,
+            halign:'center'
+          }
+
+        }
+
+      });
+
+
+      y =
+        pdf.lastAutoTable.finalY +
+        7;
+
+    }
+
+
+    /*
+     * =====================================================
+     * 6. POSTPARADA
+     * =====================================================
+     */
+
+    tituloSeccion(
+      '6. POSTPARADA'
+    );
+
+
+    if(
+      postparada.postparadaRegistrada ===
+      true
+    ){
+
+      const resumenPost =
+        postparada.resumen ||
+        {};
+
+
+      pdf.autoTable({
+
+        startY:y,
+
+        margin:{
+          left:10,
+          right:10
+        },
+
+        theme:'grid',
+
+        head:[
+          [
+            'Utilizado',
+            'Desmontado',
+            'Dañado',
+            'Faltante'
+          ]
+        ],
+
+        body:[
+          [
+
+            numero(
+              resumenPost.cantidadUtilizada
+            ),
+
+            numero(
+              resumenPost.cantidadDesmontada
+            ),
+
+            numero(
+              resumenPost.cantidadDanada
+            ),
+
+            numero(
+              resumenPost.cantidadFaltante
+            )
+
+          ]
+        ],
+
+        styles:{
+          fontSize:8,
+          halign:'center',
+          cellPadding:3
+        },
+
+        headStyles:{
+          fillColor:AZUL2,
+          textColor:[
+            255,
+            255,
+            255
+          ]
+        }
+
+      });
+
+
+      y =
+        pdf.lastAutoTable.finalY +
+        6;
+
+
+      if(
+        materialesPostparada.length
+      ){
+
+        pdf.autoTable({
+
+          startY:y,
+
+          margin:{
+            left:10,
+            right:10
+          },
+
+          theme:'grid',
+
+          head:[
+            [
+              'Material',
+              'Código',
+              'Utilizado',
+              'Desmontado',
+              'Dañado',
+              'Faltante'
+            ]
+          ],
+
+          body:
+            materialesPostparada.map(
+              material => [
+
+                material.descripcion ||
+                material.subgrupo ||
+                '-',
+
+                material.codigo ||
+                '-',
+
+                numero(
+                  material.cantidadUtilizada
+                ),
+
+                numero(
+                  material.cantidadDesmontada
+                ),
+
+                numero(
+                  material.cantidadDanada
+                ),
+
+                numero(
+                  material.cantidadFaltante
+                )
+
+              ]
+            ),
+
+          styles:{
+            fontSize:6.8,
+            cellPadding:1.8
+          },
+
+          headStyles:{
+            fillColor:AZUL,
+            textColor:[
+              255,
+              255,
+              255
+            ]
+          },
+
+          columnStyles:{
+
+            0:{
+              cellWidth:65
+            },
+
+            1:{
+              cellWidth:28
+            },
+
+            2:{
+              cellWidth:23,
+              halign:'center'
+            },
+
+            3:{
+              cellWidth:23,
+              halign:'center'
+            },
+
+            4:{
+              cellWidth:23,
+              halign:'center'
+            },
+
+            5:{
+              cellWidth:23,
+              halign:'center'
+            }
+
+          },
+
+          didParseCell(
+            data
+          ){
+
+            if(
+              data.section ===
+                'body' &&
+              Number(
+                data.row.raw[4]
+              ) > 0
+            ){
+
+              data.cell.styles.fillColor =
+                ROJO_CLARO;
+
+            }
+
+          }
+
+        });
+
+
+        y =
+          pdf.lastAutoTable.finalY +
+          6;
+
+      }
+
+
+      /*
+       * Material dañado destacado.
+       */
+
+      const materialesDanados =
+        materialesPostparada.filter(
+          material =>
+            Number(
+              material.cantidadDanada
+            ) > 0
+        );
+
+
+      if(
+        materialesDanados.length
+      ){
+
+        verificarPagina(
+          25
+        );
+
+
+        pdf.setFillColor(
+          ...ROJO_CLARO
+        );
+
+
+        pdf.setDrawColor(
+          ...ROJO
+        );
+
+
+        pdf.roundedRect(
+          10,
+          y,
+          190,
+          10,
+          2,
+          2,
+          'FD'
+        );
+
+
+        pdf.setTextColor(
+          ...ROJO
+        );
+
+
+        pdf.setFont(
+          'helvetica',
+          'bold'
+        );
+
+
+        pdf.setFontSize(
+          9
+        );
+
+
+        pdf.text(
+          'MATERIAL DAÑADO IDENTIFICADO',
+          14,
+          y + 6.3
+        );
+
+
+        y +=
+          14;
+
+
+        pdf.autoTable({
+
+          startY:y,
+
+          margin:{
+            left:10,
+            right:10
+          },
+
+          theme:'grid',
+
+          head:[
+            [
+              'Material',
+              'Código',
+              'Cantidad dañada',
+              'Observación'
+            ]
+          ],
+
+          body:
+            materialesDanados.map(
+              material => [
+
+                material.descripcion ||
+                material.subgrupo ||
+                '-',
+
+                material.codigo ||
+                '-',
+
+                numero(
+                  material.cantidadDanada
+                ),
+
+                material.observacionPostparada ||
+                '-'
+
+              ]
+            ),
+
+          styles:{
+            fontSize:7,
+            cellPadding:2
+          },
+
+          headStyles:{
+            fillColor:ROJO,
+            textColor:[
+              255,
+              255,
+              255
+            ]
+          },
+
+          bodyStyles:{
+            fillColor:ROJO_CLARO
+          },
+
+          columnStyles:{
+
+            0:{
+              cellWidth:65
+            },
+
+            1:{
+              cellWidth:30
+            },
+
+            2:{
+              cellWidth:30,
+              halign:'center'
+            },
+
+            3:{
+              cellWidth:65
+            }
+
+          }
+
+        });
+
+
+        y =
+          pdf.lastAutoTable.finalY +
+          6;
+
+      }
+
+
+      if(
+        postparada.observacionPostparada
+      ){
+
+        verificarPagina(
+          18
+        );
+
+
+        pdf.setTextColor(
+          ...AZUL
+        );
+
+
+        pdf.setFont(
+          'helvetica',
+          'bold'
+        );
+
+
+        pdf.setFontSize(
+          8
+        );
+
+
+        pdf.text(
+          'Observación de Postparada:',
+          13,
+          y
+        );
+
+
+        y +=
+          4;
+
+
+        pdf.setTextColor(
+          31,
+          45,
+          54
+        );
+
+
+        pdf.setFont(
+          'helvetica',
+          'normal'
+        );
+
+
+        const textoObservacion =
+          pdf.splitTextToSize(
+            String(
+              postparada.observacionPostparada
+            ),
+            184
+          );
+
+
+        pdf.text(
+          textoObservacion,
+          13,
+          y
+        );
+
+
+        y +=
+          (
+            textoObservacion.length *
+            4
+          ) +
+          4;
+
+      }
+
+
+    }else{
+
+      pdf.setTextColor(
+        ...GRIS
+      );
+
+
+      pdf.setFontSize(
+        8
+      );
+
+
+      pdf.text(
+        'Postparada pendiente de ejecución.',
+        13,
+        y
+      );
+
+
+      y +=
+        8;
+
+    }
+
+
+    /*
+     * =====================================================
+     * 7. OBSERVACIONES GENERALES
+     * =====================================================
+     */
+
+    tituloSeccion(
+      '7. OBSERVACIONES GENERALES'
+    );
+
+
+    pdf.setTextColor(
+      31,
+      45,
+      54
+    );
+
+
+    pdf.setFont(
+      'helvetica',
+      'normal'
+    );
+
+
+    pdf.setFontSize(
+      8
+    );
+
+
+    const observaciones =
+      pdf.splitTextToSize(
+        String(
+          servicioActual.observaciones ||
+          'Sin observaciones generales.'
+        ),
+        184
+      );
+
+
+    pdf.text(
+      observaciones,
+      13,
+      y
+    );
+
+
+    /*
+     * =====================================================
+     * PIE DE PÁGINA
+     * =====================================================
      */
 
     const paginas =
@@ -8320,13 +10194,37 @@ async function exportarPDFAndamio(){
         pagina
       );
 
+
+      pdf.setDrawColor(
+        215,
+        224,
+        231
+      );
+
+
+      pdf.line(
+        10,
+        286,
+        200,
+        286
+      );
+
+
       pdf.setTextColor(
         ...GRIS
       );
 
+
+      pdf.setFont(
+        'helvetica',
+        'normal'
+      );
+
+
       pdf.setFontSize(
         7
       );
+
 
       pdf.text(
         `DIMARZA | Reporte TAG ${
@@ -8351,14 +10249,15 @@ async function exportarPDFAndamio(){
 
 
     /*
-     * ============================================
+     * =====================================================
      * DESCARGAR
-     * ============================================
+     * =====================================================
      */
 
-    const nombreTAG =
+    const tag =
       String(
         servicioActual.tag ||
+        servicioActual.idServicio ||
         'ANDAMIO'
       )
         .replace(
@@ -8367,8 +10266,29 @@ async function exportarPDFAndamio(){
         );
 
 
+    const fecha =
+      String(
+        servicioActual.fechaProgramada ||
+        ''
+      )
+        .replace(
+          /\//g,
+          '-'
+        )
+        .replace(
+          /\s+/g,
+          '_'
+        );
+
+
+    const nombreArchivo =
+      fecha
+        ? `REPORTE_${tag}_${fecha}.pdf`
+        : `REPORTE_${tag}.pdf`;
+
+
     pdf.save(
-      `REPORTE_${nombreTAG}.pdf`
+      nombreArchivo
     );
 
 
@@ -8381,7 +10301,8 @@ async function exportarPDFAndamio(){
 
 
     alert(
-      'No se pudo generar el PDF.'
+      'No se pudo generar el PDF: ' +
+      error.message
     );
 
   }
