@@ -10897,7 +10897,110 @@ async function exportarExcelAndamio(){
 
   }
 
+  /*
+   * =====================================================
+   * FOTOGRAFÍAS PARA EXCEL
+   * =====================================================
+   */
 
+  const cacheFotosExcel =
+    new Map();
+
+
+  async function cargarFotoExcel(
+    foto
+  ){
+
+    const idArchivo =
+      String(
+        foto?.idArchivoDrive ||
+        ''
+      ).trim();
+
+
+    if(
+      !idArchivo
+    ){
+
+      return null;
+
+    }
+
+
+    if(
+      cacheFotosExcel.has(
+        idArchivo
+      )
+    ){
+
+      return cacheFotosExcel.get(
+        idArchivo
+      );
+
+    }
+
+
+    try{
+
+      const respuesta =
+        await fetch(
+          `${API_URL}` +
+          `?accion=obtenerImagenPDF` +
+          `&idArchivo=${
+            encodeURIComponent(
+              idArchivo
+            )
+          }` +
+          `&t=${Date.now()}`
+        );
+
+
+      if(
+        !respuesta.ok
+      ){
+
+        return null;
+
+      }
+
+
+      const resultado =
+        await respuesta.json();
+
+
+      if(
+        !resultado?.ok ||
+        !resultado.base64
+      ){
+
+        return null;
+
+      }
+
+
+      cacheFotosExcel.set(
+        idArchivo,
+        resultado.base64
+      );
+
+
+      return resultado.base64;
+
+
+    }catch(error){
+
+      console.warn(
+        'No se pudo cargar fotografía para Excel:',
+        idArchivo,
+        error
+      );
+
+
+      return null;
+
+    }
+
+  }
   try{
 
     const workbook =
@@ -10923,7 +11026,390 @@ async function exportarExcelAndamio(){
           ]
         }
       );
+    /*
+     * =====================================================
+     * INSERTAR FOTOGRAFÍAS EN EXCEL
+     * =====================================================
+     */
 
+    async function agregarFotosExcel(
+      listaFotos,
+      filaInicio,
+      tituloBloque = 'EVIDENCIA'
+    ){
+
+      const lista =
+        Array.isArray(
+          listaFotos
+        )
+          ? listaFotos
+          : [];
+
+
+      if(
+        !lista.length
+      ){
+
+        return filaInicio;
+
+      }
+
+
+      let fila =
+        filaInicio;
+
+
+      /*
+       * Precargar fotos en paralelo.
+       */
+      await Promise.allSettled(
+        lista.map(
+          foto =>
+            cargarFotoExcel(
+              foto
+            )
+        )
+      );
+
+
+      for(
+        let indice = 0;
+        indice < lista.length;
+        indice += 2
+      ){
+
+        const fotoIzquierda =
+          lista[indice];
+
+        const fotoDerecha =
+          lista[
+            indice + 1
+          ] ||
+          null;
+
+
+        /*
+         * Título de las evidencias.
+         */
+        hoja.mergeCells(
+          `A${fila}:C${fila}`
+        );
+
+
+        hoja.getCell(
+          `A${fila}`
+        ).value =
+          fotoIzquierda?.tipoFoto ||
+          tituloBloque;
+
+
+        hoja.getCell(
+          `A${fila}`
+        ).font = {
+          bold:true,
+          color:{
+            argb:'163F63'
+          }
+        };
+
+
+        hoja.getCell(
+          `A${fila}`
+        ).fill = {
+          type:'pattern',
+          pattern:'solid',
+          fgColor:{
+            argb:'EAF3FA'
+          }
+        };
+
+
+        hoja.getCell(
+          `A${fila}`
+        ).alignment = {
+          horizontal:'center',
+          vertical:'middle',
+          wrapText:true
+        };
+
+
+        if(
+          fotoDerecha
+        ){
+
+          hoja.mergeCells(
+            `D${fila}:F${fila}`
+          );
+
+
+          hoja.getCell(
+            `D${fila}`
+          ).value =
+            fotoDerecha.tipoFoto ||
+            tituloBloque;
+
+
+          hoja.getCell(
+            `D${fila}`
+          ).font = {
+            bold:true,
+            color:{
+              argb:'163F63'
+            }
+          };
+
+
+          hoja.getCell(
+            `D${fila}`
+          ).fill = {
+            type:'pattern',
+            pattern:'solid',
+            fgColor:{
+              argb:'EAF3FA'
+            }
+          };
+
+
+          hoja.getCell(
+            `D${fila}`
+          ).alignment = {
+            horizontal:'center',
+            vertical:'middle',
+            wrapText:true
+          };
+
+        }
+
+
+        hoja.getRow(
+          fila
+        ).height =
+          24;
+
+
+        const filaImagen =
+          fila + 1;
+
+
+        /*
+         * Reservamos espacio para las imágenes.
+         */
+        for(
+          let r =
+            filaImagen;
+          r <= filaImagen + 5;
+          r++
+        ){
+
+          hoja.getRow(
+            r
+          ).height =
+            28;
+
+        }
+
+
+        /*
+         * FOTO IZQUIERDA
+         */
+        const base64Izquierda =
+          await cargarFotoExcel(
+            fotoIzquierda
+          );
+
+
+        if(
+          base64Izquierda
+        ){
+
+          const extension =
+            base64Izquierda
+              .startsWith(
+                'data:image/png'
+              )
+                ? 'png'
+                : 'jpeg';
+
+
+          const imagenId =
+            workbook.addImage({
+              base64:
+                base64Izquierda,
+              extension
+            });
+
+
+          hoja.addImage(
+            imagenId,
+            {
+              tl:{
+                col:0.15,
+                row:
+                  filaImagen -
+                  0.85
+              },
+
+              ext:{
+                width:330,
+                height:170
+              },
+
+              editAs:'oneCell'
+            }
+          );
+
+        }
+
+
+        /*
+         * FOTO DERECHA
+         */
+        if(
+          fotoDerecha
+        ){
+
+          const base64Derecha =
+            await cargarFotoExcel(
+              fotoDerecha
+            );
+
+
+          if(
+            base64Derecha
+          ){
+
+            const extension =
+              base64Derecha
+                .startsWith(
+                  'data:image/png'
+                )
+                  ? 'png'
+                  : 'jpeg';
+
+
+            const imagenId =
+              workbook.addImage({
+                base64:
+                  base64Derecha,
+                extension
+              });
+
+
+            hoja.addImage(
+              imagenId,
+              {
+                tl:{
+                  col:3.15,
+                  row:
+                    filaImagen -
+                    0.85
+                },
+
+                ext:{
+                  width:330,
+                  height:170
+                },
+
+                editAs:'oneCell'
+              }
+            );
+
+          }
+
+        }
+
+
+        /*
+         * Fecha / hora debajo de cada foto.
+         */
+        const filaFecha =
+          filaImagen + 6;
+
+
+        hoja.mergeCells(
+          `A${filaFecha}:C${filaFecha}`
+        );
+
+
+        hoja.getCell(
+          `A${filaFecha}`
+        ).value =
+          fotoIzquierda?.fechaHora ||
+          '';
+
+
+        hoja.getCell(
+          `A${filaFecha}`
+        ).font = {
+          size:9,
+          italic:true,
+          color:{
+            argb:'667784'
+          }
+        };
+
+
+        hoja.getCell(
+          `A${filaFecha}`
+        ).alignment = {
+          horizontal:'center',
+          vertical:'middle'
+        };
+
+
+        if(
+          fotoDerecha
+        ){
+
+          hoja.mergeCells(
+            `D${filaFecha}:F${filaFecha}`
+          );
+
+
+          hoja.getCell(
+            `D${filaFecha}`
+          ).value =
+            fotoDerecha.fechaHora ||
+            '';
+
+
+          hoja.getCell(
+            `D${filaFecha}`
+          ).font = {
+            size:9,
+            italic:true,
+            color:{
+              argb:'667784'
+            }
+          };
+
+
+          hoja.getCell(
+            `D${filaFecha}`
+          ).alignment = {
+            horizontal:'center',
+            vertical:'middle'
+          };
+
+        }
+
+
+        hoja.getRow(
+          filaFecha
+        ).height =
+          18;
+
+
+        fila =
+          filaFecha +
+          2;
+
+      }
+
+
+      return fila;
+
+    }
 
     /*
      * =====================================================
@@ -12037,284 +12523,115 @@ async function exportarExcelAndamio(){
     filaActual++;
 
 
-    eventosTraslado.forEach(
-      evento => {
+    for(
+      const evento of eventosTraslado
+    ){
 
-        const esPausa =
-          normalizarTexto(
-            evento.tipoEvento
-          ).includes(
-            'PAUSA'
-          );
-
-
-        hoja.getRow(
-          filaActual
-        ).values = [
-
-          evento.fechaHora ||
-          '-',
-
-          evento.tipoEvento ||
-          '-',
-
-          evento.responsable ||
-          '-',
-
-          evento.ubicacion ||
-          '-',
-
-          evento.motivoObservacion ||
-          '-',
-
-          Number(
-            evento.tiempoTramoSegundos
-          ) > 0
-            ? formatearSegundos(
-                evento.tiempoTramoSegundos
-              )
-            : '-'
-
-        ];
-
-
-        hoja.getRow(
-          filaActual
-        ).eachCell(
-          {
-            includeEmpty:true
-          },
-          celda => {
-
-            celda.border =
-              bordeFino;
-
-
-            celda.alignment = {
-              vertical:'middle',
-              wrapText:true
-            };
-
-
-            if(
-              esPausa
-            ){
-
-              celda.fill = {
-                type:'pattern',
-                pattern:'solid',
-                fgColor:{
-                  argb:ROJO_CLARO
-                }
-              };
-
-            }
-
-          }
+      const esPausa =
+        normalizarTexto(
+          evento.tipoEvento
+        ).includes(
+          'PAUSA'
         );
 
 
-        filaActual++;
+      hoja.getRow(
+        filaActual
+      ).values = [
 
-      }
-    );
+        evento.fechaHora ||
+        '-',
 
+        evento.tipoEvento ||
+        '-',
 
-    /*
-     * =====================================================
-     * ARMADO
-     * =====================================================
-     */
+        evento.responsable ||
+        '-',
 
-    filaActual++;
+        evento.ubicacion ||
+        '-',
 
+        evento.motivoObservacion ||
+        '-',
 
-    hoja.mergeCells(
-      `A${filaActual}:F${filaActual}`
-    );
+        Number(
+          evento.tiempoTramoSegundos
+        ) > 0
+          ? formatearSegundos(
+              evento.tiempoTramoSegundos
+            )
+          : '-'
 
-
-    hoja.getCell(
-      `A${filaActual}`
-    ).value =
-      `ARMADO | Estado: ${
-        eventosArmado.estadoArmado ||
-        'PENDIENTE'
-      } | Responsable: ${
-        servicioActual.responsableArmado ||
-        '-'
-      }`;
+      ];
 
 
-    hoja.getCell(
-      `A${filaActual}`
-    ).font = {
-      bold:true,
-      color:{
-        argb:AZUL
-      }
-    };
+      hoja.getRow(
+        filaActual
+      ).eachCell(
+        {
+          includeEmpty:true
+        },
+        celda => {
+
+          celda.border =
+            bordeFino;
 
 
-    hoja.getCell(
-      `A${filaActual}`
-    ).fill = {
-      type:'pattern',
-      pattern:'solid',
-      fgColor:{
-        argb:AZUL_CLARO
-      }
-    };
+          celda.alignment = {
+            vertical:'middle',
+            wrapText:true
+          };
 
 
-    hoja.getCell(
-      `A${filaActual}`
-    ).border =
-      bordeFino;
+          if(
+            esPausa
+          ){
 
-
-    filaActual++;
-
-
-    const cabeceraArmado = [
-
-      'FECHA / HORA',
-      'EVENTO',
-      'RESPONSABLE',
-      'MOTIVO',
-      'OBSERVACIÓN',
-      'TIEMPO TRAMO'
-
-    ];
-
-
-    hoja.getRow(
-      filaActual
-    ).values =
-      cabeceraArmado;
-
-
-    hoja.getRow(
-      filaActual
-    ).eachCell(
-      celda => {
-
-        celda.font = {
-          bold:true,
-          color:{
-            argb:BLANCO
-          }
-        };
-
-
-        celda.fill = {
-          type:'pattern',
-          pattern:'solid',
-          fgColor:{
-            argb:AZUL2
-          }
-        };
-
-
-        celda.border =
-          bordeFino;
-
-
-        celda.alignment = {
-          horizontal:'center',
-          vertical:'middle',
-          wrapText:true
-        };
-
-      }
-    );
-
-
-    filaActual++;
-
-
-    eventosMontaje.forEach(
-      evento => {
-
-        const esPausa =
-          normalizarTexto(
-            evento.tipoEvento
-          ).includes(
-            'PAUSA'
-          );
-
-
-        hoja.getRow(
-          filaActual
-        ).values = [
-
-          evento.fechaHora ||
-          '-',
-
-          evento.tipoEvento ||
-          '-',
-
-          evento.responsable ||
-          '-',
-
-          evento.motivo ||
-          '-',
-
-          evento.observacion ||
-          '-',
-
-          Number(
-            evento.tiempoTramoMinutos
-          ) > 0
-            ? formatearMinutos(
-                evento.tiempoTramoMinutos
-              )
-            : '-'
-
-        ];
-
-
-        hoja.getRow(
-          filaActual
-        ).eachCell(
-          {
-            includeEmpty:true
-          },
-          celda => {
-
-            celda.border =
-              bordeFino;
-
-
-            celda.alignment = {
-              vertical:'middle',
-              wrapText:true
+            celda.fill = {
+              type:'pattern',
+              pattern:'solid',
+              fgColor:{
+                argb:ROJO_CLARO
+              }
             };
 
+          }
 
-            if(
-              esPausa
-            ){
+        }
+      );
 
-              celda.fill = {
-                type:'pattern',
-                pattern:'solid',
-                fgColor:{
-                  argb:ROJO_CLARO
-                }
-              };
+
+      filaActual++;
+
+
+      /*
+       * Fotos asociadas exactamente
+       * a este evento de Traslado.
+       */
+      const fotosEvento =
+        obtenerFotosDelEvento(
+          fotografias.filter(
+            foto => {
+
+              const etapa =
+                normalizarTexto(
+                  foto.etapa
+                );
+
+              return (
+                etapa ===
+                  'TRASLADO' ||
+                etapa ===
+                  'RECEPCION EN TAG'
+              );
 
             }
-
-          }
+          ),
+          evento
         );
 
 
-        filaActual++;
-
-      }
-    );
-
+  
 
     /*
      * =====================================================
@@ -12781,7 +13098,42 @@ async function exportarExcelAndamio(){
       wrapText:true
     };
 
+        filaActual++;
 
+
+    const fotosPostparadaExcel =
+      fotografias.filter(
+        foto =>
+          normalizarTexto(
+            foto.etapa
+          ) ===
+          'POSTPARADA'
+      );
+
+
+    const fotosPostparadaNormales =
+      fotosPostparadaExcel.filter(
+        foto =>
+          !normalizarTexto(
+            foto.tipoFoto
+          ).includes(
+            'MATERIAL DANADO'
+          )
+      );
+
+
+    if(
+      fotosPostparadaNormales.length
+    ){
+
+      filaActual =
+        await agregarFotosExcel(
+          fotosPostparadaNormales,
+          filaActual,
+          'EVIDENCIA DE POSTPARADA'
+        );
+
+    }
     /*
      * =====================================================
      * 6. INCIDENCIAS
@@ -12944,228 +13296,51 @@ async function exportarExcelAndamio(){
 
         }
       );
+              const fotosDanadoExcel =
+        fotografias.filter(
+          foto => {
 
-    }
+            const etapa =
+              normalizarTexto(
+                foto.etapa
+              );
 
-
-    /*
-     * =====================================================
-     * EVIDENCIAS
-     * =====================================================
-     */
-
-    filaActual +=
-      2;
-
-
-    pintarTituloSeccion(
-      filaActual,
-      materialesIncidencia.length
-        ? '7. EVIDENCIAS'
-        : '6. EVIDENCIAS'
-    );
+            const tipo =
+              normalizarTexto(
+                foto.tipoFoto
+              );
 
 
-    filaActual++;
-
-
-    const encabezadosFotos = [
-
-      'ETAPA',
-      'TIPO',
-      'FECHA / HORA',
-      'DESCRIPCIÓN',
-      'SUBIDO POR',
-      'ENLACE'
-
-    ];
-
-
-    hoja.getRow(
-      filaActual
-    ).values =
-      encabezadosFotos;
-
-
-    hoja.getRow(
-      filaActual
-    ).eachCell(
-      celda => {
-
-        celda.font = {
-          bold:true,
-          color:{
-            argb:BLANCO
-          }
-        };
-
-
-        celda.fill = {
-          type:'pattern',
-          pattern:'solid',
-          fgColor:{
-            argb:AZUL2
-          }
-        };
-
-
-        celda.border =
-          bordeFino;
-
-
-        celda.alignment = {
-          horizontal:'center',
-          vertical:'middle',
-          wrapText:true
-        };
-
-      }
-    );
-
-
-    filaActual++;
-
-
-    if(
-      fotografias.length
-    ){
-
-      fotografias.forEach(
-        foto => {
-
-          hoja.getCell(
-            `A${filaActual}`
-          ).value =
-            foto.etapa ||
-            '-';
-
-
-          hoja.getCell(
-            `B${filaActual}`
-          ).value =
-            foto.tipoFoto ||
-            '-';
-
-
-          hoja.getCell(
-            `C${filaActual}`
-          ).value =
-            foto.fechaHora ||
-            '-';
-
-
-          hoja.getCell(
-            `D${filaActual}`
-          ).value =
-            foto.descripcion ||
-            '-';
-
-
-          hoja.getCell(
-            `E${filaActual}`
-          ).value =
-            foto.subidoPor ||
-            '-';
-
-
-          if(
-            foto.enlaceFoto
-          ){
-
-            hoja.getCell(
-              `F${filaActual}`
-            ).value = {
-              text:'Abrir fotografía',
-              hyperlink:
-                foto.enlaceFoto,
-              tooltip:
-                'Abrir evidencia fotográfica'
-            };
-
-
-            hoja.getCell(
-              `F${filaActual}`
-            ).font = {
-              color:{
-                argb:'0563C1'
-              },
-              underline:true
-            };
-
-          }else{
-
-            hoja.getCell(
-              `F${filaActual}`
-            ).value =
-              '-';
+            return (
+              etapa ===
+                'POSTPARADA' &&
+              tipo.includes(
+                'MATERIAL DANADO'
+              )
+            );
 
           }
+        );
 
 
-          hoja.getRow(
-            filaActual
-          ).eachCell(
-            {
-              includeEmpty:true
-            },
-            celda => {
+      if(
+        fotosDanadoExcel.length
+      ){
 
-              celda.border =
-                bordeFino;
-
-
-              celda.alignment = {
-                vertical:'middle',
-                wrapText:true
-              };
-
-            }
+        filaActual =
+          await agregarFotosExcel(
+            fotosDanadoExcel,
+            filaActual + 1,
+            'EVIDENCIA DE MATERIAL DAÑADO'
           );
 
+      }
 
-          hoja.getRow(
-            filaActual
-          ).height =
-            28;
-
-
-          filaActual++;
-
-        }
-      );
-
-    }else{
-
-      hoja.mergeCells(
-        `A${filaActual}:F${filaActual}`
-      );
-
-
-      hoja.getCell(
-        `A${filaActual}`
-      ).value =
-        'No existen evidencias fotográficas registradas.';
-
-
-      hoja.getCell(
-        `A${filaActual}`
-      ).alignment = {
-        vertical:'middle',
-        horizontal:'center'
-      };
-
-
-      hoja.getCell(
-        `A${filaActual}`
-      ).border =
-        bordeFino;
-
-
-      filaActual++;
-
+      
     }
 
 
+   
     /*
      * =====================================================
      * OBSERVACIONES GENERALES
@@ -13176,12 +13351,12 @@ async function exportarExcelAndamio(){
       2;
 
 
-    pintarTituloSeccion(
-      filaActual,
-      materialesIncidencia.length
-        ? '8. OBSERVACIONES'
-        : '7. OBSERVACIONES'
-    );
+pintarTituloSeccion(
+  filaActual,
+  materialesIncidencia.length
+    ? '7. OBSERVACIONES'
+    : '6. OBSERVACIONES'
+);
 
 
     filaActual++;
