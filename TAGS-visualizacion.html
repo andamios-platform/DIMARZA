@@ -8087,11 +8087,9 @@ async function exportarPDFAndamio(){
       });
 
 
-    /*
-     * =====================================================
-     * COLORES
-     * =====================================================
-     */
+    /* =====================================================
+       COLORES
+    ===================================================== */
 
     const AZUL = [
       22,
@@ -8117,6 +8115,12 @@ async function exportarPDFAndamio(){
       95
     ];
 
+    const VERDE_CLARO = [
+      233,
+      247,
+      241
+    ];
+
     const ROJO = [
       200,
       63,
@@ -8135,18 +8139,16 @@ async function exportarPDFAndamio(){
       132
     ];
 
-    const GRIS_CLARO = [
-      245,
-      247,
-      249
+    const TEXTO = [
+      31,
+      45,
+      54
     ];
 
 
-    /*
-     * =====================================================
-     * DATOS
-     * =====================================================
-     */
+    /* =====================================================
+       DATOS
+    ===================================================== */
 
     const previos =
       datosDetalle.previos ||
@@ -8213,11 +8215,165 @@ async function exportarPDFAndamio(){
         : [];
 
 
-    /*
-     * =====================================================
-     * TOTALES
-     * =====================================================
-     */
+    const fotos =
+      Array.isArray(
+        datosDetalle.fotografias
+      )
+        ? datosDetalle.fotografias
+        : [];
+
+
+    /* =====================================================
+       FILTRAR FOTOS
+    ===================================================== */
+
+    const fotosTraslado =
+      fotos.filter(
+        foto => {
+
+          const etapa =
+            normalizarTexto(
+              foto.etapa
+            );
+
+          return (
+            etapa === 'TRASLADO' ||
+            etapa === 'RECEPCION EN TAG'
+          );
+
+        }
+      );
+
+
+    const fotosArmado =
+      fotos.filter(
+        foto => {
+
+          const etapa =
+            normalizarTexto(
+              foto.etapa
+            );
+
+          const tipoFoto =
+            normalizarTexto(
+              foto.tipoFoto
+            );
+
+
+          if(
+            etapa === 'POSTPARADA' ||
+            etapa === 'TRASLADO' ||
+            etapa === 'RECEPCION EN TAG'
+          ){
+
+            return false;
+
+          }
+
+
+          return (
+
+            etapa === 'ARMADO' ||
+
+            etapa === 'ARMADO PAUSA' ||
+
+            etapa === 'ANDAMIO TERMINADO' ||
+
+            etapa.includes(
+              'ESTABILIZ'
+            ) ||
+
+            tipoFoto.includes(
+              'VISTA GENERAL'
+            ) ||
+
+            tipoFoto.includes(
+              'LADO IZQUIERDO'
+            ) ||
+
+            tipoFoto.includes(
+              'LADO DERECHO'
+            ) ||
+
+            tipoFoto.includes(
+              'ACCESO'
+            ) ||
+
+            tipoFoto.includes(
+              'ESTABILIZ'
+            ) ||
+
+            tipoFoto.includes(
+              'OTRA EVIDENCIA'
+            )
+
+          );
+
+        }
+      );
+
+
+    const fotosPostparada =
+      fotos.filter(
+        foto =>
+          normalizarTexto(
+            foto.etapa
+          ) ===
+          'POSTPARADA'
+      );
+
+
+    const fotosMaterialDanado =
+      fotosPostparada.filter(
+        foto =>
+          normalizarTexto(
+            foto.tipoFoto
+          ).includes(
+            'MATERIAL DANADO'
+          )
+      );
+
+
+    const fotosMaterialFaltante =
+      fotosPostparada.filter(
+        foto => {
+
+          const tipo =
+            normalizarTexto(
+              foto.tipoFoto
+            );
+
+          return (
+            tipo.includes(
+              'FALTANTE'
+            ) ||
+            tipo.includes(
+              'PERDIDO'
+            ) ||
+            tipo.includes(
+              'PERDIDA'
+            )
+          );
+
+        }
+      );
+
+
+    const fotosPostparadaGenerales =
+      fotosPostparada.filter(
+        foto =>
+          !fotosMaterialDanado.includes(
+            foto
+          ) &&
+          !fotosMaterialFaltante.includes(
+            foto
+          )
+      );
+
+
+    /* =====================================================
+       TOTALES
+    ===================================================== */
 
     const totalDespachado =
       materialesPrevios.reduce(
@@ -8262,124 +8418,204 @@ async function exportarPDFAndamio(){
       ).length;
 
 
-    const totalPausasTraslado =
-      eventosTraslado.filter(
-        evento =>
-          normalizarTexto(
-            evento.tipoEvento
-          ).includes(
-            'PAUSA'
-          )
-      ).length;
+    const totalDanado =
+      Number(
+        postparada?.resumen
+          ?.cantidadDanada
+      ) || 0;
 
 
-    /*
-     * =====================================================
-     * CARGAR IMAGEN
-     * =====================================================
-     */
+    const totalFaltante =
+      Number(
+        postparada?.resumen
+          ?.cantidadFaltante
+      ) || 0;
 
-    async function cargarImagenBase64PDF(
-      ruta
+
+    /* =====================================================
+       CARGAR IMAGEN COMO BASE64
+    ===================================================== */
+
+    async function cargarImagenPDF(
+      fotoORuta
     ){
 
-      const respuesta =
-        await fetch(
-          encodeURI(
-            ruta
-          ),
-          {
-            cache:'no-store'
-          }
-        );
+      let rutas = [];
 
 
       if(
-        !respuesta.ok
+        typeof fotoORuta ===
+        'string'
       ){
 
-        throw new Error(
-          `No se pudo cargar la imagen. HTTP ${respuesta.status}`
-        );
+        rutas = [
+          fotoORuta
+        ];
+
+      }else{
+
+        const foto =
+          fotoORuta ||
+          {};
+
+
+        const id =
+          String(
+            foto.idArchivoDrive ||
+            ''
+          ).trim();
+
+
+        if(id){
+
+          rutas.push(
+            'https://drive.google.com/thumbnail?id=' +
+            encodeURIComponent(
+              id
+            ) +
+            '&sz=w1000'
+          );
+
+        }
+
+
+        if(
+          foto.enlaceFoto
+        ){
+
+          rutas.push(
+            foto.enlaceFoto
+          );
+
+        }
 
       }
 
 
-      const blob =
-        await respuesta.blob();
+      for(
+        const ruta of rutas
+      ){
+
+        try{
+
+          const respuesta =
+            await fetch(
+              encodeURI(
+                ruta
+              ),
+              {
+                cache:'no-store'
+              }
+            );
 
 
-      return await new Promise(
-        (
-          resolve,
-          reject
-        ) => {
+          if(
+            !respuesta.ok
+          ){
 
-          const lector =
-            new FileReader();
+            continue;
 
-
-          lector.onload =
-            () =>
-              resolve(
-                lector.result
-              );
+          }
 
 
-          lector.onerror =
-            () =>
-              reject(
-                new Error(
-                  'No se pudo procesar la imagen.'
-                )
-              );
+          const blob =
+            await respuesta.blob();
 
 
-          lector.readAsDataURL(
-            blob
+          const resultado =
+            await new Promise(
+              (
+                resolve,
+                reject
+              ) => {
+
+                const lector =
+                  new FileReader();
+
+
+                lector.onload =
+                  () =>
+                    resolve(
+                      lector.result
+                    );
+
+
+                lector.onerror =
+                  reject;
+
+
+                lector.readAsDataURL(
+                  blob
+                );
+
+              }
+            );
+
+
+          return resultado;
+
+
+        }catch(error){
+
+          console.warn(
+            'No se pudo cargar fotografía para PDF:',
+            ruta
           );
 
         }
-      );
+
+      }
+
+
+      return null;
 
     }
 
 
-    /*
-     * =====================================================
-     * CONTROL DE PÁGINA
-     * =====================================================
-     */
+    /* =====================================================
+       CONTROL DE PÁGINAS
+    ===================================================== */
 
     let y =
       10;
 
 
+    function nuevaPagina(){
+
+      pdf.addPage();
+
+      y =
+        15;
+
+    }
+
+
     function verificarPagina(
-      altoNecesario = 20
+      alto = 20
     ){
 
       if(
-        y + altoNecesario >
+        y + alto >
         278
       ){
 
-        pdf.addPage();
-
-        y =
-          15;
+        nuevaPagina();
 
       }
 
     }
 
+
+    /* =====================================================
+       TÍTULO DE SECCIÓN
+    ===================================================== */
 
     function tituloSeccion(
       titulo
     ){
 
       verificarPagina(
-        15
+        14
       );
 
 
@@ -8411,14 +8647,14 @@ async function exportarPDFAndamio(){
 
 
       pdf.setFontSize(
-        10
+        9.5
       );
 
 
       pdf.text(
         titulo,
         13,
-        y + 5.5
+        y + 5.4
       );
 
 
@@ -8428,11 +8664,457 @@ async function exportarPDFAndamio(){
     }
 
 
-    /*
-     * =====================================================
-     * CABECERA
-     * =====================================================
-     */
+    /* =====================================================
+       BLOQUE SIMPLE
+    ===================================================== */
+
+    function escribirBloque(
+      titulo,
+      lineas,
+      opciones = {}
+    ){
+
+      const esAlerta =
+        opciones.alerta ===
+        true;
+
+
+      const lineasValidas =
+        lineas.filter(
+          Boolean
+        );
+
+
+      const altura =
+        Math.max(
+          15,
+          9 +
+          lineasValidas.length *
+          4.5
+        );
+
+
+      verificarPagina(
+        altura + 4
+      );
+
+
+      pdf.setFillColor(
+        ...(
+          esAlerta
+            ? ROJO_CLARO
+            : AZUL_CLARO
+        )
+      );
+
+
+      pdf.setDrawColor(
+        ...(
+          esAlerta
+            ? ROJO
+            : AZUL2
+        )
+      );
+
+
+      pdf.roundedRect(
+        10,
+        y,
+        190,
+        altura,
+        2,
+        2,
+        'FD'
+      );
+
+
+      pdf.setTextColor(
+        ...(
+          esAlerta
+            ? ROJO
+            : AZUL
+        )
+      );
+
+
+      pdf.setFont(
+        'helvetica',
+        'bold'
+      );
+
+
+      pdf.setFontSize(
+        9
+      );
+
+
+      pdf.text(
+        titulo,
+        14,
+        y + 6
+      );
+
+
+      let textoY =
+        y + 11;
+
+
+      pdf.setFont(
+        'helvetica',
+        'normal'
+      );
+
+
+      pdf.setTextColor(
+        ...TEXTO
+      );
+
+
+      pdf.setFontSize(
+        7.5
+      );
+
+
+      lineasValidas.forEach(
+        linea => {
+
+          pdf.text(
+            String(
+              linea
+            ),
+            14,
+            textoY
+          );
+
+
+          textoY +=
+            4.2;
+
+        }
+      );
+
+
+      y +=
+        altura +
+        5;
+
+    }
+
+
+    /* =====================================================
+       FOTOS EN GRILLA
+    ===================================================== */
+
+    async function agregarFotos(
+      titulo,
+      listaFotos
+    ){
+
+      const lista =
+        Array.isArray(
+          listaFotos
+        )
+          ? listaFotos
+          : [];
+
+
+      if(
+        !lista.length
+      ){
+
+        return;
+
+      }
+
+
+      verificarPagina(
+        18
+      );
+
+
+      pdf.setTextColor(
+        ...AZUL
+      );
+
+
+      pdf.setFont(
+        'helvetica',
+        'bold'
+      );
+
+
+      pdf.setFontSize(
+        8.5
+      );
+
+
+      pdf.text(
+        titulo,
+        13,
+        y
+      );
+
+
+      y +=
+        5;
+
+
+      const anchoCard =
+        91;
+
+      const altoImagen =
+        48;
+
+      const altoTexto =
+        15;
+
+      const altoCard =
+        altoImagen +
+        altoTexto;
+
+      const separacion =
+        8;
+
+
+      for(
+        let i = 0;
+        i < lista.length;
+        i += 2
+      ){
+
+        verificarPagina(
+          altoCard +
+          8
+        );
+
+
+        const fila =
+          lista.slice(
+            i,
+            i + 2
+          );
+
+
+        for(
+          let columna = 0;
+          columna < fila.length;
+          columna++
+        ){
+
+          const foto =
+            fila[columna];
+
+
+          const x =
+            10 +
+            columna *
+            (
+              anchoCard +
+              separacion
+            );
+
+
+          pdf.setDrawColor(
+            215,
+            224,
+            231
+          );
+
+
+          pdf.setFillColor(
+            255,
+            255,
+            255
+          );
+
+
+          pdf.roundedRect(
+            x,
+            y,
+            anchoCard,
+            altoCard,
+            2,
+            2,
+            'FD'
+          );
+
+
+          const base64 =
+            await cargarImagenPDF(
+              foto
+            );
+
+
+          if(
+            base64
+          ){
+
+            try{
+
+              const propiedades =
+                pdf.getImageProperties(
+                  base64
+                );
+
+
+              const ratio =
+                propiedades.width /
+                propiedades.height;
+
+
+              let ancho =
+                anchoCard -
+                4;
+
+              let alto =
+                altoImagen -
+                4;
+
+
+              if(
+                ancho / alto >
+                ratio
+              ){
+
+                ancho =
+                  alto *
+                  ratio;
+
+              }else{
+
+                alto =
+                  ancho /
+                  ratio;
+
+              }
+
+
+              pdf.addImage(
+                base64,
+                propiedades.fileType ||
+                'JPEG',
+                x +
+                  (
+                    anchoCard -
+                    ancho
+                  ) /
+                  2,
+                y +
+                  2 +
+                  (
+                    altoImagen -
+                    4 -
+                    alto
+                  ) /
+                  2,
+                ancho,
+                alto
+              );
+
+
+            }catch(errorImagen){
+
+              console.warn(
+                'No se pudo insertar fotografía.',
+                errorImagen
+              );
+
+            }
+
+          }
+
+
+          pdf.setTextColor(
+            ...AZUL
+          );
+
+
+          pdf.setFont(
+            'helvetica',
+            'bold'
+          );
+
+
+          pdf.setFontSize(
+            7
+          );
+
+
+          const nombre =
+            pdf.splitTextToSize(
+              String(
+                foto.tipoFoto ||
+                foto.etapa ||
+                'Fotografía'
+              ),
+              anchoCard -
+              6
+            );
+
+
+          pdf.text(
+            nombre.slice(
+              0,
+              2
+            ),
+            x + 3,
+            y +
+            altoImagen +
+            5
+          );
+
+
+          if(
+            foto.fechaHora
+          ){
+
+            pdf.setTextColor(
+              ...GRIS
+            );
+
+
+            pdf.setFont(
+              'helvetica',
+              'normal'
+            );
+
+
+            pdf.setFontSize(
+              6.2
+            );
+
+
+            pdf.text(
+              String(
+                foto.fechaHora
+              ),
+              x + 3,
+              y +
+              altoImagen +
+              12
+            );
+
+          }
+
+        }
+
+
+        y +=
+          altoCard +
+          5;
+
+      }
+
+
+      y +=
+        2;
+
+    }
+
+
+    /* =====================================================
+       CABECERA
+    ===================================================== */
 
     pdf.setFillColor(
       ...AZUL
@@ -8447,10 +9129,6 @@ async function exportarPDFAndamio(){
       'F'
     );
 
-
-    /*
-     * Área blanca del logo.
-     */
 
     pdf.setFillColor(
       255,
@@ -8468,64 +9146,35 @@ async function exportarPDFAndamio(){
     );
 
 
-    /*
-     * Logo DIMARZA.
-     */
-
     try{
 
       const logo =
-        await cargarImagenBase64PDF(
+        await cargarImagenPDF(
           'img/logodmz (2).png'
         );
 
 
-      pdf.addImage(
-        logo,
-        'PNG',
-        13,
-        14,
-        58,
-        19
-      );
+      if(logo){
 
+        pdf.addImage(
+          logo,
+          'PNG',
+          13,
+          14,
+          58,
+          19
+        );
+
+      }
 
     }catch(errorLogo){
 
       console.warn(
-        'No se pudo cargar el logo en PDF:',
-        errorLogo
-      );
-
-
-      pdf.setTextColor(
-        ...AZUL
-      );
-
-
-      pdf.setFont(
-        'helvetica',
-        'bold'
-      );
-
-
-      pdf.setFontSize(
-        15
-      );
-
-
-      pdf.text(
-        'DIMARZA',
-        20,
-        27
+        'Logo no disponible.'
       );
 
     }
 
-
-    /*
-     * Título.
-     */
 
     pdf.setTextColor(
       255,
@@ -8541,23 +9190,19 @@ async function exportarPDFAndamio(){
 
 
     pdf.setFontSize(
-      15
+      14
     );
 
 
     pdf.text(
       'REPORTE DE ANDAMIO',
-      115,
-      22,
+      116,
+      23,
       {
         align:'center'
       }
     );
 
-
-    /*
-     * TAG.
-     */
 
     pdf.setFontSize(
       8
@@ -8567,7 +9212,7 @@ async function exportarPDFAndamio(){
     pdf.text(
       'TAG',
       195,
-      19,
+      18,
       {
         align:'right'
       }
@@ -8596,11 +9241,9 @@ async function exportarPDFAndamio(){
       47;
 
 
-    /*
-     * =====================================================
-     * 1. DATOS DEL SERVICIO
-     * =====================================================
-     */
+    /* =====================================================
+       1. DATOS DEL SERVICIO
+    ===================================================== */
 
     tituloSeccion(
       '1. DATOS DEL SERVICIO'
@@ -8679,9 +9322,8 @@ async function exportarPDFAndamio(){
       ],
 
       styles:{
-        fontSize:7.8,
-        cellPadding:2.3,
-        valign:'middle'
+        fontSize:7.5,
+        cellPadding:2.2
       },
 
       columnStyles:{
@@ -8718,105 +9360,19 @@ async function exportarPDFAndamio(){
       5;
 
 
-    /*
-     * Descripción del trabajo.
-     */
-
-    verificarPagina(
-      25
-    );
-
-
-    pdf.setFillColor(
-      ...AZUL_CLARO
-    );
-
-
-    pdf.rect(
-      10,
-      y,
-      190,
-      8,
-      'F'
-    );
-
-
-    pdf.setTextColor(
-      ...AZUL
-    );
-
-
-    pdf.setFont(
-      'helvetica',
-      'bold'
-    );
-
-
-    pdf.setFontSize(
-      8
-    );
-
-
-    pdf.text(
+    escribirBloque(
       'Descripción del trabajo',
-      13,
-      y + 5.3
+      [
+        servicioActual.descripcion ||
+        servicioActual.descripcionTrabajo ||
+        '-'
+      ]
     );
 
 
-    y +=
-      11;
-
-
-    pdf.setTextColor(
-      31,
-      45,
-      54
-    );
-
-
-    pdf.setFont(
-      'helvetica',
-      'normal'
-    );
-
-
-    pdf.setFontSize(
-      8
-    );
-
-
-    const descripcion =
-      pdf.splitTextToSize(
-        String(
-          servicioActual.descripcion ||
-          servicioActual.descripcionTrabajo ||
-          '-'
-        ),
-        184
-      );
-
-
-    pdf.text(
-      descripcion,
-      13,
-      y
-    );
-
-
-    y +=
-      (
-        descripcion.length *
-        4
-      ) +
-      5;
-
-
-    /*
-     * =====================================================
-     * 2. RESUMEN EJECUTIVO
-     * =====================================================
-     */
+    /* =====================================================
+       2. RESUMEN EJECUTIVO
+    ===================================================== */
 
     tituloSeccion(
       '2. RESUMEN EJECUTIVO'
@@ -8836,8 +9392,8 @@ async function exportarPDFAndamio(){
 
       head:[
         [
-          'Material despachado',
-          'Material utilizado',
+          'Despachado',
+          'Utilizado',
           'Peso',
           'Tonelaje'
         ]
@@ -8868,8 +9424,8 @@ async function exportarPDFAndamio(){
       ],
 
       styles:{
-        halign:'center',
         fontSize:8,
+        halign:'center',
         cellPadding:3
       },
 
@@ -8904,9 +9460,9 @@ async function exportarPDFAndamio(){
       head:[
         [
           'Tiempo traslado',
-          'Pausas traslado',
           'Pausas armado',
-          'Evidencias'
+          'Evidencias',
+          'Estado'
         ]
       ],
 
@@ -8917,20 +9473,18 @@ async function exportarPDFAndamio(){
             traslado?.tiempoEfectivoSegundos
           ),
 
-          totalPausasTraslado,
-
           totalPausasArmado,
 
-          (
-            datosDetalle.fotografias ||
-            []
-          ).length
+          fotos.length,
+
+          servicioActual.estado ||
+          '-'
         ]
       ],
 
       styles:{
-        halign:'center',
         fontSize:8,
+        halign:'center',
         cellPadding:3
       },
 
@@ -8948,796 +9502,384 @@ async function exportarPDFAndamio(){
 
     y =
       pdf.lastAutoTable.finalY +
-      7;
+      8;
 
 
-    /*
-     * =====================================================
-     * 3. PREVIOS
-     * =====================================================
-     */
+    /* =====================================================
+       3. CRONOLOGÍA
+    ===================================================== */
 
     tituloSeccion(
-      '3. PREVIOS'
+      '3. CRONOLOGÍA DEL SERVICIO'
     );
 
 
-    if(
-      materialesPrevios.length
+    /* =====================================================
+       PREVIOS
+    ===================================================== */
+
+    escribirBloque(
+      'PREVIOS',
+      [
+
+        materialesPrevios.length
+          ? 'Estado: COMPLETADO'
+          : 'Estado: PENDIENTE',
+
+        `Tipos de material: ${
+          materialesPrevios.length
+        }`,
+
+        `Material despachado: ${
+          numero(
+            totalDespachado
+          )
+        }`
+
+      ]
+    );
+
+
+    /* =====================================================
+       TRASLADO
+    ===================================================== */
+
+    escribirBloque(
+      'TRASLADO',
+      [
+
+        `Estado: ${
+          traslado.estadoTraslado ||
+          'PENDIENTE'
+        }`,
+
+        `Tiempo efectivo: ${
+          traslado.tiempoEfectivo ||
+          formatearSegundos(
+            traslado.tiempoEfectivoSegundos
+          )
+        }`
+
+      ]
+    );
+
+
+    for(
+      const evento of eventosTraslado
     ){
 
-      pdf.autoTable({
+      const pausa =
+        normalizarTexto(
+          evento.tipoEvento
+        ).includes(
+          'PAUSA'
+        );
+
+
+      escribirBloque(
+        evento.tipoEvento ||
+        'EVENTO',
+        [
+
+          evento.fechaHora
+            ? `Fecha/Hora: ${evento.fechaHora}`
+            : '',
+
+          evento.responsable
+            ? `Responsable: ${evento.responsable}`
+            : '',
+
+          evento.ubicacion
+            ? `Ubicación: ${evento.ubicacion}`
+            : '',
+
+          evento.motivoObservacion
+            ? `Observación: ${evento.motivoObservacion}`
+            : '',
 
-        startY:y,
-
-        margin:{
-          left:10,
-          right:10
-        },
-
-        theme:'grid',
-
-        head:[
-          [
-            'Material',
-            'Código',
-            'Grupo',
-            'Alistado',
-            'Despachado'
-          ]
-        ],
-
-        body:
-          materialesPrevios.map(
-            material => [
-
-              material.descripcion ||
-              material.subgrupo ||
-              '-',
-
-              material.codigo ||
-              '-',
-
-              material.grupo ||
-              '-',
-
-              numero(
-                material.cantidadAlistada
-              ),
-
-              numero(
-                material.cantidadDespachada
-              )
-
-            ]
-          ),
-
-        styles:{
-          fontSize:7,
-          cellPadding:2
-        },
-
-        headStyles:{
-          fillColor:AZUL,
-          textColor:[
-            255,
-            255,
-            255
-          ]
-        },
-
-        columnStyles:{
-
-          0:{
-            cellWidth:60
-          },
-
-          1:{
-            cellWidth:25
-          },
-
-          2:{
-            cellWidth:35
-          },
-
-          3:{
-            cellWidth:25,
-            halign:'center'
-          },
-
-          4:{
-            cellWidth:25,
-            halign:'center'
-          }
-
-        }
-
-      });
-
-
-      y =
-        pdf.lastAutoTable.finalY +
-        7;
-
-
-    }else{
-
-      pdf.setTextColor(
-        ...GRIS
-      );
-
-
-      pdf.setFontSize(
-        8
-      );
-
-
-      pdf.text(
-        'No existen materiales registrados en Previos.',
-        13,
-        y
-      );
-
-
-      y +=
-        8;
-
-    }
-
-
-    /*
-     * =====================================================
-     * 4. TRASLADO
-     * =====================================================
-     */
-
-    tituloSeccion(
-      '4. TRASLADO'
-    );
-
-
-    pdf.setTextColor(
-      ...AZUL
-    );
-
-
-    pdf.setFont(
-      'helvetica',
-      'bold'
-    );
-
-
-    pdf.setFontSize(
-      8
-    );
-
-
-    pdf.text(
-      `Estado: ${
-        traslado.estadoTraslado ||
-        'PENDIENTE'
-      }`,
-      13,
-      y
-    );
-
-
-    y +=
-      5;
-
-
-    pdf.text(
-      `Tiempo efectivo: ${
-        traslado.tiempoEfectivo ||
-        formatearSegundos(
-          traslado.tiempoEfectivoSegundos
-        )
-      }`,
-      13,
-      y
-    );
-
-
-    y +=
-      6;
-
-
-    if(
-      eventosTraslado.length
-    ){
-
-      pdf.autoTable({
-
-        startY:y,
-
-        margin:{
-          left:10,
-          right:10
-        },
-
-        theme:'grid',
-
-        head:[
-          [
-            'Fecha / Hora',
-            'Evento',
-            'Responsable',
-            'Ubicación',
-            'Observación',
-            'Tiempo'
-          ]
-        ],
-
-        body:
-          eventosTraslado.map(
-            evento => [
-
-              evento.fechaHora ||
-              '-',
-
-              evento.tipoEvento ||
-              '-',
-
-              evento.responsable ||
-              '-',
-
-              evento.ubicacion ||
-              '-',
-
-              evento.motivoObservacion ||
-              '-',
-
-              Number(
-                evento.tiempoTramoSegundos
-              ) > 0
-                ? formatearSegundos(
-                    evento.tiempoTramoSegundos
-                  )
-                : '-'
-
-            ]
-          ),
-
-        styles:{
-          fontSize:6.5,
-          cellPadding:1.8,
-          valign:'middle'
-        },
-
-        headStyles:{
-          fillColor:AZUL2,
-          textColor:[
-            255,
-            255,
-            255
-          ]
-        },
-
-        columnStyles:{
-
-          0:{
-            cellWidth:27
-          },
-
-          1:{
-            cellWidth:25
-          },
-
-          2:{
-            cellWidth:35
-          },
-
-          3:{
-            cellWidth:30
-          },
-
-          4:{
-            cellWidth:45
-          },
-
-          5:{
-            cellWidth:20
-          }
-
-        },
-
-        didParseCell(
-          data
-        ){
-
-          if(
-            data.section ===
-              'body' &&
-            normalizarTexto(
-              data.row.raw[1]
-            ).includes(
-              'PAUSA'
-            )
-          ){
-
-            data.cell.styles.fillColor =
-              ROJO_CLARO;
-
-            data.cell.styles.textColor =
-              ROJO;
-
-          }
-
-        }
-
-      });
-
-
-      y =
-        pdf.lastAutoTable.finalY +
-        7;
-
-
-    }else{
-
-      pdf.setTextColor(
-        ...GRIS
-      );
-
-
-      pdf.setFontSize(
-        8
-      );
-
-
-      pdf.text(
-        'No existen eventos de Traslado.',
-        13,
-        y
-      );
-
-
-      y +=
-        8;
-
-    }
-
-
-    /*
-     * =====================================================
-     * 5. ARMADO
-     * =====================================================
-     */
-
-    tituloSeccion(
-      '5. ARMADO'
-    );
-
-
-    pdf.setTextColor(
-      ...AZUL
-    );
-
-
-    pdf.setFont(
-      'helvetica',
-      'bold'
-    );
-
-
-    pdf.setFontSize(
-      8
-    );
-
-
-    pdf.text(
-      `Estado: ${
-        eventosArmado.estadoArmado ||
-        (
-          materialesArmado.length
-            ? 'REGISTRADO'
-            : 'PENDIENTE'
-        )
-      }`,
-      13,
-      y
-    );
-
-
-    y +=
-      5;
-
-
-    pdf.text(
-      `Responsable: ${
-        servicioActual.responsableArmado ||
-        '-'
-      }`,
-      13,
-      y
-    );
-
-
-    y +=
-      7;
-
-
-    if(
-      eventosMontaje.length
-    ){
-
-      pdf.autoTable({
-
-        startY:y,
-
-        margin:{
-          left:10,
-          right:10
-        },
-
-        theme:'grid',
-
-        head:[
-          [
-            'Fecha / Hora',
-            'Evento',
-            'Responsable',
-            'Motivo',
-            'Observación',
-            'Tiempo'
-          ]
-        ],
-
-        body:
-          eventosMontaje.map(
-            evento => [
-
-              evento.fechaHora ||
-              '-',
-
-              evento.tipoEvento ||
-              '-',
-
-              evento.responsable ||
-              '-',
-
-              evento.motivo ||
-              '-',
-
-              evento.observacion ||
-              '-',
-
-              Number(
-                evento.tiempoTramoMinutos
-              ) > 0
-                ? formatearMinutos(
-                    evento.tiempoTramoMinutos
-                  )
-                : '-'
-
-            ]
-          ),
-
-        styles:{
-          fontSize:6.5,
-          cellPadding:1.8,
-          valign:'middle'
-        },
-
-        headStyles:{
-          fillColor:AZUL2,
-          textColor:[
-            255,
-            255,
-            255
-          ]
-        },
-
-        columnStyles:{
-
-          0:{
-            cellWidth:27
-          },
-
-          1:{
-            cellWidth:25
-          },
-
-          2:{
-            cellWidth:35
-          },
-
-          3:{
-            cellWidth:30
-          },
-
-          4:{
-            cellWidth:45
-          },
-
-          5:{
-            cellWidth:20
-          }
-
-        },
-
-        didParseCell(
-          data
-        ){
-
-          if(
-            data.section ===
-              'body' &&
-            normalizarTexto(
-              data.row.raw[1]
-            ).includes(
-              'PAUSA'
-            )
-          ){
-
-            data.cell.styles.fillColor =
-              ROJO_CLARO;
-
-            data.cell.styles.textColor =
-              ROJO;
-
-          }
-
-        }
-
-      });
-
-
-      y =
-        pdf.lastAutoTable.finalY +
-        7;
-
-    }
-
-
-    /*
-     * Material realmente utilizado.
-     */
-
-    verificarPagina(
-      25
-    );
-
-
-    pdf.setTextColor(
-      ...AZUL
-    );
-
-
-    pdf.setFont(
-      'helvetica',
-      'bold'
-    );
-
-
-    pdf.setFontSize(
-      9
-    );
-
-
-    pdf.text(
-      'Material realmente utilizado',
-      13,
-      y
-    );
-
-
-    y +=
-      4;
-
-
-    const materialesUtilizados =
-      materialesArmado.filter(
-        material =>
           Number(
-            material.cantidadUtilizada
+            evento.tiempoTramoSegundos
+          ) > 0
+            ? `Tiempo tramo: ${
+                formatearSegundos(
+                  evento.tiempoTramoSegundos
+                )
+              }`
+            : ''
+
+        ],
+        {
+          alerta:
+            pausa
+        }
+      );
+
+
+      const fotosEvento =
+        obtenerFotosDelEvento(
+          fotosTraslado,
+          evento
+        );
+
+
+      await agregarFotos(
+        'Evidencia del evento',
+        fotosEvento
+      );
+
+    }
+
+
+    /* =====================================================
+       ARMADO
+    ===================================================== */
+
+    escribirBloque(
+      'ARMADO',
+      [
+
+        `Estado: ${
+          eventosArmado.estadoArmado ||
+          (
+            materialesArmado.length
+              ? 'REGISTRADO'
+              : 'PENDIENTE'
+          )
+        }`,
+
+        `Responsable: ${
+          servicioActual.responsableArmado ||
+          '-'
+        }`,
+
+        peso?.ok
+          ? `Peso: ${
+              numero(
+                peso.pesoTotalKg
+              )
+            } kg - ${
+              formatearToneladas(
+                peso.pesoTotalToneladas
+              )
+            } t`
+          : ''
+
+      ]
+    );
+
+
+    for(
+      const evento of eventosMontaje
+    ){
+
+      const tipo =
+        normalizarTexto(
+          evento.tipoEvento
+        );
+
+
+      const pausa =
+        tipo.includes(
+          'PAUSA'
+        );
+
+
+      escribirBloque(
+        evento.tipoEvento ||
+        'EVENTO',
+        [
+
+          evento.fechaHora
+            ? `Fecha/Hora: ${evento.fechaHora}`
+            : '',
+
+          evento.responsable
+            ? `Responsable: ${evento.responsable}`
+            : '',
+
+          evento.motivo
+            ? `Motivo: ${evento.motivo}`
+            : '',
+
+          evento.observacion
+            ? `Observación: ${evento.observacion}`
+            : '',
+
+          Number(
+            evento.tiempoTramoMinutos
+          ) > 0
+            ? `Tiempo tramo: ${
+                formatearMinutos(
+                  evento.tiempoTramoMinutos
+                )
+              }`
+            : ''
+
+        ],
+        {
+          alerta:
+            pausa
+        }
+      );
+
+
+      let fotosEvento =
+        obtenerFotosDelEvento(
+          fotosArmado,
+          evento
+        );
+
+
+      if(
+        tipo.includes(
+          'FIN MONTAJE'
+        )
+      ){
+
+        fotosEvento =
+          fotosArmado.filter(
+            foto => {
+
+              const etapa =
+                normalizarTexto(
+                  foto.etapa
+                );
+
+              const tipoFoto =
+                normalizarTexto(
+                  foto.tipoFoto
+                );
+
+
+              return (
+                etapa !==
+                'ARMADO PAUSA' &&
+                !tipoFoto.includes(
+                  'PAUSA'
+                )
+              );
+
+            }
+          );
+
+      }
+
+
+      await agregarFotos(
+        tipo.includes(
+          'FIN MONTAJE'
+        )
+          ? 'Evidencias finales del Armado'
+          : 'Evidencia del evento',
+        fotosEvento
+      );
+
+    }
+
+
+    /* =====================================================
+       POSTPARADA
+    ===================================================== */
+
+    if(
+      postparada
+        .postparadaRegistrada ===
+      true
+    ){
+
+      escribirBloque(
+        'POSTPARADA',
+        [
+
+          'Estado: FINALIZADA',
+
+          `Responsable: ${
+            servicioActual
+              .responsablePostparada ||
+            '-'
+          }`,
+
+          `Desmontado: ${
+            numero(
+              postparada?.resumen
+                ?.cantidadDesmontada
+            )
+          }`,
+
+          `Dañado: ${
+            numero(
+              totalDanado
+            )
+          }`,
+
+          `Faltante: ${
+            numero(
+              totalFaltante
+            )
+          }`,
+
+          postparada
+            .observacionPostparada
+              ? `Observación: ${
+                  postparada
+                    .observacionPostparada
+                }`
+              : ''
+
+        ]
+      );
+
+
+      await agregarFotos(
+        'Evidencias de Postparada',
+        fotosPostparadaGenerales
+      );
+
+    }else{
+
+      escribirBloque(
+        'POSTPARADA',
+        [
+          'Estado: PENDIENTE'
+        ]
+      );
+
+    }
+
+
+    /* =====================================================
+       4. INCIDENCIAS
+    ===================================================== */
+
+    const materialesConIncidencia =
+      materialesPostparada.filter(
+        material =>
+          (
+            Number(
+              material.cantidadDanada
+            ) || 0
+          ) > 0 ||
+          (
+            Number(
+              material.cantidadFaltante
+            ) || 0
           ) > 0
       );
 
 
     if(
-      materialesUtilizados.length
+      totalDanado > 0 ||
+      totalFaltante > 0 ||
+      materialesConIncidencia.length
     ){
 
-      pdf.autoTable({
-
-        startY:y,
-
-        margin:{
-          left:10,
-          right:10
-        },
-
-        theme:'grid',
-
-        head:[
-          [
-            'Material',
-            'Código',
-            'Despachado',
-            'Utilizado',
-            'Sobrante'
-          ]
-        ],
-
-        body:
-          materialesUtilizados.map(
-            material => [
-
-              material.descripcion ||
-              material.subgrupo ||
-              '-',
-
-              material.codigo ||
-              '-',
-
-              numero(
-                material.cantidadDespachada
-              ),
-
-              numero(
-                material.cantidadUtilizada
-              ),
-
-              numero(
-                material.cantidadSobrante ??
-                Math.max(
-                  (
-                    Number(
-                      material.cantidadDespachada
-                    ) || 0
-                  ) -
-                  (
-                    Number(
-                      material.cantidadUtilizada
-                    ) || 0
-                  ),
-                  0
-                )
-              )
-
-            ]
-          ),
-
-        styles:{
-          fontSize:7,
-          cellPadding:2
-        },
-
-        headStyles:{
-          fillColor:AZUL,
-          textColor:[
-            255,
-            255,
-            255
-          ]
-        },
-
-        columnStyles:{
-
-          0:{
-            cellWidth:75
-          },
-
-          1:{
-            cellWidth:30
-          },
-
-          2:{
-            cellWidth:27,
-            halign:'center'
-          },
-
-          3:{
-            cellWidth:27,
-            halign:'center'
-          },
-
-          4:{
-            cellWidth:27,
-            halign:'center'
-          }
-
-        }
-
-      });
-
-
-      y =
-        pdf.lastAutoTable.finalY +
-        7;
-
-    }
-
-
-    /*
-     * =====================================================
-     * 6. POSTPARADA
-     * =====================================================
-     */
-
-    tituloSeccion(
-      '6. POSTPARADA'
-    );
-
-
-    if(
-      postparada.postparadaRegistrada ===
-      true
-    ){
-
-      const resumenPost =
-        postparada.resumen ||
-        {};
-
-
-      pdf.autoTable({
-
-        startY:y,
-
-        margin:{
-          left:10,
-          right:10
-        },
-
-        theme:'grid',
-
-        head:[
-          [
-            'Utilizado',
-            'Desmontado',
-            'Dañado',
-            'Faltante'
-          ]
-        ],
-
-        body:[
-          [
-
-            numero(
-              resumenPost.cantidadUtilizada
-            ),
-
-            numero(
-              resumenPost.cantidadDesmontada
-            ),
-
-            numero(
-              resumenPost.cantidadDanada
-            ),
-
-            numero(
-              resumenPost.cantidadFaltante
-            )
-
-          ]
-        ],
-
-        styles:{
-          fontSize:8,
-          halign:'center',
-          cellPadding:3
-        },
-
-        headStyles:{
-          fillColor:AZUL2,
-          textColor:[
-            255,
-            255,
-            255
-          ]
-        }
-
-      });
-
-
-      y =
-        pdf.lastAutoTable.finalY +
-        6;
+      tituloSeccion(
+        '4. INCIDENCIAS DE POSTPARADA'
+      );
 
 
       if(
-        materialesPostparada.length
+        materialesConIncidencia.length
       ){
 
         pdf.autoTable({
@@ -9755,15 +9897,14 @@ async function exportarPDFAndamio(){
             [
               'Material',
               'Código',
-              'Utilizado',
-              'Desmontado',
               'Dañado',
-              'Faltante'
+              'Faltante',
+              'Observación'
             ]
           ],
 
           body:
-            materialesPostparada.map(
+            materialesConIncidencia.map(
               material => [
 
                 material.descripcion ||
@@ -9772,14 +9913,6 @@ async function exportarPDFAndamio(){
 
                 material.codigo ||
                 '-',
-
-                numero(
-                  material.cantidadUtilizada
-                ),
-
-                numero(
-                  material.cantidadDesmontada
-                ),
 
                 numero(
                   material.cantidadDanada
@@ -9787,192 +9920,10 @@ async function exportarPDFAndamio(){
 
                 numero(
                   material.cantidadFaltante
-                )
-
-              ]
-            ),
-
-          styles:{
-            fontSize:6.8,
-            cellPadding:1.8
-          },
-
-          headStyles:{
-            fillColor:AZUL,
-            textColor:[
-              255,
-              255,
-              255
-            ]
-          },
-
-          columnStyles:{
-
-            0:{
-              cellWidth:65
-            },
-
-            1:{
-              cellWidth:28
-            },
-
-            2:{
-              cellWidth:23,
-              halign:'center'
-            },
-
-            3:{
-              cellWidth:23,
-              halign:'center'
-            },
-
-            4:{
-              cellWidth:23,
-              halign:'center'
-            },
-
-            5:{
-              cellWidth:23,
-              halign:'center'
-            }
-
-          },
-
-          didParseCell(
-            data
-          ){
-
-            if(
-              data.section ===
-                'body' &&
-              Number(
-                data.row.raw[4]
-              ) > 0
-            ){
-
-              data.cell.styles.fillColor =
-                ROJO_CLARO;
-
-            }
-
-          }
-
-        });
-
-
-        y =
-          pdf.lastAutoTable.finalY +
-          6;
-
-      }
-
-
-      /*
-       * Material dañado destacado.
-       */
-
-      const materialesDanados =
-        materialesPostparada.filter(
-          material =>
-            Number(
-              material.cantidadDanada
-            ) > 0
-        );
-
-
-      if(
-        materialesDanados.length
-      ){
-
-        verificarPagina(
-          25
-        );
-
-
-        pdf.setFillColor(
-          ...ROJO_CLARO
-        );
-
-
-        pdf.setDrawColor(
-          ...ROJO
-        );
-
-
-        pdf.roundedRect(
-          10,
-          y,
-          190,
-          10,
-          2,
-          2,
-          'FD'
-        );
-
-
-        pdf.setTextColor(
-          ...ROJO
-        );
-
-
-        pdf.setFont(
-          'helvetica',
-          'bold'
-        );
-
-
-        pdf.setFontSize(
-          9
-        );
-
-
-        pdf.text(
-          'MATERIAL DAÑADO IDENTIFICADO',
-          14,
-          y + 6.3
-        );
-
-
-        y +=
-          14;
-
-
-        pdf.autoTable({
-
-          startY:y,
-
-          margin:{
-            left:10,
-            right:10
-          },
-
-          theme:'grid',
-
-          head:[
-            [
-              'Material',
-              'Código',
-              'Cantidad dañada',
-              'Observación'
-            ]
-          ],
-
-          body:
-            materialesDanados.map(
-              material => [
-
-                material.descripcion ||
-                material.subgrupo ||
-                '-',
-
-                material.codigo ||
-                '-',
-
-                numero(
-                  material.cantidadDanada
                 ),
 
-                material.observacionPostparada ||
+                material
+                  .observacionPostparada ||
                 '-'
 
               ]
@@ -9993,13 +9944,14 @@ async function exportarPDFAndamio(){
           },
 
           bodyStyles:{
-            fillColor:ROJO_CLARO
+            fillColor:
+              ROJO_CLARO
           },
 
           columnStyles:{
 
             0:{
-              cellWidth:65
+              cellWidth:60
             },
 
             1:{
@@ -10007,12 +9959,17 @@ async function exportarPDFAndamio(){
             },
 
             2:{
-              cellWidth:30,
+              cellWidth:22,
               halign:'center'
             },
 
             3:{
-              cellWidth:65
+              cellWidth:22,
+              halign:'center'
+            },
+
+            4:{
+              cellWidth:56
             }
 
           }
@@ -10022,162 +9979,98 @@ async function exportarPDFAndamio(){
 
         y =
           pdf.lastAutoTable.finalY +
-          6;
+          7;
 
       }
 
 
       if(
-        postparada.observacionPostparada
+        totalDanado > 0 ||
+        fotosMaterialDanado.length
       ){
 
-        verificarPagina(
-          18
+        escribirBloque(
+          'MATERIAL DAÑADO',
+          [
+            `Cantidad dañada: ${
+              numero(
+                totalDanado
+              )
+            }`
+          ],
+          {
+            alerta:true
+          }
         );
 
 
-        pdf.setTextColor(
-          ...AZUL
+        await agregarFotos(
+          'Evidencia de material dañado',
+          fotosMaterialDanado
         );
-
-
-        pdf.setFont(
-          'helvetica',
-          'bold'
-        );
-
-
-        pdf.setFontSize(
-          8
-        );
-
-
-        pdf.text(
-          'Observación de Postparada:',
-          13,
-          y
-        );
-
-
-        y +=
-          4;
-
-
-        pdf.setTextColor(
-          31,
-          45,
-          54
-        );
-
-
-        pdf.setFont(
-          'helvetica',
-          'normal'
-        );
-
-
-        const textoObservacion =
-          pdf.splitTextToSize(
-            String(
-              postparada.observacionPostparada
-            ),
-            184
-          );
-
-
-        pdf.text(
-          textoObservacion,
-          13,
-          y
-        );
-
-
-        y +=
-          (
-            textoObservacion.length *
-            4
-          ) +
-          4;
 
       }
 
 
-    }else{
+      if(
+        totalFaltante > 0 ||
+        fotosMaterialFaltante.length
+      ){
 
-      pdf.setTextColor(
-        ...GRIS
-      );
+        escribirBloque(
+          'MATERIAL FALTANTE',
+          [
+            `Cantidad faltante: ${
+              numero(
+                totalFaltante
+              )
+            }`
+          ],
+          {
+            alerta:true
+          }
+        );
 
 
-      pdf.setFontSize(
-        8
-      );
+        await agregarFotos(
+          'Evidencia de material faltante',
+          fotosMaterialFaltante
+        );
 
-
-      pdf.text(
-        'Postparada pendiente de ejecución.',
-        13,
-        y
-      );
-
-
-      y +=
-        8;
+      }
 
     }
 
 
-    /*
-     * =====================================================
-     * 7. OBSERVACIONES GENERALES
-     * =====================================================
-     */
+    /* =====================================================
+       5. OBSERVACIONES
+    ===================================================== */
 
     tituloSeccion(
-      '7. OBSERVACIONES GENERALES'
+      (
+        totalDanado > 0 ||
+        totalFaltante > 0
+      )
+        ? '5. OBSERVACIONES'
+        : '4. OBSERVACIONES'
     );
 
 
-    pdf.setTextColor(
-      31,
-      45,
-      54
+    escribirBloque(
+      'Observaciones generales',
+      [
+
+        servicioActual
+          .observaciones ||
+        'Sin observaciones generales.'
+
+      ]
     );
 
 
-    pdf.setFont(
-      'helvetica',
-      'normal'
-    );
-
-
-    pdf.setFontSize(
-      8
-    );
-
-
-    const observaciones =
-      pdf.splitTextToSize(
-        String(
-          servicioActual.observaciones ||
-          'Sin observaciones generales.'
-        ),
-        184
-      );
-
-
-    pdf.text(
-      observaciones,
-      13,
-      y
-    );
-
-
-    /*
-     * =====================================================
-     * PIE DE PÁGINA
-     * =====================================================
-     */
+    /* =====================================================
+       PIE DE PÁGINA
+    ===================================================== */
 
     const paginas =
       pdf.internal
@@ -10248,11 +10141,9 @@ async function exportarPDFAndamio(){
     }
 
 
-    /*
-     * =====================================================
-     * DESCARGAR
-     * =====================================================
-     */
+    /* =====================================================
+       DESCARGAR
+    ===================================================== */
 
     const tag =
       String(
