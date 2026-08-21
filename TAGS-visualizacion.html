@@ -9911,6 +9911,291 @@ await Promise.allSettled(
       );
 
     }
+        /* =====================================================
+       CUANTIFICACIÓN DEL ANDAMIO
+    ===================================================== */
+
+    const materialesCuantificacion =
+      (
+        peso?.ok &&
+        Array.isArray(
+          peso.materiales
+        )
+      )
+        ? peso.materiales.filter(
+            material =>
+              Number(
+                material.cantidadUtilizada
+              ) > 0
+          )
+        : [];
+
+
+    if(
+      materialesCuantificacion.length
+    ){
+
+      tituloSeccion(
+        'CUANTIFICACIÓN DEL ANDAMIO'
+      );
+
+
+      pdf.autoTable({
+
+        startY:y,
+
+        margin:{
+          left:10,
+          right:10
+        },
+
+        theme:'grid',
+
+        head:[
+          [
+            'GRUPO',
+            'MATERIAL',
+            'CÓDIGO',
+            'CANT. UTILIZADA',
+            'P. UNIT. KG',
+            'PESO TOTAL KG'
+          ]
+        ],
+
+        body:
+          materialesCuantificacion.map(
+            material => [
+
+              material.grupo ||
+              '-',
+
+              material.descripcion ||
+              material.subgrupo ||
+              '-',
+
+              material.codigo ||
+              '-',
+
+              numero(
+                material.cantidadUtilizada
+              ),
+
+              numero(
+                material.pesoUnitario
+              ),
+
+              numero(
+                material.pesoTotalKg
+              )
+
+            ]
+          ),
+
+        styles:{
+          fontSize:6.5,
+          cellPadding:1.8,
+          valign:'middle'
+        },
+
+        headStyles:{
+          fillColor:AZUL2,
+          textColor:[
+            255,
+            255,
+            255
+          ],
+          fontStyle:'bold',
+          halign:'center'
+        },
+
+        alternateRowStyles:{
+          fillColor:[
+            245,
+            247,
+            249
+          ]
+        },
+
+        columnStyles:{
+
+          0:{
+            cellWidth:28
+          },
+
+          1:{
+            cellWidth:62
+          },
+
+          2:{
+            cellWidth:25
+          },
+
+          3:{
+            cellWidth:27,
+            halign:'center'
+          },
+
+          4:{
+            cellWidth:24,
+            halign:'right'
+          },
+
+          5:{
+            cellWidth:24,
+            halign:'right'
+          }
+
+        },
+
+        didDrawPage(){
+
+          /*
+           * AutoTable controla automáticamente
+           * los saltos cuando hay muchos materiales.
+           */
+
+        }
+
+      });
+
+
+      y =
+        pdf.lastAutoTable.finalY +
+        6;
+
+
+      /*
+       * ===============================================
+       * TOTALES DE CUANTIFICACIÓN
+       * ===============================================
+       */
+
+      verificarPagina(
+        28
+      );
+
+
+      pdf.setFillColor(
+        ...VERDE_CLARO
+      );
+
+
+      pdf.setDrawColor(
+        ...VERDE
+      );
+
+
+      pdf.roundedRect(
+        10,
+        y,
+        190,
+        20,
+        2,
+        2,
+        'FD'
+      );
+
+
+      /*
+       * PESO TOTAL
+       */
+
+      pdf.setTextColor(
+        ...VERDE
+      );
+
+
+      pdf.setFont(
+        'helvetica',
+        'bold'
+      );
+
+
+      pdf.setFontSize(
+        8
+      );
+
+
+      pdf.text(
+        'PESO TOTAL DEL ANDAMIO',
+        14,
+        y + 6
+      );
+
+
+      pdf.setTextColor(
+        ...TEXTO
+      );
+
+
+      pdf.setFontSize(
+        10
+      );
+
+
+      pdf.text(
+        `${
+          numero(
+            peso.pesoTotalKg
+          )
+        } kg`,
+        196,
+        y + 6,
+        {
+          align:'right'
+        }
+      );
+
+
+      /*
+       * TONELAJE
+       */
+
+      pdf.setTextColor(
+        ...VERDE
+      );
+
+
+      pdf.setFontSize(
+        8
+      );
+
+
+      pdf.text(
+        'TONELAJE TOTAL',
+        14,
+        y + 15
+      );
+
+
+      pdf.setTextColor(
+        ...TEXTO
+      );
+
+
+      pdf.setFontSize(
+        10
+      );
+
+
+      pdf.text(
+        `${
+          formatearToneladas(
+            peso.pesoTotalToneladas
+          )
+        } t`,
+        196,
+        y + 15,
+        {
+          align:'right'
+        }
+      );
+
+
+      y +=
+        27;
+
+    }
 
 
     /* =====================================================
