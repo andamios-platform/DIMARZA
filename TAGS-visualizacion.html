@@ -8432,146 +8432,282 @@ async function exportarPDFAndamio(){
       ) || 0;
 
 
-    /* =====================================================
-       CARGAR IMAGEN COMO BASE64
-    ===================================================== */
+/* =====================================================
+   CARGAR IMAGEN COMO BASE64
+===================================================== */
 
-    async function cargarImagenPDF(
-      fotoORuta
-    ){
+const cacheImagenesPDF =
+  new Map();
 
-      let rutas = [];
+
+async function cargarImagenPDF(
+  fotoORuta
+){
+
+  /*
+   * ===================================================
+   * LOGO LOCAL
+   * ===================================================
+   */
+
+  if(
+    typeof fotoORuta ===
+    'string'
+  ){
+
+    try{
+
+      const respuesta =
+        await fetch(
+          encodeURI(
+            fotoORuta
+          ),
+          {
+            cache:'no-store'
+          }
+        );
 
 
       if(
-        typeof fotoORuta ===
-        'string'
+        !respuesta.ok
       ){
 
-        rutas = [
-          fotoORuta
-        ];
-
-      }else{
-
-        const foto =
-          fotoORuta ||
-          {};
-
-
-        const id =
-          String(
-            foto.idArchivoDrive ||
-            ''
-          ).trim();
-
-
-        if(id){
-
-          rutas.push(
-            'https://drive.google.com/thumbnail?id=' +
-            encodeURIComponent(
-              id
-            ) +
-            '&sz=w1000'
-          );
-
-        }
-
-
-        if(
-          foto.enlaceFoto
-        ){
-
-          rutas.push(
-            foto.enlaceFoto
-          );
-
-        }
+        return null;
 
       }
 
 
-      for(
-        const ruta of rutas
-      ){
-
-        try{
-
-          const respuesta =
-            await fetch(
-              encodeURI(
-                ruta
-              ),
-              {
-                cache:'no-store'
-              }
-            );
+      const blob =
+        await respuesta.blob();
 
 
-          if(
-            !respuesta.ok
-          ){
+      return await new Promise(
+        (
+          resolve,
+          reject
+        ) => {
 
-            continue;
-
-          }
-
-
-          const blob =
-            await respuesta.blob();
+          const lector =
+            new FileReader();
 
 
-          const resultado =
-            await new Promise(
-              (
-                resolve,
-                reject
-              ) => {
-
-                const lector =
-                  new FileReader();
+          lector.onload =
+            () =>
+              resolve(
+                lector.result
+              );
 
 
-                lector.onload =
-                  () =>
-                    resolve(
-                      lector.result
-                    );
+          lector.onerror =
+            () =>
+              reject(
+                new Error(
+                  'No se pudo procesar la imagen.'
+                )
+              );
 
 
-                lector.onerror =
-                  reject;
-
-
-                lector.readAsDataURL(
-                  blob
-                );
-
-              }
-            );
-
-
-          return resultado;
-
-
-        }catch(error){
-
-          console.warn(
-            'No se pudo cargar fotografía para PDF:',
-            ruta
+          lector.readAsDataURL(
+            blob
           );
 
         }
+      );
 
-      }
+
+    }catch(error){
+
+      console.warn(
+        'No se pudo cargar imagen local:',
+        fotoORuta,
+        error
+      );
 
 
       return null;
 
     }
 
+  }
 
+
+  /*
+   * ===================================================
+   * FOTOGRAFÍA DE GOOGLE DRIVE
+   * ===================================================
+   */
+
+  const foto =
+    fotoORuta ||
+    {};
+
+
+  const idArchivo =
+    String(
+      foto.idArchivoDrive ||
+      ''
+    ).trim();
+
+
+  if(
+    !idArchivo
+  ){
+
+    console.warn(
+      'Fotografía sin ID de Drive:',
+      foto
+    );
+
+    return null;
+
+  }
+
+
+  /*
+   * Si ya cargamos esta fotografía,
+   * reutilizamos el Base64.
+   */
+  if(
+    cacheImagenesPDF.has(
+      idArchivo
+    )
+  ){
+
+    return cacheImagenesPDF.get(
+      idArchivo
+    );
+
+  }
+
+
+  try{
+
+    const url =
+      `${API_URL}` +
+      `?accion=obtenerImagenPDF` +
+      `&idArchivo=${
+        encodeURIComponent(
+          idArchivo
+        )
+      }` +
+      `&t=${Date.now()}`;
+
+
+    const respuesta =
+      await fetch(
+        url,
+        {
+          cache:'no-store'
+        }
+      );
+
+
+    if(
+      !respuesta.ok
+    ){
+
+      throw new Error(
+        `HTTP ${respuesta.status}`
+      );
+
+    }
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(
+      !resultado ||
+      resultado.ok !== true ||
+      !resultado.base64
+    ){
+
+      throw new Error(
+        resultado?.mensaje ||
+        'Apps Script no devolvió la imagen.'
+      );
+
+    }
+
+
+    cacheImagenesPDF.set(
+      idArchivo,
+      resultado.base64
+    );
+
+
+    return resultado.base64;
+
+
+  }catch(error){
+
+    console.warn(
+      'No se pudo obtener la fotografía desde Apps Script:',
+      idArchivo,
+      error
+    );
+
+
+    return null;
+
+  }
+
+}
+
+/*
+ * =====================================================
+ * PRECARGAR FOTOGRAFÍAS
+ * =====================================================
+ */
+
+const fotosUnicasPDF =
+  fotos.filter(
+    (
+      foto,
+      indice,
+      lista
+    ) => {
+
+      const id =
+        String(
+          foto.idArchivoDrive ||
+          ''
+        ).trim();
+
+
+      if(
+        !id
+      ){
+
+        return false;
+
+      }
+
+
+      return (
+        lista.findIndex(
+          item =>
+            String(
+              item.idArchivoDrive ||
+              ''
+            ).trim() === id
+        ) === indice
+      );
+
+    }
+  );
+
+
+await Promise.allSettled(
+  fotosUnicasPDF.map(
+    foto =>
+      cargarImagenPDF(
+        foto
+      )
+  )
+);
+    
     /* =====================================================
        CONTROL DE PÁGINAS
     ===================================================== */
