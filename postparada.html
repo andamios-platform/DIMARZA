@@ -1473,6 +1473,117 @@
     const API_URL =
       'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
 
+async function consultarAPI(
+  url,
+  maxIntentos = 4
+) {
+
+  let ultimoError = null;
+
+  for (
+    let intento = 1;
+    intento <= maxIntentos;
+    intento++
+  ) {
+
+    try {
+
+      const separador =
+        url.includes('?')
+          ? '&'
+          : '?';
+
+      const urlFinal =
+        `${url}${separador}` +
+        `t=${Date.now()}` +
+        `&intento=${intento}`;
+
+      const respuesta =
+        await fetch(
+          urlFinal,
+          {
+            method: 'GET',
+            cache: 'no-store',
+            redirect: 'follow'
+          }
+        );
+
+      if (!respuesta.ok) {
+        throw new Error(
+          `Error HTTP ${respuesta.status}`
+        );
+      }
+
+      const texto =
+        await respuesta.text();
+
+      if (
+        texto
+          .trim()
+          .startsWith('<')
+      ) {
+        throw new Error(
+          'Apps Script devolvió temporalmente una página HTML.'
+        );
+      }
+
+      let datos;
+
+      try {
+
+        datos =
+          JSON.parse(
+            texto
+          );
+
+      } catch (errorJSON) {
+
+        throw new Error(
+          'Apps Script devolvió una respuesta no válida.'
+        );
+
+      }
+
+      return datos;
+
+    } catch (error) {
+
+      ultimoError =
+        error;
+
+      console.warn(
+        `Intento ${intento} de ${maxIntentos} falló:`,
+        error.message
+      );
+
+      if (
+        intento <
+        maxIntentos
+      ) {
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              intento * 700
+            )
+        );
+
+      }
+
+    }
+
+  }
+
+  throw (
+    ultimoError ||
+    new Error(
+      'No se pudo conectar con Apps Script.'
+    )
+  );
+
+}
+    
     const PARAMETROS =
       new URLSearchParams(
         window.location.search
@@ -1587,18 +1698,10 @@
   selector.disabled = true;
 
   try {
-    const respuesta = await fetch(
-      `${API_URL}?accion=personalPrevios&_=${Date.now()}`
-    );
-
-    if (!respuesta.ok) {
-      throw new Error(
-        `Error de conexión (${respuesta.status}).`
-      );
-    }
-
-    const resultado =
-      await respuesta.json();
+ const resultado =
+  await consultarAPI(
+    `${API_URL}?accion=personalPrevios`
+  );
 
     if (!resultado.ok) {
       throw new Error(
@@ -1673,22 +1776,14 @@
 
       try {
         await cargarPersonalPostparada();
-        const url =
+      const datos =
+        await consultarAPI(
           `${API_URL}?accion=obtenerPostparada&idServicio=${
-            encodeURIComponent(ID_SERVICIO)
-          }&_=${Date.now()}`;
-
-        const respuesta =
-          await fetch(url);
-
-        if (!respuesta.ok) {
-          throw new Error(
-            `Error de conexión (${respuesta.status}).`
-          );
-        }
-
-        const datos =
-          await respuesta.json();
+            encodeURIComponent(
+              ID_SERVICIO
+            )
+          }`
+        );
 
         if (!datos.ok) {
           throw new Error(
@@ -2876,15 +2971,14 @@
 
     async function cargarFotografiasPostparadaRegistradas() {
       try {
-        const respuesta =
-          await fetch(
-            `${API_URL}?accion=obtenerFotografiasPostparada&idServicio=${
-              encodeURIComponent(ID_SERVICIO)
-            }&_=${Date.now()}`
-          );
-
         const datos =
-          await respuesta.json();
+          await consultarAPI(
+            `${API_URL}?accion=obtenerFotografiasPostparada&idServicio=${
+              encodeURIComponent(
+                ID_SERVICIO
+              )
+            }`
+          );
 
         if (!datos.ok) {
           throw new Error(
