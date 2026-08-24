@@ -1643,26 +1643,26 @@ document.addEventListener(
 
 
     /*
-     * Primero necesitamos la configuración,
-     * porque los botones de servicio dependen
-     * de ella.
+     * Cargamos únicamente lo necesario
+     * para mostrar Gestión.
      */
-    await cargarConfiguracionMinas();
+    await Promise.all([
+      cargarConfiguracionMinas(),
+      cargarServicios()
+    ]);
 
 
     /*
-     * Estas tres consultas ya pueden
-     * ejecutarse al mismo tiempo.
+     * Como configuración y servicios
+     * cargaron simultáneamente,
+     * reconstruimos los filtros al final.
      */
-    await Promise.all([
-      cargarServicios(),
-      cargarSupervisores(),
-      cargarResponsablesPrevios()
-    ]);
+    crearBotonesServicio();
+
+    aplicarFiltros();
 
   }
 );
-
 async function cargarConfiguracionMinas() {
 
   const selector =
@@ -2626,8 +2626,7 @@ function volverAtras() {
    CARGA MASIVA EXCEL
    ====================================================== */
 
-function abrirCargaMasiva() {
-
+async function abrirCargaMasiva() {
   const modal =
     document.getElementById(
       'modalCargaMasiva'
@@ -2636,7 +2635,10 @@ function abrirCargaMasiva() {
   limpiarCargaMasiva();
 
   cargarMinasMasivo();
-
+  await Promise.all([
+  cargarSupervisores(),
+  cargarResponsablesPrevios()
+]);
   copiarSelectMasivo(
     'supervisor',
     'supervisorMasivo'
@@ -4633,7 +4635,7 @@ function actualizarCantidadSeleccionadaMasiva() {
       return 'estado-general';
     }
 
-    function abrirModalNuevoServicio() {
+    async function abrirModalNuevoServicio() {
   const modal =
     document.getElementById('modalNuevoServicio');
 
@@ -4651,7 +4653,10 @@ function actualizarCantidadSeleccionadaMasiva() {
   if (!fecha.value) {
     fecha.value = obtenerFechaActualISO();
   }
-
+await Promise.all([
+  cargarSupervisores(),
+  cargarResponsablesPrevios()
+]);
 modal.classList.add('activo');
 
   setTimeout(() => {
@@ -5105,14 +5110,15 @@ function obtenerFechaActualISO() {
 }
 async function actualizarTodo() {
 
-  await cargarConfiguracionMinas();
-
-
   await Promise.all([
-    cargarServicios(),
-    cargarSupervisores(),
-    cargarResponsablesPrevios()
+    cargarConfiguracionMinas(),
+    cargarServicios()
   ]);
+
+
+  crearBotonesServicio();
+
+  aplicarFiltros();
 
 }
   </script>
