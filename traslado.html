@@ -1368,6 +1368,101 @@
 const API_URL =
   'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
 
+
+function consultarJSONP(url) {
+
+  return new Promise(
+    (
+      resolve,
+      reject
+    ) => {
+
+      const nombreCallback =
+        `jsonp_${Date.now()}_${Math.floor(
+          Math.random() * 100000
+        )}`;
+
+
+      const script =
+        document.createElement(
+          'script'
+        );
+
+
+      const separador =
+        url.includes('?')
+          ? '&'
+          : '?';
+
+
+      const limpiar = () => {
+
+        delete window[
+          nombreCallback
+        ];
+
+
+        if (
+          script.parentNode
+        ) {
+
+          script.parentNode
+            .removeChild(
+              script
+            );
+
+        }
+
+      };
+
+
+      window[
+        nombreCallback
+      ] =
+        datos => {
+
+          limpiar();
+
+          resolve(
+            datos
+          );
+
+        };
+
+
+      script.onerror =
+        () => {
+
+          limpiar();
+
+          reject(
+            new Error(
+              'No se pudo conectar con Apps Script.'
+            )
+          );
+
+        };
+
+
+      script.src =
+        `${url}${separador}` +
+        `callback=${
+          encodeURIComponent(
+            nombreCallback
+          )
+        }` +
+        `&t=${Date.now()}`;
+
+
+      document.head
+        .appendChild(
+          script
+        );
+
+    }
+  );
+
+}  
 const parametros =
   new URLSearchParams(
     window.location.search
@@ -1409,11 +1504,11 @@ async function iniciarModulo() {
   }
 
   try {
-    await Promise.all([
-      cargarTraslado(),
-      cargarPersonal(),
-      cargarFotografiasTraslado()
-    ]);
+await cargarTraslado();
+
+await cargarPersonal();
+
+await cargarFotografiasTraslado();
 
     renderizarHistorial();
     
@@ -1452,25 +1547,28 @@ async function iniciarModulo() {
 }
 
 async function cargarFotografiasTraslado() {
+
   try {
-    const respuesta =
-      await fetch(
+
+    const datos =
+      await consultarJSONP(
         `${API_URL}?accion=obtenerFotografiasTraslado&idServicio=${
           encodeURIComponent(
             ID_SERVICIO
           )
-        }&t=${Date.now()}`
+        }`
       );
 
-    const datos =
-      await respuesta.json();
 
     if (!datos.ok) {
+
       throw new Error(
         datos.mensaje ||
         'No se pudieron cargar las fotografías del traslado.'
       );
+
     }
+
 
     fotografiasTraslado =
       Array.isArray(
@@ -1479,73 +1577,91 @@ async function cargarFotografiasTraslado() {
         ? datos.fotografias
         : [];
 
+
   } catch (error) {
+
     console.error(
       'Error cargando fotografías de traslado:',
       error
     );
 
-    fotografiasTraslado = [];
+
+    fotografiasTraslado =
+      [];
+
   }
+
 }
 async function cargarTraslado() {
-  const respuesta =
-    await fetch(
+
+  const datos =
+    await consultarJSONP(
       `${API_URL}?accion=obtenerTraslado&idServicio=${
         encodeURIComponent(
           ID_SERVICIO
         )
-      }&t=${Date.now()}`
+      }`
     );
 
-  const datos =
-    await respuesta.json();
 
   if (!datos.ok) {
+
     throw new Error(
       datos.mensaje ||
       'No se pudo cargar el traslado.'
     );
+
   }
 
-  trasladoActual = datos;
+
+  trasladoActual =
+    datos;
+
 
   servicioActual =
     datos.servicio || {};
 
+
   mostrarServicio();
+
   renderizarHistorial();
+
   aplicarEstadoTraslado();
+
 }
 
-
 async function cargarPersonal() {
+
   try {
-    const respuesta =
-      await fetch(
-        `${API_URL}?accion=personalPrevios&t=${Date.now()}`
-      );
 
     const datos =
-      await respuesta.json();
+      await consultarJSONP(
+        `${API_URL}?accion=personalPrevios`
+      );
+
 
     if (!datos.ok) {
+
       throw new Error(
         datos.mensaje ||
         'No se pudo cargar el personal.'
       );
+
     }
+
 
     const selector =
       document.getElementById(
         'responsable'
       );
 
+
     selector.innerHTML = `
       <option value="">
         Seleccionar responsable
       </option>
     `;
+
 
     const personas =
       Array.isArray(
@@ -1554,27 +1670,40 @@ async function cargarPersonal() {
         ? datos.responsables
         : [];
 
-    personas.forEach(persona => {
-      const opcion =
-        document.createElement(
-          'option'
+
+    personas.forEach(
+      persona => {
+
+        const opcion =
+          document.createElement(
+            'option'
+          );
+
+
+        opcion.value =
+          persona.nombre;
+
+
+        opcion.textContent =
+          persona.cargo
+            ? `${persona.nombre} — ${persona.cargo}`
+            : persona.nombre;
+
+
+        selector.appendChild(
+          opcion
         );
 
-      opcion.value =
-        persona.nombre;
+      }
+    );
 
-      opcion.textContent =
-        persona.cargo
-          ? `${persona.nombre} — ${persona.cargo}`
-          : persona.nombre;
-
-      selector.appendChild(
-        opcion
-      );
-    });
 
   } catch (error) {
-    console.error(error);
+
+    console.error(
+      error
+    );
+
 
     document
       .getElementById(
@@ -1585,10 +1714,10 @@ async function cargarPersonal() {
           No se pudo cargar el personal
         </option>
       `;
+
   }
+
 }
-
-
 function mostrarServicio() {
   escribirTexto(
     'datoId',
