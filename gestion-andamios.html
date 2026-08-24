@@ -1671,7 +1671,7 @@ async function cargarConfiguracionMinas() {
   try {
 
     const resultado =
-      await consultarJSONP(
+      await consultarAPI(
         `${API_URL}?accion=configuracion`
       );
 
@@ -1837,7 +1837,7 @@ async function cargarServicios() {
   try {
 
     const resultado =
-      await consultarJSONP(
+      await consultarAPI(
         `${API_URL}?accion=listarServicios`
       );
 
@@ -2481,7 +2481,7 @@ function actualizarIndicadores(
 
       try {
         const resultado =
-          await consultarJSONP(
+          await consultarAPI(
             `${API_URL}?accion=historialTag&tag=${
               encodeURIComponent(tag)
             }`
@@ -4416,55 +4416,137 @@ function cambiarSeleccionMasiva(
 
 }
 
-function consultarJSONP(url) {
-  return new Promise((resolve, reject) => {
+async function consultarAPI(
+  url,
+  maxIntentos = 4
+) {
 
-    const nombreCallback =
-      `jsonp_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+  let ultimoError = null;
 
-    const script =
-      document.createElement('script');
 
-    const separador =
-      url.includes('?')
-        ? '&'
-        : '?';
+  for (
+    let intento = 1;
+    intento <= maxIntentos;
+    intento++
+  ) {
 
-    const limpiar = () => {
-      delete window[nombreCallback];
+    try {
 
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
+      const separador =
+        url.includes('?')
+          ? '&'
+          : '?';
 
-    window[nombreCallback] =
-      resultado => {
-        limpiar();
-        resolve(resultado);
-      };
 
-    script.onerror =
-      () => {
-        limpiar();
+      const urlFinal =
+        `${url}${separador}` +
+        `t=${Date.now()}` +
+        `&intento=${intento}`;
 
-        reject(
-          new Error(
-            'No se pudo conectar con Apps Script.'
-          )
+
+      const respuesta =
+        await fetch(
+          urlFinal,
+          {
+            method: 'GET',
+            cache: 'no-store',
+            redirect: 'follow'
+          }
         );
-      };
 
-    script.src =
-      `${url}${separador}` +
-      `callback=${encodeURIComponent(nombreCallback)}` +
-      `&t=${Date.now()}`;
 
-    document.head.appendChild(
-      script
-    );
+      if (!respuesta.ok) {
 
-  });
+        throw new Error(
+          `Error HTTP ${respuesta.status}`
+        );
+
+      }
+
+
+      const texto =
+        await respuesta.text();
+
+
+      /*
+       * Si Google devolvió una página HTML
+       * en vez de nuestra respuesta, no intentamos
+       * convertirla a JSON.
+       */
+      if (
+        texto
+          .trim()
+          .startsWith('<')
+      ) {
+
+        throw new Error(
+          'Apps Script devolvió temporalmente una página HTML.'
+        );
+
+      }
+
+
+      let datos;
+
+
+      try {
+
+        datos =
+          JSON.parse(
+            texto
+          );
+
+      } catch (errorJSON) {
+
+        throw new Error(
+          'Apps Script devolvió una respuesta no válida.'
+        );
+
+      }
+
+
+      return datos;
+
+
+    } catch (error) {
+
+      ultimoError =
+        error;
+
+
+      console.warn(
+        `Intento ${intento} de ${maxIntentos} falló:`,
+        error.message
+      );
+
+
+      if (
+        intento <
+        maxIntentos
+      ) {
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              intento * 700
+            )
+        );
+
+      }
+
+    }
+
+  }
+
+
+  throw (
+    ultimoError ||
+    new Error(
+      'No se pudo conectar con Apps Script.'
+    )
+  );
+
 }
 function actualizarCantidadSeleccionadaMasiva() {
 
@@ -4599,7 +4681,7 @@ async function cargarSupervisores() {
   try {
 
     const resultado =
-      await consultarJSONP(
+      await consultarAPI(
         `${API_URL}?accion=supervisoresAndamios`
       );
 
@@ -4709,7 +4791,7 @@ async function cargarResponsablesPrevios() {
   try {
 
     const resultado =
-      await consultarJSONP(
+      await consultarAPI(
         `${API_URL}?accion=personalPrevios`
       );
 
