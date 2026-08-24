@@ -1829,10 +1829,112 @@ function cargarServiciosMina() {
         const url =
           `${API_URL}?accion=listarServicios&t=${Date.now()}`;
 
-        const respuesta = await fetch(url, {
+let resultado = null;
+let ultimoError = null;
+
+
+for (
+  let intento = 1;
+  intento <= 4;
+  intento++
+) {
+
+  try {
+
+    const urlIntento =
+      `${API_URL}?accion=listarServicios` +
+      `&t=${Date.now()}` +
+      `&intento=${intento}`;
+
+
+    const respuesta =
+      await fetch(
+        urlIntento,
+        {
           method: 'GET',
-          redirect: 'follow'
-        });
+          redirect: 'follow',
+          cache: 'no-store'
+        }
+      );
+
+
+    if (!respuesta.ok) {
+
+      throw new Error(
+        `Error HTTP ${respuesta.status}`
+      );
+
+    }
+
+
+    const textoRespuesta =
+      await respuesta.text();
+
+
+    try {
+
+      resultado =
+        JSON.parse(
+          textoRespuesta
+        );
+
+    } catch (errorJSON) {
+
+      throw new Error(
+        'La API devolvió HTML en vez de JSON.'
+      );
+
+    }
+
+
+    if (!resultado.ok) {
+
+      throw new Error(
+        resultado.mensaje ||
+        'No fue posible consultar los servicios.'
+      );
+
+    }
+
+
+    break;
+
+
+  } catch (error) {
+
+    ultimoError =
+      error;
+
+
+    if (
+      intento < 4
+    ) {
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            intento * 800
+          )
+      );
+
+    }
+
+  }
+
+}
+
+
+if (!resultado) {
+
+  throw (
+    ultimoError ||
+    new Error(
+      'No se pudo conectar con la API.'
+    )
+  );
+
+}
 
         if (!respuesta.ok) {
           throw new Error(
@@ -1840,14 +1942,42 @@ function cargarServiciosMina() {
           );
         }
 
-        const resultado = await respuesta.json();
+const textoRespuesta =
+  await respuesta.text();
 
-        if (!resultado.ok) {
-          throw new Error(
-            resultado.mensaje ||
-            'No fue posible consultar los servicios.'
-          );
-        }
+
+let resultado;
+
+
+try {
+
+  resultado =
+    JSON.parse(
+      textoRespuesta
+    );
+
+} catch (error) {
+
+  console.error(
+    'Apps Script devolvió HTML en vez de JSON:',
+    textoRespuesta
+  );
+
+  throw new Error(
+    'Apps Script devolvió una respuesta temporal no válida.'
+  );
+
+}
+
+
+if (!resultado.ok) {
+
+  throw new Error(
+    resultado.mensaje ||
+    'No fue posible consultar los servicios.'
+  );
+
+}
 
         const todosLosServicios =
           Array.isArray(resultado.servicios)
