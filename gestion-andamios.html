@@ -4894,12 +4894,10 @@ function obtenerFechaActualISO() {
 }
 async function actualizarTodo() {
 
-  await Promise.all([
-    cargarConfiguracionMinas(),
-    cargarServicios(),
-    cargarSupervisores(),
-    cargarResponsablesPrevios()
-  ]);
+await cargarConfiguracionMinas();
+await cargarServicios();
+await cargarSupervisores();
+await cargarResponsablesPrevios();
 
 }
   </script>
