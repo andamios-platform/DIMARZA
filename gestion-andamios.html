@@ -1639,12 +1639,13 @@ let resumenCargaMasiva = {
               filtrarServicios
             );
       
-          await Promise.all([
-            cargarConfiguracionMinas(),
-            cargarServicios(),
-            cargarSupervisores(),
-            cargarResponsablesPrevios()
-          ]);
+await cargarConfiguracionMinas();
+
+await cargarServicios();
+
+await cargarSupervisores();
+
+await cargarResponsablesPrevios();
       
         }
       );
@@ -1656,36 +1657,34 @@ async function cargarConfiguracionMinas() {
       'faena'
     );
 
+
   selector.innerHTML = `
     <option value="">
       Cargando unidades mineras...
     </option>
   `;
 
+
   selector.disabled = true;
+
 
   try {
 
-    const respuesta =
-      await fetch(
-        `${API_URL}?accion=configuracion&t=${Date.now()}`
-      );
-
-    if (!respuesta.ok) {
-      throw new Error(
-        `Error HTTP ${respuesta.status}`
-      );
-    }
-
     const resultado =
-      await respuesta.json();
+      await consultarJSONP(
+        `${API_URL}?accion=configuracion`
+      );
+
 
     if (!resultado.ok) {
+
       throw new Error(
         resultado.mensaje ||
         'No se pudo cargar la configuración.'
       );
+
     }
+
 
     configuracionMinas =
       resultado.configuracion || {
@@ -1693,7 +1692,9 @@ async function cargarConfiguracionMinas() {
         relaciones: []
       };
 
+
     cargarMinasFormulario();
+
 
   } catch (error) {
 
@@ -1702,16 +1703,19 @@ async function cargarConfiguracionMinas() {
       error
     );
 
+
     configuracionMinas = {
       minas: [],
       relaciones: []
     };
+
 
     selector.innerHTML = `
       <option value="">
         Error al cargar unidades mineras
       </option>
     `;
+
 
   } finally {
 
@@ -1815,76 +1819,27 @@ function cargarServiciosMina() {
       servicios[0];
   }
 }
-    async function cargarServicios() {
-      const contenedor =
-        document.getElementById('contenedorTarjetas');
+async function cargarServicios() {
 
-      contenedor.innerHTML = `
-        <div class="cargando">
-          Consultando servicios...
-        </div>
-      `;
-
-      try {
-        const url =
-          `${API_URL}?accion=listarServicios&t=${Date.now()}`;
-
-let resultado = null;
-let ultimoError = null;
+  const contenedor =
+    document.getElementById(
+      'contenedorTarjetas'
+    );
 
 
-for (
-  let intento = 1;
-  intento <= 4;
-  intento++
-) {
+  contenedor.innerHTML = `
+    <div class="cargando">
+      Consultando servicios...
+    </div>
+  `;
+
 
   try {
 
-    const urlIntento =
-      `${API_URL}?accion=listarServicios` +
-      `&t=${Date.now()}` +
-      `&intento=${intento}`;
-
-
-    const respuesta =
-      await fetch(
-        urlIntento,
-        {
-          method: 'GET',
-          redirect: 'follow',
-          cache: 'no-store'
-        }
+    const resultado =
+      await consultarJSONP(
+        `${API_URL}?accion=listarServicios`
       );
-
-
-    if (!respuesta.ok) {
-
-      throw new Error(
-        `Error HTTP ${respuesta.status}`
-      );
-
-    }
-
-
-    const textoRespuesta =
-      await respuesta.text();
-
-
-    try {
-
-      resultado =
-        JSON.parse(
-          textoRespuesta
-        );
-
-    } catch (errorJSON) {
-
-      throw new Error(
-        'La API devolvió HTML en vez de JSON.'
-      );
-
-    }
 
 
     if (!resultado.ok) {
@@ -1897,119 +1852,65 @@ for (
     }
 
 
-    break;
+    const todosLosServicios =
+      Array.isArray(
+        resultado.servicios
+      )
+        ? resultado.servicios
+        : [];
+
+
+    serviciosActivos =
+      todosLosServicios.filter(
+        servicio => {
+
+          const estado =
+            normalizarTexto(
+              servicio.estado
+            );
+
+
+          return (
+            !estadosCerrados.includes(
+              estado
+            )
+          );
+
+        }
+      );
+
+
+    crearBotonesServicio();
+
+    aplicarFiltros();
 
 
   } catch (error) {
 
-    ultimoError =
-      error;
+    console.error(
+      'Error cargando servicios:',
+      error
+    );
 
 
-    if (
-      intento < 4
-    ) {
+    contenedor.innerHTML = `
+      <div class="error">
+        No se pudo conectar con la API.<br>
+        ${escaparHTML(
+          error.message
+        )}
+      </div>
+    `;
 
-      await new Promise(
-        resolve =>
-          setTimeout(
-            resolve,
-            intento * 800
-          )
-      );
 
-    }
+    document.getElementById(
+      'contadorResultados'
+    ).textContent =
+      'Error de conexión';
 
   }
 
 }
-
-
-if (!resultado) {
-
-  throw (
-    ultimoError ||
-    new Error(
-      'No se pudo conectar con la API.'
-    )
-  );
-
-}
-
-        if (!respuesta.ok) {
-          throw new Error(
-            `Error HTTP ${respuesta.status}`
-          );
-        }
-
-const textoRespuesta =
-  await respuesta.text();
-
-
-let resultado;
-
-
-try {
-
-  resultado =
-    JSON.parse(
-      textoRespuesta
-    );
-
-} catch (error) {
-
-  console.error(
-    'Apps Script devolvió HTML en vez de JSON:',
-    textoRespuesta
-  );
-
-  throw new Error(
-    'Apps Script devolvió una respuesta temporal no válida.'
-  );
-
-}
-
-
-if (!resultado.ok) {
-
-  throw new Error(
-    resultado.mensaje ||
-    'No fue posible consultar los servicios.'
-  );
-
-}
-
-        const todosLosServicios =
-          Array.isArray(resultado.servicios)
-            ? resultado.servicios
-            : [];
-
-        serviciosActivos = todosLosServicios.filter(servicio => {
-          const estado =
-            normalizarTexto(servicio.estado);
-
-          return !estadosCerrados.includes(estado);
-        });
-
-        crearBotonesServicio();
-        aplicarFiltros();
-
-      } catch (error) {
-        console.error(error);
-
-        contenedor.innerHTML = `
-          <div class="error">
-            No se pudo conectar con la API.<br>
-            ${escaparHTML(error.message)}
-          </div>
-        `;
-
-        document.getElementById(
-          'contadorResultados'
-        ).textContent = 'Error de conexión';
-      }
-    }
-
 
 function filtrarServicios() {
   aplicarFiltros();
@@ -2579,13 +2480,12 @@ function actualizarIndicadores(
       modal.classList.add('activo');
 
       try {
-        const url =
-          `${API_URL}?accion=historialTag&tag=${
-            encodeURIComponent(tag)
-          }&t=${Date.now()}`;
-
-        const respuesta = await fetch(url);
-        const resultado = await respuesta.json();
+        const resultado =
+          await consultarJSONP(
+            `${API_URL}?accion=historialTag&tag=${
+              encodeURIComponent(tag)
+            }`
+          );
 
         if (!resultado.ok) {
           throw new Error(
@@ -4516,7 +4416,56 @@ function cambiarSeleccionMasiva(
 
 }
 
+function consultarJSONP(url) {
+  return new Promise((resolve, reject) => {
 
+    const nombreCallback =
+      `jsonp_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+
+    const script =
+      document.createElement('script');
+
+    const separador =
+      url.includes('?')
+        ? '&'
+        : '?';
+
+    const limpiar = () => {
+      delete window[nombreCallback];
+
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+
+    window[nombreCallback] =
+      resultado => {
+        limpiar();
+        resolve(resultado);
+      };
+
+    script.onerror =
+      () => {
+        limpiar();
+
+        reject(
+          new Error(
+            'No se pudo conectar con Apps Script.'
+          )
+        );
+      };
+
+    script.src =
+      `${url}${separador}` +
+      `callback=${encodeURIComponent(nombreCallback)}` +
+      `&t=${Date.now()}`;
+
+    document.head.appendChild(
+      script
+    );
+
+  });
+}
 function actualizarCantidadSeleccionadaMasiva() {
 
   const cantidad =
@@ -4630,10 +4579,12 @@ function cerrarModalNuevoDesdeFondo(evento) {
 }
 
 async function cargarSupervisores() {
+
   const selector =
     document.getElementById(
       'supervisor'
     );
+
 
   selector.innerHTML = `
     <option value="">
@@ -4641,33 +4592,27 @@ async function cargarSupervisores() {
     </option>
   `;
 
+
   selector.disabled = true;
 
+
   try {
-    const url =
-      `${API_URL}?accion=supervisoresAndamios&t=${Date.now()}`;
-
-    const respuesta =
-      await fetch(url, {
-        method: 'GET',
-        redirect: 'follow'
-      });
-
-    if (!respuesta.ok) {
-      throw new Error(
-        `Error HTTP ${respuesta.status}`
-      );
-    }
 
     const resultado =
-      await respuesta.json();
+      await consultarJSONP(
+        `${API_URL}?accion=supervisoresAndamios`
+      );
+
 
     if (!resultado.ok) {
+
       throw new Error(
         resultado.mensaje ||
         'No se pudieron cargar los supervisores.'
       );
+
     }
+
 
     const supervisores =
       Array.isArray(
@@ -4676,38 +4621,58 @@ async function cargarSupervisores() {
         ? resultado.supervisores
         : [];
 
+
     selector.innerHTML = `
       <option value="">
         Seleccionar supervisor
       </option>
     `;
 
-    supervisores.forEach(nombre => {
-      const opcion =
-        document.createElement(
-          'option'
+
+    supervisores.forEach(
+      nombre => {
+
+        const opcion =
+          document.createElement(
+            'option'
+          );
+
+
+        opcion.value =
+          nombre;
+
+        opcion.textContent =
+          nombre;
+
+
+        selector.appendChild(
+          opcion
         );
 
-      opcion.value = nombre;
-      opcion.textContent = nombre;
+      }
+    );
 
-      selector.appendChild(
-        opcion
-      );
-    });
 
     if (
       supervisores.length === 0
     ) {
+
       selector.innerHTML = `
         <option value="">
           No hay supervisores registrados
         </option>
       `;
+
     }
 
+
   } catch (error) {
-    console.error(error);
+
+    console.error(
+      'Error cargando supervisores:',
+      error
+    );
+
 
     selector.innerHTML = `
       <option value="">
@@ -4715,16 +4680,21 @@ async function cargarSupervisores() {
       </option>
     `;
 
-  } finally {
-    selector.disabled = false;
-  }
-}
 
+  } finally {
+
+    selector.disabled = false;
+
+  }
+
+}
 async function cargarResponsablesPrevios() {
+
   const selector =
     document.getElementById(
       'responsablePrevios'
     );
+
 
   selector.innerHTML = `
     <option value="">
@@ -4732,33 +4702,27 @@ async function cargarResponsablesPrevios() {
     </option>
   `;
 
+
   selector.disabled = true;
 
+
   try {
-    const url =
-      `${API_URL}?accion=personalPrevios&t=${Date.now()}`;
-
-    const respuesta =
-      await fetch(url, {
-        method: 'GET',
-        redirect: 'follow'
-      });
-
-    if (!respuesta.ok) {
-      throw new Error(
-        `Error HTTP ${respuesta.status}`
-      );
-    }
 
     const resultado =
-      await respuesta.json();
+      await consultarJSONP(
+        `${API_URL}?accion=personalPrevios`
+      );
+
 
     if (!resultado.ok) {
+
       throw new Error(
         resultado.mensaje ||
         'No se pudo cargar el personal.'
       );
+
     }
+
 
     const responsables =
       Array.isArray(
@@ -4767,43 +4731,61 @@ async function cargarResponsablesPrevios() {
         ? resultado.responsables
         : [];
 
+
     selector.innerHTML = `
       <option value="">
         Seleccionar responsable
       </option>
     `;
 
-    responsables.forEach(persona => {
-      const opcion =
-        document.createElement(
-          'option'
+
+    responsables.forEach(
+      persona => {
+
+        const opcion =
+          document.createElement(
+            'option'
+          );
+
+
+        opcion.value =
+          persona.nombre;
+
+
+        opcion.textContent =
+          persona.cargo
+            ? `${persona.nombre} — ${persona.cargo}`
+            : persona.nombre;
+
+
+        selector.appendChild(
+          opcion
         );
 
-      opcion.value =
-        persona.nombre;
+      }
+    );
 
-      opcion.textContent =
-        persona.cargo
-          ? `${persona.nombre} — ${persona.cargo}`
-          : persona.nombre;
-
-      selector.appendChild(
-        opcion
-      );
-    });
 
     if (
       responsables.length === 0
     ) {
+
       selector.innerHTML = `
         <option value="">
           No hay personal registrado
         </option>
       `;
+
     }
 
+
   } catch (error) {
-    console.error(error);
+
+    console.error(
+      'Error cargando responsables:',
+      error
+    );
+
 
     selector.innerHTML = `
       <option value="">
@@ -4811,9 +4793,13 @@ async function cargarResponsablesPrevios() {
       </option>
     `;
 
+
   } finally {
+
     selector.disabled = false;
+
   }
+
 }
 async function guardarNuevoServicio(evento) {
   evento.preventDefault();
