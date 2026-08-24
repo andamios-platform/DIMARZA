@@ -4502,7 +4502,35 @@ const eventosTraslado =
         )
     ).length;
 
+const eventoFinArmado =
+  [...eventos]
+    .reverse()
+    .find(
+      evento =>
+        normalizarTexto(
+          evento.tipoEvento
+        ).includes(
+          'FIN MONTAJE'
+        )
+    );
 
+
+const fechaFinArmado =
+  eventoFinArmado?.fechaHora ||
+  '-';
+
+
+const tiempoEfectivoArmado =
+  Number.isFinite(
+    Number(
+      eventosArmado?.tiempoEfectivoMinutos
+    )
+  )
+    ? formatearMinutos(
+        eventosArmado
+          .tiempoEfectivoMinutos
+      )
+    : '-';
   /*
    * =====================================================
    * ESTADO DE LAS ETAPAS
@@ -4796,19 +4824,42 @@ const eventosTraslado =
       ================================================ -->
 
       <div class="resumen-indicadores">
+<div class="resumen-indicador">
+
+  <span>
+    Fecha fin de Armado
+  </span>
+
+  <strong
+    style="
+      font-size:14px;
+    "
+  >
+    ${
+      escaparHTML(
+        fechaFinArmado
+      )
+    }
+  </strong>
+
+</div>
 
 
-        <div class="resumen-indicador">
+<div class="resumen-indicador">
 
-          <span>
-            Material despachado
-          </span>
+  <span>
+    Tiempo efectivo de Armado
+  </span>
 
-          <strong>
-            ${numero(totalDespachado)}
-          </strong>
+  <strong>
+    ${
+      escaparHTML(
+        tiempoEfectivoArmado
+      )
+    }
+  </strong>
 
-        </div>
+</div>
 
         <div class="resumen-indicador">
 
@@ -7049,19 +7100,7 @@ const fotosFinales =
             </div>
 
 
-            <div
-              style="
-                margin-top:12px;
-                text-align:right;
-                font-weight:bold;
-                color:var(--azul);
-              "
-            >
 
-              Total utilizado:
-              ${numero(totalUtilizado)}
-
-            </div>
 
           `
           : (
@@ -8403,7 +8442,36 @@ async function exportarPDFAndamio(){
           )
       ).length;
 
+const eventoFinArmadoPDF =
+  [...eventosMontaje]
+    .reverse()
+    .find(
+      evento =>
+        normalizarTexto(
+          evento.tipoEvento
+        ).includes(
+          'FIN MONTAJE'
+        )
+    );
 
+
+const fechaFinArmadoPDF =
+  eventoFinArmadoPDF?.fechaHora ||
+  '-';
+
+
+const tiempoEfectivoArmadoPDF =
+  Number.isFinite(
+    Number(
+      eventosArmado
+        .tiempoEfectivoMinutos
+    )
+  )
+    ? formatearMinutos(
+        eventosArmado
+          .tiempoEfectivoMinutos
+      )
+    : '-';
     const totalDanado =
       Number(
         postparada?.resumen
@@ -9501,6 +9569,10 @@ await Promise.allSettled(
     );
 
 
+    /*
+     * PRIMERA FILA DEL RESUMEN
+     */
+
     pdf.autoTable({
 
       startY:y,
@@ -9514,8 +9586,8 @@ await Promise.allSettled(
 
       head:[
         [
-          'Despachado',
-          'Utilizado',
+          'Fecha fin Armado',
+          'Tiempo Armado',
           'Peso',
           'Tonelaje'
         ]
@@ -9523,13 +9595,9 @@ await Promise.allSettled(
 
       body:[
         [
-          numero(
-            totalDespachado
-          ),
+          fechaFinArmadoPDF,
 
-          numero(
-            totalUtilizado
-          ),
+          tiempoEfectivoArmadoPDF,
 
           peso?.ok
             ? `${numero(
@@ -9567,6 +9635,10 @@ await Promise.allSettled(
       pdf.lastAutoTable.finalY +
       4;
 
+
+    /*
+     * SEGUNDA FILA DEL RESUMEN
+     */
 
     pdf.autoTable({
 
@@ -9625,7 +9697,6 @@ await Promise.allSettled(
     y =
       pdf.lastAutoTable.finalY +
       8;
-
 
     /* =====================================================
        3. CRONOLOGÍA
@@ -10781,7 +10852,36 @@ async function exportarExcelAndamio(){
         )
     ).length;
 
+const eventoFinArmadoExcel =
+  [...eventosMontaje]
+    .reverse()
+    .find(
+      evento =>
+        normalizarTexto(
+          evento.tipoEvento
+        ).includes(
+          'FIN MONTAJE'
+        )
+    );
 
+
+const fechaFinArmadoExcel =
+  eventoFinArmadoExcel?.fechaHora ||
+  '-';
+
+
+const tiempoEfectivoArmadoExcel =
+  Number.isFinite(
+    Number(
+      eventosArmado
+        .tiempoEfectivoMinutos
+    )
+  )
+    ? formatearMinutos(
+        eventosArmado
+          .tiempoEfectivoMinutos
+      )
+    : '-';
   const totalDanado =
     Number(
       postparada?.resumen
@@ -12136,20 +12236,20 @@ async function exportarExcelAndamio(){
     filaActual++;
 
 
-    const indicadores1 = [
+const indicadores1 = [
 
-      'Material despachado',
-      totalDespachado,
+  'Fecha fin Armado',
+  fechaFinArmadoExcel,
 
-      'Material utilizado',
-      totalUtilizado,
+  'Tiempo efectivo Armado',
+  tiempoEfectivoArmadoExcel,
 
-      'Peso kg',
-      Number(
-        peso.pesoTotalKg
-      ) || 0
+  'Peso kg',
+  Number(
+    peso.pesoTotalKg
+  ) || 0
 
-    ];
+];
 
 
     hoja.getRow(
@@ -14155,5 +14255,5 @@ function escaparAtributo(
 
 
 </body>
-
+ 
 </html>
