@@ -1628,27 +1628,40 @@ let resumenCargaMasiva = {
     ];
 
 
-      document.addEventListener(
-        'DOMContentLoaded',
-        async () => {
-      
-          document
-            .getElementById('buscador')
-            .addEventListener(
-              'input',
-              filtrarServicios
-            );
-      
-await cargarConfiguracionMinas();
+document.addEventListener(
+  'DOMContentLoaded',
+  async () => {
 
-await cargarServicios();
-
-await cargarSupervisores();
-
-await cargarResponsablesPrevios();
-      
-        }
+    document
+      .getElementById(
+        'buscador'
+      )
+      .addEventListener(
+        'input',
+        filtrarServicios
       );
+
+
+    /*
+     * Primero necesitamos la configuración,
+     * porque los botones de servicio dependen
+     * de ella.
+     */
+    await cargarConfiguracionMinas();
+
+
+    /*
+     * Estas tres consultas ya pueden
+     * ejecutarse al mismo tiempo.
+     */
+    await Promise.all([
+      cargarServicios(),
+      cargarSupervisores(),
+      cargarResponsablesPrevios()
+    ]);
+
+  }
+);
 
 async function cargarConfiguracionMinas() {
 
@@ -5092,10 +5105,14 @@ function obtenerFechaActualISO() {
 }
 async function actualizarTodo() {
 
-await cargarConfiguracionMinas();
-await cargarServicios();
-await cargarSupervisores();
-await cargarResponsablesPrevios();
+  await cargarConfiguracionMinas();
+
+
+  await Promise.all([
+    cargarServicios(),
+    cargarSupervisores(),
+    cargarResponsablesPrevios()
+  ]);
 
 }
   </script>
