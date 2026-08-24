@@ -1369,25 +1369,21 @@ const API_URL =
   'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
 
 
-function consultarJSONP(url) {
+async function consultarAPI(
+  url,
+  maxIntentos = 4
+) {
 
-  return new Promise(
-    (
-      resolve,
-      reject
-    ) => {
-
-      const nombreCallback =
-        `jsonp_${Date.now()}_${Math.floor(
-          Math.random() * 100000
-        )}`;
+  let ultimoError = null;
 
 
-      const script =
-        document.createElement(
-          'script'
-        );
+  for (
+    let intento = 1;
+    intento <= maxIntentos;
+    intento++
+  ) {
 
+    try {
 
       const separador =
         url.includes('?')
@@ -1395,78 +1391,117 @@ function consultarJSONP(url) {
           : '?';
 
 
-      const limpiar = () => {
-
-        delete window[
-          nombreCallback
-        ];
-
-
-        if (
-          script.parentNode
-        ) {
-
-          script.parentNode
-            .removeChild(
-              script
-            );
-
-        }
-
-      };
-
-
-      window[
-        nombreCallback
-      ] =
-        datos => {
-
-          limpiar();
-
-          resolve(
-            datos
-          );
-
-        };
-
-
-      script.onerror =
-        () => {
-
-          limpiar();
-
-          reject(
-            new Error(
-              'No se pudo conectar con Apps Script.'
-            )
-          );
-
-        };
-
-
-      script.src =
+      const urlFinal =
         `${url}${separador}` +
-        `callback=${
-          encodeURIComponent(
-            nombreCallback
-          )
-        }` +
-        `&t=${Date.now()}`;
+        `t=${Date.now()}` +
+        `&intento=${intento}`;
 
 
-      document.head
-        .appendChild(
-          script
+      const respuesta =
+        await fetch(
+          urlFinal,
+          {
+            method: 'GET',
+            cache: 'no-store',
+            redirect: 'follow'
+          }
         );
 
+
+      if (!respuesta.ok) {
+
+        throw new Error(
+          `Error HTTP ${respuesta.status}`
+        );
+
+      }
+
+
+      const texto =
+        await respuesta.text();
+
+
+      if (
+        texto
+          .trim()
+          .startsWith('<')
+      ) {
+
+        throw new Error(
+          'Apps Script devolvió temporalmente una página HTML.'
+        );
+
+      }
+
+
+      let datos;
+
+
+      try {
+
+        datos =
+          JSON.parse(
+            texto
+          );
+
+      } catch (errorJSON) {
+
+        throw new Error(
+          'Apps Script devolvió una respuesta no válida.'
+        );
+
+      }
+
+
+      return datos;
+
+
+    } catch (error) {
+
+      ultimoError =
+        error;
+
+
+      console.warn(
+        `Intento ${intento} de ${maxIntentos} falló:`,
+        error.message
+      );
+
+
+      if (
+        intento <
+        maxIntentos
+      ) {
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              intento * 700
+            )
+        );
+
+      }
+
     }
+
+  }
+
+
+  throw (
+    ultimoError ||
+    new Error(
+      'No se pudo conectar con Apps Script.'
+    )
   );
 
-}  
+}
+
 const parametros =
   new URLSearchParams(
     window.location.search
   );
+
 
 const ID_SERVICIO =
   (
@@ -1479,11 +1514,17 @@ const ID_SERVICIO =
     .trim()
     .toUpperCase();
 
+
 let trasladoActual = null;
+
 let servicioActual = null;
+
 let fotografiasTraslado = [];
+
 let temporizadorCronometro = null;
+
 let fechaInicioTramoActual = null;
+
 let fotoTrasladoActual = null;
 
 
@@ -1491,6 +1532,7 @@ document.addEventListener(
   'DOMContentLoaded',
   iniciarModulo
 );
+  
 
 
 async function iniciarModulo() {
@@ -1551,7 +1593,7 @@ async function cargarFotografiasTraslado() {
   try {
 
     const datos =
-      await consultarJSONP(
+      await consultarAPI(
         `${API_URL}?accion=obtenerFotografiasTraslado&idServicio=${
           encodeURIComponent(
             ID_SERVICIO
@@ -1595,7 +1637,7 @@ async function cargarFotografiasTraslado() {
 async function cargarTraslado() {
 
   const datos =
-    await consultarJSONP(
+    await consultarAPI(
       `${API_URL}?accion=obtenerTraslado&idServicio=${
         encodeURIComponent(
           ID_SERVICIO
@@ -1635,7 +1677,7 @@ async function cargarPersonal() {
   try {
 
     const datos =
-      await consultarJSONP(
+      await consultarAPI(
         `${API_URL}?accion=personalPrevios`
       );
 
