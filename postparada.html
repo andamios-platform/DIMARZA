@@ -2016,29 +2016,216 @@ async function consultarAPI(
     }
 
 
-    function actualizarCantidad(input) {
-      const indice =
-        Number(input.dataset.indice);
+function actualizarCantidad(input) {
 
-      const campo =
-        input.dataset.campo;
+  const indice =
+    Number(
+      input.dataset.indice
+    );
 
-      if (
-        !Number.isInteger(indice) ||
-        !materialesPostparada[indice] ||
-        !campo
-      ) {
-        return;
-      }
 
-      materialesPostparada[indice][campo] =
-        input.value === ''
-          ? 0
-          : Number(input.value);
+  const campo =
+    input.dataset.campo;
 
-      actualizarResumen();
+
+  if (
+    !Number.isInteger(
+      indice
+    ) ||
+    !materialesPostparada[
+      indice
+    ] ||
+    !campo
+  ) {
+
+    return;
+
+  }
+
+
+  const material =
+    materialesPostparada[
+      indice
+    ];
+
+
+  const utilizada =
+    Math.max(
+      0,
+      Number(
+        material.cantidadUtilizada
+      ) || 0
+    );
+
+
+  let valor =
+    input.value === ''
+      ? 0
+      : Number(
+          input.value
+        );
+
+
+  if (
+    !Number.isFinite(
+      valor
+    )
+  ) {
+
+    valor = 0;
+
+  }
+
+
+  valor =
+    Math.max(
+      0,
+      valor
+    );
+
+
+  /*
+   * =====================================================
+   * DESMONTADO
+   *
+   * FALTANTE =
+   * UTILIZADO - DESMONTADO
+   * =====================================================
+   */
+  if (
+    campo ===
+    'cantidadDesmontada'
+  ) {
+
+    const desmontada =
+      Math.min(
+        valor,
+        utilizada
+      );
+
+
+    const faltante =
+      Math.max(
+        utilizada -
+        desmontada,
+        0
+      );
+
+
+    material.cantidadDesmontada =
+      desmontada;
+
+
+    material.cantidadFaltante =
+      faltante;
+
+
+    input.value =
+      formatearNumero(
+        desmontada
+      );
+
+
+    const inputFaltante =
+      document.querySelector(
+        `input[data-indice="${indice}"][data-campo="cantidadFaltante"]`
+      );
+
+
+    if (
+      inputFaltante
+    ) {
+
+      inputFaltante.value =
+        formatearNumero(
+          faltante
+        );
+
     }
 
+  }
+
+
+  /*
+   * =====================================================
+   * FALTANTE
+   *
+   * DESMONTADO =
+   * UTILIZADO - FALTANTE
+   * =====================================================
+   */
+  else if (
+    campo ===
+    'cantidadFaltante'
+  ) {
+
+    const faltante =
+      Math.min(
+        valor,
+        utilizada
+      );
+
+
+    const desmontada =
+      Math.max(
+        utilizada -
+        faltante,
+        0
+      );
+
+
+    material.cantidadFaltante =
+      faltante;
+
+
+    material.cantidadDesmontada =
+      desmontada;
+
+
+    input.value =
+      formatearNumero(
+        faltante
+      );
+
+
+    const inputDesmontado =
+      document.querySelector(
+        `input[data-indice="${indice}"][data-campo="cantidadDesmontada"]`
+      );
+
+
+    if (
+      inputDesmontado
+    ) {
+
+      inputDesmontado.value =
+        formatearNumero(
+          desmontada
+        );
+
+    }
+
+  }
+
+
+  /*
+   * =====================================================
+   * DAÑADO
+   *
+   * No participa en el balance.
+   * =====================================================
+   */
+  else {
+
+    material[campo] =
+      valor;
+
+  }
+
+
+  actualizarResumen();
+
+}
 
     function actualizarResumen() {
       const resumen =
