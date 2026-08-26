@@ -16,6 +16,15 @@
 .servicio-datos{display:grid;grid-template-columns:repeat(4,1fr);padding:0 20px}.dato{padding:15px 10px;border-bottom:1px solid var(--borde)}.dato-label{margin-bottom:5px;color:var(--gris);font-size:11px;text-transform:uppercase}.dato-valor{font-size:13px;font-weight:bold;word-break:break-word}.responsables{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px 20px}.responsable{padding:12px;background:#f8fafb;border:1px solid var(--borde);border-radius:10px}.responsable span{display:block;margin-bottom:5px;color:var(--gris);font-size:11px}.responsable strong{font-size:13px}.servicio-acciones{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding:16px 20px 20px}.btn{padding:10px 14px;border:none;border-radius:9px;cursor:pointer;font-weight:bold}.btn-detalle{color:#fff;background:var(--azul)}.btn-fotos{color:#fff;background:#6f42c1}.btn-previos{color:#8a5200;background:#fff0dc;border:1px solid #f5cf9e}
 @media(max-width:900px){.resumen{grid-template-columns:repeat(2,1fr)}.barra{grid-template-columns:1fr 1fr}.barra button{grid-column:1/-1}.servicio-datos{grid-template-columns:repeat(2,1fr)}.responsables{grid-template-columns:1fr}}
 @media(max-width:600px){.encabezado-contenido,.cabecera-tag-superior,.servicio-cabecera{flex-direction:column}.acciones-encabezado,.boton-encabezado{width:100%}.tag{font-size:34px}.resumen,.barra,.servicio-datos{grid-template-columns:1fr}.barra button{grid-column:auto}.servicio-acciones{flex-direction:column}.servicio-acciones .btn{width:100%}}
+.footer-copyright{
+  width:100%;
+  text-align:center;
+  margin-top:30px;
+  padding-top:18px;
+  border-top:1px solid var(--borde);
+  color:var(--gris);
+  font-size:12px;
+}
 </style>
 </head>
 <body>
@@ -28,7 +37,11 @@
 <section class="barra"><input id="buscarHistorial" type="search" placeholder="Buscar por OT, trabajo, área, faena o supervisor..." oninput="aplicarFiltros()"><select id="filtroEstado" onchange="aplicarFiltros()"><option value="">Todos los estados</option></select><button onclick="limpiarFiltros()">Restablecer</button></section>
 <div id="sinResultados" class="sin-resultados oculto">No se encontraron servicios que coincidan con los filtros.</div>
 <div id="listaServicios" class="lista-servicios"></div>
-</div></main>
+</div>
+<footer class="footer-copyright">
+  © 2026 Rubén Romero. Todos los derechos reservados.
+</footer>
+</main>
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
 const p=new URLSearchParams(location.search),TAG=String(p.get('tag')||'').trim().toUpperCase();let servicios=[],filtrados=[];
