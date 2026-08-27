@@ -1,0 +1,4017 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+  Modulación | DIMARZA
+</title>
+
+
+<style>
+
+:root{
+
+  --azul:#163f63;
+  --azul2:#2f6d9b;
+  --azul-claro:#eaf3fa;
+
+  --naranja:#f28c28;
+  --naranja2:#d96f0b;
+
+  --verde:#1f8f5f;
+  --verde-claro:#e9f7f1;
+
+  --rojo:#c83f49;
+  --rojo-claro:#fff0f1;
+
+  --amarillo:#b7790c;
+  --amarillo-claro:#fff6dc;
+
+  --gris:#667784;
+  --gris2:#87949d;
+
+  --gris-claro:#f5f7f9;
+
+  --borde:#d7e0e7;
+
+  --texto:#1f2d36;
+
+  --sombra:
+    0 10px 28px
+    rgba(26,54,76,.10);
+
+  --radio:16px;
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+body{
+
+  margin:0;
+
+  color:var(--texto);
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  background:
+    linear-gradient(
+      180deg,
+      #edf4f8 0%,
+      #f8fafb 260px,
+      #f5f7f9 100%
+    );
+
+}
+
+
+button,
+input,
+textarea{
+  font:inherit;
+}
+
+
+button{
+  cursor:pointer;
+}
+
+
+.oculto{
+  display:none !important;
+}
+
+
+/* =========================================================
+   CONTENEDOR
+========================================================= */
+
+.contenedor{
+
+  width:
+    min(
+      1400px,
+      calc(100% - 28px)
+    );
+
+  margin:0 auto;
+
+  padding:
+    22px 0 45px;
+
+}
+
+
+/* =========================================================
+   CABECERA
+========================================================= */
+
+.cabecera{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  gap:18px;
+
+  align-items:center;
+
+  margin-bottom:18px;
+
+  padding:22px;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(22,63,99,.98),
+      rgba(47,109,155,.94)
+    );
+
+  border-radius:var(--radio);
+
+  box-shadow:var(--sombra);
+
+}
+
+
+.cabecera h1{
+
+  margin:
+    0 0 7px;
+
+  font-size:
+    clamp(
+      26px,
+      3vw,
+      38px
+    );
+
+}
+
+
+.cabecera p{
+
+  margin:0;
+
+  opacity:.90;
+
+  line-height:1.45;
+
+}
+
+
+.btn-volver{
+
+  padding:
+    11px 16px;
+
+  color:white;
+
+  font-weight:bold;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .12
+    );
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .35
+    );
+
+  border-radius:10px;
+
+}
+
+
+.btn-volver:hover{
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .20
+    );
+
+}
+
+
+/* =========================================================
+   PANEL
+========================================================= */
+
+.panel{
+
+  margin-bottom:18px;
+
+  padding:20px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:
+    var(--radio);
+
+  box-shadow:
+    var(--sombra);
+
+}
+
+
+.panel-titulo{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:
+    space-between;
+
+  gap:15px;
+
+  margin-bottom:16px;
+
+}
+
+
+.panel-titulo h2{
+
+  margin:0;
+
+  color:var(--azul);
+
+  font-size:21px;
+
+}
+
+
+.panel-subtitulo{
+
+  margin:
+    -7px 0 17px;
+
+  color:var(--gris);
+
+  font-size:13px;
+
+  line-height:1.5;
+
+}
+
+
+/* =========================================================
+   MENÚ
+========================================================= */
+
+.menu-modulacion{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(260px,1fr)
+    );
+
+  gap:18px;
+
+}
+
+
+.modulo-card{
+
+  min-height:200px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:12px;
+
+  padding:25px;
+
+  text-align:center;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:16px;
+
+  box-shadow:var(--sombra);
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease;
+
+}
+
+
+.modulo-card:hover{
+
+  transform:
+    translateY(-3px);
+
+  box-shadow:
+    0 15px 32px
+    rgba(26,54,76,.15);
+
+}
+
+
+.modulo-card.nuevo{
+
+  border-top:
+    5px solid
+    var(--naranja);
+
+}
+
+
+.modulo-card.guardados{
+
+  border-top:
+    5px solid
+    var(--azul2);
+
+}
+
+
+.modulo-icono{
+
+  width:70px;
+  height:70px;
+
+  display:grid;
+
+  place-items:center;
+
+  color:white;
+
+  background:
+    var(--azul);
+
+  border-radius:50%;
+
+  font-size:34px;
+
+}
+
+
+.modulo-card.nuevo
+.modulo-icono{
+
+  background:
+    var(--naranja);
+
+}
+
+
+.modulo-card h2{
+
+  margin:0;
+
+  color:var(--azul);
+
+  font-size:22px;
+
+}
+
+
+.modulo-card p{
+
+  max-width:430px;
+
+  margin:0;
+
+  color:var(--gris);
+
+  font-size:13px;
+
+  line-height:1.5;
+
+}
+
+
+.modulo-card button{
+
+  margin-top:5px;
+
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.btn{
+
+  padding:
+    11px 16px;
+
+  font-weight:bold;
+
+  border:0;
+
+  border-radius:9px;
+
+}
+
+
+.btn-primario{
+
+  color:white;
+
+  background:var(--azul);
+
+}
+
+
+.btn-primario:hover{
+
+  background:var(--azul2);
+
+}
+
+
+.btn-naranja{
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--naranja),
+      var(--naranja2)
+    );
+
+}
+
+
+.btn-secundario{
+
+  color:var(--azul);
+
+  background:
+    var(--azul-claro);
+
+  border:
+    1px solid
+    #bfd7e8;
+
+}
+
+
+.btn-peligro{
+
+  color:var(--rojo);
+
+  background:
+    var(--rojo-claro);
+
+  border:
+    1px solid
+    #efc1c5;
+
+}
+
+
+.btn-verde{
+
+  color:white;
+
+  background:
+    var(--verde);
+
+}
+
+
+.btn:disabled{
+
+  cursor:not-allowed;
+
+  opacity:.55;
+
+}
+
+
+/* =========================================================
+   FORMULARIO
+========================================================= */
+
+.form-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0,1fr)
+    );
+
+  gap:14px;
+
+}
+
+
+.campo{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:7px;
+
+}
+
+
+.campo.completo{
+
+  grid-column:
+    1 / -1;
+
+}
+
+
+.campo label{
+
+  color:var(--gris);
+
+  font-size:12px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.campo input,
+.campo textarea{
+
+  width:100%;
+
+  padding:
+    11px 12px;
+
+  color:var(--texto);
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:9px;
+
+  outline:none;
+
+}
+
+
+.campo textarea{
+
+  min-height:80px;
+
+  resize:vertical;
+
+}
+
+
+.campo input:focus,
+.campo textarea:focus{
+
+  border-color:
+    var(--azul2);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(
+      47,
+      109,
+      155,
+      .12
+    );
+
+}
+
+
+/* =========================================================
+   RESUMEN
+========================================================= */
+
+.resumen{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(150px,1fr)
+    );
+
+  gap:12px;
+
+  margin-bottom:18px;
+
+}
+
+
+.resumen-card{
+
+  padding:16px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-top:
+    4px solid
+    var(--azul2);
+
+  border-radius:12px;
+
+}
+
+
+.resumen-card.peso{
+
+  border-top-color:
+    var(--verde);
+
+}
+
+
+.resumen-card.materiales{
+
+  border-top-color:
+    var(--naranja);
+
+}
+
+
+.resumen-card span{
+
+  display:block;
+
+  margin-bottom:7px;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.resumen-card strong{
+
+  color:var(--azul);
+
+  font-size:26px;
+
+}
+
+
+/* =========================================================
+   BUSCADOR DE MATERIAL
+========================================================= */
+
+.buscador-material{
+
+  position:relative;
+
+  margin-top:18px;
+
+}
+
+
+.buscador-fila{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  gap:10px;
+
+}
+
+
+.buscador-fila input{
+
+  width:100%;
+
+  padding:
+    13px 14px;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:10px;
+
+  outline:none;
+
+}
+
+
+.buscador-fila input:focus{
+
+  border-color:
+    var(--azul2);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(
+      47,
+      109,
+      155,
+      .12
+    );
+
+}
+
+
+.resultados-material{
+
+  max-height:330px;
+
+  overflow-y:auto;
+
+  margin-top:10px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:11px;
+
+}
+
+
+.resultado-material{
+
+  width:100%;
+
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  gap:15px;
+
+  align-items:center;
+
+  padding:
+    12px 14px;
+
+  color:var(--texto);
+
+  text-align:left;
+
+  background:white;
+
+  border:0;
+
+  border-bottom:
+    1px solid
+    var(--borde);
+
+}
+
+
+.resultado-material:last-child{
+
+  border-bottom:0;
+
+}
+
+
+.resultado-material:hover{
+
+  background:
+    var(--azul-claro);
+
+}
+
+
+.resultado-material strong{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--azul);
+
+}
+
+
+.resultado-material span{
+
+  display:block;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+}
+
+
+.resultado-peso{
+
+  white-space:nowrap;
+
+  color:var(--verde) !important;
+
+  font-weight:bold;
+
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.tabla-wrap{
+
+  width:100%;
+
+  overflow-x:auto;
+
+  margin-top:16px;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:12px;
+
+}
+
+
+table{
+
+  width:100%;
+
+  min-width:1050px;
+
+  border-collapse:
+    collapse;
+
+}
+
+
+th,
+td{
+
+  padding:
+    11px 10px;
+
+  border-bottom:
+    1px solid
+    var(--borde);
+
+  text-align:left;
+
+  vertical-align:middle;
+
+}
+
+
+th{
+
+  color:white;
+
+  background:
+    var(--azul);
+
+  font-size:11px;
+
+  text-transform:uppercase;
+
+}
+
+
+tbody tr:last-child td{
+
+  border-bottom:0;
+
+}
+
+
+tbody tr:hover{
+
+  background:#f9fbfc;
+
+}
+
+
+.material-nombre{
+
+  min-width:230px;
+
+}
+
+
+.material-nombre strong{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--azul);
+
+}
+
+
+.material-nombre small{
+
+  color:var(--gris);
+
+}
+
+
+.cantidad-editor{
+
+  display:inline-grid;
+
+  grid-template-columns:
+    34px 70px 34px;
+
+  align-items:center;
+
+  overflow:hidden;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:9px;
+
+}
+
+
+.cantidad-editor button{
+
+  height:38px;
+
+  color:var(--azul);
+
+  font-weight:bold;
+
+  background:
+    var(--azul-claro);
+
+  border:0;
+
+}
+
+
+.cantidad-editor input{
+
+  width:70px;
+
+  height:38px;
+
+  text-align:center;
+
+  border:0;
+
+  outline:none;
+
+}
+
+
+.obs-material{
+
+  width:190px;
+
+  min-width:190px;
+
+  min-height:40px;
+
+  padding:
+    8px 9px;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:8px;
+
+  resize:vertical;
+
+}
+
+
+.peso-material{
+
+  color:var(--verde);
+
+  font-weight:bold;
+
+  white-space:nowrap;
+
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones{
+
+  display:flex;
+
+  justify-content:flex-end;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-top:18px;
+
+}
+
+
+/* =========================================================
+   BORRADORES
+========================================================= */
+
+.borradores-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(300px,1fr)
+    );
+
+  gap:15px;
+
+}
+
+
+.borrador-card{
+
+  overflow:hidden;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:14px;
+
+  box-shadow:var(--sombra);
+
+}
+
+
+.borrador-cabecera{
+
+  display:flex;
+
+  justify-content:
+    space-between;
+
+  gap:12px;
+
+  padding:
+    16px 17px;
+
+  background:
+    var(--gris-claro);
+
+  border-bottom:
+    1px solid
+    var(--borde);
+
+}
+
+
+.borrador-id{
+
+  margin:
+    0 0 4px;
+
+  color:var(--azul);
+
+  font-size:18px;
+
+}
+
+
+.borrador-referencia{
+
+  color:var(--texto);
+
+  font-size:13px;
+
+  font-weight:bold;
+
+}
+
+
+.estado-borrador{
+
+  height:fit-content;
+
+  padding:
+    6px 9px;
+
+  color:
+    var(--amarillo);
+
+  background:
+    var(--amarillo-claro);
+
+  border-radius:999px;
+
+  font-size:10px;
+
+  font-weight:bold;
+
+}
+
+
+.borrador-datos{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:9px;
+
+  padding:
+    15px 17px;
+
+}
+
+
+.borrador-dato{
+
+  padding:10px;
+
+  background:
+    var(--gris-claro);
+
+  border-radius:8px;
+
+}
+
+
+.borrador-dato span{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  color:var(--gris);
+
+  font-size:9px;
+
+  font-weight:bold;
+
+  text-transform:uppercase;
+
+}
+
+
+.borrador-dato strong{
+
+  display:block;
+
+  font-size:12px;
+
+  word-break:break-word;
+
+}
+
+
+.borrador-acciones{
+
+  display:flex;
+
+  gap:8px;
+
+  padding:
+    0 17px 17px;
+
+}
+
+
+.borrador-acciones button{
+
+  flex:1;
+
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.mensaje{
+
+  position:fixed;
+
+  right:18px;
+
+  bottom:18px;
+
+  z-index:5000;
+
+  max-width:420px;
+
+  padding:
+    14px 16px;
+
+  color:white;
+
+  background:
+    var(--azul);
+
+  border-radius:10px;
+
+  box-shadow:var(--sombra);
+
+}
+
+
+.mensaje.exito{
+
+  background:
+    var(--verde);
+
+}
+
+
+.mensaje.error{
+
+  background:
+    var(--rojo);
+
+}
+
+
+.cargando{
+
+  padding:
+    30px 20px;
+
+  color:var(--azul);
+
+  text-align:center;
+
+  background:
+    var(--azul-claro);
+
+  border-radius:11px;
+
+}
+
+
+.sin-datos{
+
+  padding:
+    30px 20px;
+
+  color:var(--gris);
+
+  text-align:center;
+
+  background:white;
+
+  border:
+    1px dashed
+    var(--borde);
+
+  border-radius:11px;
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer-copyright{
+
+  width:100%;
+
+  margin-top:30px;
+
+  padding-top:18px;
+
+  color:var(--gris);
+
+  font-size:12px;
+
+  text-align:center;
+
+  border-top:
+    1px solid
+    var(--borde);
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:760px){
+
+  .contenedor{
+
+    width:
+      min(
+        100% - 18px,
+        1400px
+      );
+
+    padding-top:10px;
+
+  }
+
+
+  .cabecera{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .btn-volver{
+
+    width:100%;
+
+  }
+
+
+  .menu-modulacion{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .form-grid{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .campo.completo{
+
+    grid-column:auto;
+
+  }
+
+
+  .resumen{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .buscador-fila{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .resultado-material{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .acciones{
+
+    flex-direction:column-reverse;
+
+  }
+
+
+  .acciones button{
+
+    width:100%;
+
+  }
+
+
+  .borrador-acciones{
+
+    flex-direction:column;
+
+  }
+
+
+  .mensaje{
+
+    left:10px;
+    right:10px;
+    bottom:10px;
+
+    max-width:none;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<main class="contenedor">
+
+
+  <!-- =====================================================
+       CABECERA
+  ====================================================== -->
+
+  <section class="cabecera">
+
+    <div>
+
+      <h1>
+        🧩 Modulación
+      </h1>
+
+      <p>
+        Crea borradores de materiales para modular,
+        contabilizar y estimar el peso de un trabajo
+        antes de su ejecución.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn-volver"
+      onclick="volverMenuPrincipal()"
+    >
+      ← Volver al menú principal
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       MENÚ PRINCIPAL
+  ====================================================== -->
+
+  <section
+    id="vistaMenu"
+    class="menu-modulacion"
+  >
+
+
+    <article class="modulo-card nuevo">
+
+      <div class="modulo-icono">
+        ＋
+      </div>
+
+      <h2>
+        Nuevo borrador
+      </h2>
+
+      <p>
+        Inicia una modulación desde cero,
+        agrega materiales y registra
+        cantidades estimadas.
+      </p>
+
+      <button
+        type="button"
+        class="btn btn-naranja"
+        onclick="nuevoBorrador()"
+      >
+        Crear borrador
+      </button>
+
+    </article>
+
+
+    <article class="modulo-card guardados">
+
+      <div class="modulo-icono">
+        📋
+      </div>
+
+      <h2>
+        Borradores guardados
+      </h2>
+
+      <p>
+        Consulta modulaciones anteriores
+        y continúa trabajando sobre ellas.
+      </p>
+
+      <button
+        type="button"
+        class="btn btn-primario"
+        onclick="abrirListaBorradores()"
+      >
+        Ver borradores
+      </button>
+
+    </article>
+
+
+  </section>
+
+
+  <!-- =====================================================
+       EDITOR
+  ====================================================== -->
+
+  <section
+    id="vistaEditor"
+    class="oculto"
+  >
+
+
+    <div class="panel">
+
+      <div class="panel-titulo">
+
+        <h2 id="tituloEditor">
+          Nuevo borrador
+        </h2>
+
+        <span
+          id="idBorradorVisible"
+          style="
+            color:#667784;
+            font-size:12px;
+            font-weight:bold;
+          "
+        >
+          SIN GUARDAR
+        </span>
+
+      </div>
+
+
+      <p class="panel-subtitulo">
+        Este registro es únicamente un borrador de trabajo.
+        No modifica Inventario ni Gestión de Andamios.
+      </p>
+
+
+      <div class="form-grid">
+
+
+        <div class="campo">
+
+          <label for="responsable">
+            Responsable *
+          </label>
+
+          <input
+            id="responsable"
+            type="text"
+            placeholder="Nombre del andamiero o responsable"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label for="referencia">
+            Referencia del trabajo *
+          </label>
+
+          <input
+            id="referencia"
+            type="text"
+            placeholder="Ej.: CV001, Molino, Bomba 03..."
+          >
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         RESUMEN
+    ==================================================== -->
+
+    <div class="resumen">
+
+
+      <article class="resumen-card materiales">
+
+        <span>
+          Tipos de material
+        </span>
+
+        <strong id="totalMateriales">
+          0
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-card">
+
+        <span>
+          Total de piezas
+        </span>
+
+        <strong id="totalPiezas">
+          0
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-card peso">
+
+        <span>
+          Peso estimado
+        </span>
+
+        <strong id="pesoTotal">
+          0 kg
+        </strong>
+
+      </article>
+
+
+    </div>
+
+
+    <!-- ===================================================
+         MATERIALES
+    ==================================================== -->
+
+    <div class="panel">
+
+      <div class="panel-titulo">
+
+        <h2>
+          Materiales
+        </h2>
+
+      </div>
+
+
+      <p class="panel-subtitulo">
+        Busca un material por descripción,
+        código o grupo y agrégalo al borrador.
+      </p>
+
+
+      <div class="buscador-material">
+
+
+        <div class="buscador-fila">
+
+          <input
+            id="buscarMaterial"
+            type="search"
+            placeholder="Buscar material, código o grupo..."
+            autocomplete="off"
+            oninput="buscarMateriales()"
+            onkeydown="detectarEnterBuscador(event)"
+          >
+
+
+          <button
+            type="button"
+            class="btn btn-secundario"
+            onclick="limpiarBusquedaMaterial()"
+          >
+            Limpiar
+          </button>
+
+        </div>
+
+
+        <div
+          id="resultadosMaterial"
+          class="resultados-material oculto"
+        >
+        </div>
+
+
+      </div>
+
+
+      <div
+        id="sinMateriales"
+        class="sin-datos"
+        style="margin-top:18px;"
+      >
+        Todavía no agregaste materiales al borrador.
+      </div>
+
+
+      <div
+        id="tablaMaterialesContenedor"
+        class="tabla-wrap oculto"
+      >
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Material
+              </th>
+
+              <th>
+                Código
+              </th>
+
+              <th>
+                Grupo
+              </th>
+
+              <th>
+                Cantidad
+              </th>
+
+              <th>
+                P. Unit. kg
+              </th>
+
+              <th>
+                Peso total
+              </th>
+
+              <th>
+                Observación
+              </th>
+
+              <th>
+                Acción
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="tablaMateriales">
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div class="acciones">
+
+        <button
+          type="button"
+          class="btn btn-secundario"
+          onclick="volverDesdeEditor()"
+        >
+          ← Volver
+        </button>
+
+
+        <button
+          id="btnGuardar"
+          type="button"
+          class="btn btn-verde"
+          onclick="guardarBorrador()"
+        >
+          💾 Guardar borrador
+        </button>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+
+  <!-- =====================================================
+       BORRADORES
+  ====================================================== -->
+
+  <section
+    id="vistaBorradores"
+    class="oculto"
+  >
+
+
+    <div class="panel">
+
+
+      <div class="panel-titulo">
+
+        <h2>
+          Borradores guardados
+        </h2>
+
+
+        <button
+          type="button"
+          class="btn btn-secundario"
+          onclick="volverMenuModulacion()"
+        >
+          ← Volver
+        </button>
+
+      </div>
+
+
+      <div
+        id="cargandoBorradores"
+        class="cargando"
+      >
+        Cargando borradores...
+      </div>
+
+
+      <div
+        id="sinBorradores"
+        class="sin-datos oculto"
+      >
+        Todavía no existen borradores registrados.
+      </div>
+
+
+      <div
+        id="listaBorradores"
+        class="borradores-grid"
+      >
+      </div>
+
+
+    </div>
+
+
+  </section>
+
+
+  <!-- =====================================================
+       FOOTER
+  ====================================================== -->
+
+  <footer class="footer-copyright">
+    © 2026 Ruben Romero. Todos los derechos reservados.
+  </footer>
+
+
+</main>
+
+
+<div
+  id="mensaje"
+  class="mensaje oculto"
+>
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbxxn8zRBSMLwuQ-riNFNZ_xOH1jFVTIZt0QwUBrUMvarX2KMLiTDIUKKsW0m-or9Pv7/exec';
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let catalogoMateriales = [];
+
+let materialesBorrador = [];
+
+let idBorradorActual = '';
+
+let fechaBorradorActual = '';
+
+let catalogoCargado = false;
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  iniciarPagina
+);
+
+
+async function iniciarPagina(){
+
+  try{
+
+    await cargarCatalogo();
+
+  }catch(error){
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo cargar el catálogo.',
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   API GET RESISTENTE
+========================================================= */
+
+async function consultarAPI(
+  url,
+  maxIntentos = 4
+){
+
+  let ultimoError = null;
+
+
+  for(
+    let intento = 1;
+    intento <= maxIntentos;
+    intento++
+  ){
+
+    try{
+
+      const separador =
+        url.includes('?')
+          ? '&'
+          : '?';
+
+
+      const urlFinal =
+        `${url}${separador}` +
+        `t=${Date.now()}` +
+        `&intento=${intento}`;
+
+
+      const respuesta =
+        await fetch(
+          urlFinal,
+          {
+            method:'GET',
+            cache:'no-store',
+            redirect:'follow'
+          }
+        );
+
+
+      if(!respuesta.ok){
+
+        throw new Error(
+          `Error HTTP ${respuesta.status}`
+        );
+
+      }
+
+
+      const texto =
+        await respuesta.text();
+
+
+      if(
+        texto
+          .trim()
+          .startsWith('<')
+      ){
+
+        throw new Error(
+          'Apps Script devolvió temporalmente una página HTML.'
+        );
+
+      }
+
+
+      let datos;
+
+
+      try{
+
+        datos =
+          JSON.parse(
+            texto
+          );
+
+      }catch(errorJSON){
+
+        throw new Error(
+          'Apps Script devolvió una respuesta no válida.'
+        );
+
+      }
+
+
+      return datos;
+
+
+    }catch(error){
+
+      ultimoError =
+        error;
+
+
+      console.warn(
+        `Intento ${intento} de ${maxIntentos} falló:`,
+        error.message
+      );
+
+
+      if(
+        intento <
+        maxIntentos
+      ){
+
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              intento * 700
+            )
+        );
+
+      }
+
+    }
+
+  }
+
+
+  throw (
+    ultimoError ||
+    new Error(
+      'No se pudo conectar con Apps Script.'
+    )
+  );
+
+}
+
+
+/* =========================================================
+   API POST
+========================================================= */
+
+async function enviarAPI(
+  datos
+){
+
+  const respuesta =
+    await fetch(
+      API_URL,
+      {
+        method:'POST',
+
+        headers:{
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body:
+          JSON.stringify(
+            datos
+          )
+      }
+    );
+
+
+  if(!respuesta.ok){
+
+    throw new Error(
+      `Error HTTP ${respuesta.status}`
+    );
+
+  }
+
+
+  const texto =
+    await respuesta.text();
+
+
+  if(
+    texto
+      .trim()
+      .startsWith('<')
+  ){
+
+    throw new Error(
+      'Apps Script devolvió temporalmente una página HTML.'
+    );
+
+  }
+
+
+  try{
+
+    return JSON.parse(
+      texto
+    );
+
+  }catch(error){
+
+    throw new Error(
+      'Apps Script devolvió una respuesta no válida.'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CATÁLOGO
+========================================================= */
+
+async function cargarCatalogo(){
+
+  const datos =
+    await consultarAPI(
+      `${API_URL}?accion=catalogoModulacion`
+    );
+
+
+  if(!datos.ok){
+
+    throw new Error(
+      datos.error ||
+      datos.mensaje ||
+      'No se pudo cargar el catálogo.'
+    );
+
+  }
+
+
+  catalogoMateriales =
+    Array.isArray(
+      datos.materiales
+    )
+      ? datos.materiales
+      : [];
+
+
+  catalogoCargado =
+    true;
+
+}
+
+
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
+
+function volverMenuPrincipal(){
+
+  window.location.href =
+    'index.html';
+
+}
+
+
+function mostrarSolo(
+  id
+){
+
+  [
+    'vistaMenu',
+    'vistaEditor',
+    'vistaBorradores'
+  ]
+    .forEach(
+      elementoId => {
+
+        document
+          .getElementById(
+            elementoId
+          )
+          .classList.add(
+            'oculto'
+          );
+
+      }
+    );
+
+
+  document
+    .getElementById(
+      id
+    )
+    .classList.remove(
+      'oculto'
+    );
+
+}
+
+
+function volverMenuModulacion(){
+
+  mostrarSolo(
+    'vistaMenu'
+  );
+
+}
+
+
+function volverDesdeEditor(){
+
+  if(
+    materialesBorrador.length
+  ){
+
+    const confirmar =
+      confirm(
+        '¿Deseas salir del borrador? Los cambios no guardados se perderán.'
+      );
+
+
+    if(!confirmar){
+      return;
+    }
+
+  }
+
+
+  volverMenuModulacion();
+
+}
+
+
+/* =========================================================
+   NUEVO BORRADOR
+========================================================= */
+
+function nuevoBorrador(){
+
+  if(!catalogoCargado){
+
+    mostrarMensaje(
+      'El catálogo todavía está cargando.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  idBorradorActual = '';
+
+  fechaBorradorActual = '';
+
+  materialesBorrador = [];
+
+
+  document
+    .getElementById(
+      'responsable'
+    )
+    .value = '';
+
+
+  document
+    .getElementById(
+      'referencia'
+    )
+    .value = '';
+
+
+  document
+    .getElementById(
+      'buscarMaterial'
+    )
+    .value = '';
+
+
+  document
+    .getElementById(
+      'tituloEditor'
+    )
+    .textContent =
+      'Nuevo borrador';
+
+
+  document
+    .getElementById(
+      'idBorradorVisible'
+    )
+    .textContent =
+      'SIN GUARDAR';
+
+
+  limpiarBusquedaMaterial();
+
+  renderizarMateriales();
+
+  mostrarSolo(
+    'vistaEditor'
+  );
+
+
+  document
+    .getElementById(
+      'responsable'
+    )
+    .focus();
+
+}
+
+
+/* =========================================================
+   BUSCAR MATERIAL
+========================================================= */
+
+function buscarMateriales(){
+
+  const termino =
+    normalizar(
+      document
+        .getElementById(
+          'buscarMaterial'
+        )
+        .value
+    );
+
+
+  const contenedor =
+    document.getElementById(
+      'resultadosMaterial'
+    );
+
+
+  if(
+    termino.length <
+    2
+  ){
+
+    contenedor
+      .classList.add(
+        'oculto'
+      );
+
+    contenedor.innerHTML =
+      '';
+
+    return;
+
+  }
+
+
+  const resultados =
+    catalogoMateriales
+      .filter(
+        material => {
+
+          const texto =
+            normalizar(
+              [
+                material.codigo,
+                material.descripcion,
+                material.grupo,
+                material.subgrupo
+              ].join(' ')
+            );
+
+
+          return texto.includes(
+            termino
+          );
+
+        }
+      )
+      .slice(
+        0,
+        30
+      );
+
+
+  if(
+    !resultados.length
+  ){
+
+    contenedor.innerHTML = `
+
+      <div
+        style="
+          padding:18px;
+          color:#667784;
+          text-align:center;
+        "
+      >
+        No se encontraron materiales.
+      </div>
+
+    `;
+
+
+    contenedor
+      .classList.remove(
+        'oculto'
+      );
+
+    return;
+
+  }
+
+
+  contenedor.innerHTML =
+    resultados
+      .map(
+        material => {
+
+          const indice =
+            catalogoMateriales
+              .indexOf(
+                material
+              );
+
+
+          return `
+
+            <button
+              type="button"
+              class="resultado-material"
+              onclick="agregarMaterialCatalogo(
+                ${indice}
+              )"
+            >
+
+              <div>
+
+                <strong>
+                  ${
+                    escaparHTML(
+                      material.descripcion ||
+                      material.subgrupo ||
+                      'Sin descripción'
+                    )
+                  }
+                </strong>
+
+                <span>
+
+                  ${
+                    escaparHTML(
+                      material.grupo ||
+                      'SIN GRUPO'
+                    )
+                  }
+
+                  · Código:
+
+                  ${
+                    escaparHTML(
+                      material.codigo ||
+                      'S/C'
+                    )
+                  }
+
+                </span>
+
+              </div>
+
+
+              <span class="resultado-peso">
+
+                ${
+                  formatearNumero(
+                    material.pesoUnitario
+                  )
+                } kg
+
+              </span>
+
+            </button>
+
+          `;
+
+        }
+      )
+      .join('');
+
+
+  contenedor
+    .classList.remove(
+      'oculto'
+    );
+
+}
+
+
+function detectarEnterBuscador(
+  evento
+){
+
+  if(
+    evento.key !==
+    'Enter'
+  ){
+    return;
+  }
+
+
+  evento.preventDefault();
+
+
+  const termino =
+    normalizar(
+      document
+        .getElementById(
+          'buscarMaterial'
+        )
+        .value
+    );
+
+
+  if(
+    termino.length <
+    2
+  ){
+    return;
+  }
+
+
+  const encontrado =
+    catalogoMateriales
+      .find(
+        material =>
+          normalizar(
+            [
+              material.codigo,
+              material.descripcion,
+              material.grupo
+            ].join(' ')
+          )
+            .includes(
+              termino
+            )
+      );
+
+
+  if(encontrado){
+
+    agregarMaterialCatalogo(
+      catalogoMateriales
+        .indexOf(
+          encontrado
+        )
+    );
+
+  }
+
+}
+
+
+function limpiarBusquedaMaterial(){
+
+  document
+    .getElementById(
+      'buscarMaterial'
+    )
+    .value = '';
+
+
+  document
+    .getElementById(
+      'resultadosMaterial'
+    )
+    .innerHTML = '';
+
+
+  document
+    .getElementById(
+      'resultadosMaterial'
+    )
+    .classList.add(
+      'oculto'
+    );
+
+}
+
+
+/* =========================================================
+   AGREGAR MATERIAL
+========================================================= */
+
+function agregarMaterialCatalogo(
+  indice
+){
+
+  const material =
+    catalogoMateriales[
+      indice
+    ];
+
+
+  if(!material){
+    return;
+  }
+
+
+  const existente =
+    materialesBorrador
+      .find(
+        item =>
+          normalizar(
+            item.codigo
+          ) ===
+            normalizar(
+              material.codigo
+            ) &&
+          normalizar(
+            item.descripcion
+          ) ===
+            normalizar(
+              material.descripcion
+            )
+      );
+
+
+  if(existente){
+
+    existente.cantidad =
+      (
+        Number(
+          existente.cantidad
+        ) || 0
+      ) + 1;
+
+
+    mostrarMensaje(
+      'El material ya estaba agregado. Se aumentó su cantidad.',
+      'exito'
+    );
+
+  }else{
+
+    materialesBorrador.push({
+
+      codigo:
+        material.codigo ||
+        '',
+
+      descripcion:
+        material.descripcion ||
+        material.subgrupo ||
+        '',
+
+      grupo:
+        material.grupo ||
+        '',
+
+      subgrupo:
+        material.subgrupo ||
+        material.descripcion ||
+        '',
+
+      cantidad:1,
+
+      pesoUnitario:
+        Number(
+          material.pesoUnitario
+        ) || 0,
+
+      observacion:''
+
+    });
+
+
+    mostrarMensaje(
+      'Material agregado.',
+      'exito'
+    );
+
+  }
+
+
+  limpiarBusquedaMaterial();
+
+  renderizarMateriales();
+
+}
+
+
+/* =========================================================
+   RENDERIZAR MATERIALES
+========================================================= */
+
+function renderizarMateriales(){
+
+  const tbody =
+    document.getElementById(
+      'tablaMateriales'
+    );
+
+
+  const contenedor =
+    document.getElementById(
+      'tablaMaterialesContenedor'
+    );
+
+
+  const vacio =
+    document.getElementById(
+      'sinMateriales'
+    );
+
+
+  tbody.innerHTML = '';
+
+
+  if(
+    !materialesBorrador.length
+  ){
+
+    contenedor
+      .classList.add(
+        'oculto'
+      );
+
+
+    vacio
+      .classList.remove(
+        'oculto'
+      );
+
+
+    actualizarResumen();
+
+    return;
+
+  }
+
+
+  vacio
+    .classList.add(
+      'oculto'
+    );
+
+
+  contenedor
+    .classList.remove(
+      'oculto'
+    );
+
+
+  materialesBorrador
+    .forEach(
+      (
+        material,
+        indice
+      ) => {
+
+        const pesoTotal =
+          (
+            Number(
+              material.cantidad
+            ) || 0
+          ) *
+          (
+            Number(
+              material.pesoUnitario
+            ) || 0
+          );
+
+
+        const fila =
+          document.createElement(
+            'tr'
+          );
+
+
+        fila.innerHTML = `
+
+          <td class="material-nombre">
+
+            <strong>
+              ${
+                escaparHTML(
+                  material.descripcion ||
+                  material.subgrupo ||
+                  'Sin descripción'
+                )
+              }
+            </strong>
+
+            <small>
+              ${
+                escaparHTML(
+                  material.subgrupo ||
+                  ''
+                )
+              }
+            </small>
+
+          </td>
+
+
+          <td>
+            ${
+              escaparHTML(
+                material.codigo ||
+                'S/C'
+              )
+            }
+          </td>
+
+
+          <td>
+            ${
+              escaparHTML(
+                material.grupo ||
+                'SIN GRUPO'
+              )
+            }
+          </td>
+
+
+          <td>
+
+            <div class="cantidad-editor">
+
+              <button
+                type="button"
+                onclick="cambiarCantidad(
+                  ${indice},
+                  -1
+                )"
+              >
+                −
+              </button>
+
+
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value="${
+                  material.cantidad
+                }"
+                onchange="establecerCantidad(
+                  ${indice},
+                  this.value
+                )"
+              >
+
+
+              <button
+                type="button"
+                onclick="cambiarCantidad(
+                  ${indice},
+                  1
+                )"
+              >
+                +
+              </button>
+
+            </div>
+
+          </td>
+
+
+          <td>
+            ${
+              formatearNumero(
+                material.pesoUnitario
+              )
+            }
+          </td>
+
+
+          <td class="peso-material">
+
+            ${
+              formatearNumero(
+                pesoTotal
+              )
+            } kg
+
+          </td>
+
+
+          <td>
+
+            <textarea
+              class="obs-material"
+              placeholder="Opcional"
+              onchange="actualizarObservacion(
+                ${indice},
+                this.value
+              )"
+            >${
+              escaparHTML(
+                material.observacion ||
+                ''
+              )
+            }</textarea>
+
+          </td>
+
+
+          <td>
+
+            <button
+              type="button"
+              class="btn btn-peligro"
+              onclick="eliminarMaterial(
+                ${indice}
+              )"
+            >
+              Eliminar
+            </button>
+
+          </td>
+
+        `;
+
+
+        tbody.appendChild(
+          fila
+        );
+
+      }
+    );
+
+
+  actualizarResumen();
+
+}
+
+
+/* =========================================================
+   CANTIDADES
+========================================================= */
+
+function cambiarCantidad(
+  indice,
+  cambio
+){
+
+  const material =
+    materialesBorrador[
+      indice
+    ];
+
+
+  if(!material){
+    return;
+  }
+
+
+  const nuevaCantidad =
+    (
+      Number(
+        material.cantidad
+      ) || 0
+    ) +
+    cambio;
+
+
+  material.cantidad =
+    Math.max(
+      0.01,
+      nuevaCantidad
+    );
+
+
+  renderizarMateriales();
+
+}
+
+
+function establecerCantidad(
+  indice,
+  valor
+){
+
+  const material =
+    materialesBorrador[
+      indice
+    ];
+
+
+  if(!material){
+    return;
+  }
+
+
+  const numero =
+    Number(
+      valor
+    );
+
+
+  material.cantidad =
+    (
+      Number.isFinite(numero) &&
+      numero > 0
+    )
+      ? numero
+      : 1;
+
+
+  renderizarMateriales();
+
+}
+
+
+function actualizarObservacion(
+  indice,
+  valor
+){
+
+  if(
+    materialesBorrador[
+      indice
+    ]
+  ){
+
+    materialesBorrador[
+      indice
+    ].observacion =
+      String(
+        valor || ''
+      ).trim();
+
+  }
+
+}
+
+
+function eliminarMaterial(
+  indice
+){
+
+  materialesBorrador
+    .splice(
+      indice,
+      1
+    );
+
+
+  renderizarMateriales();
+
+}
+
+
+/* =========================================================
+   RESUMEN
+========================================================= */
+
+function actualizarResumen(){
+
+  const totalMateriales =
+    materialesBorrador.length;
+
+
+  const totalPiezas =
+    materialesBorrador
+      .reduce(
+        (
+          total,
+          material
+        ) =>
+          total +
+          (
+            Number(
+              material.cantidad
+            ) || 0
+          ),
+        0
+      );
+
+
+  const pesoTotal =
+    materialesBorrador
+      .reduce(
+        (
+          total,
+          material
+        ) =>
+          total +
+          (
+            (
+              Number(
+                material.cantidad
+              ) || 0
+            ) *
+            (
+              Number(
+                material.pesoUnitario
+              ) || 0
+            )
+          ),
+        0
+      );
+
+
+  document
+    .getElementById(
+      'totalMateriales'
+    )
+    .textContent =
+      totalMateriales;
+
+
+  document
+    .getElementById(
+      'totalPiezas'
+    )
+    .textContent =
+      formatearNumero(
+        totalPiezas
+      );
+
+
+  document
+    .getElementById(
+      'pesoTotal'
+    )
+    .textContent =
+      `${formatearNumero(
+        pesoTotal
+      )} kg`;
+
+}
+
+
+/* =========================================================
+   GUARDAR BORRADOR
+========================================================= */
+
+async function guardarBorrador(){
+
+  const responsable =
+    document
+      .getElementById(
+        'responsable'
+      )
+      .value
+      .trim();
+
+
+  const referencia =
+    document
+      .getElementById(
+        'referencia'
+      )
+      .value
+      .trim();
+
+
+  if(!responsable){
+
+    mostrarMensaje(
+      'Debes indicar el responsable.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  if(!referencia){
+
+    mostrarMensaje(
+      'Debes indicar una referencia para el trabajo.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !materialesBorrador.length
+  ){
+
+    mostrarMensaje(
+      'Debes agregar al menos un material.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  const boton =
+    document.getElementById(
+      'btnGuardar'
+    );
+
+
+  const textoOriginal =
+    boton.textContent;
+
+
+  boton.disabled =
+    true;
+
+
+  boton.textContent =
+    'Guardando...';
+
+
+  try{
+
+    const datos =
+      await enviarAPI({
+
+        accion:
+          'guardarBorradorModulacion',
+
+        idBorrador:
+          idBorradorActual,
+
+        fecha:
+          fechaBorradorActual,
+
+        responsable,
+
+        referencia,
+
+        estado:
+          'BORRADOR',
+
+        materiales:
+          materialesBorrador
+
+      });
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudo guardar el borrador.'
+      );
+
+    }
+
+
+    idBorradorActual =
+      datos.idBorrador ||
+      idBorradorActual;
+
+
+    document
+      .getElementById(
+        'idBorradorVisible'
+      )
+      .textContent =
+        idBorradorActual;
+
+
+    document
+      .getElementById(
+        'tituloEditor'
+      )
+      .textContent =
+        `Borrador ${idBorradorActual}`;
+
+
+    mostrarMensaje(
+      datos.mensaje ||
+      'Borrador guardado correctamente.',
+      'exito'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo guardar el borrador.',
+      'error'
+    );
+
+
+  }finally{
+
+    boton.disabled =
+      false;
+
+
+    boton.textContent =
+      textoOriginal;
+
+  }
+
+}
+
+
+/* =========================================================
+   LISTAR BORRADORES
+========================================================= */
+
+async function abrirListaBorradores(){
+
+  mostrarSolo(
+    'vistaBorradores'
+  );
+
+
+  const cargando =
+    document.getElementById(
+      'cargandoBorradores'
+    );
+
+
+  const lista =
+    document.getElementById(
+      'listaBorradores'
+    );
+
+
+  const vacio =
+    document.getElementById(
+      'sinBorradores'
+    );
+
+
+  cargando
+    .classList.remove(
+      'oculto'
+    );
+
+
+  vacio
+    .classList.add(
+      'oculto'
+    );
+
+
+  lista.innerHTML =
+    '';
+
+
+  try{
+
+    const datos =
+      await consultarAPI(
+        `${API_URL}?accion=listarBorradoresModulacion`
+      );
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudieron cargar los borradores.'
+      );
+
+    }
+
+
+    const borradores =
+      Array.isArray(
+        datos.borradores
+      )
+        ? datos.borradores
+        : [];
+
+
+    cargando
+      .classList.add(
+        'oculto'
+      );
+
+
+    if(
+      !borradores.length
+    ){
+
+      vacio
+        .classList.remove(
+          'oculto'
+        );
+
+      return;
+
+    }
+
+
+    lista.innerHTML =
+      borradores
+        .map(
+          borrador => `
+
+            <article class="borrador-card">
+
+
+              <div class="borrador-cabecera">
+
+                <div>
+
+                  <h3 class="borrador-id">
+
+                    ${
+                      escaparHTML(
+                        borrador.idBorrador
+                      )
+                    }
+
+                  </h3>
+
+
+                  <div class="borrador-referencia">
+
+                    ${
+                      escaparHTML(
+                        borrador.referencia ||
+                        'Sin referencia'
+                      )
+                    }
+
+                  </div>
+
+                </div>
+
+
+                <span class="estado-borrador">
+
+                  ${
+                    escaparHTML(
+                      borrador.estado ||
+                      'BORRADOR'
+                    )
+                  }
+
+                </span>
+
+              </div>
+
+
+              <div class="borrador-datos">
+
+
+                ${datoBorrador(
+                  'Responsable',
+                  borrador.responsable ||
+                  '-'
+                )}
+
+
+                ${datoBorrador(
+                  'Materiales',
+                  borrador.cantidadMateriales
+                )}
+
+
+                ${datoBorrador(
+                  'Piezas',
+                  formatearNumero(
+                    borrador.totalPiezas
+                  )
+                )}
+
+
+                ${datoBorrador(
+                  'Peso',
+                  `${formatearNumero(
+                    borrador.pesoTotal
+                  )} kg`
+                )}
+
+
+                ${datoBorrador(
+                  'Fecha',
+                  borrador.fecha ||
+                  '-'
+                )}
+
+
+                ${datoBorrador(
+                  'Última modificación',
+                  borrador.ultimaModificacion ||
+                  '-'
+                )}
+
+
+              </div>
+
+
+              <div class="borrador-acciones">
+
+                <button
+                  type="button"
+                  class="btn btn-primario"
+                  onclick="abrirBorrador(
+                    '${escaparAtributo(
+                      borrador.idBorrador
+                    )}'
+                  )"
+                >
+                  Abrir
+                </button>
+
+
+                <button
+                  type="button"
+                  class="btn btn-peligro"
+                  onclick="eliminarBorrador(
+                    '${escaparAtributo(
+                      borrador.idBorrador
+                    )}'
+                  )"
+                >
+                  Eliminar
+                </button>
+
+              </div>
+
+
+            </article>
+
+          `
+        )
+        .join('');
+
+
+  }catch(error){
+
+    cargando
+      .classList.add(
+        'oculto'
+      );
+
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudieron cargar los borradores.',
+      'error'
+    );
+
+  }
+
+}
+
+
+function datoBorrador(
+  etiqueta,
+  valor
+){
+
+  return `
+
+    <div class="borrador-dato">
+
+      <span>
+        ${
+          escaparHTML(
+            etiqueta
+          )
+        }
+      </span>
+
+      <strong>
+        ${
+          escaparHTML(
+            valor
+          )
+        }
+      </strong>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   ABRIR BORRADOR
+========================================================= */
+
+async function abrirBorrador(
+  idBorrador
+){
+
+  try{
+
+    mostrarMensaje(
+      'Cargando borrador...'
+    );
+
+
+    const datos =
+      await consultarAPI(
+
+        `${API_URL}` +
+        `?accion=obtenerBorradorModulacion` +
+        `&idBorrador=${
+          encodeURIComponent(
+            idBorrador
+          )
+        }`
+
+      );
+
+
+    if(
+      !datos.ok ||
+      !datos.borrador
+    ){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudo abrir el borrador.'
+      );
+
+    }
+
+
+    const borrador =
+      datos.borrador;
+
+
+    idBorradorActual =
+      borrador.idBorrador ||
+      '';
+
+
+    fechaBorradorActual =
+      borrador.fecha ||
+      '';
+
+
+    materialesBorrador =
+      Array.isArray(
+        borrador.materiales
+      )
+        ? borrador.materiales
+        : [];
+
+
+    document
+      .getElementById(
+        'responsable'
+      )
+      .value =
+        borrador.responsable ||
+        '';
+
+
+    document
+      .getElementById(
+        'referencia'
+      )
+      .value =
+        borrador.referencia ||
+        '';
+
+
+    document
+      .getElementById(
+        'tituloEditor'
+      )
+      .textContent =
+        `Borrador ${idBorradorActual}`;
+
+
+    document
+      .getElementById(
+        'idBorradorVisible'
+      )
+      .textContent =
+        idBorradorActual;
+
+
+    limpiarBusquedaMaterial();
+
+    renderizarMateriales();
+
+    mostrarSolo(
+      'vistaEditor'
+    );
+
+
+    ocultarMensaje();
+
+
+  }catch(error){
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo abrir el borrador.',
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   ELIMINAR BORRADOR
+========================================================= */
+
+async function eliminarBorrador(
+  idBorrador
+){
+
+  const confirmar =
+    confirm(
+      `¿Eliminar definitivamente el borrador ${idBorrador}?`
+    );
+
+
+  if(!confirmar){
+    return;
+  }
+
+
+  try{
+
+    const datos =
+      await enviarAPI({
+
+        accion:
+          'eliminarBorradorModulacion',
+
+        idBorrador
+
+      });
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudo eliminar.'
+      );
+
+    }
+
+
+    mostrarMensaje(
+      datos.mensaje ||
+      'Borrador eliminado.',
+      'exito'
+    );
+
+
+    await abrirListaBorradores();
+
+
+  }catch(error){
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo eliminar el borrador.',
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+function mostrarMensaje(
+  texto,
+  tipo = ''
+){
+
+  const mensaje =
+    document.getElementById(
+      'mensaje'
+    );
+
+
+  mensaje.textContent =
+    texto;
+
+
+  mensaje.className =
+    `mensaje ${tipo}`.trim();
+
+
+  mensaje
+    .classList.remove(
+      'oculto'
+    );
+
+
+  clearTimeout(
+    mostrarMensaje.temporizador
+  );
+
+
+  mostrarMensaje.temporizador =
+    setTimeout(
+      () => {
+
+        mensaje
+          .classList.add(
+            'oculto'
+          );
+
+      },
+      4000
+    );
+
+}
+
+
+function ocultarMensaje(){
+
+  document
+    .getElementById(
+      'mensaje'
+    )
+    .classList.add(
+      'oculto'
+    );
+
+}
+
+
+/* =========================================================
+   FORMATO
+========================================================= */
+
+function formatearNumero(
+  valor
+){
+
+  const numero =
+    Number(
+      valor
+    ) || 0;
+
+
+  return numero
+    .toLocaleString(
+      'es-PE',
+      {
+        maximumFractionDigits:2
+      }
+    );
+
+}
+
+
+function normalizar(
+  valor
+){
+
+  return String(
+    valor || ''
+  )
+    .trim()
+    .toLowerCase()
+    .normalize(
+      'NFD'
+    )
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    );
+
+}
+
+
+function escaparHTML(
+  valor
+){
+
+  return String(
+    valor ??
+    ''
+  )
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+    .replace(
+      /</g,
+      '&lt;'
+    )
+    .replace(
+      />/g,
+      '&gt;'
+    )
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+
+}
+
+
+function escaparAtributo(
+  valor
+){
+
+  return String(
+    valor ||
+    ''
+  )
+    .replace(
+      /\\/g,
+      '\\\\'
+    )
+    .replace(
+      /'/g,
+      "\\'"
+    );
+
+}
+
+</script>
+
+
+</body>
+
+</html>
