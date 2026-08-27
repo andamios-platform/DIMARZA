@@ -2720,6 +2720,13 @@ function nuevoBorrador(){
 
   materialesBorrador = [];
 
+  document
+  .getElementById(
+    'btnGuardar'
+  )
+  .textContent =
+    '💾 Guardar borrador';
+
 
   document
     .getElementById(
@@ -3626,11 +3633,11 @@ async function guardarBorrador(){
         `Borrador ${idBorradorActual}`;
 
 
-    mostrarMensaje(
-      datos.mensaje ||
-      'Borrador guardado correctamente.',
-      'exito'
-    );
+mostrarMensaje(
+  'Borrador guardado correctamente. Puedes continuar agregando o modificando materiales y usar "Guardar cambios" para actualizarlo. Para crear un borrador diferente, vuelve al menú anterior y selecciona "Crear borrador".',
+  'exito',
+  7000
+);
 
 
   }catch(error){
@@ -3647,16 +3654,18 @@ async function guardarBorrador(){
     );
 
 
-  }finally{
-
-    boton.disabled =
-      false;
-
-
-    boton.textContent =
-      textoOriginal;
-
-  }
+    }finally{
+    
+      boton.disabled =
+        false;
+    
+    
+      boton.textContent =
+        idBorradorActual
+          ? '💾 Guardar cambios'
+          : '💾 Guardar borrador';
+    
+    }
 
 }
 
@@ -4038,6 +4047,12 @@ async function abrirBorrador(
       )
       .textContent =
         idBorradorActual;
+    document
+      .getElementById(
+        'btnGuardar'
+      )
+      .textContent =
+        '💾 Guardar cambios';
 
 
     limpiarBusquedaMaterial();
@@ -4137,7 +4152,8 @@ async function eliminarBorrador(
 
 function mostrarMensaje(
   texto,
-  tipo = ''
+  tipo = '',
+  duracion = 4000
 ){
 
   const mensaje =
@@ -4175,7 +4191,7 @@ function mostrarMensaje(
           );
 
       },
-      4000
+      duracion
     );
 
 }
