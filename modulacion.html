@@ -582,6 +582,7 @@ button{
 
 
 .campo input,
+.campo select,
 .campo textarea{
 
   width:100%;
@@ -612,8 +613,8 @@ button{
 
 }
 
-
 .campo input:focus,
+.campo select:focus,
 .campo textarea:focus{
 
   border-color:
@@ -1621,19 +1622,21 @@ tbody tr:hover{
       <div class="form-grid">
 
 
-        <div class="campo">
-
-          <label for="responsable">
-            Responsable *
-          </label>
-
-          <input
-            id="responsable"
-            type="text"
-            placeholder="Nombre del andamiero o responsable"
-          >
-
-        </div>
+      <div class="campo">
+      
+        <label for="responsable">
+          Responsable *
+        </label>
+      
+        <select id="responsable">
+      
+          <option value="">
+            Cargando responsables...
+          </option>
+      
+        </select>
+      
+      </div>
 
 
         <div class="campo">
@@ -1727,7 +1730,27 @@ tbody tr:hover{
 
 
       <div class="buscador-material">
+      <div
+  class="campo"
+  style="margin-bottom:12px;"
+>
 
+  <label for="filtroGrupo">
+    Grupo
+  </label>
+
+  <select
+    id="filtroGrupo"
+    onchange="filtrarPorGrupo()"
+  >
+
+    <option value="">
+      Todos los grupos
+    </option>
+
+  </select>
+
+</div>
 
         <div class="buscador-fila">
 
@@ -1941,7 +1964,7 @@ tbody tr:hover{
 ========================================================= */
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIHr9XP7SA81SoZZSxo4OoB5N7VaMLLklU9ym82vCwDQN/exec';
+  'https://script.google.com/macros/s/AKfycbxnOt5xCYLtMP7syAL6YfJvF6G0L3S9F69FqumsqC81qadrASxTHXqRjJjO65h70sT1/exec';
 
 
 /* =========================================================
@@ -1957,6 +1980,7 @@ let idBorradorActual = '';
 let fechaBorradorActual = '';
 
 let catalogoCargado = false;
+let responsablesModulacion = [];
 
 
 /* =========================================================
@@ -1973,13 +1997,16 @@ async function iniciarPagina(){
 
   try{
 
-    await cargarCatalogo();
+    await Promise.all([
+      cargarCatalogo(),
+      cargarResponsables()
+    ]);
 
   }catch(error){
 
     mostrarMensaje(
       error.message ||
-      'No se pudo cargar el catálogo.',
+      'No se pudieron cargar los datos iniciales.',
       'error'
     );
 
@@ -2224,10 +2251,371 @@ async function cargarCatalogo(){
 
   catalogoCargado =
     true;
+  cargarGrupos();
+
+}
+function cargarGrupos(){
+
+  const select =
+    document.getElementById(
+      'filtroGrupo'
+    );
+
+
+  const grupos =
+    [
+      ...new Set(
+        catalogoMateriales
+          .map(
+            material =>
+              String(
+                material.grupo || ''
+              ).trim()
+          )
+          .filter(Boolean)
+      )
+    ]
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            'es'
+          )
+      );
+
+
+  select.innerHTML = `
+
+    <option value="">
+      Todos los grupos
+    </option>
+
+  `;
+
+
+  grupos.forEach(grupo => {
+
+    const opcion =
+      document.createElement(
+        'option'
+      );
+
+    opcion.value =
+      grupo;
+
+    opcion.textContent =
+      grupo;
+
+    select.appendChild(
+      opcion
+    );
+
+  });
+
+}
+  function filtrarPorGrupo(){
+
+  const grupo =
+    document
+      .getElementById(
+        'filtroGrupo'
+      )
+      .value;
+
+
+  const contenedor =
+    document.getElementById(
+      'resultadosMaterial'
+    );
+
+
+  if(!grupo){
+
+    contenedor.innerHTML = '';
+
+    contenedor.classList.add(
+      'oculto'
+    );
+
+    return;
+
+  }
+
+
+  const resultados =
+    catalogoMateriales.filter(
+      material =>
+        normalizar(
+          material.grupo
+        ) ===
+        normalizar(
+          grupo
+        )
+    );
+
+
+  mostrarResultadosMateriales(
+    resultados
+  );
 
 }
 
+function mostrarResultadosMateriales(
+  resultados
+){
 
+  const contenedor =
+    document.getElementById(
+      'resultadosMaterial'
+    );
+
+
+  if(
+    !resultados.length
+  ){
+
+    contenedor.innerHTML = `
+
+      <div
+        style="
+          padding:18px;
+          color:#667784;
+          text-align:center;
+        "
+      >
+        No se encontraron materiales.
+      </div>
+
+    `;
+
+    contenedor
+      .classList.remove(
+        'oculto'
+      );
+
+    return;
+
+  }
+
+
+  contenedor.innerHTML =
+    resultados
+      .slice(
+        0,
+        50
+      )
+      .map(
+        material => {
+
+          const indice =
+            catalogoMateriales
+              .indexOf(
+                material
+              );
+
+
+          return `
+
+            <button
+              type="button"
+              class="resultado-material"
+              onclick="agregarMaterialCatalogo(
+                ${indice}
+              )"
+            >
+
+              <div>
+
+                <strong>
+                  ${
+                    escaparHTML(
+                      material.descripcion ||
+                      material.subgrupo ||
+                      'Sin descripción'
+                    )
+                  }
+                </strong>
+
+                <span>
+
+                  ${
+                    escaparHTML(
+                      material.grupo ||
+                      'SIN GRUPO'
+                    )
+                  }
+
+                  · Código:
+
+                  ${
+                    escaparHTML(
+                      material.codigo ||
+                      'S/C'
+                    )
+                  }
+
+                </span>
+
+              </div>
+
+
+              <span class="resultado-peso">
+
+                ${
+                  formatearNumero(
+                    material.pesoUnitario
+                  )
+                } kg
+
+              </span>
+
+            </button>
+
+          `;
+
+        }
+      )
+      .join('');
+
+
+  contenedor
+    .classList.remove(
+      'oculto'
+    );
+
+}
+async function cargarResponsables(){
+
+  const datos =
+    await consultarAPI(
+      `${API_URL}?accion=responsablesModulacion`
+    );
+
+
+  if(!datos.ok){
+
+    throw new Error(
+      datos.error ||
+      datos.mensaje ||
+      'No se pudieron cargar los responsables.'
+    );
+
+  }
+
+
+  responsablesModulacion =
+    Array.isArray(datos.responsables)
+      ? datos.responsables
+      : [];
+
+
+  const select =
+    document.getElementById(
+      'responsable'
+    );
+
+
+  select.innerHTML = `
+
+    <option value="">
+      Seleccione responsable
+    </option>
+
+  `;
+
+
+  const lideres =
+    responsablesModulacion.filter(
+      persona =>
+        normalizar(persona.cargo) ===
+        'lider andamiero'
+    );
+
+
+  const supervisores =
+    responsablesModulacion.filter(
+      persona =>
+        normalizar(persona.cargo) ===
+        'supervisor andamiero'
+    );
+
+
+  if(lideres.length){
+
+    const grupo =
+      document.createElement(
+        'optgroup'
+      );
+
+    grupo.label =
+      'LÍDERES ANDAMIEROS';
+
+
+    lideres.forEach(persona => {
+
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value =
+        persona.nombre;
+
+      opcion.textContent =
+        persona.nombre;
+
+      grupo.appendChild(
+        opcion
+      );
+
+    });
+
+
+    select.appendChild(
+      grupo
+    );
+
+  }
+
+
+  if(supervisores.length){
+
+    const grupo =
+      document.createElement(
+        'optgroup'
+      );
+
+    grupo.label =
+      'SUPERVISORES ANDAMIEROS';
+
+
+    supervisores.forEach(persona => {
+
+      const opcion =
+        document.createElement(
+          'option'
+        );
+
+      opcion.value =
+        persona.nombre;
+
+      opcion.textContent =
+        persona.nombre;
+
+      grupo.appendChild(
+        opcion
+      );
+
+    });
+
+
+    select.appendChild(
+      grupo
+    );
+
+  }
+
+}
 /* =========================================================
    NAVEGACIÓN
 ========================================================= */
@@ -2456,115 +2844,11 @@ function buscarMateriales(){
       );
 
 
-  if(
-    !resultados.length
-  ){
+ mostrarResultadosMateriales(
+  resultados
+);
 
-    contenedor.innerHTML = `
-
-      <div
-        style="
-          padding:18px;
-          color:#667784;
-          text-align:center;
-        "
-      >
-        No se encontraron materiales.
-      </div>
-
-    `;
-
-
-    contenedor
-      .classList.remove(
-        'oculto'
-      );
-
-    return;
-
-  }
-
-
-  contenedor.innerHTML =
-    resultados
-      .map(
-        material => {
-
-          const indice =
-            catalogoMateriales
-              .indexOf(
-                material
-              );
-
-
-          return `
-
-            <button
-              type="button"
-              class="resultado-material"
-              onclick="agregarMaterialCatalogo(
-                ${indice}
-              )"
-            >
-
-              <div>
-
-                <strong>
-                  ${
-                    escaparHTML(
-                      material.descripcion ||
-                      material.subgrupo ||
-                      'Sin descripción'
-                    )
-                  }
-                </strong>
-
-                <span>
-
-                  ${
-                    escaparHTML(
-                      material.grupo ||
-                      'SIN GRUPO'
-                    )
-                  }
-
-                  · Código:
-
-                  ${
-                    escaparHTML(
-                      material.codigo ||
-                      'S/C'
-                    )
-                  }
-
-                </span>
-
-              </div>
-
-
-              <span class="resultado-peso">
-
-                ${
-                  formatearNumero(
-                    material.pesoUnitario
-                  )
-                } kg
-
-              </span>
-
-            </button>
-
-          `;
-
-        }
-      )
-      .join('');
-
-
-  contenedor
-    .classList.remove(
-      'oculto'
-    );
+}
 
 }
 
@@ -2629,9 +2913,6 @@ function detectarEnterBuscador(
     );
 
   }
-
-}
-
 
 function limpiarBusquedaMaterial(){
 
@@ -2913,11 +3194,9 @@ function renderizarMateriales(){
 
               <input
                 type="number"
-                min="0.01"
-                step="0.01"
-                value="${
-                  material.cantidad
-                }"
+                min="1"
+                step="1"
+                value="${material.cantidad}"
                 onchange="establecerCantidad(
                   ${indice},
                   this.value
@@ -3038,11 +3317,13 @@ function cambiarCantidad(
     cambio;
 
 
-  material.cantidad =
-    Math.max(
-      0.01,
+material.cantidad =
+  Math.max(
+    1,
+    Math.round(
       nuevaCantidad
-    );
+    )
+  );
 
 
   renderizarMateriales();
@@ -3072,13 +3353,13 @@ function establecerCantidad(
     );
 
 
-  material.cantidad =
-    (
-      Number.isFinite(numero) &&
-      numero > 0
-    )
-      ? numero
-      : 1;
+    material.cantidad =
+      (
+        Number.isFinite(numero) &&
+        numero > 0
+      )
+        ? Math.round(numero)
+        : 1;
 
 
   renderizarMateriales();
