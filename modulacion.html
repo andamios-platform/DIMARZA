@@ -1739,6 +1739,22 @@ tbody tr:hover{
     Grupo
   </label>
 
+<div
+  style="
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:10px;
+  "
+>
+
+<div
+  style="
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:10px;
+  "
+>
+
   <select
     id="filtroGrupo"
     onchange="filtrarPorGrupo()"
@@ -1749,6 +1765,37 @@ tbody tr:hover{
     </option>
 
   </select>
+
+
+<div
+  style="
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:10px;
+  "
+>
+
+  <select
+    id="filtroGrupo"
+    onchange="filtrarPorGrupo()"
+  >
+
+    <option value="">
+      Todos los grupos
+    </option>
+
+  </select>
+
+
+  <button
+    type="button"
+    class="btn btn-secundario"
+    onclick="filtrarPorGrupo()"
+  >
+    Ver grupo
+  </button>
+
+</div>
 
 </div>
 
