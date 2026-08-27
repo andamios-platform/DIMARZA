@@ -1849,7 +1849,75 @@ tbody tr:hover{
 
       </div>
 
+    <div
+      id="herramientasBorrador"
+      class="panel oculto"
+      style="margin-top:18px;"
+    >
 
+  <div class="panel-titulo">
+
+    <h2>
+      Herramientas
+    </h2>
+
+  </div>
+
+  <p class="panel-subtitulo">
+    Guarda primero el borrador para poder exportarlo o compartirlo.
+  </p>
+
+  <div
+    style="
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:10px;
+    "
+  >
+
+    <button
+      type="button"
+      class="btn btn-primario"
+      onclick="exportarPDF()"
+    >
+      📄 Exportar PDF
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-verde"
+      onclick="exportarExcel()"
+    >
+      📊 Exportar Excel
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-secundario"
+      onclick="enviarCorreoModulacion()"
+    >
+      ✉️ Enviar correo
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-secundario"
+      onclick="compartirWhatsApp()"
+    >
+      🟢 WhatsApp
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-secundario"
+      onclick="imprimirModulacion()"
+    >
+      🖨️ Imprimir
+    </button>
+
+  </div>
+
+</div>
       <div class="acciones">
 
         <button
@@ -2726,7 +2794,13 @@ function nuevoBorrador(){
   )
   .textContent =
     '💾 Guardar borrador';
-
+document
+  .getElementById(
+    'herramientasBorrador'
+  )
+  .classList.add(
+    'oculto'
+  );
 
   document
     .getElementById(
@@ -3616,7 +3690,13 @@ async function guardarBorrador(){
       datos.idBorrador ||
       idBorradorActual;
 
-
+    document
+      .getElementById(
+        'herramientasBorrador'
+      )
+      .classList.remove(
+        'oculto'
+      );
     document
       .getElementById(
         'idBorradorVisible'
@@ -4000,7 +4080,13 @@ async function abrirBorrador(
     idBorradorActual =
       borrador.idBorrador ||
       '';
-
+    document
+      .getElementById(
+        'herramientasBorrador'
+      )
+      .classList.remove(
+        'oculto'
+      );
 
     fechaBorradorActual =
       borrador.fecha ||
@@ -4144,7 +4230,756 @@ async function eliminarBorrador(
   }
 
 }
+/* =========================================================
+   HERRAMIENTAS DE MODULACIÓN
+========================================================= */
 
+function validarBorradorGuardado(){
+
+  if(!idBorradorActual){
+
+    mostrarMensaje(
+      'Primero debes guardar el borrador.',
+      'error'
+    );
+
+    return false;
+  }
+
+  return true;
+}
+
+
+/* =========================================================
+   DESCARGAR ARCHIVO BASE64
+========================================================= */
+
+function descargarBase64(
+  base64,
+  tipo,
+  nombre
+){
+
+  const binario =
+    atob(base64);
+
+
+  const bytes =
+    new Uint8Array(
+      binario.length
+    );
+
+
+  for(
+    let i = 0;
+    i < binario.length;
+    i++
+  ){
+
+    bytes[i] =
+      binario.charCodeAt(i);
+
+  }
+
+
+  const blob =
+    new Blob(
+      [bytes],
+      {
+        type:tipo
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  const enlace =
+    document.createElement(
+      'a'
+    );
+
+
+  enlace.href =
+    url;
+
+  enlace.download =
+    nombre;
+
+
+  document.body.appendChild(
+    enlace
+  );
+
+
+  enlace.click();
+
+  enlace.remove();
+
+
+  setTimeout(
+    () =>
+      URL.revokeObjectURL(
+        url
+      ),
+    1000
+  );
+
+}
+
+
+/* =========================================================
+   PDF
+========================================================= */
+
+async function exportarPDF(){
+
+  if(
+    !validarBorradorGuardado()
+  ){
+    return;
+  }
+
+
+  mostrarMensaje(
+    'Generando PDF...'
+  );
+
+
+  try{
+
+    const datos =
+      await enviarAPI({
+
+        accion:
+          'exportarPDFModulacion',
+
+        idBorrador:
+          idBorradorActual
+
+      });
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudo generar el PDF.'
+      );
+
+    }
+
+
+    descargarBase64(
+      datos.archivo,
+      'application/pdf',
+      datos.nombreArchivo ||
+      `Modulacion_${idBorradorActual}.pdf`
+    );
+
+
+    mostrarMensaje(
+      'PDF generado correctamente.',
+      'exito'
+    );
+
+
+  }catch(error){
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo generar el PDF.',
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   EXCEL
+========================================================= */
+
+async function exportarExcel(){
+
+  if(
+    !validarBorradorGuardado()
+  ){
+    return;
+  }
+
+
+  mostrarMensaje(
+    'Generando Excel...'
+  );
+
+
+  try{
+
+    const datos =
+      await enviarAPI({
+
+        accion:
+          'exportarExcelModulacion',
+
+        idBorrador:
+          idBorradorActual
+
+      });
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudo generar el Excel.'
+      );
+
+    }
+
+
+    descargarBase64(
+      datos.archivo,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      datos.nombreArchivo ||
+      `Modulacion_${idBorradorActual}.xlsx`
+    );
+
+
+    mostrarMensaje(
+      'Excel generado correctamente.',
+      'exito'
+    );
+
+
+  }catch(error){
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo generar el Excel.',
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CORREO
+========================================================= */
+
+async function enviarCorreoModulacion(){
+
+  if(
+    !validarBorradorGuardado()
+  ){
+    return;
+  }
+
+
+  const correo =
+    prompt(
+      'Ingrese el correo destinatario:'
+    );
+
+
+  if(!correo){
+    return;
+  }
+
+
+  const correoLimpio =
+    String(
+      correo
+    ).trim();
+
+
+  if(
+    !correoLimpio.includes('@')
+  ){
+
+    mostrarMensaje(
+      'Ingrese un correo válido.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  mostrarMensaje(
+    'Enviando correo...'
+  );
+
+
+  try{
+
+    const datos =
+      await enviarAPI({
+
+        accion:
+          'enviarCorreoModulacion',
+
+        idBorrador:
+          idBorradorActual,
+
+        correo:
+          correoLimpio
+
+      });
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudo enviar el correo.'
+      );
+
+    }
+
+
+    mostrarMensaje(
+      'Correo enviado correctamente.',
+      'exito'
+    );
+
+
+  }catch(error){
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo enviar el correo.',
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   WHATSAPP
+========================================================= */
+
+async function compartirWhatsApp(){
+
+  if(
+    !validarBorradorGuardado()
+  ){
+    return;
+  }
+
+
+  /*
+    Abrimos la ventana antes del await
+    para evitar que el navegador bloquee
+    WhatsApp como popup.
+  */
+
+  const ventanaWhatsApp =
+    window.open(
+      '',
+      '_blank'
+    );
+
+
+  try{
+
+    mostrarMensaje(
+      'Preparando PDF para WhatsApp...'
+    );
+
+
+    const datos =
+      await enviarAPI({
+
+        accion:
+          'exportarPDFModulacion',
+
+        idBorrador:
+          idBorradorActual
+
+      });
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        'No se pudo generar el PDF.'
+      );
+
+    }
+
+
+    descargarBase64(
+      datos.archivo,
+      'application/pdf',
+      datos.nombreArchivo ||
+      `Modulacion_${idBorradorActual}.pdf`
+    );
+
+
+    const referencia =
+      document
+        .getElementById(
+          'referencia'
+        )
+        .value
+        .trim();
+
+
+    const peso =
+      document
+        .getElementById(
+          'pesoTotal'
+        )
+        .textContent;
+
+
+    const mensaje =
+      [
+        `MODULACIÓN ${idBorradorActual}`,
+        '',
+        `Referencia: ${referencia}`,
+        `Peso total: ${peso}`,
+        '',
+        'Adjunto PDF de la modulación.'
+      ].join('\n');
+
+
+    const url =
+      'https://wa.me/?text=' +
+      encodeURIComponent(
+        mensaje
+      );
+
+
+    if(ventanaWhatsApp){
+
+      ventanaWhatsApp.location.href =
+        url;
+
+    }else{
+
+      window.open(
+        url,
+        '_blank'
+      );
+
+    }
+
+
+    mostrarMensaje(
+      'PDF generado. WhatsApp fue abierto; adjunta el PDF descargado al mensaje.',
+      'exito',
+      7000
+    );
+
+
+  }catch(error){
+
+    if(
+      ventanaWhatsApp
+    ){
+
+      ventanaWhatsApp.close();
+
+    }
+
+
+    mostrarMensaje(
+      error.message ||
+      'No se pudo preparar WhatsApp.',
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   IMPRIMIR
+========================================================= */
+
+function imprimirModulacion(){
+
+  if(
+    !validarBorradorGuardado()
+  ){
+    return;
+  }
+
+
+  const responsable =
+    document
+      .getElementById(
+        'responsable'
+      )
+      .value;
+
+
+  const referencia =
+    document
+      .getElementById(
+        'referencia'
+      )
+      .value;
+
+
+  const pesoTotal =
+    materialesBorrador.reduce(
+      (total,item) =>
+        total +
+        (
+          Number(
+            item.cantidad
+          ) || 0
+        ) *
+        (
+          Number(
+            item.pesoUnitario
+          ) || 0
+        ),
+      0
+    );
+
+
+  const filas =
+    materialesBorrador
+      .map(
+        item => {
+
+          const peso =
+            (
+              Number(
+                item.cantidad
+              ) || 0
+            ) *
+            (
+              Number(
+                item.pesoUnitario
+              ) || 0
+            );
+
+
+          return `
+
+            <tr>
+
+              <td>
+                ${escaparHTML(item.codigo)}
+              </td>
+
+              <td>
+                ${escaparHTML(item.descripcion)}
+              </td>
+
+              <td>
+                ${escaparHTML(item.grupo)}
+              </td>
+
+              <td style="text-align:center;">
+                ${formatearNumero(item.cantidad)}
+              </td>
+
+              <td style="text-align:right;">
+                ${formatearNumero(item.pesoUnitario)} kg
+              </td>
+
+              <td style="text-align:right;">
+                ${formatearNumero(peso)} kg
+              </td>
+
+              <td>
+                ${escaparHTML(item.observacion || '')}
+              </td>
+
+            </tr>
+
+          `;
+
+        }
+      )
+      .join('');
+
+
+  const ventana =
+    window.open(
+      '',
+      '_blank'
+    );
+
+
+  ventana.document.write(`
+
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+      <meta charset="UTF-8">
+
+      <title>
+        Modulación ${escaparHTML(idBorradorActual)}
+      </title>
+
+      <style>
+
+        body{
+          font-family:Arial,sans-serif;
+          padding:25px;
+          color:#1f2d36;
+        }
+
+        h1{
+          color:#163f63;
+          margin-bottom:5px;
+        }
+
+        .info{
+          margin:20px 0;
+          padding:15px;
+          background:#f5f7f9;
+        }
+
+        table{
+          width:100%;
+          border-collapse:collapse;
+          margin-top:20px;
+          font-size:11px;
+        }
+
+        th{
+          background:#163f63;
+          color:white;
+          padding:8px;
+          border:1px solid #ccc;
+        }
+
+        td{
+          padding:8px;
+          border:1px solid #ccc;
+        }
+
+        .peso{
+          margin-top:20px;
+          text-align:right;
+          font-size:18px;
+          font-weight:bold;
+        }
+
+        .footer{
+          margin-top:30px;
+          text-align:center;
+          font-size:10px;
+          color:#667784;
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      <h1>
+        DIMARZA - MODULACIÓN
+      </h1>
+
+      <strong>
+        ${escaparHTML(idBorradorActual)}
+      </strong>
+
+
+      <div class="info">
+
+        <div>
+          <strong>Responsable:</strong>
+          ${escaparHTML(responsable)}
+        </div>
+
+        <div>
+          <strong>Referencia:</strong>
+          ${escaparHTML(referencia)}
+        </div>
+
+      </div>
+
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>Código</th>
+            <th>Material</th>
+            <th>Grupo</th>
+            <th>Cantidad</th>
+            <th>P. Unit.</th>
+            <th>Peso total</th>
+            <th>Observación</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+          ${filas}
+        </tbody>
+
+      </table>
+
+
+      <div class="peso">
+
+        Peso total:
+        ${formatearNumero(
+          pesoTotal
+        )} kg
+
+      </div>
+
+
+      <div class="footer">
+        © 2026 Ruben Romero. Todos los derechos reservados.
+      </div>
+
+    </body>
+
+    </html>
+
+  `);
+
+
+  ventana.document.close();
+
+
+  setTimeout(
+    () => {
+
+      ventana.focus();
+
+      ventana.print();
+
+    },
+    400
+  );
+
+}
 
 /* =========================================================
    MENSAJES
