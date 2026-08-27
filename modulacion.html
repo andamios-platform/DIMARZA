@@ -4488,10 +4488,6 @@ async function exportarExcel(){
 }
 
 
-/* =========================================================
-   CORREO
-========================================================= */
-
 async function enviarCorreoModulacion(){
 
   if(
@@ -4501,34 +4497,18 @@ async function enviarCorreoModulacion(){
   }
 
 
-  const correo =
-    prompt(
-      'Ingrese el correo destinatario:'
+  const confirmar =
+    confirm(
+      'Se enviará la modulación por correo a:\n\n' +
+      'ruben.romero@ucsp.edu.pe\n' +
+      'churafigueroawf@gmail.com\n\n' +
+      'Se adjuntará el PDF y el Excel.\n\n' +
+      '¿Deseas continuar?'
     );
 
 
-  if(!correo){
+  if(!confirmar){
     return;
-  }
-
-
-  const correoLimpio =
-    String(
-      correo
-    ).trim();
-
-
-  if(
-    !correoLimpio.includes('@')
-  ){
-
-    mostrarMensaje(
-      'Ingrese un correo válido.',
-      'error'
-    );
-
-    return;
-
   }
 
 
@@ -4546,10 +4526,7 @@ async function enviarCorreoModulacion(){
           'enviarCorreoModulacion',
 
         idBorrador:
-          idBorradorActual,
-
-        correo:
-          correoLimpio
+          idBorradorActual
 
       });
 
@@ -4566,8 +4543,9 @@ async function enviarCorreoModulacion(){
 
 
     mostrarMensaje(
-      'Correo enviado correctamente.',
-      'exito'
+      'Correo enviado correctamente a los destinatarios registrados.',
+      'exito',
+      6000
     );
 
 
@@ -4582,7 +4560,6 @@ async function enviarCorreoModulacion(){
   }
 
 }
-
 
 /* =========================================================
    WHATSAPP
