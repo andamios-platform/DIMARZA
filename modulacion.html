@@ -4575,9 +4575,8 @@ async function compartirWhatsApp(){
 
 
   /*
-    Abrimos la ventana antes del await
-    para evitar que el navegador bloquee
-    WhatsApp como popup.
+    Abrimos primero la ventana para evitar
+    que el navegador bloquee WhatsApp.
   */
 
   const ventanaWhatsApp =
@@ -4587,18 +4586,18 @@ async function compartirWhatsApp(){
     );
 
 
+  mostrarMensaje(
+    'Preparando PDF y Excel para WhatsApp...'
+  );
+
+
   try{
-
-    mostrarMensaje(
-      'Preparando PDF para WhatsApp...'
-    );
-
 
     const datos =
       await enviarAPI({
 
         accion:
-          'exportarPDFModulacion',
+          'whatsappModulacion',
 
         idBorrador:
           idBorradorActual
@@ -4611,46 +4610,35 @@ async function compartirWhatsApp(){
       throw new Error(
         datos.error ||
         datos.mensaje ||
-        'No se pudo generar el PDF.'
+        'No se pudieron preparar los archivos.'
       );
 
     }
 
 
-    descargarBase64(
-      datos.archivo,
-      'application/pdf',
-      datos.nombreArchivo ||
-      `Modulacion_${idBorradorActual}.pdf`
-    );
-
-
-    const referencia =
-      document
-        .getElementById(
-          'referencia'
-        )
-        .value
-        .trim();
-
-
     const peso =
-      document
-        .getElementById(
-          'pesoTotal'
-        )
-        .textContent;
+      Number(
+        datos.pesoTotal || 0
+      ).toFixed(2);
 
 
     const mensaje =
       [
-        `MODULACIÓN ${idBorradorActual}`,
+        'DIMARZA - MODULACIÓN',
         '',
-        `Referencia: ${referencia}`,
-        `Peso total: ${peso}`,
+        `ID: ${datos.idBorrador}`,
+        `Referencia: ${datos.referencia}`,
+        `Peso total: ${peso} kg`,
         '',
-        'Adjunto PDF de la modulación.'
-      ].join('\n');
+        '📄 PDF:',
+        datos.pdf.url,
+        '',
+        '📊 EXCEL:',
+        datos.excel.url
+      ]
+        .join(
+          '\n'
+        );
 
 
     const url =
@@ -4660,7 +4648,9 @@ async function compartirWhatsApp(){
       );
 
 
-    if(ventanaWhatsApp){
+    if(
+      ventanaWhatsApp
+    ){
 
       ventanaWhatsApp.location.href =
         url;
@@ -4676,9 +4666,9 @@ async function compartirWhatsApp(){
 
 
     mostrarMensaje(
-      'PDF generado. WhatsApp fue abierto; adjunta el PDF descargado al mensaje.',
+      'PDF y Excel preparados. Abriendo WhatsApp...',
       'exito',
-      7000
+      6000
     );
 
 
@@ -4696,13 +4686,13 @@ async function compartirWhatsApp(){
     mostrarMensaje(
       error.message ||
       'No se pudo preparar WhatsApp.',
-      'error'
+      'error',
+      6000
     );
 
   }
 
 }
-
 
 /* =========================================================
    IMPRIMIR
