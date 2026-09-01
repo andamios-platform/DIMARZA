@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1"
+>
+
+<title>
+  Control de Evaluación de Desempeño
+</title>
+
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+</script>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+</script>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js">
+</script>
+
+
+<style>
+
+body{
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  background:#f4f7fb;
+
+  margin:0;
+
+  padding:20px;
+
+  color:#1f2937;
+
+}
+
+
+.container{
+
+  max-width:1350px;
+
+  margin:auto;
+
+  background:white;
+
+  border-radius:18px;
+
+  padding:24px;
+
+  box-shadow:
+    0 6px 22px
+    rgba(0,0,0,.08);
+
+}
+
+
+h1{
+
+  text-align:center;
+
+  margin:
+    0
+    0
+    6px;
+
+}
+
+
+.subtitulo{
+
+  text-align:center;
+
+  color:#6b7280;
+
+  margin-bottom:24px;
+
+}
+
+
+.volver{
+
+  display:inline-block;
+
+  text-decoration:none;
+
+  padding:
+    10px
+    16px;
+
+  border-radius:9px;
+
+  background:#e5e7eb;
+
+  color:#111827;
+
+  font-weight:bold;
+
+  margin-bottom:18px;
+
+}
+
+
+.tabs{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:22px;
+
+}
+
+
+.tab{
+
+  border:0;
+
+  border-radius:10px;
+
+  padding:
+    12px
+    18px;
+
+  cursor:pointer;
+
+  background:#e5e7eb;
+
+  color:#111827;
+
+  font-weight:bold;
+
+}
+
+
+.tab.active{
+
+  background:#2563eb;
+
+  color:white;
+
+}
+
+
+.panel{
+
+  display:none;
+
+}
+
+
+.panel.active{
+
+  display:block;
+
+}
+
+
+.filtros{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(190px,1fr)
+    );
+
+  gap:14px;
+
+  margin-bottom:20px;
+
+  background:#f8fafc;
+
+  border:
+    1px
+    solid
+    #e5e7eb;
+
+  border-radius:12px;
+
+  padding:16px;
+
+}
+
+
+.field{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:6px;
+
+}
+
+
+.field label{
+
+  font-size:13px;
+
+  font-weight:bold;
+
+}
+
+
+.field input,
+.field select{
+
+  padding:10px;
+
+  border:
+    1px
+    solid
+    #d1d5db;
+
+  border-radius:8px;
+
+  background:white;
+
+}
+
+
+.kpis{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(180px,1fr)
+    );
+
+  gap:14px;
+
+  margin-bottom:22px;
+
+}
+
+
+.kpi{
+
+  border-radius:14px;
+
+  padding:18px;
+
+  background:#f8fafc;
+
+  border:
+    1px
+    solid
+    #e5e7eb;
+
+}
+
+
+.kpi-titulo{
+
+  color:#6b7280;
+
+  font-size:13px;
+
+  margin-bottom:8px;
+
+}
+
+
+.kpi-valor{
+
+  font-size:28px;
+
+  font-weight:bold;
+
+}
+
+
+.estado-si{
+
+  color:#15803d;
+
+  font-weight:bold;
+
+}
+
+
+.estado-no{
+
+  color:#dc2626;
+
+  font-weight:bold;
+
+}
+
+
+.table-wrap{
+
+  width:100%;
+
+  overflow-x:auto;
+
+  border:
+    1px
+    solid
+    #e5e7eb;
+
+  border-radius:12px;
+
+}
+
+
+table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  min-width:850px;
+
+}
+
+
+th{
+
+  background:#1f2937;
+
+  color:white;
+
+  font-size:13px;
+
+  padding:12px;
+
+  text-align:left;
+
+}
+
+
+td{
+
+  padding:11px;
+
+  border-bottom:
+    1px
+    solid
+    #e5e7eb;
+
+  font-size:13px;
+
+}
+
+
+tr:hover td{
+
+  background:#f8fafc;
+
+}
+
+
+.exportar{
+
+  display:flex;
+
+  justify-content:flex-end;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:16px;
+
+}
+
+
+.btn-exportar{
+
+  border:0;
+
+  padding:
+    10px
+    14px;
+
+  border-radius:9px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+  color:white;
+
+}
+
+
+.btn-pdf{
+
+  background:#dc2626;
+
+}
+
+
+.btn-excel{
+
+  background:#15803d;
+
+}
+
+
+.loading{
+
+  text-align:center;
+
+  padding:30px;
+
+  font-weight:bold;
+
+  color:#6b7280;
+
+}
+
+
+.error{
+
+  color:#dc2626;
+
+}
+
+
+.footer{
+
+  text-align:center;
+
+  margin-top:30px;
+
+  padding-top:18px;
+
+  border-top:
+    1px
+    solid
+    #e5e7eb;
+
+  color:#6b7280;
+
+  font-size:12px;
+
+}
+
+
+@media(max-width:720px){
+
+  body{
+
+    padding:10px;
+
+  }
+
+
+  .container{
+
+    padding:15px;
+
+  }
+
+
+  h1{
+
+    font-size:22px;
+
+  }
+
+
+  .tab{
+
+    flex:1;
+
+    min-width:150px;
+
+  }
+
+
+  .kpi-valor{
+
+    font-size:23px;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+<a
+  class="volver"
+  href="visualizacion.html"
+>
+  ← Volver a Visualización
+</a>
+
+
+<h1>
+  📊 Control de Evaluación de Desempeño
+</h1>
+
+
+<div class="subtitulo">
+  Seguimiento de evaluadores,
+  evaluaciones realizadas
+  y resultados.
+</div>
+
+
+
+<div class="tabs">
+
+  <button
+    class="tab active"
+    onclick="mostrarPanel('cumplimiento',this)"
+  >
+    Cumplimiento de Evaluadores
+  </button>
+
+
+  <button
+    class="tab"
+    onclick="mostrarPanel('evaluaciones',this)"
+  >
+    Evaluaciones Realizadas
+  </button>
+
+
+  <button
+    class="tab"
+    onclick="mostrarPanel('analisis',this)"
+  >
+    Resultados / Análisis
+  </button>
+
+</div>
+
+
+
+<div class="filtros">
+
+  <div class="field">
+
+    <label>
+      Desde
+    </label>
+
+    <input
+      type="date"
+      id="fechaDesde"
+      onchange="actualizarTodo()"
+    >
+
+  </div>
+
+
+  <div class="field">
+
+    <label>
+      Hasta
+    </label>
+
+    <input
+      type="date"
+      id="fechaHasta"
+      onchange="actualizarTodo()"
+    >
+
+  </div>
+
+
+  <div class="field">
+
+    <label>
+      Cargo
+    </label>
+
+    <select
+      id="filtroCargo"
+      onchange="actualizarTodo()"
+    >
+
+      <option value="">
+        Todos
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="field">
+
+    <label>
+      Unidad
+    </label>
+
+    <select
+      id="filtroUnidad"
+      onchange="actualizarTodo()"
+    >
+
+      <option value="">
+        Todas
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="field">
+
+    <label>
+      Servicio
+    </label>
+
+    <select
+      id="filtroServicio"
+      onchange="actualizarTodo()"
+    >
+
+      <option value="">
+        Todos
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="field">
+
+    <label>
+      Buscar
+    </label>
+
+    <input
+      id="buscar"
+      type="text"
+      placeholder="Nombre..."
+      oninput="actualizarTodo()"
+    >
+
+  </div>
+
+</div>
+
+
+
+<section
+  id="panel-cumplimiento"
+  class="panel active"
+>
+
+
+<div class="kpis">
+
+  <div class="kpi">
+
+    <div class="kpi-titulo">
+      Evaluadores registrados
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiEvaluadores"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div class="kpi-titulo">
+      Ya realizaron evaluaciones
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiRealizaron"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div class="kpi-titulo">
+      Sin evaluaciones registradas
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiSinEvaluaciones"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div class="kpi-titulo">
+      Evaluaciones realizadas
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiCantidadEvaluaciones"
+    >
+      0
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="exportar">
+
+<button
+  class="btn-exportar btn-pdf"
+  onclick="exportarPDF('cumplimiento')"
+>
+  📄 PDF
+</button>
+
+
+<button
+  class="btn-exportar btn-excel"
+  onclick="exportarExcel('cumplimiento')"
+>
+  📊 Excel
+</button>
+
+</div>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Evaluador</th>
+
+<th>Cargo</th>
+
+<th>Nivel</th>
+
+<th>Evaluaciones</th>
+
+<th>Última evaluación</th>
+
+<th>Estado</th>
+
+</tr>
+
+</thead>
+
+
+<tbody
+  id="tablaCumplimiento"
+></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+
+<section
+  id="panel-evaluaciones"
+  class="panel"
+>
+
+
+<div class="exportar">
+
+<button
+  class="btn-exportar btn-pdf"
+  onclick="exportarPDF('evaluaciones')"
+>
+  📄 PDF
+</button>
+
+
+<button
+  class="btn-exportar btn-excel"
+  onclick="exportarExcel('evaluaciones')"
+>
+  📊 Excel
+</button>
+
+</div>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Fecha</th>
+
+<th>Evaluado</th>
+
+<th>Cargo</th>
+
+<th>Evaluador</th>
+
+<th>Unidad</th>
+
+<th>Servicio</th>
+
+<th>Resultado</th>
+
+</tr>
+
+</thead>
+
+
+<tbody
+  id="tablaEvaluaciones"
+></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+
+<section
+  id="panel-analisis"
+  class="panel"
+>
+
+
+<div class="kpis">
+
+<div class="kpi">
+
+<div class="kpi-titulo">
+Promedio General
+</div>
+
+<div
+  class="kpi-valor"
+  id="promedioGeneral"
+>
+0%
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-titulo">
+Desempeño
+</div>
+
+<div
+  class="kpi-valor"
+  id="promedioDesempeno"
+>
+0%
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-titulo">
+Actitud
+</div>
+
+<div
+  class="kpi-valor"
+  id="promedioActitud"
+>
+0%
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-titulo">
+Conocimientos
+</div>
+
+<div
+  class="kpi-valor"
+  id="promedioConocimientos"
+>
+0%
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-titulo">
+Seguridad
+</div>
+
+<div
+  class="kpi-valor"
+  id="promedioSeguridad"
+>
+0%
+</div>
+
+</div>
+
+
+<div class="kpi">
+
+<div class="kpi-titulo">
+Asistencia
+</div>
+
+<div
+  class="kpi-valor"
+  id="promedioAsistencia"
+>
+0%
+</div>
+
+</div>
+
+</div>
+
+
+<div class="exportar">
+
+<button
+  class="btn-exportar btn-pdf"
+  onclick="exportarPDF('analisis')"
+>
+  📄 PDF
+</button>
+
+
+<button
+  class="btn-exportar btn-excel"
+  onclick="exportarExcel('analisis')"
+>
+  📊 Excel
+</button>
+
+</div>
+
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Evaluado</th>
+
+<th>Promedio</th>
+
+<th>Desempeño</th>
+
+<th>Actitud</th>
+
+<th>Conocimientos</th>
+
+<th>Seguridad</th>
+
+<th>Asistencia</th>
+
+</tr>
+
+</thead>
+
+
+<tbody
+  id="tablaAnalisis"
+></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+
+<div
+  id="estadoCarga"
+  class="loading"
+>
+  Cargando información...
+</div>
+
+
+
+<div class="footer">
+  © 2026 Ruben Romero.
+  Todos los derechos reservados.
+</div>
+
+
+</div>
+
+
+<script>
+
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwePhcC00uUjdqXa6A59RxSQOx0yiMZxXnU9NkqJ1qSYo_QRlQllRtDpTw4YJzZKu16dw/exec";
+
+
+let datos = {
+
+  personal:[],
+
+  registros:[]
+
+};
+
+
+const $ =
+  id =>
+    document.getElementById(id);
+
+
+const num =
+  valor =>
+    Number(valor) || 0;
+
+
+const norm =
+  valor =>
+    String(valor || '')
+      .trim()
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(
+        /[\u0300-\u036f]/g,
+        ''
+      );
+
+
+function porcentaje(valor){
+
+  return (
+    num(valor) * 100
+  ).toLocaleString(
+    'es-PE',
+    {
+      maximumFractionDigits:2
+    }
+  ) + '%';
+
+}
+
+
+
+function mostrarPanel(
+  panel,
+  boton
+){
+
+  document
+    .querySelectorAll('.panel')
+    .forEach(
+      x =>
+        x.classList.remove('active')
+    );
+
+
+  document
+    .querySelectorAll('.tab')
+    .forEach(
+      x =>
+        x.classList.remove('active')
+    );
+
+
+  $(
+    'panel-' + panel
+  ).classList.add('active');
+
+
+  boton.classList.add(
+    'active'
+  );
+
+}
+
+
+
+async function cargarDatos(){
+
+  try{
+
+    const url =
+      API_URL +
+      '?accion=controlEvaluacion&t=' +
+      Date.now();
+
+
+    const respuesta =
+      await fetch(url);
+
+
+    const json =
+      await respuesta.json();
+
+
+    if(
+      !json ||
+      json.ok === false
+    ){
+
+      throw new Error(
+        json.error ||
+        'No se pudo cargar información.'
+      );
+
+    }
+
+
+    datos.personal =
+      json.personal || [];
+
+
+    datos.registros =
+      json.registros || [];
+
+
+    cargarFiltros();
+
+
+    actualizarTodo();
+
+
+    $('estadoCarga')
+      .style.display =
+        'none';
+
+
+  }
+  catch(error){
+
+    $('estadoCarga')
+      .innerHTML =
+        '<span class="error">' +
+        'Error: ' +
+        error.message +
+        '</span>';
+
+  }
+
+}
+
+
+
+function cargarFiltros(){
+
+  const cargos =
+    [
+      ...new Set(
+        datos.personal
+          .map(x => x.cargo)
+          .filter(Boolean)
+      )
+    ]
+    .sort();
+
+
+  cargos.forEach(
+    cargo => {
+
+      const op =
+        document.createElement(
+          'option'
+        );
+
+      op.value =
+        cargo;
+
+      op.textContent =
+        cargo;
+
+      $('filtroCargo')
+        .appendChild(op);
+
+    }
+  );
+
+
+  const unidades =
+    [
+      ...new Set(
+        datos.registros
+          .map(x => x.unidad)
+          .filter(Boolean)
+      )
+    ]
+    .sort();
+
+
+  unidades.forEach(
+    unidad => {
+
+      const op =
+        document.createElement(
+          'option'
+        );
+
+      op.value =
+        unidad;
+
+      op.textContent =
+        unidad;
+
+      $('filtroUnidad')
+        .appendChild(op);
+
+    }
+  );
+
+
+  const servicios =
+    [
+      ...new Set(
+        datos.registros
+          .map(x => x.servicio)
+          .filter(Boolean)
+      )
+    ]
+    .sort();
+
+
+  servicios.forEach(
+    servicio => {
+
+      const op =
+        document.createElement(
+          'option'
+        );
+
+      op.value =
+        servicio;
+
+      op.textContent =
+        servicio;
+
+      $('filtroServicio')
+        .appendChild(op);
+
+    }
+  );
+
+}
+
+
+
+function registrosFiltrados(){
+
+  const desde =
+    $('fechaDesde').value;
+
+
+  const hasta =
+    $('fechaHasta').value;
+
+
+  const unidad =
+    $('filtroUnidad').value;
+
+
+  const servicio =
+    $('filtroServicio').value;
+
+
+  const texto =
+    norm(
+      $('buscar').value
+    );
+
+
+  return datos.registros
+    .filter(
+      r => {
+
+        if(
+          desde &&
+          r.fechaISO &&
+          r.fechaISO < desde
+        ){
+          return false;
+        }
+
+
+        if(
+          hasta &&
+          r.fechaISO &&
+          r.fechaISO > hasta
+        ){
+          return false;
+        }
+
+
+        if(
+          unidad &&
+          r.unidad !== unidad
+        ){
+          return false;
+        }
+
+
+        if(
+          servicio &&
+          r.servicio !== servicio
+        ){
+          return false;
+        }
+
+
+        if(
+          texto &&
+          !norm(
+            r.evaluado +
+            ' ' +
+            r.evaluador
+          ).includes(texto)
+        ){
+          return false;
+        }
+
+
+        return true;
+
+      }
+    );
+
+}
+
+
+
+function personalFiltrado(){
+
+  const cargo =
+    $('filtroCargo').value;
+
+
+  const texto =
+    norm(
+      $('buscar').value
+    );
+
+
+  return datos.personal
+    .filter(
+      p => {
+
+        if(
+          cargo &&
+          p.cargo !== cargo
+        ){
+          return false;
+        }
+
+
+        if(
+          texto &&
+          !norm(p.nombre)
+            .includes(texto)
+        ){
+          return false;
+        }
+
+
+        return true;
+
+      }
+    );
+
+}
+
+
+
+function actualizarTodo(){
+
+  renderCumplimiento();
+
+  renderEvaluaciones();
+
+  renderAnalisis();
+
+}
+
+
+
+function renderCumplimiento(){
+
+  const personal =
+    personalFiltrado();
+
+
+  const registros =
+    registrosFiltrados();
+
+
+  const tbody =
+    $('tablaCumplimiento');
+
+
+  tbody.innerHTML =
+    '';
+
+
+  let realizaron =
+    0;
+
+
+  personal.forEach(
+    persona => {
+
+      const hechas =
+        registros.filter(
+          r =>
+            norm(r.evaluador) ===
+            norm(persona.nombre)
+        );
+
+
+      if(
+        hechas.length > 0
+      ){
+        realizaron++;
+      }
+
+
+      let ultima =
+        '—';
+
+
+      if(
+        hechas.length
+      ){
+
+        const ordenadas =
+          [...hechas]
+            .sort(
+              (a,b) =>
+                String(
+                  b.fechaISO
+                )
+                .localeCompare(
+                  String(
+                    a.fechaISO
+                  )
+                )
+            );
+
+
+        ultima =
+          ordenadas[0].fecha ||
+          '—';
+
+      }
+
+
+      const tr =
+        document.createElement(
+          'tr'
+        );
+
+
+      tr.innerHTML =
+        `
+        <td>
+          ${persona.nombre}
+        </td>
+
+        <td>
+          ${persona.cargo}
+        </td>
+
+        <td>
+          ${persona.nivel}
+        </td>
+
+        <td>
+          ${hechas.length}
+        </td>
+
+        <td>
+          ${ultima}
+        </td>
+
+        <td class="${
+          hechas.length
+            ? 'estado-si'
+            : 'estado-no'
+        }">
+          ${
+            hechas.length
+              ? 'REALIZÓ'
+              : 'SIN EVALUACIONES'
+          }
+        </td>
+        `;
+
+
+      tbody.appendChild(
+        tr
+      );
+
+    }
+  );
+
+
+  $('kpiEvaluadores')
+    .textContent =
+      personal.length;
+
+
+  $('kpiRealizaron')
+    .textContent =
+      realizaron;
+
+
+  $('kpiSinEvaluaciones')
+    .textContent =
+      personal.length -
+      realizaron;
+
+
+  $('kpiCantidadEvaluaciones')
+    .textContent =
+      registros.length;
+
+}
+
+
+
+function renderEvaluaciones(){
+
+  const cargo =
+    $('filtroCargo').value;
+
+
+  const registros =
+    registrosFiltrados()
+      .filter(
+        r =>
+          !cargo ||
+          r.cargo === cargo
+      );
+
+
+  const tbody =
+    $('tablaEvaluaciones');
+
+
+  tbody.innerHTML =
+    '';
+
+
+  registros
+    .sort(
+      (a,b) =>
+        String(
+          b.fechaISO
+        )
+        .localeCompare(
+          String(
+            a.fechaISO
+          )
+        )
+    )
+    .forEach(
+      r => {
+
+        const tr =
+          document.createElement(
+            'tr'
+          );
+
+
+        tr.innerHTML =
+          `
+          <td>
+            ${r.fecha}
+          </td>
+
+          <td>
+            ${r.evaluado}
+          </td>
+
+          <td>
+            ${r.cargo}
+          </td>
+
+          <td>
+            ${r.evaluador}
+          </td>
+
+          <td>
+            ${r.unidad}
+          </td>
+
+          <td>
+            ${r.servicio}
+          </td>
+
+          <td>
+            <strong>
+              ${porcentaje(
+                r.promedio
+              )}
+            </strong>
+          </td>
+          `;
+
+
+        tbody.appendChild(
+          tr
+        );
+
+      }
+    );
+
+}
+
+
+
+function promedioCampo(
+  registros,
+  campo
+){
+
+  if(
+    registros.length === 0
+  ){
+    return 0;
+  }
+
+
+  const suma =
+    registros.reduce(
+      (acum,r) =>
+        acum +
+        num(r[campo]),
+      0
+    );
+
+
+  return (
+    suma /
+    registros.length
+  );
+
+}
+
+
+
+function renderAnalisis(){
+
+  const cargo =
+    $('filtroCargo').value;
+
+
+  const registros =
+    registrosFiltrados()
+      .filter(
+        r =>
+          !cargo ||
+          r.cargo === cargo
+      );
+
+
+  $('promedioGeneral')
+    .textContent =
+      porcentaje(
+        promedioCampo(
+          registros,
+          'promedio'
+        )
+      );
+
+
+  $('promedioDesempeno')
+    .textContent =
+      porcentaje(
+        promedioCampo(
+          registros,
+          'desempeno'
+        )
+      );
+
+
+  $('promedioActitud')
+    .textContent =
+      porcentaje(
+        promedioCampo(
+          registros,
+          'actitud'
+        )
+      );
+
+
+  $('promedioConocimientos')
+    .textContent =
+      porcentaje(
+        promedioCampo(
+          registros,
+          'conocimientos'
+        )
+      );
+
+
+  $('promedioSeguridad')
+    .textContent =
+      porcentaje(
+        promedioCampo(
+          registros,
+          'seguridad'
+        )
+      );
+
+
+  $('promedioAsistencia')
+    .textContent =
+      porcentaje(
+        promedioCampo(
+          registros,
+          'asistencia'
+        )
+      );
+
+
+  const tbody =
+    $('tablaAnalisis');
+
+
+  tbody.innerHTML =
+    '';
+
+
+  registros.forEach(
+    r => {
+
+      const tr =
+        document.createElement(
+          'tr'
+        );
+
+
+      tr.innerHTML =
+        `
+        <td>
+          ${r.evaluado}
+        </td>
+
+        <td>
+          ${porcentaje(
+            r.promedio
+          )}
+        </td>
+
+        <td>
+          ${porcentaje(
+            r.desempeno
+          )}
+        </td>
+
+        <td>
+          ${porcentaje(
+            r.actitud
+          )}
+        </td>
+
+        <td>
+          ${porcentaje(
+            r.conocimientos
+          )}
+        </td>
+
+        <td>
+          ${porcentaje(
+            r.seguridad
+          )}
+        </td>
+
+        <td>
+          ${porcentaje(
+            r.asistencia
+          )}
+        </td>
+        `;
+
+
+      tbody.appendChild(
+        tr
+      );
+
+    }
+  );
+
+}
+
+
+
+function obtenerDatosExportacion(
+  tipo
+){
+
+  if(
+    tipo ===
+    'cumplimiento'
+  ){
+
+    const personal =
+      personalFiltrado();
+
+
+    const registros =
+      registrosFiltrados();
+
+
+    return {
+
+      titulo:
+        'Cumplimiento de Evaluadores',
+
+      encabezados:[
+        'Evaluador',
+        'Cargo',
+        'Nivel',
+        'Evaluaciones',
+        'Última evaluación',
+        'Estado'
+      ],
+
+      filas:
+        personal.map(
+          persona => {
+
+            const hechas =
+              registros.filter(
+                r =>
+                  norm(
+                    r.evaluador
+                  ) ===
+                  norm(
+                    persona.nombre
+                  )
+              );
+
+
+            let ultima =
+              '';
+
+
+            if(
+              hechas.length
+            ){
+
+              ultima =
+                [...hechas]
+                  .sort(
+                    (a,b) =>
+                      String(
+                        b.fechaISO
+                      )
+                      .localeCompare(
+                        String(
+                          a.fechaISO
+                        )
+                      )
+                  )[0]
+                  .fecha;
+
+            }
+
+
+            return [
+
+              persona.nombre,
+
+              persona.cargo,
+
+              persona.nivel,
+
+              hechas.length,
+
+              ultima,
+
+              hechas.length
+                ? 'REALIZÓ'
+                : 'SIN EVALUACIONES'
+
+            ];
+
+          }
+        )
+
+    };
+
+  }
+
+
+
+  if(
+    tipo ===
+    'evaluaciones'
+  ){
+
+    const cargo =
+      $('filtroCargo')
+        .value;
+
+
+    const registros =
+      registrosFiltrados()
+        .filter(
+          r =>
+            !cargo ||
+            r.cargo === cargo
+        );
+
+
+    return {
+
+      titulo:
+        'Evaluaciones Realizadas',
+
+      encabezados:[
+        'Fecha',
+        'Evaluado',
+        'Cargo',
+        'Evaluador',
+        'Unidad',
+        'Servicio',
+        'Resultado'
+      ],
+
+      filas:
+        registros.map(
+          r => [
+
+            r.fecha,
+
+            r.evaluado,
+
+            r.cargo,
+
+            r.evaluador,
+
+            r.unidad,
+
+            r.servicio,
+
+            porcentaje(
+              r.promedio
+            )
+
+          ]
+        )
+
+    };
+
+  }
+
+
+
+  const cargo =
+    $('filtroCargo')
+      .value;
+
+
+  const registros =
+    registrosFiltrados()
+      .filter(
+        r =>
+          !cargo ||
+          r.cargo === cargo
+      );
+
+
+  return {
+
+    titulo:
+      'Resultados de Evaluación',
+
+    encabezados:[
+      'Evaluado',
+      'Promedio',
+      'Desempeño',
+      'Actitud',
+      'Conocimientos',
+      'Seguridad',
+      'Asistencia'
+    ],
+
+    filas:
+      registros.map(
+        r => [
+
+          r.evaluado,
+
+          porcentaje(
+            r.promedio
+          ),
+
+          porcentaje(
+            r.desempeno
+          ),
+
+          porcentaje(
+            r.actitud
+          ),
+
+          porcentaje(
+            r.conocimientos
+          ),
+
+          porcentaje(
+            r.seguridad
+          ),
+
+          porcentaje(
+            r.asistencia
+          )
+
+        ]
+      )
+
+  };
+
+}
+
+
+
+function exportarExcel(
+  tipo
+){
+
+  const datosExp =
+    obtenerDatosExportacion(
+      tipo
+    );
+
+
+  const hoja = [
+
+    datosExp.encabezados,
+
+    ...datosExp.filas
+
+  ];
+
+
+  const ws =
+    XLSX.utils
+      .aoa_to_sheet(
+        hoja
+      );
+
+
+  const wb =
+    XLSX.utils
+      .book_new();
+
+
+  XLSX.utils
+    .book_append_sheet(
+      wb,
+      ws,
+      'Reporte'
+    );
+
+
+  XLSX.writeFile(
+    wb,
+    limpiarNombreArchivo(
+      datosExp.titulo
+    ) +
+    '_' +
+    fechaArchivo() +
+    '.xlsx'
+  );
+
+}
+
+
+
+function exportarPDF(
+  tipo
+){
+
+  const datosExp =
+    obtenerDatosExportacion(
+      tipo
+    );
+
+
+  const {
+    jsPDF
+  } =
+    window.jspdf;
+
+
+  const doc =
+    new jsPDF({
+      orientation:'landscape',
+      unit:'mm',
+      format:'a4'
+    });
+
+
+  doc.setFontSize(16);
+
+
+  doc.text(
+    datosExp.titulo,
+    14,
+    15
+  );
+
+
+  doc.setFontSize(9);
+
+
+  doc.text(
+    'Fecha de exportación: ' +
+    new Date()
+      .toLocaleDateString(
+        'es-PE'
+      ),
+    14,
+    21
+  );
+
+
+  doc.autoTable({
+
+    startY:26,
+
+    head:[
+      datosExp.encabezados
+    ],
+
+    body:
+      datosExp.filas,
+
+    styles:{
+      fontSize:7,
+      cellPadding:2
+    },
+
+    headStyles:{
+      fillColor:[
+        31,
+        41,
+        55
+      ]
+    }
+
+  });
+
+
+  doc.save(
+    limpiarNombreArchivo(
+      datosExp.titulo
+    ) +
+    '_' +
+    fechaArchivo() +
+    '.pdf'
+  );
+
+}
+
+
+
+function fechaArchivo(){
+
+  const d =
+    new Date();
+
+
+  return (
+    d.getFullYear() +
+    '-' +
+    String(
+      d.getMonth() + 1
+    )
+    .padStart(
+      2,
+      '0'
+    ) +
+    '-' +
+    String(
+      d.getDate()
+    )
+    .padStart(
+      2,
+      '0'
+    )
+  );
+
+}
+
+
+
+function limpiarNombreArchivo(
+  texto
+){
+
+  return norm(texto)
+    .toLowerCase()
+    .replace(
+      /[^a-z0-9]+/g,
+      '_'
+    )
+    .replace(
+      /^_+|_+$/g,
+      ''
+    );
+
+}
+
+
+
+cargarDatos();
+
+</script>
+
+
+</body>
+
+</html>
