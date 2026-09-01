@@ -319,9 +319,18 @@
           </select>
         </div>
 
-        <div class="full">
+        <div>
+          <label>Puesto</label>
+          <select id="puestoPaso1" onchange="actualizarResponsables()">
+            <option value="">Seleccione</option>
+          </select>
+        </div>
+        
+        <div>
           <label>Responsable</label>
-          <input type="text" id="responsablePaso1">
+          <select id="responsablePaso1">
+            <option value="">Seleccione primero un puesto</option>
+          </select>
         </div>
 
         <div class="full">
@@ -430,6 +439,7 @@
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbxxn8zRBSMLwuQ-riNFNZ_xOH1jFVTIZt0QwUBrUMvarX2KMLiTDIUKKsW0m-or9Pv7/exec';
     let mapaGrupos = {};
+    let mapaResponsables = {};
 
     async function cargarMapaGrupos() {
       try {
@@ -439,6 +449,98 @@
         document.getElementById('mensaje').textContent = 'Error cargando grupos: ' + error.message;
       }
     }
+
+    async function cargarResponsablesInventario() {
+
+  try {
+
+    const respuesta = await fetch(
+      API_URL + '?accion=responsablesInventario'
+    );
+
+    const datos = await respuesta.json();
+
+    if (!datos.ok) {
+      throw new Error(
+        datos.error || 'No se pudo cargar el personal'
+      );
+    }
+
+    mapaResponsables =
+      datos.puestos || {};
+
+    const selectPuesto =
+      document.getElementById('puestoPaso1');
+
+    selectPuesto.innerHTML =
+      '<option value="">Seleccione</option>';
+
+    Object.keys(mapaResponsables).forEach(
+      puesto => {
+
+        const opcion =
+          document.createElement('option');
+
+        opcion.value = puesto;
+        opcion.textContent = puesto;
+
+        selectPuesto.appendChild(opcion);
+
+      }
+    );
+
+  } catch (error) {
+
+    document.getElementById('mensaje').textContent =
+      'Error cargando responsables: ' +
+      error.message;
+
+  }
+}
+
+
+function actualizarResponsables() {
+
+  const puesto =
+    document.getElementById('puestoPaso1').value;
+
+  const selectResponsable =
+    document.getElementById('responsablePaso1');
+
+  selectResponsable.innerHTML = '';
+
+  if (
+    !puesto ||
+    !mapaResponsables[puesto]
+  ) {
+
+    selectResponsable.innerHTML =
+      '<option value="">Seleccione primero un puesto</option>';
+
+    return;
+  }
+
+
+  selectResponsable.innerHTML =
+    '<option value="">Seleccione</option>';
+
+
+  mapaResponsables[puesto].forEach(
+    nombre => {
+
+      const opcion =
+        document.createElement('option');
+
+      opcion.value = nombre;
+      opcion.textContent = nombre;
+
+      selectResponsable.appendChild(
+        opcion
+      );
+
+    }
+  );
+}
 
     function actualizarIndicador(pasoActivo) {
       document.getElementById('indicador1').classList.remove('paso-activo');
@@ -455,8 +557,12 @@
 
       mensaje.textContent = '';
 
-      if (!origen || !destino || !responsable) {
-        mensaje.textContent = 'Completa origen, destino y responsable.';
+      const puesto =
+        document.getElementById('puestoPaso1').value;
+      
+      if (!origen || !destino || !puesto || !responsable) {
+        mensaje.textContent =
+          'Completa ubicación, destino, puesto y responsable.';
         return;
       }
 
@@ -678,7 +784,10 @@
 
         document.getElementById('origenPaso1').value = '';
         document.getElementById('destinoPaso1').value = '';
-        document.getElementById('responsablePaso1').value = '';
+        document.getElementById('puestoPaso1').value = '';
+        
+        document.getElementById('responsablePaso1').innerHTML =
+          '<option value="">Seleccione primero un puesto</option>';
 
         document.getElementById('resumenOrigen').textContent = '';
         document.getElementById('resumenDestino').textContent = '';
@@ -704,6 +813,7 @@
     }
 
     cargarMapaGrupos();
+    cargarResponsablesInventario();
   </script>
 </body>
 </html>
