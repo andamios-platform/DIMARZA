@@ -447,6 +447,9 @@ font-weight:bold;
 .tags-visualizacion{
   background:linear-gradient(135deg,#0284c7,#0369a1);
 }
+.control-inventario{
+  background:linear-gradient(135deg,#16a34a,#15803d);
+}
 .actualizar{
 background:linear-gradient(135deg,#0891b2,#0e7490);
 }
@@ -649,6 +652,25 @@ Centro de consultas y visualización
 
   </a>
 
+ <a
+  class="btn control-inventario modulo-protegido"
+  data-permiso="AMBOS"
+  href="control-inventario.html"
+>
+
+  <div class="etiqueta-bloqueo">
+    🔒 Residente / Supervisor
+  </div>
+
+  <img
+    src="img/inventario.png"
+    class="icono"
+  >
+
+  <span>Control de Inventario</span>
+
+</a>
+    
   <a
     class="btn inventario modulo-protegido"
     data-permiso="RESIDENTE"
