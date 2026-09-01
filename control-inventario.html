@@ -180,6 +180,7 @@ const API_URL='https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIH
 let datosControl={movimientos:[],unidades:{}};
 const $=id=>document.getElementById(id);
 const num=v=>Number(v)||0;
+  const redondear=v=>Math.round((num(v)+Number.EPSILON)*100)/100;
 const fmt=v=>num(v).toLocaleString('es-PE',{maximumFractionDigits:2});
 const norm=v=>String(v||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
@@ -358,7 +359,7 @@ function obtenerDatosExportacion(tipo){
             m.responsable,
             m.observacion,
             m.contrato || '',
-            num(m.pesoTotal)
+            redondear(m.pesoTotal)
           ]
         )
 
@@ -416,19 +417,19 @@ function obtenerDatosExportacion(tipo){
         'Peso dañado (kg)'
       ],
 
-      filas:
-        filas.map(
-          x => [
-            x.codigo,
-            x.item,
-            num(x.stock),
-            num(x.pesoTotal),
-            num(x.perdido),
-            num(x.pesoPerdida),
-            num(x.dano),
-            num(x.pesoDanado)
-          ]
-        )
+filas:
+  filas.map(
+    x => [
+      x.codigo,
+      x.item,
+      num(x.stock),
+      redondear(x.pesoTotal),
+      num(x.perdido),
+      redondear(x.pesoPerdida),
+      num(x.dano),
+      redondear(x.pesoDanado)
+    ]
+  )
 
     };
 
@@ -500,7 +501,7 @@ function obtenerDatosExportacion(tipo){
             x.item,
             num(x.stock),
             num(x.dano),
-            num(x.pesoDanado),
+            redondear(x.pesoDanado),
             Number(
               porcentaje
                 .toFixed(2)
