@@ -18,9 +18,42 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
 .tabla-wrap{overflow:auto;border:1px solid #e2e8f0;border-radius:10px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:center;font-size:13px}th{position:sticky;top:0;background:#163f63;color:#fff;z-index:1}tbody tr:hover{background:#f8fafc}.vacio{padding:24px;text-align:center;color:#64748b}
 .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:bold;background:#e2e8f0;color:#334155}
 .footer{text-align:center;color:#64748b;font-size:12px;margin-top:25px;padding-top:16px;border-top:1px solid #dbe3ea}
-@media(max-width:900px){.filtros,.kpis{grid-template-columns:repeat(2,1fr)}.cabecera{align-items:flex-start;flex-direction:column}}
+.exportar{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+.btn-exportar{
+  border:0;
+  padding:10px 14px;
+  border-radius:9px;
+  font-weight:bold;
+  cursor:pointer;
+  color:white;
+}
+
+.btn-pdf{
+  background:#dc2626;
+}
+
+.btn-excel{
+  background:#15803d;
+}
+
+.btn-exportar:hover{
+  opacity:.9;
+}
+ @media(max-width:900px){.filtros,.kpis{grid-template-columns:repeat(2,1fr)}.cabecera{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){body{padding:12px}.filtros,.kpis{grid-template-columns:1fr}.cabecera h1{font-size:27px}.panel{padding:14px}.tab{flex:1;min-width:145px}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 <div class="contenedor">
@@ -36,6 +69,25 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
   </div>
 
   <section id="movimientos" class="panel activo">
+    <div class="exportar">
+
+  <button
+    class="btn-exportar btn-pdf"
+    type="button"
+    onclick="exportarPDF('movimientos')"
+  >
+    📄 Exportar PDF
+  </button>
+
+  <button
+    class="btn-exportar btn-excel"
+    type="button"
+    onclick="exportarExcel('movimientos')"
+  >
+    📊 Exportar Excel
+  </button>
+
+</div>
     <div class="filtros">
       <div class="campo"><label>Desde</label><input type="date" id="movDesde"></div>
       <div class="campo"><label>Hasta</label><input type="date" id="movHasta"></div>
@@ -51,7 +103,28 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
     <div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>ID</th><th>Tipo</th><th>Material</th><th>Cantidad</th><th>Origen</th><th>Destino</th><th>Responsable</th><th>Observación</th><th>Contrato</th></tr></thead><tbody id="tablaMovimientos"></tbody></table></div>
   </section>
 
-  <section id="material" class="panel">
+<section id="material" class="panel">
+
+    <div class="exportar">
+
+      <button
+        class="btn-exportar btn-pdf"
+        type="button"
+        onclick="exportarPDF('material')"
+      >
+        📄 Exportar PDF
+      </button>
+
+      <button
+        class="btn-exportar btn-excel"
+        type="button"
+        onclick="exportarExcel('material')"
+      >
+        📊 Exportar Excel
+      </button>
+
+    </div>
+
     <div class="filtros">
       <div class="campo"><label>Unidad</label><select id="matUnidad"></select></div>
       <div class="campo"><label>Buscar material</label><input type="text" id="matBuscar" placeholder="Código o material"></div>
@@ -66,6 +139,25 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
   </section>
 
   <section id="danados" class="panel">
+    <div class="exportar">
+
+  <button
+    class="btn-exportar btn-pdf"
+    type="button"
+    onclick="exportarPDF('danados')"
+  >
+    📄 Exportar PDF
+  </button>
+
+  <button
+    class="btn-exportar btn-excel"
+    type="button"
+    onclick="exportarExcel('danados')"
+  >
+    📊 Exportar Excel
+  </button>
+
+</div>
     <div class="filtros">
       <div class="campo"><label>Unidad</label><select id="danUnidad"></select></div>
       <div class="campo"><label>Buscar material</label><input type="text" id="danBuscar" placeholder="Código o material"></div>
@@ -132,7 +224,625 @@ function renderMovimientos(){
 function filasUnidad(idSelect,buscarId){const u=$(idSelect).value,b=norm($(buscarId).value);return (datosControl.unidades?.[u]||[]).filter(x=>!b||norm(x.codigo+' '+x.item).includes(b));}
 function renderMaterial(){const f=filasUnidad('matUnidad','matBuscar');const con=f.filter(x=>num(x.stock)!==0||num(x.perdido)!==0||num(x.dano)!==0);$('kpiMatTipos').textContent=f.filter(x=>num(x.stock)>0).length;$('kpiMatPiezas').textContent=fmt(f.reduce((a,x)=>a+num(x.stock),0));$('kpiMatPeso').textContent=fmt(f.reduce((a,x)=>a+num(x.pesoTotal),0))+' kg';$('kpiMatPerdidos').textContent=fmt(f.reduce((a,x)=>a+num(x.perdido),0));$('tablaMaterial').innerHTML=con.length?con.map(x=>`<tr><td>${esc(x.codigo)}</td><td>${esc(x.item)}</td><td>${fmt(x.stock)}</td><td>${fmt(x.pesoTotal)} kg</td><td>${fmt(x.perdido)}</td><td>${fmt(x.pesoPerdida)} kg</td><td>${fmt(x.dano)}</td><td>${fmt(x.pesoDanado)} kg</td></tr>`).join(''):'<tr><td colspan="8" class="vacio">Sin material para mostrar</td></tr>';}
 function renderDanados(){const u=$('danUnidad').value;const f=filasUnidad('danUnidad','danBuscar').filter(x=>num(x.dano)>0);$('kpiDanTipos').textContent=f.length;$('kpiDanPiezas').textContent=fmt(f.reduce((a,x)=>a+num(x.dano),0));$('kpiDanPeso').textContent=fmt(f.reduce((a,x)=>a+num(x.pesoDanado),0))+' kg';$('kpiDanUnidad').textContent=u||'—';$('tablaDanados').innerHTML=f.length?f.map(x=>{const base=num(x.stock)+num(x.dano),p=base>0?num(x.dano)/base*100:0;return `<tr><td>${esc(x.codigo)}</td><td>${esc(x.item)}</td><td>${fmt(x.stock)}</td><td>${fmt(x.dano)}</td><td>${fmt(x.pesoDanado)} kg</td><td>${fmt(p)}%</td></tr>`}).join(''):'<tr><td colspan="6" class="vacio">No hay dañados en esta unidad</td></tr>';}
-function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function obtenerDatosExportacion(tipo){
+
+  if(tipo === 'movimientos'){
+
+    const desde =
+      $('movDesde').value;
+
+    const hasta =
+      $('movHasta').value;
+
+    const unidad =
+      norm(
+        $('movUnidad').value
+      );
+
+    const buscar =
+      norm(
+        $('movBuscar').value
+      );
+
+
+    const filas =
+      (datosControl.movimientos || [])
+      .filter(m => {
+
+        if(
+          desde &&
+          m.fechaISO < desde
+        ){
+          return false;
+        }
+
+        if(
+          hasta &&
+          m.fechaISO > hasta
+        ){
+          return false;
+        }
+
+        if(
+          unidad &&
+          ![
+            m.origen,
+            m.destino
+          ].some(
+            x =>
+              norm(x) === unidad
+          )
+        ){
+          return false;
+        }
+
+        if(
+          buscar &&
+          !norm(
+            [
+              m.idMovimiento,
+              m.tipo,
+              m.item,
+              m.codigo,
+              m.origen,
+              m.destino,
+              m.responsable,
+              m.observacion,
+              m.contrato
+            ].join(' ')
+          ).includes(buscar)
+        ){
+          return false;
+        }
+
+        return true;
+
+      })
+      .slice()
+      .reverse();
+
+
+    return {
+
+      titulo:
+        'Movimientos de Inventario',
+
+      subtitulo:
+        [
+          desde
+            ? 'Desde: ' + desde
+            : '',
+
+          hasta
+            ? 'Hasta: ' + hasta
+            : '',
+
+          $('movUnidad').value
+            ? 'Unidad: ' +
+              $('movUnidad').value
+            : 'Unidad: Todas'
+
+        ]
+        .filter(Boolean)
+        .join(' | '),
+
+      nombre:
+        'movimientos_inventario',
+
+      encabezados:[
+        'Fecha',
+        'ID',
+        'Tipo',
+        'Código',
+        'Material',
+        'Cantidad',
+        'Origen',
+        'Destino',
+        'Responsable',
+        'Observación',
+        'Contrato',
+        'Peso total (kg)'
+      ],
+
+      filas:
+        filas.map(
+          m => [
+            m.fecha,
+            m.idMovimiento,
+            m.tipo,
+            m.codigo,
+            m.item,
+            num(m.cantidad),
+            m.origen,
+            m.destino,
+            m.responsable,
+            m.observacion,
+            m.contrato || '',
+            num(m.pesoTotal)
+          ]
+        )
+
+    };
+
+  }
+
+
+  if(tipo === 'material'){
+
+    const unidad =
+      $('matUnidad').value;
+
+
+    const filas =
+      filasUnidad(
+        'matUnidad',
+        'matBuscar'
+      )
+      .filter(
+        x =>
+          num(x.stock) !== 0 ||
+          num(x.perdido) !== 0 ||
+          num(x.dano) !== 0
+      );
+
+
+    return {
+
+      titulo:
+        'Material por Unidad',
+
+      subtitulo:
+        'Unidad: ' +
+        (
+          unidad ||
+          '—'
+        ),
+
+      nombre:
+        'material_' +
+        limpiarNombreArchivo(
+          unidad ||
+          'unidad'
+        ),
+
+      encabezados:[
+        'Código',
+        'Material',
+        'Stock',
+        'Peso stock (kg)',
+        'Perdido',
+        'Peso perdido (kg)',
+        'Dañado',
+        'Peso dañado (kg)'
+      ],
+
+      filas:
+        filas.map(
+          x => [
+            x.codigo,
+            x.item,
+            num(x.stock),
+            num(x.pesoTotal),
+            num(x.perdido),
+            num(x.pesoPerdida),
+            num(x.dano),
+            num(x.pesoDanado)
+          ]
+        )
+
+    };
+
+  }
+
+
+  const unidad =
+    $('danUnidad').value;
+
+
+  const filas =
+    filasUnidad(
+      'danUnidad',
+      'danBuscar'
+    )
+    .filter(
+      x =>
+        num(x.dano) > 0
+    );
+
+
+  return {
+
+    titulo:
+      'Dañados por Unidad',
+
+    subtitulo:
+      'Unidad: ' +
+      (
+        unidad ||
+        '—'
+      ),
+
+    nombre:
+      'danados_' +
+      limpiarNombreArchivo(
+        unidad ||
+        'unidad'
+      ),
+
+    encabezados:[
+      'Código',
+      'Material',
+      'Stock operativo',
+      'Dañado',
+      'Peso dañado (kg)',
+      '% dañado'
+    ],
+
+    filas:
+      filas.map(
+        x => {
+
+          const base =
+            num(x.stock) +
+            num(x.dano);
+
+          const porcentaje =
+            base > 0
+              ? (
+                  num(x.dano) /
+                  base *
+                  100
+                )
+              : 0;
+
+          return [
+            x.codigo,
+            x.item,
+            num(x.stock),
+            num(x.dano),
+            num(x.pesoDanado),
+            Number(
+              porcentaje
+                .toFixed(2)
+            )
+          ];
+
+        }
+      )
+
+  };
+
+}
+
+
+/* =========================================================
+   EXPORTAR EXCEL
+========================================================= */
+
+function exportarExcel(tipo){
+
+  const datos =
+    obtenerDatosExportacion(
+      tipo
+    );
+
+
+  if(
+    !datos.filas.length
+  ){
+
+    alert(
+      'No hay información para exportar.'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    typeof XLSX ===
+    'undefined'
+  ){
+
+    alert(
+      'No se pudo cargar la librería de Excel.'
+    );
+
+    return;
+
+  }
+
+
+  const contenido = [
+
+    [datos.titulo],
+
+    [datos.subtitulo],
+
+    [],
+
+    datos.encabezados,
+
+    ...datos.filas
+
+  ];
+
+
+  const hoja =
+    XLSX.utils.aoa_to_sheet(
+      contenido
+    );
+
+
+  hoja['!cols'] =
+    datos.encabezados.map(
+      (encabezado, indice) => {
+
+        let ancho =
+          Math.max(
+            12,
+            String(
+              encabezado
+            ).length + 2
+          );
+
+
+        datos.filas.forEach(
+          fila => {
+
+            ancho =
+              Math.max(
+                ancho,
+                String(
+                  fila[indice] ?? ''
+                ).length + 2
+              );
+
+          }
+        );
+
+
+        return {
+
+          wch:
+            Math.min(
+              ancho,
+              45
+            )
+
+        };
+
+      }
+    );
+
+
+  const libro =
+    XLSX.utils.book_new();
+
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    hoja,
+    'Inventario'
+  );
+
+
+  XLSX.writeFile(
+    libro,
+    datos.nombre +
+    '_' +
+    fechaArchivo() +
+    '.xlsx'
+  );
+
+}
+
+
+/* =========================================================
+   EXPORTAR PDF
+========================================================= */
+
+function exportarPDF(tipo){
+
+  const datos =
+    obtenerDatosExportacion(
+      tipo
+    );
+
+
+  if(
+    !datos.filas.length
+  ){
+
+    alert(
+      'No hay información para exportar.'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !window.jspdf ||
+    !window.jspdf.jsPDF
+  ){
+
+    alert(
+      'No se pudo cargar la librería de PDF.'
+    );
+
+    return;
+
+  }
+
+
+  const {
+    jsPDF
+  } =
+    window.jspdf;
+
+
+  const doc =
+    new jsPDF({
+
+      orientation:
+        'landscape',
+
+      unit:
+        'mm',
+
+      format:
+        'a4'
+
+    });
+
+
+  doc.setFontSize(
+    16
+  );
+
+
+  doc.text(
+    datos.titulo,
+    14,
+    15
+  );
+
+
+  doc.setFontSize(
+    9
+  );
+
+
+  doc.text(
+    datos.subtitulo ||
+    '',
+    14,
+    21
+  );
+
+
+  doc.autoTable({
+
+    startY:
+      26,
+
+    head:[
+      datos.encabezados
+    ],
+
+    body:
+      datos.filas.map(
+        fila =>
+          fila.map(
+            valor =>
+              String(
+                valor ?? ''
+              )
+          )
+      ),
+
+    styles:{
+      fontSize:7,
+      cellPadding:1.8,
+      overflow:'linebreak'
+    },
+
+    headStyles:{
+      fillColor:[
+        22,
+        63,
+        99
+      ],
+      textColor:[
+        255,
+        255,
+        255
+      ]
+    },
+
+    margin:{
+      left:8,
+      right:8
+    }
+
+  });
+
+
+  doc.save(
+    datos.nombre +
+    '_' +
+    fechaArchivo() +
+    '.pdf'
+  );
+
+}
+
+
+/* =========================================================
+   UTILIDADES EXPORTACIÓN
+========================================================= */
+
+function fechaArchivo(){
+
+  const fecha =
+    new Date();
+
+
+  return [
+
+    fecha.getFullYear(),
+
+    String(
+      fecha.getMonth() + 1
+    )
+    .padStart(
+      2,
+      '0'
+    ),
+
+    String(
+      fecha.getDate()
+    )
+    .padStart(
+      2,
+      '0'
+    )
+
+  ].join('-');
+
+}
+
+
+function limpiarNombreArchivo(
+  valor
+){
+
+  return String(
+    valor || ''
+  )
+  .trim()
+  .toLowerCase()
+  .normalize(
+    'NFD'
+  )
+  .replace(
+    /[\u0300-\u036f]/g,
+    ''
+  )
+  .replace(
+    /[^a-z0-9]+/g,
+    '_'
+  )
+  .replace(
+    /^_+|_+$/g,
+    ''
+  );
+
+}
+  function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
 ['movDesde','movHasta','movUnidad','movBuscar'].forEach(id=>$(id).addEventListener(id==='movBuscar'?'input':'change',renderMovimientos));['matUnidad','matBuscar'].forEach(id=>$(id).addEventListener(id==='matBuscar'?'input':'change',renderMaterial));['danUnidad','danBuscar'].forEach(id=>$(id).addEventListener(id==='danBuscar'?'input':'change',renderDanados));
 cargar();
 </script>
