@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Control de EDPs - Dimarza</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  background:#0f172a;
+  min-height:100vh;
+  padding:25px;
+  color:#0f172a;
+}
+
+.container{
+  max-width:1500px;
+  margin:auto;
+}
+
+.header{
+  background:white;
+  border-radius:18px;
+  padding:22px 25px;
+  margin-bottom:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.20);
+}
+
+.header-superior{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+h1{
+  font-size:26px;
+  color:#0f172a;
+}
+
+.subtitulo{
+  margin-top:5px;
+  color:#64748b;
+  font-size:14px;
+}
+
+.btn-volver{
+  text-decoration:none;
+  background:#0f172a;
+  color:white;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:600;
+  font-size:14px;
+}
+
+.btn-volver:hover{
+  background:#1e293b;
+}
+
+.filtros{
+  display:grid;
+  grid-template-columns:
+    repeat(4,minmax(160px,1fr));
+  gap:15px;
+  margin-top:20px;
+}
+
+.filtro label{
+  display:block;
+  font-size:12px;
+  font-weight:600;
+  color:#475569;
+  margin-bottom:5px;
+}
+
+.filtro input,
+.filtro select{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  font-size:13px;
+  background:white;
+}
+
+.acciones{
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:none;
+  cursor:pointer;
+  border-radius:9px;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:600;
+}
+
+.btn-limpiar{
+  background:#e2e8f0;
+  color:#334155;
+}
+
+.btn-excel{
+  background:#16a34a;
+  color:white;
+}
+
+.btn-pdf{
+  background:#dc2626;
+  color:white;
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+}
+
+.tab{
+  background:#334155;
+  color:white;
+  padding:11px 20px;
+  border-radius:10px;
+}
+
+.tab.activo{
+  background:#7c3aed;
+}
+
+.panel{
+  display:none;
+}
+
+.panel.activo{
+  display:block;
+}
+
+.kpis{
+  display:grid;
+  grid-template-columns:
+    repeat(4,minmax(180px,1fr));
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.kpi{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 8px 25px rgba(0,0,0,.18);
+}
+
+.kpi .titulo{
+  color:#64748b;
+  font-size:12px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+.kpi .valor{
+  font-size:22px;
+  font-weight:700;
+  color:#0f172a;
+}
+
+.tarjeta{
+  background:white;
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.20);
+  margin-bottom:20px;
+}
+
+.tarjeta h2{
+  font-size:19px;
+  margin-bottom:15px;
+}
+
+.tabla-contenedor{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1100px;
+}
+
+th{
+  background:#0f172a;
+  color:white;
+  padding:11px 9px;
+  font-size:11px;
+  text-align:center;
+  white-space:nowrap;
+}
+
+td{
+  padding:9px;
+  border-bottom:1px solid #e2e8f0;
+  text-align:center;
+  font-size:11px;
+}
+
+tbody tr:hover{
+  background:#f8fafc;
+}
+
+.mensaje{
+  padding:25px;
+  text-align:center;
+  color:#64748b;
+}
+
+.footer-copyright{
+  text-align:center;
+  color:#94a3b8;
+  font-size:12px;
+  margin-top:25px;
+  padding:15px;
+}
+
+.cargando{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.85);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  font-weight:600;
+  z-index:9999;
+}
+
+.oculto{
+  display:none !important;
+}
+
+@media(max-width:1000px){
+
+  .filtros{
+    grid-template-columns:
+      repeat(2,minmax(150px,1fr));
+  }
+
+  .kpis{
+    grid-template-columns:
+      repeat(2,minmax(150px,1fr));
+  }
+}
+
+@media(max-width:600px){
+
+  body{
+    padding:12px;
+  }
+
+  .filtros,
+  .kpis{
+    grid-template-columns:1fr;
+  }
+
+  h1{
+    font-size:21px;
+  }
+
+  .tab{
+    width:100%;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="cargando" class="cargando">
+  Cargando información de EDPs...
+</div>
+
+<div class="container">
+
+  <div class="header">
+
+    <div class="header-superior">
+
+      <div>
+        <h1>Control de EDPs</h1>
+
+        <div class="subtitulo">
+          Seguimiento económico y operativo de EDPs
+        </div>
+      </div>
+
+      <a
+        href="visualizacion.html"
+        class="btn-volver"
+      >
+        ← Volver
+      </a>
+
+    </div>
+
+    <div class="filtros">
+
+      <div class="filtro">
+        <label>Año</label>
+
+        <select id="filtroAnio">
+          <option value="">
+            Todos
+          </option>
+        </select>
+      </div>
+
+      <div class="filtro">
+        <label>Mes</label>
+
+        <select id="filtroMes">
+          <option value="">
+            Todos
+          </option>
+
+          <option value="01">Enero</option>
+          <option value="02">Febrero</option>
+          <option value="03">Marzo</option>
+          <option value="04">Abril</option>
+          <option value="05">Mayo</option>
+          <option value="06">Junio</option>
+          <option value="07">Julio</option>
+          <option value="08">Agosto</option>
+          <option value="09">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+      </div>
+
+      <div class="filtro">
+        <label>Servicio</label>
+
+        <select id="filtroServicio">
+          <option value="">
+            Todos
+          </option>
+        </select>
+      </div>
+
+      <div class="filtro">
+        <label>Buscar EDP</label>
+
+        <input
+          type="text"
+          id="buscar"
+          placeholder="Ej. EDP 001"
+        >
+      </div>
+
+    </div>
+
+    <div class="acciones">
+
+      <button
+        class="btn-limpiar"
+        onclick="limpiarFiltros()"
+      >
+        Limpiar filtros
+      </button>
+
+      <button
+        class="btn-excel"
+        onclick="exportarExcel()"
+      >
+        Exportar Excel
+      </button>
+
+      <button
+        class="btn-pdf"
+        onclick="exportarPDF()"
+      >
+        Exportar PDF
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="tabs">
+
+    <button
+      class="tab activo"
+      data-panel="resumen"
+    >
+      Resumen
+    </button>
+
+    <button
+      class="tab"
+      data-panel="detalle"
+    >
+      Detalle de EDPs
+    </button>
+
+    <button
+      class="tab"
+      data-panel="concentrado"
+    >
+      Concentrado
+    </button>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- RESUMEN -->
+  <!-- ========================= -->
+
+  <div
+    id="panel-resumen"
+    class="panel activo"
+  >
+
+    <div class="kpis">
+
+      <div class="kpi">
+        <div class="titulo">
+          EDPs registrados
+        </div>
+        <div
+          class="valor"
+          id="kpiEDPS"
+        >
+          0
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="titulo">
+          CLP sin IVA
+        </div>
+        <div
+          class="valor"
+          id="kpiCLPSinIVA"
+        >
+          $0
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="titulo">
+          CLP con IVA
+        </div>
+        <div
+          class="valor"
+          id="kpiCLPConIVA"
+        >
+          $0
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="titulo">
+          USD sin IVA
+        </div>
+        <div
+          class="valor"
+          id="kpiUSDSinIVA"
+        >
+          $0
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="titulo">
+          USD con IVA
+        </div>
+        <div
+          class="valor"
+          id="kpiUSDConIVA"
+        >
+          $0
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="titulo">
+          Turnos
+        </div>
+        <div
+          class="valor"
+          id="kpiTurnos"
+        >
+          0
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="titulo">
+          Toneladas contrato
+        </div>
+        <div
+          class="valor"
+          id="kpiToneladas"
+        >
+          0
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="titulo">
+          Tonelaje real
+        </div>
+        <div
+          class="valor"
+          id="kpiTonelajeReal"
+        >
+          0
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="tarjeta">
+
+      <h2>
+        Resumen por Servicio
+      </h2>
+
+      <div class="tabla-contenedor">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>EDPs</th>
+              <th>Turnos</th>
+              <th>Toneladas</th>
+              <th>Ton. Real</th>
+              <th>CLP sin IVA</th>
+              <th>CLP con IVA</th>
+              <th>USD sin IVA</th>
+              <th>USD con IVA</th>
+            </tr>
+          </thead>
+
+          <tbody id="tablaResumen">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- DETALLE -->
+  <!-- ========================= -->
+
+  <div
+    id="panel-detalle"
+    class="panel"
+  >
+
+    <div class="tarjeta">
+
+      <h2>
+        Detalle de EDPs
+      </h2>
+
+      <div class="tabla-contenedor">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>EDP</th>
+              <th>Servicio</th>
+              <th>Mes</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Días</th>
+              <th>Cuerpos</th>
+              <th>Toneladas</th>
+              <th>Ton. Real</th>
+              <th>Turnos</th>
+              <th>CLP sin IVA</th>
+              <th>CLP con IVA</th>
+              <th>USD sin IVA</th>
+              <th>USD con IVA</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="tablaDetalle">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- CONCENTRADO -->
+  <!-- ========================= -->
+
+  <div
+    id="panel-concentrado"
+    class="panel"
+  >
+
+    <div class="tarjeta">
+
+      <h2>
+        Concentrado
+      </h2>
+
+      <div class="tabla-contenedor">
+
+        <table id="tablaConcentrado">
+
+          <thead id="cabeceraConcentrado">
+          </thead>
+
+          <tbody id="cuerpoConcentrado">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="footer-copyright">
+    © 2026 Ruben Romero. Todos los derechos reservados.
+  </div>
+
+</div>
+
+
+<script>
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbyoySrk_uKYD-ysloMxxRWeP-ATBhYXnV7gd6qIAh4Cdh7bjbmigNj4Ia7nVjG1dvkE/exec";
+
+let registros = [];
+let concentrado = [];
+let panelActual = "resumen";
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    configurarTabs();
+    configurarFiltros();
+    cargarDatos();
+
+  }
+);
+
+
+function configurarTabs(){
+
+  document
+    .querySelectorAll(".tab")
+    .forEach(tab => {
+
+      tab.addEventListener(
+        "click",
+        () => {
+
+          document
+            .querySelectorAll(".tab")
+            .forEach(t => {
+              t.classList.remove("activo");
+            });
+
+          document
+            .querySelectorAll(".panel")
+            .forEach(p => {
+              p.classList.remove("activo");
+            });
+
+          tab.classList.add("activo");
+
+          panelActual =
+            tab.dataset.panel;
+
+          document
+            .getElementById(
+              "panel-" + panelActual
+            )
+            .classList
+            .add("activo");
+
+        }
+      );
+
+    });
+
+}
+
+
+function configurarFiltros(){
+
+  [
+    "filtroAnio",
+    "filtroMes",
+    "filtroServicio"
+  ]
+  .forEach(id => {
+
+    document
+      .getElementById(id)
+      .addEventListener(
+        "change",
+        renderTodo
+      );
+
+  });
+
+  document
+    .getElementById("buscar")
+    .addEventListener(
+      "input",
+      renderTodo
+    );
+
+}
+
+
+async function cargarDatos(){
+
+  mostrarCarga(true);
+
+  try{
+
+    const response =
+      await fetch(
+        WEB_APP_URL +
+        "?accion=controlEDPS&t=" +
+        Date.now()
+      );
+
+    const data =
+      await response.json();
+
+    if (!data.ok) {
+
+      throw new Error(
+        data.error ||
+        "No se pudo cargar la información."
+      );
+
+    }
+
+    registros =
+      Array.isArray(data.registros)
+        ? data.registros
+        : [];
+
+    concentrado =
+      Array.isArray(data.concentrado)
+        ? data.concentrado
+        : [];
+
+    cargarOpcionesFiltros();
+
+    renderTodo();
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    alert(
+      "Error al cargar los EDPs:\n" +
+      error.message
+    );
+
+  }
+  finally{
+
+    mostrarCarga(false);
+
+  }
+
+}
+
+
+function cargarOpcionesFiltros(){
+
+  const anios =
+    [
+      ...new Set(
+        registros
+          .map(r => {
+            return (
+              r.mesISO ||
+              ""
+            )
+            .substring(0,4);
+          })
+          .filter(Boolean)
+      )
+    ]
+    .sort();
+
+  const selectAnio =
+    document.getElementById(
+      "filtroAnio"
+    );
+
+  anios.forEach(anio => {
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value = anio;
+    option.textContent = anio;
+
+    selectAnio.appendChild(
+      option
+    );
+
+  });
+
+
+  const servicios =
+    [
+      ...new Set(
+        registros
+          .map(r => r.servicio)
+          .filter(Boolean)
+      )
+    ]
+    .sort();
+
+  const selectServicio =
+    document.getElementById(
+      "filtroServicio"
+    );
+
+  servicios.forEach(servicio => {
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value = servicio;
+    option.textContent = servicio;
+
+    selectServicio.appendChild(
+      option
+    );
+
+  });
+
+}
+
+
+function registrosFiltrados(){
+
+  const anio =
+    document
+      .getElementById("filtroAnio")
+      .value;
+
+  const mes =
+    document
+      .getElementById("filtroMes")
+      .value;
+
+  const servicio =
+    document
+      .getElementById(
+        "filtroServicio"
+      )
+      .value;
+
+  const buscar =
+    normalizar(
+      document
+        .getElementById("buscar")
+        .value
+    );
+
+  return registros.filter(r => {
+
+    const mesISO =
+      r.mesISO || "";
+
+    if (
+      anio &&
+      !mesISO.startsWith(anio)
+    ) {
+      return false;
+    }
+
+    if (
+      mes &&
+      mesISO.substring(5,7) !== mes
+    ) {
+      return false;
+    }
+
+    if (
+      servicio &&
+      r.servicio !== servicio
+    ) {
+      return false;
+    }
+
+    if (buscar) {
+
+      const texto =
+        normalizar(
+          [
+            r.edps,
+            r.servicio,
+            r.mes,
+            r.fechaInicio,
+            r.fechaFin
+          ]
+          .join(" ")
+        );
+
+      if (
+        !texto.includes(buscar)
+      ) {
+        return false;
+      }
+
+    }
+
+    return true;
+
+  });
+
+}
+
+
+function renderTodo(){
+
+  renderKPIs();
+  renderResumenServicio();
+  renderDetalle();
+  renderConcentrado();
+
+}
+
+
+function renderKPIs(){
+
+  const datos =
+    registrosFiltrados();
+
+  const total =
+    campo => {
+
+      return datos.reduce(
+        (suma,r) =>
+          suma +
+          (Number(r[campo]) || 0),
+        0
+      );
+
+    };
+
+  document
+    .getElementById("kpiEDPS")
+    .textContent =
+      datos.length;
+
+  document
+    .getElementById("kpiCLPSinIVA")
+    .textContent =
+      formatoCLP(
+        total("costoSinIvaCLP")
+      );
+
+  document
+    .getElementById("kpiCLPConIVA")
+    .textContent =
+      formatoCLP(
+        total("costoConIvaCLP")
+      );
+
+  document
+    .getElementById("kpiUSDSinIVA")
+    .textContent =
+      formatoUSD(
+        total("costoSinIvaUSD")
+      );
+
+  document
+    .getElementById("kpiUSDConIVA")
+    .textContent =
+      formatoUSD(
+        total("costoConIvaUSD")
+      );
+
+  document
+    .getElementById("kpiTurnos")
+    .textContent =
+      formatoNumero(
+        total("turnos")
+      );
+
+  document
+    .getElementById("kpiToneladas")
+    .textContent =
+      formatoNumero(
+        total("toneladas")
+      );
+
+  document
+    .getElementById("kpiTonelajeReal")
+    .textContent =
+      formatoNumero(
+        total("tonelajeReal")
+      );
+
+}
+
+
+function renderResumenServicio(){
+
+  const tbody =
+    document.getElementById(
+      "tablaResumen"
+    );
+
+  const datos =
+    registrosFiltrados();
+
+  if (!datos.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="mensaje">
+          No hay registros para los filtros seleccionados.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const mapa = {};
+
+  datos.forEach(r => {
+
+    const servicio =
+      r.servicio ||
+      "SIN SERVICIO";
+
+    if (!mapa[servicio]) {
+
+      mapa[servicio] = {
+        edps:0,
+        turnos:0,
+        toneladas:0,
+        tonelajeReal:0,
+        costoSinIvaCLP:0,
+        costoConIvaCLP:0,
+        costoSinIvaUSD:0,
+        costoConIvaUSD:0
+      };
+
+    }
+
+    const x =
+      mapa[servicio];
+
+    x.edps++;
+
+    x.turnos +=
+      Number(r.turnos) || 0;
+
+    x.toneladas +=
+      Number(r.toneladas) || 0;
+
+    x.tonelajeReal +=
+      Number(r.tonelajeReal) || 0;
+
+    x.costoSinIvaCLP +=
+      Number(r.costoSinIvaCLP) || 0;
+
+    x.costoConIvaCLP +=
+      Number(r.costoConIvaCLP) || 0;
+
+    x.costoSinIvaUSD +=
+      Number(r.costoSinIvaUSD) || 0;
+
+    x.costoConIvaUSD +=
+      Number(r.costoConIvaUSD) || 0;
+
+  });
+
+  tbody.innerHTML =
+    Object.entries(mapa)
+      .map(([servicio,x]) => {
+
+        return `
+          <tr>
+            <td>${escapar(servicio)}</td>
+            <td>${x.edps}</td>
+            <td>${formatoNumero(x.turnos)}</td>
+            <td>${formatoNumero(x.toneladas)}</td>
+            <td>${formatoNumero(x.tonelajeReal)}</td>
+            <td>${formatoCLP(x.costoSinIvaCLP)}</td>
+            <td>${formatoCLP(x.costoConIvaCLP)}</td>
+            <td>${formatoUSD(x.costoSinIvaUSD)}</td>
+            <td>${formatoUSD(x.costoConIvaUSD)}</td>
+          </tr>
+        `;
+
+      })
+      .join("");
+
+}
+
+
+function renderDetalle(){
+
+  const tbody =
+    document.getElementById(
+      "tablaDetalle"
+    );
+
+  const datos =
+    registrosFiltrados();
+
+  if (!datos.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="14" class="mensaje">
+          No hay EDPs registrados.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    datos.map(r => {
+
+      return `
+        <tr>
+          <td>${escapar(r.edps)}</td>
+          <td>${escapar(r.servicio)}</td>
+          <td>${escapar(r.mes)}</td>
+          <td>${escapar(r.fechaInicio)}</td>
+          <td>${escapar(r.fechaFin)}</td>
+          <td>${formatoNumero(r.dias)}</td>
+          <td>${formatoNumero(r.cuerpos)}</td>
+          <td>${formatoNumero(r.toneladas)}</td>
+          <td>${formatoNumero(r.tonelajeReal)}</td>
+          <td>${formatoNumero(r.turnos)}</td>
+          <td>${formatoCLP(r.costoSinIvaCLP)}</td>
+          <td>${formatoCLP(r.costoConIvaCLP)}</td>
+          <td>${formatoUSD(r.costoSinIvaUSD)}</td>
+          <td>${formatoUSD(r.costoConIvaUSD)}</td>
+        </tr>
+      `;
+
+    })
+    .join("");
+
+}
+
+
+function renderConcentrado(){
+
+  const thead =
+    document.getElementById(
+      "cabeceraConcentrado"
+    );
+
+  const tbody =
+    document.getElementById(
+      "cuerpoConcentrado"
+    );
+
+  if (!concentrado.length){
+
+    thead.innerHTML = "";
+
+    tbody.innerHTML = `
+      <tr>
+        <td class="mensaje">
+          No hay información en CONCENTRADO.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const columnas =
+    Object.keys(
+      concentrado[0]
+    );
+
+  thead.innerHTML = `
+    <tr>
+      ${columnas
+        .map(c => `
+          <th>
+            ${escapar(c)}
+          </th>
+        `)
+        .join("")}
+    </tr>
+  `;
+
+  tbody.innerHTML =
+    concentrado.map(fila => {
+
+      return `
+        <tr>
+          ${columnas
+            .map(c => `
+              <td>
+                ${formatoValorConcentrado(
+                  fila[c]
+                )}
+              </td>
+            `)
+            .join("")}
+        </tr>
+      `;
+
+    })
+    .join("");
+
+}
+
+
+function limpiarFiltros(){
+
+  document
+    .getElementById("filtroAnio")
+    .value = "";
+
+  document
+    .getElementById("filtroMes")
+    .value = "";
+
+  document
+    .getElementById(
+      "filtroServicio"
+    )
+    .value = "";
+
+  document
+    .getElementById("buscar")
+    .value = "";
+
+  renderTodo();
+
+}
+
+
+function exportarExcel(){
+
+  const datos =
+    registrosFiltrados();
+
+  if (!datos.length){
+
+    alert(
+      "No hay información para exportar."
+    );
+
+    return;
+  }
+
+  const filas =
+    datos.map(r => ({
+
+      "EDP":
+        r.edps,
+
+      "Servicio":
+        r.servicio,
+
+      "Mes":
+        r.mes,
+
+      "Fecha Inicio":
+        r.fechaInicio,
+
+      "Fecha Fin":
+        r.fechaFin,
+
+      "Días":
+        r.dias,
+
+      "Cuerpos":
+        r.cuerpos,
+
+      "Toneladas":
+        r.toneladas,
+
+      "Tonelaje Real":
+        r.tonelajeReal,
+
+      "Turnos":
+        r.turnos,
+
+      "CLP sin IVA":
+        r.costoSinIvaCLP,
+
+      "CLP con IVA":
+        r.costoConIvaCLP,
+
+      "USD sin IVA":
+        r.costoSinIvaUSD,
+
+      "USD con IVA":
+        r.costoConIvaUSD
+
+    }));
+
+  const libro =
+    XLSX.utils.book_new();
+
+  const hojaDetalle =
+    XLSX.utils.json_to_sheet(
+      filas
+    );
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    hojaDetalle,
+    "EDPs"
+  );
+
+
+  if (concentrado.length){
+
+    const hojaConcentrado =
+      XLSX.utils.json_to_sheet(
+        concentrado
+      );
+
+    XLSX.utils.book_append_sheet(
+      libro,
+      hojaConcentrado,
+      "Concentrado"
+    );
+
+  }
+
+  XLSX.writeFile(
+    libro,
+    "Control_EDPs.xlsx"
+  );
+
+}
+
+
+function exportarPDF(){
+
+  const datos =
+    registrosFiltrados();
+
+  if (!datos.length){
+
+    alert(
+      "No hay información para exportar."
+    );
+
+    return;
+  }
+
+  const {
+    jsPDF
+  } = window.jspdf;
+
+  const doc =
+    new jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4"
+    });
+
+  doc.setFontSize(16);
+
+  doc.text(
+    "CONTROL DE EDPs",
+    14,
+    15
+  );
+
+  doc.setFontSize(9);
+
+  doc.text(
+    "EDPs registrados: " +
+    datos.length,
+    14,
+    22
+  );
+
+  const body =
+    datos.map(r => [
+
+      r.edps,
+      r.servicio,
+      r.mes,
+      r.fechaInicio,
+      r.fechaFin,
+      formatoNumero(r.dias),
+      formatoNumero(r.cuerpos),
+      formatoNumero(r.toneladas),
+      formatoNumero(r.tonelajeReal),
+      formatoNumero(r.turnos),
+      formatoNumero(
+        r.costoSinIvaCLP
+      ),
+      formatoNumero(
+        r.costoSinIvaUSD
+      )
+
+    ]);
+
+  doc.autoTable({
+
+    startY:27,
+
+    head:[[
+      "EDP",
+      "Servicio",
+      "Mes",
+      "Inicio",
+      "Fin",
+      "Días",
+      "Cuerpos",
+      "Ton.",
+      "Ton. Real",
+      "Turnos",
+      "CLP sin IVA",
+      "USD sin IVA"
+    ]],
+
+    body:body,
+
+    styles:{
+      fontSize:6,
+      cellPadding:1.5
+    },
+
+    headStyles:{
+      fillColor:[15,23,42]
+    }
+
+  });
+
+  doc.save(
+    "Control_EDPs.pdf"
+  );
+
+}
+
+
+function formatoCLP(valor){
+
+  return new Intl.NumberFormat(
+    "es-CL",
+    {
+      style:"currency",
+      currency:"CLP",
+      maximumFractionDigits:0
+    }
+  )
+  .format(
+    Number(valor) || 0
+  );
+
+}
+
+
+function formatoUSD(valor){
+
+  return new Intl.NumberFormat(
+    "en-US",
+    {
+      style:"currency",
+      currency:"USD",
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    }
+  )
+  .format(
+    Number(valor) || 0
+  );
+
+}
+
+
+function formatoNumero(valor){
+
+  return new Intl.NumberFormat(
+    "es-CL",
+    {
+      maximumFractionDigits:2
+    }
+  )
+  .format(
+    Number(valor) || 0
+  );
+
+}
+
+
+function formatoValorConcentrado(valor){
+
+  if (
+    valor === null ||
+    valor === undefined ||
+    valor === ""
+  ){
+    return "";
+  }
+
+  if (
+    typeof valor === "number"
+  ){
+
+    return formatoNumero(valor);
+
+  }
+
+  return escapar(valor);
+
+}
+
+
+function normalizar(valor){
+
+  return (
+    valor || ""
+  )
+  .toString()
+  .trim()
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(
+    /[\u0300-\u036f]/g,
+    ""
+  );
+
+}
+
+
+function escapar(valor){
+
+  return (
+    valor === null ||
+    valor === undefined
+  )
+    ? ""
+    : valor
+      .toString()
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+
+}
+
+
+function mostrarCarga(mostrar){
+
+  document
+    .getElementById(
+      "cargando"
+    )
+    .classList
+    .toggle(
+      "oculto",
+      !mostrar
+    );
+
+}
+
+</script>
+
+</body>
+</html>
