@@ -2041,26 +2041,62 @@ function renderizarModulaciones(){
             ${escaparHTML(item.ultimaModificacion)}
           </td>
 
-          <td>
+<td>
 
-            <button
-              type="button"
-              class="btn btn-gris"
-              onclick="alternarDetalle(
-                '${escaparAtributo(
-                  item.idBorrador
-                )}'
-              )"
-            >
-              ${
-                detalleAbierto ===
-                item.idBorrador
-                  ? "Ocultar"
-                  : "Ver"
-              }
-            </button>
+  <div
+    style="
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    "
+  >
 
-          </td>
+    <button
+      type="button"
+      class="btn btn-gris"
+      onclick="alternarDetalle(
+        '${escaparAtributo(
+          item.idBorrador
+        )}'
+      )"
+    >
+      ${
+        detalleAbierto ===
+        item.idBorrador
+          ? "Ocultar"
+          : "Ver"
+      }
+    </button>
+
+
+    <button
+      type="button"
+      class="btn btn-naranja"
+      onclick="exportarPDFModulacion(
+        '${escaparAtributo(
+          item.idBorrador
+        )}'
+      )"
+    >
+      PDF
+    </button>
+
+
+    <button
+      type="button"
+      class="btn btn-verde"
+      onclick="exportarExcelModulacion(
+        '${escaparAtributo(
+          item.idBorrador
+        )}'
+      )"
+    >
+      Excel
+    </button>
+
+  </div>
+
+</td>
 
         `;
 
@@ -2758,7 +2794,340 @@ function mostrarTab(
 
 }
 
+/* =========================================================
+   EXPORTAR UNA MODULACIÓN A EXCEL
+========================================================= */
 
+function exportarExcelModulacion(
+  idBorrador
+){
+
+  const modulacion =
+    modulaciones.find(
+      item =>
+        item.idBorrador ===
+        idBorrador
+    );
+
+
+  if(!modulacion){
+
+    alert(
+      "No se encontró la modulación."
+    );
+
+    return;
+  }
+
+
+  const detalle =
+    materiales.filter(
+      item =>
+        item.idBorrador ===
+        idBorrador
+    );
+
+
+  const wb =
+    XLSX.utils.book_new();
+
+
+  const resumen = [
+
+    {
+      "ID":
+        modulacion.idBorrador,
+
+      "Fecha":
+        modulacion.fecha,
+
+      "Responsable":
+        modulacion.responsable,
+
+      "Referencia":
+        modulacion.referencia,
+
+      "Estado":
+        modulacion.estado,
+
+      "Tipos de material":
+        modulacion.cantidadMateriales,
+
+      "Piezas totales":
+        modulacion.totalPiezas,
+
+      "Peso total kg":
+        modulacion.pesoTotal,
+
+      "Última modificación":
+        modulacion.ultimaModificacion
+    }
+
+  ];
+
+
+  const materialesExcel =
+    detalle.map(
+      item => ({
+
+        "Código":
+          item.codigo,
+
+        "Material":
+          item.descripcion,
+
+        "Grupo":
+          item.grupo,
+
+        "Subgrupo":
+          item.subgrupo,
+
+        "Cantidad":
+          item.cantidad,
+
+        "Peso unitario kg":
+          item.pesoUnitario,
+
+        "Peso total kg":
+          item.pesoTotal,
+
+        "Observación":
+          item.observacion
+
+      })
+    );
+
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.json_to_sheet(
+      resumen
+    ),
+    "Resumen"
+  );
+
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.json_to_sheet(
+      materialesExcel
+    ),
+    "Materiales"
+  );
+
+
+  XLSX.writeFile(
+    wb,
+    idBorrador +
+    "_Modulacion.xlsx"
+  );
+
+}
+
+
+/* =========================================================
+   EXPORTAR UNA MODULACIÓN A PDF
+========================================================= */
+
+function exportarPDFModulacion(
+  idBorrador
+){
+
+  const modulacion =
+    modulaciones.find(
+      item =>
+        item.idBorrador ===
+        idBorrador
+    );
+
+
+  if(!modulacion){
+
+    alert(
+      "No se encontró la modulación."
+    );
+
+    return;
+  }
+
+
+  const detalle =
+    materiales.filter(
+      item =>
+        item.idBorrador ===
+        idBorrador
+    );
+
+
+  const {
+    jsPDF
+  } =
+    window.jspdf;
+
+
+  const doc =
+    new jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4"
+    });
+
+
+  doc.setFontSize(
+    17
+  );
+
+
+  doc.text(
+    "DIMARZA - MODULACIÓN",
+    14,
+    15
+  );
+
+
+  doc.setFontSize(
+    10
+  );
+
+
+  doc.text(
+    "ID: " +
+    modulacion.idBorrador,
+    14,
+    23
+  );
+
+
+  doc.text(
+    "Fecha: " +
+    modulacion.fecha,
+    14,
+    29
+  );
+
+
+  doc.text(
+    "Responsable: " +
+    modulacion.responsable,
+    14,
+    35
+  );
+
+
+  doc.text(
+    "Referencia: " +
+    modulacion.referencia,
+    14,
+    41
+  );
+
+
+  doc.text(
+    "Estado: " +
+    modulacion.estado,
+    150,
+    23
+  );
+
+
+  doc.text(
+    "Piezas: " +
+    formatearNumero(
+      modulacion.totalPiezas
+    ),
+    150,
+    29
+  );
+
+
+  doc.text(
+    "Peso total: " +
+    formatearNumero(
+      modulacion.pesoTotal
+    ) +
+    " kg",
+    150,
+    35
+  );
+
+
+  doc.text(
+    "Tipos de material: " +
+    formatearNumero(
+      modulacion.cantidadMateriales
+    ),
+    150,
+    41
+  );
+
+
+  const filas =
+    detalle.map(
+      item => [
+
+        item.codigo || "S/C",
+
+        item.descripcion,
+
+        item.grupo,
+
+        item.cantidad,
+
+        formatearNumero(
+          item.pesoUnitario
+        ) +
+        " kg",
+
+        formatearNumero(
+          item.pesoTotal
+        ) +
+        " kg",
+
+        item.observacion || ""
+
+      ]
+    );
+
+
+  doc.autoTable({
+
+    startY:50,
+
+    head:[[
+      "Código",
+      "Material",
+      "Grupo",
+      "Cantidad",
+      "P. Unit.",
+      "Peso total",
+      "Observación"
+    ]],
+
+    body:
+      filas,
+
+    styles:{
+      fontSize:8,
+      cellPadding:2
+    },
+
+    headStyles:{
+      fillColor:[
+        22,
+        63,
+        99
+      ]
+    }
+
+  });
+
+
+  doc.save(
+    idBorrador +
+    "_Modulacion.pdf"
+  );
+
+}
 /* =========================================================
    EXPORTAR EXCEL
 ========================================================= */
