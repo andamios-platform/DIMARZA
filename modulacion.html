@@ -642,7 +642,7 @@ button{
 
   grid-template-columns:
     repeat(
-      3,
+      5,
       minmax(150px,1fr)
     );
 
@@ -1703,7 +1703,30 @@ tbody tr:hover{
         </strong>
 
       </article>
+    <article class="resumen-card">
 
+  <span>
+    Toneladas
+  </span>
+
+  <strong id="totalToneladas">
+    0 t
+  </strong>
+
+</article>
+
+
+<article class="resumen-card">
+
+  <span>
+    Cuerpos
+  </span>
+
+  <strong id="totalCuerpos">
+    0
+  </strong>
+
+</article>
 
     </div>
 
@@ -3553,7 +3576,14 @@ function actualizarResumen(){
           ),
         0
       );
+const totalToneladas =
+  pesoTotal / 1000;
 
+
+const totalCuerpos =
+  Math.round(
+    pesoTotal / 240
+  );
 
   document
     .getElementById(
@@ -3581,7 +3611,28 @@ function actualizarResumen(){
       `${formatearNumero(
         pesoTotal
       )} kg`;
+document
+  .getElementById(
+    'totalToneladas'
+  )
+  .textContent =
+    `${totalToneladas.toLocaleString(
+      'es-PE',
+      {
+        minimumFractionDigits:3,
+        maximumFractionDigits:3
+      }
+    )} t`;
 
+
+document
+  .getElementById(
+    'totalCuerpos'
+  )
+  .textContent =
+    formatearNumero(
+      totalCuerpos
+    );
 }
 
 
