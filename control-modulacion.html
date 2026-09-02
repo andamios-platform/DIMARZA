@@ -1,0 +1,3234 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+  Control de Modulación | DIMARZA
+</title>
+
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+  rel="stylesheet"
+>
+
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+></script>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+></script>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+></script>
+
+
+<style>
+
+:root{
+
+  --azul:#163f63;
+  --azul2:#2f6d9b;
+
+  --naranja:#ea580c;
+  --naranja2:#c2410c;
+
+  --verde:#16815d;
+  --morado:#7c3aed;
+
+  --gris:#64748b;
+  --gris-claro:#f1f5f9;
+
+  --borde:#dbe4ea;
+
+  --texto:#1e293b;
+
+  --rojo:#dc2626;
+
+  --sombra:
+    0 10px 28px
+    rgba(15,23,42,.08);
+
+  --radio:16px;
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+body{
+
+  margin:0;
+
+  font-family:
+    "Poppins",
+    Arial,
+    sans-serif;
+
+  color:var(--texto);
+
+  background:#e9eef3;
+}
+
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+
+button{
+  cursor:pointer;
+}
+
+
+.oculto{
+  display:none !important;
+}
+
+
+/* =========================================================
+   CONTENEDOR
+========================================================= */
+
+.contenedor{
+
+  width:
+    min(
+      1500px,
+      calc(100% - 28px)
+    );
+
+  margin:0 auto;
+
+  padding:
+    22px 0 45px;
+}
+
+
+/* =========================================================
+   CABECERA
+========================================================= */
+
+.cabecera{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  gap:18px;
+
+  align-items:center;
+
+  padding:22px;
+
+  margin-bottom:18px;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--naranja),
+      var(--naranja2)
+    );
+
+  border-radius:
+    var(--radio);
+
+  box-shadow:
+    var(--sombra);
+}
+
+
+.cabecera h1{
+
+  margin:0 0 5px;
+
+  font-size:
+    clamp(
+      25px,
+      3vw,
+      36px
+    );
+}
+
+
+.cabecera p{
+
+  margin:0;
+
+  font-size:13px;
+
+  opacity:.92;
+}
+
+
+.btn-volver{
+
+  padding:
+    11px 16px;
+
+  color:white;
+
+  font-weight:600;
+
+  background:
+    rgba(255,255,255,.15);
+
+  border:
+    1px solid
+    rgba(255,255,255,.35);
+
+  border-radius:10px;
+}
+
+
+.btn-volver:hover{
+  background:
+    rgba(255,255,255,.24);
+}
+
+
+/* =========================================================
+   PANEL
+========================================================= */
+
+.panel{
+
+  margin-bottom:18px;
+
+  padding:20px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:
+    var(--radio);
+
+  box-shadow:
+    var(--sombra);
+}
+
+
+.panel-titulo{
+
+  display:flex;
+
+  justify-content:
+    space-between;
+
+  align-items:center;
+
+  gap:15px;
+
+  margin-bottom:15px;
+}
+
+
+.panel-titulo h2{
+
+  margin:0;
+
+  color:var(--azul);
+
+  font-size:19px;
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+.filtros{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      5,
+      minmax(150px,1fr)
+    );
+
+  gap:12px;
+}
+
+
+.campo{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:6px;
+}
+
+
+.campo label{
+
+  color:var(--gris);
+
+  font-size:10px;
+
+  font-weight:700;
+
+  text-transform:uppercase;
+}
+
+
+.campo input,
+.campo select{
+
+  width:100%;
+
+  padding:
+    10px 11px;
+
+  color:var(--texto);
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:9px;
+
+  outline:none;
+}
+
+
+.campo input:focus,
+.campo select:focus{
+
+  border-color:
+    var(--azul2);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(47,109,155,.10);
+}
+
+
+.acciones-filtro{
+
+  display:flex;
+
+  gap:9px;
+
+  flex-wrap:wrap;
+
+  margin-top:15px;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.btn{
+
+  padding:
+    10px 15px;
+
+  font-weight:600;
+
+  border:0;
+
+  border-radius:9px;
+}
+
+
+.btn-azul{
+
+  color:white;
+
+  background:var(--azul);
+}
+
+
+.btn-verde{
+
+  color:white;
+
+  background:var(--verde);
+}
+
+
+.btn-naranja{
+
+  color:white;
+
+  background:var(--naranja);
+}
+
+
+.btn-gris{
+
+  color:var(--azul);
+
+  background:#edf4f8;
+
+  border:
+    1px solid
+    #cbdde8;
+}
+
+
+/* =========================================================
+   KPIS
+========================================================= */
+
+.kpis{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      5,
+      minmax(160px,1fr)
+    );
+
+  gap:13px;
+
+  margin-bottom:18px;
+}
+
+
+.kpi{
+
+  padding:17px;
+
+  background:white;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:14px;
+
+  box-shadow:
+    var(--sombra);
+
+  border-top:
+    4px solid
+    var(--azul2);
+}
+
+
+.kpi:nth-child(2){
+  border-top-color:
+    var(--naranja);
+}
+
+
+.kpi:nth-child(3){
+  border-top-color:
+    var(--verde);
+}
+
+
+.kpi:nth-child(4){
+  border-top-color:
+    var(--morado);
+}
+
+
+.kpi:nth-child(5){
+  border-top-color:
+    #0891b2;
+}
+
+
+.kpi span{
+
+  display:block;
+
+  margin-bottom:7px;
+
+  color:var(--gris);
+
+  font-size:10px;
+
+  font-weight:700;
+
+  text-transform:uppercase;
+}
+
+
+.kpi strong{
+
+  color:var(--azul);
+
+  font-size:24px;
+}
+
+
+/* =========================================================
+   PESTAÑAS
+========================================================= */
+
+.tabs{
+
+  display:flex;
+
+  gap:8px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:15px;
+}
+
+
+.tab{
+
+  padding:
+    10px 16px;
+
+  color:var(--gris);
+
+  font-weight:600;
+
+  background:
+    var(--gris-claro);
+
+  border:0;
+
+  border-radius:9px;
+}
+
+
+.tab.activa{
+
+  color:white;
+
+  background:
+    var(--azul);
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.tabla-wrap{
+
+  width:100%;
+
+  overflow-x:auto;
+
+  border:
+    1px solid
+    var(--borde);
+
+  border-radius:12px;
+}
+
+
+table{
+
+  width:100%;
+
+  min-width:1050px;
+
+  border-collapse:
+    collapse;
+}
+
+
+th,
+td{
+
+  padding:
+    10px 9px;
+
+  border-bottom:
+    1px solid
+    var(--borde);
+
+  text-align:left;
+
+  vertical-align:middle;
+}
+
+
+th{
+
+  color:white;
+
+  background:
+    var(--azul);
+
+  font-size:10px;
+
+  text-transform:uppercase;
+
+  white-space:nowrap;
+}
+
+
+td{
+
+  font-size:11px;
+}
+
+
+tbody tr:hover{
+
+  background:#f8fafc;
+}
+
+
+.numero{
+  text-align:right;
+}
+
+
+.centro{
+  text-align:center;
+}
+
+
+.id-modulacion{
+
+  color:var(--azul2);
+
+  font-weight:700;
+}
+
+
+.estado{
+
+  display:inline-block;
+
+  padding:
+    5px 8px;
+
+  color:#92400e;
+
+  background:#fef3c7;
+
+  border-radius:999px;
+
+  font-size:9px;
+
+  font-weight:700;
+}
+
+
+/* =========================================================
+   DETALLE
+========================================================= */
+
+.fila-detalle{
+
+  background:#f8fafc;
+}
+
+
+.detalle-contenedor{
+
+  padding:8px 0;
+}
+
+
+.detalle-titulo{
+
+  margin:
+    0 0 10px;
+
+  color:var(--azul);
+
+  font-size:13px;
+}
+
+
+.tabla-detalle{
+
+  min-width:900px;
+}
+
+
+.tabla-detalle th{
+
+  background:
+    var(--azul2);
+}
+
+
+/* =========================================================
+   ANÁLISIS
+========================================================= */
+
+.analisis-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0,1fr)
+    );
+
+  gap:18px;
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.cargando,
+.sin-datos{
+
+  padding:28px;
+
+  text-align:center;
+
+  border-radius:11px;
+}
+
+
+.cargando{
+
+  color:var(--azul);
+
+  background:#edf6fb;
+}
+
+
+.sin-datos{
+
+  color:var(--gris);
+
+  background:#f8fafc;
+
+  border:
+    1px dashed
+    var(--borde);
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer{
+
+  margin-top:30px;
+
+  padding-top:18px;
+
+  color:var(--gris);
+
+  font-size:11px;
+
+  text-align:center;
+
+  border-top:
+    1px solid
+    var(--borde);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1100px){
+
+  .filtros{
+    grid-template-columns:
+      repeat(3,1fr);
+  }
+
+  .kpis{
+    grid-template-columns:
+      repeat(3,1fr);
+  }
+}
+
+
+@media(max-width:760px){
+
+  .contenedor{
+
+    width:
+      calc(100% - 18px);
+
+    padding-top:10px;
+  }
+
+
+  .cabecera{
+
+    grid-template-columns:1fr;
+  }
+
+
+  .btn-volver{
+    width:100%;
+  }
+
+
+  .filtros{
+
+    grid-template-columns:1fr;
+  }
+
+
+  .kpis{
+
+    grid-template-columns:1fr;
+  }
+
+
+  .analisis-grid{
+
+    grid-template-columns:1fr;
+  }
+
+
+  .acciones-filtro{
+
+    flex-direction:column;
+  }
+
+
+  .acciones-filtro button{
+
+    width:100%;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<main class="contenedor">
+
+
+  <!-- =====================================================
+       CABECERA
+  ====================================================== -->
+
+  <section class="cabecera">
+
+    <div>
+
+      <h1>
+        Control de Modulación
+      </h1>
+
+      <p>
+        Consulta y analiza las modulaciones registradas,
+        sus materiales, cantidades y pesos estimados.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn-volver"
+      onclick="volverVisualizacion()"
+    >
+      ← Volver a Visualización
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTROS
+  ====================================================== -->
+
+  <section class="panel">
+
+    <div class="panel-titulo">
+
+      <h2>
+        Filtros
+      </h2>
+
+    </div>
+
+
+    <div class="filtros">
+
+
+      <div class="campo">
+
+        <label>
+          Desde
+        </label>
+
+        <input
+          type="date"
+          id="filtroDesde"
+          onchange="aplicarFiltros()"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Hasta
+        </label>
+
+        <input
+          type="date"
+          id="filtroHasta"
+          onchange="aplicarFiltros()"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Responsable
+        </label>
+
+        <select
+          id="filtroResponsable"
+          onchange="aplicarFiltros()"
+        >
+
+          <option value="">
+            Todos
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Estado
+        </label>
+
+        <select
+          id="filtroEstado"
+          onchange="aplicarFiltros()"
+        >
+
+          <option value="">
+            Todos
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Buscar
+        </label>
+
+        <input
+          type="search"
+          id="filtroBuscar"
+          placeholder="ID, referencia..."
+          oninput="aplicarFiltros()"
+        >
+
+      </div>
+
+
+    </div>
+
+
+    <div class="acciones-filtro">
+
+      <button
+        type="button"
+        class="btn btn-gris"
+        onclick="limpiarFiltros()"
+      >
+        Limpiar filtros
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-verde"
+        onclick="exportarExcel()"
+      >
+        📊 Exportar Excel
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-naranja"
+        onclick="exportarPDF()"
+      >
+        📄 Exportar PDF
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       KPIS
+  ====================================================== -->
+
+  <section class="kpis">
+
+
+    <article class="kpi">
+
+      <span>
+        Modulaciones
+      </span>
+
+      <strong id="kpiModulaciones">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="kpi">
+
+      <span>
+        Tipos de material
+      </span>
+
+      <strong id="kpiMateriales">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="kpi">
+
+      <span>
+        Piezas totales
+      </span>
+
+      <strong id="kpiPiezas">
+        0
+      </strong>
+
+    </article>
+
+
+    <article class="kpi">
+
+      <span>
+        Peso estimado
+      </span>
+
+      <strong id="kpiPeso">
+        0 kg
+      </strong>
+
+    </article>
+
+
+    <article class="kpi">
+
+      <span>
+        Responsables
+      </span>
+
+      <strong id="kpiResponsables">
+        0
+      </strong>
+
+    </article>
+
+
+  </section>
+
+
+  <!-- =====================================================
+       CONTENIDO
+  ====================================================== -->
+
+  <section class="panel">
+
+
+    <div class="tabs">
+
+      <button
+        type="button"
+        id="tabModulaciones"
+        class="tab activa"
+        onclick="mostrarTab('modulaciones')"
+      >
+        Modulaciones
+      </button>
+
+
+      <button
+        type="button"
+        id="tabMateriales"
+        class="tab"
+        onclick="mostrarTab('materiales')"
+      >
+        Análisis de materiales
+      </button>
+
+
+      <button
+        type="button"
+        id="tabResponsables"
+        class="tab"
+        onclick="mostrarTab('responsables')"
+      >
+        Por responsable
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         MODULACIONES
+    ==================================================== -->
+
+    <div id="vistaModulaciones">
+
+      <div
+        id="cargando"
+        class="cargando"
+      >
+        Cargando Control de Modulación...
+      </div>
+
+
+      <div
+        id="sinModulaciones"
+        class="sin-datos oculto"
+      >
+        No existen modulaciones para los filtros seleccionados.
+      </div>
+
+
+      <div
+        id="tablaModulacionesWrap"
+        class="tabla-wrap oculto"
+      >
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                ID
+              </th>
+
+              <th>
+                Fecha
+              </th>
+
+              <th>
+                Responsable
+              </th>
+
+              <th>
+                Referencia
+              </th>
+
+              <th>
+                Estado
+              </th>
+
+              <th>
+                Tipos material
+              </th>
+
+              <th>
+                Piezas
+              </th>
+
+              <th>
+                Peso
+              </th>
+
+              <th>
+                Última modificación
+              </th>
+
+              <th>
+                Detalle
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="tablaModulaciones">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         MATERIALES
+    ==================================================== -->
+
+    <div
+      id="vistaMateriales"
+      class="oculto"
+    >
+
+      <div
+        id="sinMateriales"
+        class="sin-datos oculto"
+      >
+        No existen materiales para los filtros seleccionados.
+      </div>
+
+
+      <div
+        id="tablaMaterialesWrap"
+        class="tabla-wrap"
+      >
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Grupo
+              </th>
+
+              <th>
+                Código
+              </th>
+
+              <th>
+                Material
+              </th>
+
+              <th>
+                Modulaciones
+              </th>
+
+              <th>
+                Cantidad total
+              </th>
+
+              <th>
+                Peso total
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="tablaMateriales">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         RESPONSABLES
+    ==================================================== -->
+
+    <div
+      id="vistaResponsables"
+      class="oculto"
+    >
+
+      <div
+        id="sinResponsables"
+        class="sin-datos oculto"
+      >
+        No existen responsables para los filtros seleccionados.
+      </div>
+
+
+      <div
+        id="tablaResponsablesWrap"
+        class="tabla-wrap"
+      >
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Responsable
+              </th>
+
+              <th>
+                Modulaciones
+              </th>
+
+              <th>
+                Tipos material
+              </th>
+
+              <th>
+                Piezas
+              </th>
+
+              <th>
+                Peso total
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="tablaResponsables">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+  </section>
+
+
+  <footer class="footer">
+
+    © 2026 Ruben Romero.
+    Todos los derechos reservados.
+
+  </footer>
+
+
+</main>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIHr9XP7SA81SoZZSxo4OoB5N7VaMLLklU9ym82vCwDQN/exec";
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let modulaciones = [];
+
+let materiales = [];
+
+let modulacionesFiltradas = [];
+
+let materialesFiltrados = [];
+
+let detalleAbierto = "";
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  cargarControlModulacion
+);
+
+
+/* =========================================================
+   CARGAR API
+========================================================= */
+
+async function cargarControlModulacion(){
+
+  try{
+
+    const respuesta =
+      await fetch(
+        WEB_APP_URL +
+        "?accion=controlModulacion" +
+        "&t=" +
+        Date.now(),
+        {
+          cache:"no-store"
+        }
+      );
+
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        "Error HTTP " +
+        respuesta.status
+      );
+    }
+
+
+    const datos =
+      await respuesta.json();
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        "No se pudo cargar Control de Modulación."
+      );
+    }
+
+
+    modulaciones =
+      Array.isArray(
+        datos.modulaciones
+      )
+        ? datos.modulaciones
+        : [];
+
+
+    materiales =
+      Array.isArray(
+        datos.materiales
+      )
+        ? datos.materiales
+        : [];
+
+
+    cargarFiltros();
+
+    aplicarFiltros();
+
+
+    document
+      .getElementById(
+        "cargando"
+      )
+      .classList.add(
+        "oculto"
+      );
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    const cargando =
+      document.getElementById(
+        "cargando"
+      );
+
+
+    cargando.textContent =
+      "No se pudo cargar la información: " +
+      error.message;
+
+  }
+
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+function cargarFiltros(){
+
+  const responsables =
+    [
+      ...new Set(
+        modulaciones
+          .map(
+            item =>
+              String(
+                item.responsable || ""
+              ).trim()
+          )
+          .filter(Boolean)
+      )
+    ]
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "es"
+          )
+      );
+
+
+  const estados =
+    [
+      ...new Set(
+        modulaciones
+          .map(
+            item =>
+              String(
+                item.estado || ""
+              ).trim()
+          )
+          .filter(Boolean)
+      )
+    ]
+      .sort();
+
+
+  const selectResponsable =
+    document.getElementById(
+      "filtroResponsable"
+    );
+
+
+  responsables.forEach(
+    responsable => {
+
+      const opcion =
+        document.createElement(
+          "option"
+        );
+
+      opcion.value =
+        responsable;
+
+      opcion.textContent =
+        responsable;
+
+      selectResponsable
+        .appendChild(
+          opcion
+        );
+
+    }
+  );
+
+
+  const selectEstado =
+    document.getElementById(
+      "filtroEstado"
+    );
+
+
+  estados.forEach(
+    estado => {
+
+      const opcion =
+        document.createElement(
+          "option"
+        );
+
+      opcion.value =
+        estado;
+
+      opcion.textContent =
+        estado;
+
+      selectEstado
+        .appendChild(
+          opcion
+        );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   APLICAR FILTROS
+========================================================= */
+
+function aplicarFiltros(){
+
+  const desde =
+    document
+      .getElementById(
+        "filtroDesde"
+      )
+      .value;
+
+
+  const hasta =
+    document
+      .getElementById(
+        "filtroHasta"
+      )
+      .value;
+
+
+  const responsable =
+    normalizar(
+      document
+        .getElementById(
+          "filtroResponsable"
+        )
+        .value
+    );
+
+
+  const estado =
+    normalizar(
+      document
+        .getElementById(
+          "filtroEstado"
+        )
+        .value
+    );
+
+
+  const buscar =
+    normalizar(
+      document
+        .getElementById(
+          "filtroBuscar"
+        )
+        .value
+    );
+
+
+  modulacionesFiltradas =
+    modulaciones.filter(
+      item => {
+
+        const fecha =
+          String(
+            item.fechaISO || ""
+          );
+
+
+        if(
+          desde &&
+          fecha &&
+          fecha < desde
+        ){
+          return false;
+        }
+
+
+        if(
+          hasta &&
+          fecha &&
+          fecha > hasta
+        ){
+          return false;
+        }
+
+
+        if(
+          responsable &&
+          normalizar(
+            item.responsable
+          ) !== responsable
+        ){
+          return false;
+        }
+
+
+        if(
+          estado &&
+          normalizar(
+            item.estado
+          ) !== estado
+        ){
+          return false;
+        }
+
+
+        if(buscar){
+
+          const texto =
+            normalizar(
+              [
+                item.idBorrador,
+                item.referencia,
+                item.responsable,
+                item.estado
+              ].join(" ")
+            );
+
+
+          if(
+            !texto.includes(
+              buscar
+            )
+          ){
+            return false;
+          }
+
+        }
+
+
+        return true;
+
+      }
+    );
+
+
+  const idsPermitidos =
+    new Set(
+      modulacionesFiltradas
+        .map(
+          item =>
+            item.idBorrador
+        )
+    );
+
+
+  materialesFiltrados =
+    materiales.filter(
+      item =>
+        idsPermitidos.has(
+          item.idBorrador
+        )
+    );
+
+
+  detalleAbierto = "";
+
+
+  renderizarTodo();
+
+}
+
+
+/* =========================================================
+   LIMPIAR FILTROS
+========================================================= */
+
+function limpiarFiltros(){
+
+  document
+    .getElementById(
+      "filtroDesde"
+    )
+    .value = "";
+
+
+  document
+    .getElementById(
+      "filtroHasta"
+    )
+    .value = "";
+
+
+  document
+    .getElementById(
+      "filtroResponsable"
+    )
+    .value = "";
+
+
+  document
+    .getElementById(
+      "filtroEstado"
+    )
+    .value = "";
+
+
+  document
+    .getElementById(
+      "filtroBuscar"
+    )
+    .value = "";
+
+
+  aplicarFiltros();
+
+}
+
+
+/* =========================================================
+   RENDER GENERAL
+========================================================= */
+
+function renderizarTodo(){
+
+  actualizarKPIs();
+
+  renderizarModulaciones();
+
+  renderizarAnalisisMateriales();
+
+  renderizarResponsables();
+
+}
+
+
+/* =========================================================
+   KPIS
+========================================================= */
+
+function actualizarKPIs(){
+
+  const totalModulaciones =
+    modulacionesFiltradas.length;
+
+
+  const piezas =
+    modulacionesFiltradas
+      .reduce(
+        (
+          total,
+          item
+        ) =>
+          total +
+          (
+            Number(
+              item.totalPiezas
+            ) || 0
+          ),
+        0
+      );
+
+
+  const peso =
+    modulacionesFiltradas
+      .reduce(
+        (
+          total,
+          item
+        ) =>
+          total +
+          (
+            Number(
+              item.pesoTotal
+            ) || 0
+          ),
+        0
+      );
+
+
+  const responsables =
+    new Set(
+      modulacionesFiltradas
+        .map(
+          item =>
+            String(
+              item.responsable || ""
+            ).trim()
+        )
+        .filter(Boolean)
+    )
+      .size;
+
+
+  const tiposMaterial =
+    new Set(
+      materialesFiltrados
+        .map(
+          item =>
+            [
+              normalizar(
+                item.codigo
+              ),
+              normalizar(
+                item.descripcion
+              )
+            ]
+              .join("|")
+        )
+    )
+      .size;
+
+
+  document
+    .getElementById(
+      "kpiModulaciones"
+    )
+    .textContent =
+      formatearNumero(
+        totalModulaciones
+      );
+
+
+  document
+    .getElementById(
+      "kpiMateriales"
+    )
+    .textContent =
+      formatearNumero(
+        tiposMaterial
+      );
+
+
+  document
+    .getElementById(
+      "kpiPiezas"
+    )
+    .textContent =
+      formatearNumero(
+        piezas
+      );
+
+
+  document
+    .getElementById(
+      "kpiPeso"
+    )
+    .textContent =
+      formatearNumero(
+        peso
+      ) +
+      " kg";
+
+
+  document
+    .getElementById(
+      "kpiResponsables"
+    )
+    .textContent =
+      formatearNumero(
+        responsables
+      );
+
+}
+
+
+/* =========================================================
+   MODULACIONES
+========================================================= */
+
+function renderizarModulaciones(){
+
+  const tbody =
+    document.getElementById(
+      "tablaModulaciones"
+    );
+
+
+  const wrap =
+    document.getElementById(
+      "tablaModulacionesWrap"
+    );
+
+
+  const sinDatos =
+    document.getElementById(
+      "sinModulaciones"
+    );
+
+
+  tbody.innerHTML = "";
+
+
+  if(
+    !modulacionesFiltradas.length
+  ){
+
+    wrap
+      .classList.add(
+        "oculto"
+      );
+
+
+    sinDatos
+      .classList.remove(
+        "oculto"
+      );
+
+
+    return;
+  }
+
+
+  sinDatos
+    .classList.add(
+      "oculto"
+    );
+
+
+  wrap
+    .classList.remove(
+      "oculto"
+    );
+
+
+  modulacionesFiltradas
+    .forEach(
+      item => {
+
+        const fila =
+          document.createElement(
+            "tr"
+          );
+
+
+        fila.innerHTML = `
+
+          <td class="id-modulacion">
+            ${escaparHTML(item.idBorrador)}
+          </td>
+
+          <td>
+            ${escaparHTML(item.fecha)}
+          </td>
+
+          <td>
+            ${escaparHTML(item.responsable)}
+          </td>
+
+          <td>
+            ${escaparHTML(item.referencia)}
+          </td>
+
+          <td>
+            <span class="estado">
+              ${escaparHTML(item.estado || "BORRADOR")}
+            </span>
+          </td>
+
+          <td class="centro">
+            ${formatearNumero(item.cantidadMateriales)}
+          </td>
+
+          <td class="centro">
+            ${formatearNumero(item.totalPiezas)}
+          </td>
+
+          <td class="numero">
+            ${formatearNumero(item.pesoTotal)} kg
+          </td>
+
+          <td>
+            ${escaparHTML(item.ultimaModificacion)}
+          </td>
+
+          <td>
+
+            <button
+              type="button"
+              class="btn btn-gris"
+              onclick="alternarDetalle(
+                '${escaparAtributo(
+                  item.idBorrador
+                )}'
+              )"
+            >
+              ${
+                detalleAbierto ===
+                item.idBorrador
+                  ? "Ocultar"
+                  : "Ver"
+              }
+            </button>
+
+          </td>
+
+        `;
+
+
+        tbody.appendChild(
+          fila
+        );
+
+
+        if(
+          detalleAbierto ===
+          item.idBorrador
+        ){
+
+          tbody.appendChild(
+            crearFilaDetalle(
+              item.idBorrador
+            )
+          );
+
+        }
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   DETALLE
+========================================================= */
+
+function alternarDetalle(
+  idBorrador
+){
+
+  detalleAbierto =
+    detalleAbierto ===
+    idBorrador
+      ? ""
+      : idBorrador;
+
+
+  renderizarModulaciones();
+
+}
+
+
+function crearFilaDetalle(
+  idBorrador
+){
+
+  const fila =
+    document.createElement(
+      "tr"
+    );
+
+
+  fila.className =
+    "fila-detalle";
+
+
+  const materialesDetalle =
+    materialesFiltrados.filter(
+      item =>
+        item.idBorrador ===
+        idBorrador
+    );
+
+
+  const filas =
+    materialesDetalle
+      .map(
+        item => `
+
+          <tr>
+
+            <td>
+              ${escaparHTML(item.codigo || "S/C")}
+            </td>
+
+            <td>
+              ${escaparHTML(item.descripcion)}
+            </td>
+
+            <td>
+              ${escaparHTML(item.grupo)}
+            </td>
+
+            <td class="centro">
+              ${formatearNumero(item.cantidad)}
+            </td>
+
+            <td class="numero">
+              ${formatearNumero(item.pesoUnitario)} kg
+            </td>
+
+            <td class="numero">
+              ${formatearNumero(item.pesoTotal)} kg
+            </td>
+
+            <td>
+              ${escaparHTML(item.observacion)}
+            </td>
+
+          </tr>
+
+        `
+      )
+      .join("");
+
+
+  fila.innerHTML = `
+
+    <td colspan="10">
+
+      <div class="detalle-contenedor">
+
+        <h3 class="detalle-titulo">
+          Materiales de ${escaparHTML(idBorrador)}
+        </h3>
+
+
+        <div class="tabla-wrap">
+
+          <table class="tabla-detalle">
+
+            <thead>
+
+              <tr>
+
+                <th>Código</th>
+                <th>Material</th>
+                <th>Grupo</th>
+                <th>Cantidad</th>
+                <th>P. Unit.</th>
+                <th>Peso total</th>
+                <th>Observación</th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${filas}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </td>
+
+  `;
+
+
+  return fila;
+
+}
+
+
+/* =========================================================
+   ANÁLISIS DE MATERIALES
+========================================================= */
+
+function obtenerAnalisisMateriales(){
+
+  const mapa = {};
+
+
+  materialesFiltrados.forEach(
+    item => {
+
+      const clave =
+        [
+          normalizar(
+            item.codigo
+          ),
+          normalizar(
+            item.descripcion
+          )
+        ]
+          .join("|");
+
+
+      if(!mapa[clave]){
+
+        mapa[clave] = {
+
+          codigo:
+            item.codigo,
+
+          descripcion:
+            item.descripcion,
+
+          grupo:
+            item.grupo,
+
+          cantidad:0,
+
+          pesoTotal:0,
+
+          modulaciones:
+            new Set()
+
+        };
+
+      }
+
+
+      mapa[clave].cantidad +=
+        Number(
+          item.cantidad
+        ) || 0;
+
+
+      mapa[clave].pesoTotal +=
+        Number(
+          item.pesoTotal
+        ) || 0;
+
+
+      mapa[clave]
+        .modulaciones
+        .add(
+          item.idBorrador
+        );
+
+    }
+  );
+
+
+  return Object
+    .values(
+      mapa
+    )
+    .map(
+      item => ({
+
+        codigo:
+          item.codigo,
+
+        descripcion:
+          item.descripcion,
+
+        grupo:
+          item.grupo,
+
+        cantidad:
+          item.cantidad,
+
+        pesoTotal:
+          item.pesoTotal,
+
+        modulaciones:
+          item.modulaciones.size
+
+      })
+    )
+    .sort(
+      (a,b) =>
+        b.cantidad -
+        a.cantidad
+    );
+
+}
+
+
+function renderizarAnalisisMateriales(){
+
+  const datos =
+    obtenerAnalisisMateriales();
+
+
+  const tbody =
+    document.getElementById(
+      "tablaMateriales"
+    );
+
+
+  const wrap =
+    document.getElementById(
+      "tablaMaterialesWrap"
+    );
+
+
+  const sinDatos =
+    document.getElementById(
+      "sinMateriales"
+    );
+
+
+  tbody.innerHTML = "";
+
+
+  if(!datos.length){
+
+    wrap
+      .classList.add(
+        "oculto"
+      );
+
+
+    sinDatos
+      .classList.remove(
+        "oculto"
+      );
+
+
+    return;
+  }
+
+
+  wrap
+    .classList.remove(
+      "oculto"
+    );
+
+
+  sinDatos
+    .classList.add(
+      "oculto"
+    );
+
+
+  datos.forEach(
+    item => {
+
+      const fila =
+        document.createElement(
+          "tr"
+        );
+
+
+      fila.innerHTML = `
+
+        <td>
+          ${escaparHTML(item.grupo)}
+        </td>
+
+        <td>
+          ${escaparHTML(item.codigo || "S/C")}
+        </td>
+
+        <td>
+          ${escaparHTML(item.descripcion)}
+        </td>
+
+        <td class="centro">
+          ${formatearNumero(item.modulaciones)}
+        </td>
+
+        <td class="numero">
+          ${formatearNumero(item.cantidad)}
+        </td>
+
+        <td class="numero">
+          ${formatearNumero(item.pesoTotal)} kg
+        </td>
+
+      `;
+
+
+      tbody.appendChild(
+        fila
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   RESPONSABLES
+========================================================= */
+
+function obtenerAnalisisResponsables(){
+
+  const mapa = {};
+
+
+  modulacionesFiltradas.forEach(
+    item => {
+
+      const responsable =
+        String(
+          item.responsable ||
+          "SIN RESPONSABLE"
+        );
+
+
+      if(!mapa[responsable]){
+
+        mapa[responsable] = {
+
+          responsable,
+
+          modulaciones:0,
+
+          piezas:0,
+
+          pesoTotal:0,
+
+          materiales:
+            new Set()
+
+        };
+
+      }
+
+
+      mapa[responsable]
+        .modulaciones++;
+
+
+      mapa[responsable]
+        .piezas +=
+          Number(
+            item.totalPiezas
+          ) || 0;
+
+
+      mapa[responsable]
+        .pesoTotal +=
+          Number(
+            item.pesoTotal
+          ) || 0;
+
+    }
+  );
+
+
+  materialesFiltrados.forEach(
+    item => {
+
+      const responsable =
+        String(
+          item.responsable ||
+          "SIN RESPONSABLE"
+        );
+
+
+      if(
+        mapa[
+          responsable
+        ]
+      ){
+
+        mapa[
+          responsable
+        ]
+          .materiales
+          .add(
+            [
+              normalizar(
+                item.codigo
+              ),
+              normalizar(
+                item.descripcion
+              )
+            ]
+              .join("|")
+          );
+
+      }
+
+    }
+  );
+
+
+  return Object
+    .values(
+      mapa
+    )
+    .map(
+      item => ({
+
+        responsable:
+          item.responsable,
+
+        modulaciones:
+          item.modulaciones,
+
+        materiales:
+          item.materiales.size,
+
+        piezas:
+          item.piezas,
+
+        pesoTotal:
+          item.pesoTotal
+
+      })
+    )
+    .sort(
+      (a,b) =>
+        b.modulaciones -
+        a.modulaciones
+    );
+
+}
+
+
+function renderizarResponsables(){
+
+  const datos =
+    obtenerAnalisisResponsables();
+
+
+  const tbody =
+    document.getElementById(
+      "tablaResponsables"
+    );
+
+
+  const wrap =
+    document.getElementById(
+      "tablaResponsablesWrap"
+    );
+
+
+  const sinDatos =
+    document.getElementById(
+      "sinResponsables"
+    );
+
+
+  tbody.innerHTML = "";
+
+
+  if(!datos.length){
+
+    wrap
+      .classList.add(
+        "oculto"
+      );
+
+
+    sinDatos
+      .classList.remove(
+        "oculto"
+      );
+
+
+    return;
+  }
+
+
+  wrap
+    .classList.remove(
+      "oculto"
+    );
+
+
+  sinDatos
+    .classList.add(
+      "oculto"
+    );
+
+
+  datos.forEach(
+    item => {
+
+      const fila =
+        document.createElement(
+          "tr"
+        );
+
+
+      fila.innerHTML = `
+
+        <td>
+          ${escaparHTML(item.responsable)}
+        </td>
+
+        <td class="centro">
+          ${formatearNumero(item.modulaciones)}
+        </td>
+
+        <td class="centro">
+          ${formatearNumero(item.materiales)}
+        </td>
+
+        <td class="numero">
+          ${formatearNumero(item.piezas)}
+        </td>
+
+        <td class="numero">
+          ${formatearNumero(item.pesoTotal)} kg
+        </td>
+
+      `;
+
+
+      tbody.appendChild(
+        fila
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+function mostrarTab(
+  tab
+){
+
+  const vistas = {
+
+    modulaciones:
+      "vistaModulaciones",
+
+    materiales:
+      "vistaMateriales",
+
+    responsables:
+      "vistaResponsables"
+
+  };
+
+
+  const botones = {
+
+    modulaciones:
+      "tabModulaciones",
+
+    materiales:
+      "tabMateriales",
+
+    responsables:
+      "tabResponsables"
+
+  };
+
+
+  Object
+    .values(
+      vistas
+    )
+    .forEach(
+      id =>
+        document
+          .getElementById(
+            id
+          )
+          .classList.add(
+            "oculto"
+          )
+    );
+
+
+  Object
+    .values(
+      botones
+    )
+    .forEach(
+      id =>
+        document
+          .getElementById(
+            id
+          )
+          .classList.remove(
+            "activa"
+          )
+    );
+
+
+  document
+    .getElementById(
+      vistas[tab]
+    )
+    .classList.remove(
+      "oculto"
+    );
+
+
+  document
+    .getElementById(
+      botones[tab]
+    )
+    .classList.add(
+      "activa"
+    );
+
+}
+
+
+/* =========================================================
+   EXPORTAR EXCEL
+========================================================= */
+
+function exportarExcel(){
+
+  if(
+    !modulacionesFiltradas.length
+  ){
+
+    alert(
+      "No existen datos para exportar."
+    );
+
+    return;
+  }
+
+
+  const wb =
+    XLSX.utils.book_new();
+
+
+  const hojaModulaciones =
+    modulacionesFiltradas.map(
+      item => ({
+
+        "ID":
+          item.idBorrador,
+
+        "Fecha":
+          item.fecha,
+
+        "Responsable":
+          item.responsable,
+
+        "Referencia":
+          item.referencia,
+
+        "Estado":
+          item.estado,
+
+        "Tipos de material":
+          item.cantidadMateriales,
+
+        "Piezas":
+          item.totalPiezas,
+
+        "Peso total kg":
+          Number(
+            item.pesoTotal
+          ) || 0,
+
+        "Última modificación":
+          item.ultimaModificacion
+
+      })
+    );
+
+
+  const hojaDetalle =
+    materialesFiltrados.map(
+      item => ({
+
+        "ID Modulación":
+          item.idBorrador,
+
+        "Fecha":
+          item.fecha,
+
+        "Responsable":
+          item.responsable,
+
+        "Referencia":
+          item.referencia,
+
+        "Código":
+          item.codigo,
+
+        "Material":
+          item.descripcion,
+
+        "Grupo":
+          item.grupo,
+
+        "Cantidad":
+          item.cantidad,
+
+        "Peso unitario kg":
+          item.pesoUnitario,
+
+        "Peso total kg":
+          item.pesoTotal,
+
+        "Observación":
+          item.observacion
+
+      })
+    );
+
+
+  const hojaAnalisis =
+    obtenerAnalisisMateriales()
+      .map(
+        item => ({
+
+          "Grupo":
+            item.grupo,
+
+          "Código":
+            item.codigo,
+
+          "Material":
+            item.descripcion,
+
+          "Modulaciones":
+            item.modulaciones,
+
+          "Cantidad total":
+            item.cantidad,
+
+          "Peso total kg":
+            item.pesoTotal
+
+        })
+      );
+
+
+  const hojaResponsables =
+    obtenerAnalisisResponsables()
+      .map(
+        item => ({
+
+          "Responsable":
+            item.responsable,
+
+          "Modulaciones":
+            item.modulaciones,
+
+          "Tipos de material":
+            item.materiales,
+
+          "Piezas":
+            item.piezas,
+
+          "Peso total kg":
+            item.pesoTotal
+
+        })
+      );
+
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.json_to_sheet(
+      hojaModulaciones
+    ),
+    "Modulaciones"
+  );
+
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.json_to_sheet(
+      hojaDetalle
+    ),
+    "Detalle"
+  );
+
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.json_to_sheet(
+      hojaAnalisis
+    ),
+    "Materiales"
+  );
+
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.json_to_sheet(
+      hojaResponsables
+    ),
+    "Responsables"
+  );
+
+
+  XLSX.writeFile(
+    wb,
+    "Control_Modulacion.xlsx"
+  );
+
+}
+
+
+/* =========================================================
+   EXPORTAR PDF
+========================================================= */
+
+function exportarPDF(){
+
+  if(
+    !modulacionesFiltradas.length
+  ){
+
+    alert(
+      "No existen datos para exportar."
+    );
+
+    return;
+  }
+
+
+  const {
+    jsPDF
+  } =
+    window.jspdf;
+
+
+  const doc =
+    new jsPDF({
+      orientation:"landscape",
+      unit:"mm",
+      format:"a4"
+    });
+
+
+  doc.setFontSize(
+    17
+  );
+
+
+  doc.text(
+    "DIMARZA - CONTROL DE MODULACIÓN",
+    14,
+    15
+  );
+
+
+  doc.setFontSize(
+    9
+  );
+
+
+  const piezas =
+    modulacionesFiltradas.reduce(
+      (
+        total,
+        item
+      ) =>
+        total +
+        (
+          Number(
+            item.totalPiezas
+          ) || 0
+        ),
+      0
+    );
+
+
+  const peso =
+    modulacionesFiltradas.reduce(
+      (
+        total,
+        item
+      ) =>
+        total +
+        (
+          Number(
+            item.pesoTotal
+          ) || 0
+        ),
+      0
+    );
+
+
+  doc.text(
+    "Modulaciones: " +
+    modulacionesFiltradas.length +
+    "   |   Piezas: " +
+    formatearNumero(piezas) +
+    "   |   Peso estimado: " +
+    formatearNumero(peso) +
+    " kg",
+    14,
+    22
+  );
+
+
+  const filas =
+    modulacionesFiltradas.map(
+      item => [
+
+        item.idBorrador,
+
+        item.fecha,
+
+        item.responsable,
+
+        item.referencia,
+
+        item.estado,
+
+        formatearNumero(
+          item.cantidadMateriales
+        ),
+
+        formatearNumero(
+          item.totalPiezas
+        ),
+
+        formatearNumero(
+          item.pesoTotal
+        ) +
+        " kg",
+
+        item.ultimaModificacion
+
+      ]
+    );
+
+
+  doc.autoTable({
+
+    startY:28,
+
+    head:[[
+      "ID",
+      "Fecha",
+      "Responsable",
+      "Referencia",
+      "Estado",
+      "Materiales",
+      "Piezas",
+      "Peso",
+      "Última modificación"
+    ]],
+
+    body:
+      filas,
+
+    styles:{
+      fontSize:7,
+      cellPadding:2
+    },
+
+    headStyles:{
+      fillColor:[
+        22,
+        63,
+        99
+      ]
+    }
+
+  });
+
+
+  doc.save(
+    "Control_Modulacion.pdf"
+  );
+
+}
+
+
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
+
+function volverVisualizacion(){
+
+  window.location.href =
+    "visualizacion.html";
+
+}
+
+
+/* =========================================================
+   FORMATO
+========================================================= */
+
+function formatearNumero(
+  valor
+){
+
+  const numero =
+    Number(
+      valor
+    ) || 0;
+
+
+  return numero.toLocaleString(
+    "es-PE",
+    {
+      maximumFractionDigits:2
+    }
+  );
+
+}
+
+
+function normalizar(
+  valor
+){
+
+  return String(
+    valor || ""
+  )
+    .trim()
+    .toLowerCase()
+    .normalize(
+      "NFD"
+    )
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    );
+}
+
+
+function escaparHTML(
+  valor
+){
+
+  return String(
+    valor ?? ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+function escaparAtributo(
+  valor
+){
+
+  return String(
+    valor || ""
+  )
+    .replace(
+      /\\/g,
+      "\\\\"
+    )
+    .replace(
+      /'/g,
+      "\\'"
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>
