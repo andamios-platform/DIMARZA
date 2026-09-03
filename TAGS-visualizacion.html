@@ -794,7 +794,32 @@ button{
 
 }
 
+.btn-eliminar-tag{
 
+  width:45px;
+
+  flex:0 0 45px;
+
+  color:white;
+
+  background:
+    var(--rojo);
+
+  border:0;
+
+  border-radius:9px;
+
+  font-size:16px;
+
+  font-weight:bold;
+
+}
+
+.btn-eliminar-tag:hover{
+
+  background:#a92f38;
+
+}
 /* =========================================================
    CARGA / SIN DATOS
 ========================================================= */
@@ -3775,19 +3800,44 @@ function pintarServicios(){
               </div>
 
 
-              <button
-                type="button"
-                class="btn-ver"
-                onclick="abrirDetalle('${
-                  escaparAtributo(
-                    servicio.idServicio
-                  )
-                }')"
-              >
+<div
+  style="
+    display:flex;
+    gap:8px;
+    margin:auto 17px 17px;
+  "
+>
 
-                Ver expediente del TAG
+  <button
+    type="button"
+    class="btn-ver"
+    style="
+      margin:0;
+      flex:1;
+    "
+    onclick="abrirDetalle('${
+      escaparAtributo(
+        servicio.idServicio
+      )
+    }')"
+  >
+    Ver expediente
+  </button>
 
-              </button>
+
+  <button
+    type="button"
+    class="btn-eliminar-tag"
+    onclick="eliminarTag(
+      '${escaparAtributo(
+        servicio.idServicio
+      )}'
+    )"
+  >
+    🗑️
+  </button>
+
+</div>
 
             </article>
 
@@ -3823,7 +3873,186 @@ function crearDatoTag(
 
 }
 
+/* =========================================================
+   ELIMINAR TAG / SERVICIO
+========================================================= */
 
+async function eliminarTag(
+  idServicio
+){
+
+  const servicio =
+    serviciosOriginales.find(
+      item =>
+        String(
+          item.idServicio ||
+          ''
+        ).trim() ===
+        String(
+          idServicio ||
+          ''
+        ).trim()
+    );
+
+
+  if(!servicio){
+
+    alert(
+      'No se encontró el servicio.'
+    );
+
+    return;
+
+  }
+
+
+  const confirmar =
+    confirm(
+      '¿ELIMINAR ESTE TAG?\n\n' +
+
+      'TAG: ' +
+      (
+        servicio.tag ||
+        '-'
+      ) +
+
+      '\nID Servicio: ' +
+      (
+        servicio.idServicio ||
+        '-'
+      ) +
+
+      '\nMina: ' +
+      (
+        servicio.faena ||
+        servicio.mina ||
+        '-'
+      ) +
+
+      '\n\nSe eliminará también su información de Previos, Traslado, Armado, Postparada y fotografías.' +
+
+      '\n\nEsta acción no debe utilizarse para servicios reales.'
+    );
+
+
+  if(!confirmar){
+    return;
+  }
+
+
+  /*
+   * Segunda confirmación para evitar
+   * eliminaciones accidentales.
+   */
+  const confirmarDefinitivo =
+    confirm(
+      'CONFIRMACIÓN FINAL\n\n' +
+      '¿Eliminar definitivamente ' +
+      (
+        servicio.tag ||
+        servicio.idServicio
+      ) +
+      '?'
+    );
+
+
+  if(!confirmarDefinitivo){
+    return;
+  }
+
+
+  try{
+
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+          method:'POST',
+
+          headers:{
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body:
+            JSON.stringify({
+              accion:
+                'eliminarServicio',
+              idServicio:
+                idServicio
+            })
+        }
+      );
+
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        'Error HTTP ' +
+        respuesta.status
+      );
+
+    }
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.mensaje ||
+        'No fue posible eliminar el TAG.'
+      );
+
+    }
+
+
+    alert(
+      resultado.mensaje ||
+      'TAG eliminado correctamente.'
+    );
+
+
+    /*
+     * Lo quitamos inmediatamente
+     * de la pantalla.
+     */
+    serviciosOriginales =
+      serviciosOriginales.filter(
+        item =>
+          String(
+            item.idServicio ||
+            ''
+          ).trim() !==
+          String(
+            idServicio ||
+            ''
+          ).trim()
+      );
+
+
+    cargarFiltros();
+
+    aplicarFiltros();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      'No se pudo eliminar el TAG: ' +
+      error.message
+    );
+
+  }
+
+}
 /* =========================================================
    ABRIR DETALLE
 ========================================================= */
