@@ -14,7 +14,13 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
 .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.tab{border:0;padding:12px 18px;border-radius:10px;background:#dbe3ea;color:#334155;font-weight:bold;cursor:pointer}.tab.activo{background:#2563eb;color:#fff}
 .panel{display:none;background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 18px rgba(15,23,42,.08)}.panel.activo{display:block}
 .filtros{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.campo label{display:block;font-size:13px;font-weight:bold;margin-bottom:6px;color:#475569}.campo input,.campo select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:15px}.kpi span{display:block;font-size:12px;color:#64748b;font-weight:bold}.kpi strong{display:block;margin-top:7px;font-size:24px;color:#0f172a}
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+.kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:15px}.kpi span{display:block;font-size:12px;color:#64748b;font-weight:bold}.kpi strong{display:block;margin-top:7px;font-size:24px;color:#0f172a}
 .tabla-wrap{overflow:auto;border:1px solid #e2e8f0;border-radius:10px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:center;font-size:13px}th{position:sticky;top:0;background:#163f63;color:#fff;z-index:1}tbody tr:hover{background:#f8fafc}.vacio{padding:24px;text-align:center;color:#64748b}
 .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:bold;background:#e2e8f0;color:#334155}
 .footer{text-align:center;color:#64748b;font-size:12px;margin-top:25px;padding-top:16px;border-top:1px solid #dbe3ea}
@@ -94,12 +100,39 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
       <div class="campo"><label>Unidad</label><select id="movUnidad"><option value="">Todas</option></select></div>
       <div class="campo"><label>Tipo / observación</label><input type="text" id="movBuscar" placeholder="TRASLADO, DAÑADO, responsable..."></div>
     </div>
-    <div class="kpis">
-      <div class="kpi"><span>REGISTROS</span><strong id="kpiMovReg">0</strong></div>
-      <div class="kpi"><span>PIEZAS MOVIDAS</span><strong id="kpiMovPiezas">0</strong></div>
-      <div class="kpi"><span>PESO TOTAL</span><strong id="kpiMovPeso">0 kg</strong></div>
-      <div class="kpi"><span>MOVIMIENTOS ÚNICOS</span><strong id="kpiMovIds">0</strong></div>
-    </div>
+<div class="kpis">
+
+  <div class="kpi">
+    <span>REGISTROS</span>
+    <strong id="kpiMovReg">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>PIEZAS MOVIDAS</span>
+    <strong id="kpiMovPiezas">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>PESO TOTAL</span>
+    <strong id="kpiMovPeso">0 kg</strong>
+  </div>
+
+  <div class="kpi">
+    <span>TONELADAS</span>
+    <strong id="kpiMovTon">0 t</strong>
+  </div>
+
+  <div class="kpi">
+    <span>CUERPOS</span>
+    <strong id="kpiMovCuerpos">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>MOVIMIENTOS ÚNICOS</span>
+    <strong id="kpiMovIds">0</strong>
+  </div>
+
+</div>
     <div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>ID</th><th>Tipo</th><th>Material</th><th>Cantidad</th><th>Origen</th><th>Destino</th><th>Responsable</th><th>Observación</th><th>Contrato</th></tr></thead><tbody id="tablaMovimientos"></tbody></table></div>
   </section>
 
@@ -129,12 +162,39 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
       <div class="campo"><label>Unidad</label><select id="matUnidad"></select></div>
       <div class="campo"><label>Buscar material</label><input type="text" id="matBuscar" placeholder="Código o material"></div>
     </div>
-    <div class="kpis">
-      <div class="kpi"><span>MATERIALES CON STOCK</span><strong id="kpiMatTipos">0</strong></div>
-      <div class="kpi"><span>PIEZAS EN STOCK</span><strong id="kpiMatPiezas">0</strong></div>
-      <div class="kpi"><span>PESO EN STOCK</span><strong id="kpiMatPeso">0 kg</strong></div>
-      <div class="kpi"><span>PERDIDOS</span><strong id="kpiMatPerdidos">0</strong></div>
-    </div>
+<div class="kpis">
+
+  <div class="kpi">
+    <span>MATERIALES CON STOCK</span>
+    <strong id="kpiMatTipos">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>PIEZAS EN STOCK</span>
+    <strong id="kpiMatPiezas">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>PESO EN STOCK</span>
+    <strong id="kpiMatPeso">0 kg</strong>
+  </div>
+
+  <div class="kpi">
+    <span>TONELADAS EN STOCK</span>
+    <strong id="kpiMatTon">0 t</strong>
+  </div>
+
+  <div class="kpi">
+    <span>CUERPOS</span>
+    <strong id="kpiMatCuerpos">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>PERDIDOS</span>
+    <strong id="kpiMatPerdidos">0</strong>
+  </div>
+
+</div>
     <div class="tabla-wrap"><table><thead><tr><th>Código</th><th>Material</th><th>Stock</th><th>Peso stock</th><th>Perdido</th><th>Peso perdido</th><th>Dañado</th><th>Peso dañado</th></tr></thead><tbody id="tablaMaterial"></tbody></table></div>
   </section>
 
@@ -162,12 +222,44 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
       <div class="campo"><label>Unidad</label><select id="danUnidad"></select></div>
       <div class="campo"><label>Buscar material</label><input type="text" id="danBuscar" placeholder="Código o material"></div>
     </div>
-    <div class="kpis">
-      <div class="kpi"><span>MATERIALES DAÑADOS</span><strong id="kpiDanTipos">0</strong></div>
-      <div class="kpi"><span>PIEZAS DAÑADAS</span><strong id="kpiDanPiezas">0</strong></div>
-      <div class="kpi"><span>PESO DAÑADO</span><strong id="kpiDanPeso">0 kg</strong></div>
-      <div class="kpi"><span>UNIDAD</span><strong id="kpiDanUnidad" style="font-size:16px">—</strong></div>
-    </div>
+<div class="kpis">
+
+  <div class="kpi">
+    <span>MATERIALES DAÑADOS</span>
+    <strong id="kpiDanTipos">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>PIEZAS DAÑADAS</span>
+    <strong id="kpiDanPiezas">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>PESO DAÑADO</span>
+    <strong id="kpiDanPeso">0 kg</strong>
+  </div>
+
+  <div class="kpi">
+    <span>TONELADAS DAÑADAS</span>
+    <strong id="kpiDanTon">0 t</strong>
+  </div>
+
+  <div class="kpi">
+    <span>CUERPOS</span>
+    <strong id="kpiDanCuerpos">0</strong>
+  </div>
+
+  <div class="kpi">
+    <span>UNIDAD</span>
+    <strong
+      id="kpiDanUnidad"
+      style="font-size:16px"
+    >
+      —
+    </strong>
+  </div>
+
+</div>
     <div class="tabla-wrap"><table><thead><tr><th>Código</th><th>Material</th><th>Stock operativo</th><th>Dañado</th><th>Peso dañado</th><th>% dañado*</th></tr></thead><tbody id="tablaDanados"></tbody></table></div>
     <div style="margin-top:10px;font-size:12px;color:#64748b">* % dañado = dañado / (stock operativo + dañado), cuando el total es mayor que cero.</div>
   </section>
@@ -218,14 +310,249 @@ function renderMovimientos(){
     if(buscar&&!norm([m.idMovimiento,m.tipo,m.item,m.codigo,m.origen,m.destino,m.responsable,m.observacion,m.contrato].join(' ')).includes(buscar))return false;
     return true;
   });
-  $('kpiMovReg').textContent=fmt(filas.length);$('kpiMovPiezas').textContent=fmt(filas.reduce((a,x)=>a+num(x.cantidad),0));$('kpiMovPeso').textContent=fmt(filas.reduce((a,x)=>a+num(x.pesoTotal),0))+' kg';$('kpiMovIds').textContent=new Set(filas.map(x=>x.idMovimiento)).size;
+const pesoMovimientos =
+  filas.reduce(
+    (a,x) =>
+      a + num(x.pesoTotal),
+    0
+  );
+
+$('kpiMovReg').textContent =
+  fmt(filas.length);
+
+$('kpiMovPiezas').textContent =
+  fmt(
+    filas.reduce(
+      (a,x) =>
+        a + num(x.cantidad),
+      0
+    )
+  );
+
+$('kpiMovPeso').textContent =
+  fmt(pesoMovimientos) + ' kg';
+
+$('kpiMovTon').textContent =
+  (pesoMovimientos / 1000)
+    .toLocaleString(
+      'es-PE',
+      {
+        minimumFractionDigits:3,
+        maximumFractionDigits:3
+      }
+    ) + ' t';
+
+$('kpiMovCuerpos').textContent =
+  Math.ceil(
+    pesoMovimientos / 240
+  );
+
+$('kpiMovIds').textContent =
+  new Set(
+    filas.map(
+      x => x.idMovimiento
+    )
+  ).size;
   $('tablaMovimientos').innerHTML=filas.length?filas.slice().reverse().map(m=>`<tr><td>${esc(m.fecha)}</td><td>${esc(m.idMovimiento)}</td><td><span class="badge">${esc(m.tipo)}</span></td><td>${esc(m.item)}</td><td>${fmt(m.cantidad)}</td><td>${esc(m.origen)}</td><td>${esc(m.destino)}</td><td>${esc(m.responsable)}</td><td>${esc(m.observacion)}</td><td>${esc(m.contrato||'-')}</td></tr>`).join(''):'<tr><td colspan="10" class="vacio">Sin resultados</td></tr>';
 }
 
 function filasUnidad(idSelect,buscarId){const u=$(idSelect).value,b=norm($(buscarId).value);return (datosControl.unidades?.[u]||[]).filter(x=>!b||norm(x.codigo+' '+x.item).includes(b));}
-function renderMaterial(){const f=filasUnidad('matUnidad','matBuscar');const con=f.filter(x=>num(x.stock)!==0||num(x.perdido)!==0||num(x.dano)!==0);$('kpiMatTipos').textContent=f.filter(x=>num(x.stock)>0).length;$('kpiMatPiezas').textContent=fmt(f.reduce((a,x)=>a+num(x.stock),0));$('kpiMatPeso').textContent=fmt(f.reduce((a,x)=>a+num(x.pesoTotal),0))+' kg';$('kpiMatPerdidos').textContent=fmt(f.reduce((a,x)=>a+num(x.perdido),0));$('tablaMaterial').innerHTML=con.length?con.map(x=>`<tr><td>${esc(x.codigo)}</td><td>${esc(x.item)}</td><td>${fmt(x.stock)}</td><td>${fmt(x.pesoTotal)} kg</td><td>${fmt(x.perdido)}</td><td>${fmt(x.pesoPerdida)} kg</td><td>${fmt(x.dano)}</td><td>${fmt(x.pesoDanado)} kg</td></tr>`).join(''):'<tr><td colspan="8" class="vacio">Sin material para mostrar</td></tr>';}
-function renderDanados(){const u=$('danUnidad').value;const f=filasUnidad('danUnidad','danBuscar').filter(x=>num(x.dano)>0);$('kpiDanTipos').textContent=f.length;$('kpiDanPiezas').textContent=fmt(f.reduce((a,x)=>a+num(x.dano),0));$('kpiDanPeso').textContent=fmt(f.reduce((a,x)=>a+num(x.pesoDanado),0))+' kg';$('kpiDanUnidad').textContent=u||'—';$('tablaDanados').innerHTML=f.length?f.map(x=>{const base=num(x.stock)+num(x.dano),p=base>0?num(x.dano)/base*100:0;return `<tr><td>${esc(x.codigo)}</td><td>${esc(x.item)}</td><td>${fmt(x.stock)}</td><td>${fmt(x.dano)}</td><td>${fmt(x.pesoDanado)} kg</td><td>${fmt(p)}%</td></tr>`}).join(''):'<tr><td colspan="6" class="vacio">No hay dañados en esta unidad</td></tr>';}
-function obtenerDatosExportacion(tipo){
+function renderMaterial(){
+
+  const f =
+    filasUnidad(
+      'matUnidad',
+      'matBuscar'
+    );
+
+  const con =
+    f.filter(
+      x =>
+        num(x.stock) !== 0 ||
+        num(x.perdido) !== 0 ||
+        num(x.dano) !== 0
+    );
+
+
+  const pesoStock =
+    f.reduce(
+      (a,x) =>
+        a + num(x.pesoTotal),
+      0
+    );
+
+
+  $('kpiMatTipos').textContent =
+    f.filter(
+      x => num(x.stock) > 0
+    ).length;
+
+
+  $('kpiMatPiezas').textContent =
+    fmt(
+      f.reduce(
+        (a,x) =>
+          a + num(x.stock),
+        0
+      )
+    );
+
+
+  $('kpiMatPeso').textContent =
+    fmt(pesoStock) +
+    ' kg';
+
+
+  $('kpiMatTon').textContent =
+    (pesoStock / 1000)
+      .toLocaleString(
+        'es-PE',
+        {
+          minimumFractionDigits:3,
+          maximumFractionDigits:3
+        }
+      ) +
+      ' t';
+
+
+  $('kpiMatCuerpos').textContent =
+    Math.ceil(
+      pesoStock / 240
+    );
+
+
+  $('kpiMatPerdidos').textContent =
+    fmt(
+      f.reduce(
+        (a,x) =>
+          a + num(x.perdido),
+        0
+      )
+    );
+
+
+  $('tablaMaterial').innerHTML =
+    con.length
+      ? con.map(
+          x => `
+            <tr>
+              <td>${esc(x.codigo)}</td>
+              <td>${esc(x.item)}</td>
+              <td>${fmt(x.stock)}</td>
+              <td>${fmt(x.pesoTotal)} kg</td>
+              <td>${fmt(x.perdido)}</td>
+              <td>${fmt(x.pesoPerdida)} kg</td>
+              <td>${fmt(x.dano)}</td>
+              <td>${fmt(x.pesoDanado)} kg</td>
+            </tr>
+          `
+        ).join('')
+      : '<tr><td colspan="8" class="vacio">Sin material para mostrar</td></tr>';
+
+}
+function renderDanados(){
+
+  const u =
+    $('danUnidad').value;
+
+
+  const f =
+    filasUnidad(
+      'danUnidad',
+      'danBuscar'
+    )
+    .filter(
+      x =>
+        num(x.dano) > 0
+    );
+
+
+  const pesoDanado =
+    f.reduce(
+      (a,x) =>
+        a + num(x.pesoDanado),
+      0
+    );
+
+
+  $('kpiDanTipos').textContent =
+    f.length;
+
+
+  $('kpiDanPiezas').textContent =
+    fmt(
+      f.reduce(
+        (a,x) =>
+          a + num(x.dano),
+        0
+      )
+    );
+
+
+  $('kpiDanPeso').textContent =
+    fmt(pesoDanado) +
+    ' kg';
+
+
+  $('kpiDanTon').textContent =
+    (pesoDanado / 1000)
+      .toLocaleString(
+        'es-PE',
+        {
+          minimumFractionDigits:3,
+          maximumFractionDigits:3
+        }
+      ) +
+      ' t';
+
+
+  $('kpiDanCuerpos').textContent =
+    Math.ceil(
+      pesoDanado / 240
+    );
+
+
+  $('kpiDanUnidad').textContent =
+    u || '—';
+
+
+  $('tablaDanados').innerHTML =
+    f.length
+      ? f.map(
+          x => {
+
+            const base =
+              num(x.stock) +
+              num(x.dano);
+
+
+            const p =
+              base > 0
+                ? (
+                    num(x.dano) /
+                    base *
+                    100
+                  )
+                : 0;
+
+
+            return `
+              <tr>
+                <td>${esc(x.codigo)}</td>
+                <td>${esc(x.item)}</td>
+                <td>${fmt(x.stock)}</td>
+                <td>${fmt(x.dano)}</td>
+                <td>${fmt(x.pesoDanado)} kg</td>
+                <td>${fmt(p)}%</td>
+              </tr>
+            `;
+
+          }
+        ).join('')
+      : '<tr><td colspan="6" class="vacio">No hay dañados en esta unidad</td></tr>';
+
+}
+  function obtenerDatosExportacion(tipo){
 
   if(tipo === 'movimientos'){
 
