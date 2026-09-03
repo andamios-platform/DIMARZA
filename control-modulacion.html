@@ -2093,6 +2093,21 @@ function renderizarModulaciones(){
     >
       Excel
     </button>
+    <button
+  type="button"
+  class="btn"
+  style="
+    color:white;
+    background:#dc2626;
+  "
+  onclick="eliminarModulacion(
+    '${escaparAtributo(
+      item.idBorrador
+    )}'
+  )"
+>
+  Eliminar
+</button>
 
   </div>
 
@@ -2794,6 +2809,152 @@ function mostrarTab(
 
 }
 
+/* =========================================================
+   ELIMINAR MODULACIÓN
+========================================================= */
+
+async function eliminarModulacion(
+  idBorrador
+){
+
+  const modulacion =
+    modulaciones.find(
+      item =>
+        item.idBorrador ===
+        idBorrador
+    );
+
+
+  if(!modulacion){
+
+    alert(
+      "No se encontró la modulación."
+    );
+
+    return;
+  }
+
+
+  const confirmar =
+    confirm(
+      "¿Eliminar definitivamente la modulación " +
+      idBorrador +
+      "?\n\n" +
+      "Referencia: " +
+      (
+        modulacion.referencia ||
+        "-"
+      ) +
+      "\n" +
+      "Responsable: " +
+      (
+        modulacion.responsable ||
+        "-"
+      ) +
+      "\n\n" +
+      "Esta acción no se puede deshacer."
+    );
+
+
+  if(!confirmar){
+    return;
+  }
+
+
+  try{
+
+    const respuesta =
+      await fetch(
+        WEB_APP_URL,
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body:
+            JSON.stringify({
+
+              accion:
+                "eliminarBorradorModulacion",
+
+              idBorrador:
+                idBorrador
+
+            })
+        }
+      );
+
+
+    if(!respuesta.ok){
+
+      throw new Error(
+        "Error HTTP " +
+        respuesta.status
+      );
+
+    }
+
+
+    const datos =
+      await respuesta.json();
+
+
+    if(!datos.ok){
+
+      throw new Error(
+        datos.error ||
+        datos.mensaje ||
+        "No se pudo eliminar la modulación."
+      );
+
+    }
+
+
+    alert(
+      "La modulación " +
+      idBorrador +
+      " fue eliminada correctamente."
+    );
+
+
+    modulaciones =
+      modulaciones.filter(
+        item =>
+          item.idBorrador !==
+          idBorrador
+      );
+
+
+    materiales =
+      materiales.filter(
+        item =>
+          item.idBorrador !==
+          idBorrador
+      );
+
+
+    aplicarFiltros();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      error.message ||
+      "No se pudo eliminar la modulación."
+    );
+
+  }
+
+}
+  
 /* =========================================================
    EXPORTAR UNA MODULACIÓN A EXCEL
 ========================================================= */
