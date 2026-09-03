@@ -3022,6 +3022,31 @@ function exportarExcelModulacion(
 
       "Última modificación":
         modulacion.ultimaModificacion
+      "Peso total kg":
+  modulacion.pesoTotal,
+
+"Toneladas":
+  Number(
+    (
+      (
+        Number(
+          modulacion.pesoTotal
+        ) || 0
+      ) / 1000
+    ).toFixed(3)
+  ),
+
+"Cuerpos":
+  Math.ceil(
+    (
+      Number(
+        modulacion.pesoTotal
+      ) || 0
+    ) / 240
+  ),
+
+"Última modificación":
+  modulacion.ultimaModificacion
     }
 
   ];
@@ -3201,25 +3226,66 @@ function exportarPDFModulacion(
   );
 
 
-  doc.text(
-    "Peso total: " +
-    formatearNumero(
-      modulacion.pesoTotal
-    ) +
-    " kg",
-    150,
-    35
+const pesoTotal =
+  Number(
+    modulacion.pesoTotal
+  ) || 0;
+
+
+const toneladas =
+  pesoTotal / 1000;
+
+
+const cuerpos =
+  Math.ceil(
+    pesoTotal / 240
   );
 
 
-  doc.text(
-    "Tipos de material: " +
-    formatearNumero(
-      modulacion.cantidadMateriales
-    ),
-    150,
-    41
-  );
+doc.text(
+  "Peso total: " +
+  formatearNumero(
+    pesoTotal
+  ) +
+  " kg",
+  150,
+  35
+);
+
+
+doc.text(
+  "Toneladas: " +
+  toneladas.toLocaleString(
+    "es-PE",
+    {
+      minimumFractionDigits:3,
+      maximumFractionDigits:3
+    }
+  ) +
+  " t",
+  150,
+  41
+);
+
+
+doc.text(
+  "Cuerpos: " +
+  formatearNumero(
+    cuerpos
+  ),
+  150,
+  47
+);
+
+
+doc.text(
+  "Tipos de material: " +
+  formatearNumero(
+    modulacion.cantidadMateriales
+  ),
+  150,
+  53
+);
 
 
   const filas =
@@ -3252,8 +3318,7 @@ function exportarPDFModulacion(
 
   doc.autoTable({
 
-    startY:50,
-
+    startY:60,
     head:[[
       "Código",
       "Material",
