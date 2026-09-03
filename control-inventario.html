@@ -644,14 +644,13 @@ async function eliminarMovimiento(
       resultado.mensaje ||
       'Movimiento eliminado correctamente.'
     );
-
-
+    
+    
     /*
-     * Recargamos desde Sheets para que
-     * KPIs, movimientos y stock queden
-     * nuevamente sincronizados.
+     * Refrescamos completamente la página
+     * para mostrar los datos actualizados.
      */
-    await cargar();
+    window.location.reload();
 
 
   }catch(error){
