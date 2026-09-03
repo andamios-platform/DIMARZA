@@ -52,6 +52,21 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
 .btn-exportar:hover{
   opacity:.9;
 }
+  .btn-eliminar-mov{
+  border:0;
+  background:#dc2626;
+  color:white;
+  width:38px;
+  height:34px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:15px;
+  font-weight:bold;
+}
+
+.btn-eliminar-mov:hover{
+  background:#b91c1c;
+}
  @media(max-width:900px){.filtros,.kpis{grid-template-columns:repeat(2,1fr)}.cabecera{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){body{padding:12px}.filtros,.kpis{grid-template-columns:1fr}.cabecera h1{font-size:27px}.panel{padding:14px}.tab{flex:1;min-width:145px}}
 </style>
@@ -133,7 +148,20 @@ body{margin:0;font-family:Arial,sans-serif;background:#f3f6f9;color:#1f2937;padd
   </div>
 
 </div>
-    <div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>ID</th><th>Tipo</th><th>Material</th><th>Cantidad</th><th>Origen</th><th>Destino</th><th>Responsable</th><th>Observación</th><th>Contrato</th></tr></thead><tbody id="tablaMovimientos"></tbody></table></div>
+    <div class="tabla-wrap"><table><thead>
+<tr>
+  <th>Fecha</th>
+  <th>ID</th>
+  <th>Tipo</th>
+  <th>Material</th>
+  <th>Cantidad</th>
+  <th>Origen</th>
+  <th>Destino</th>
+  <th>Responsable</th>
+  <th>Observación</th>
+  <th>Contrato</th>
+  <th>Acción</th>
+</tr>    </thead><tbody id="tablaMovimientos"></tbody></table></div>
   </section>
 
 <section id="material" class="panel">
@@ -353,9 +381,294 @@ $('kpiMovIds').textContent =
       x => x.idMovimiento
     )
   ).size;
-  $('tablaMovimientos').innerHTML=filas.length?filas.slice().reverse().map(m=>`<tr><td>${esc(m.fecha)}</td><td>${esc(m.idMovimiento)}</td><td><span class="badge">${esc(m.tipo)}</span></td><td>${esc(m.item)}</td><td>${fmt(m.cantidad)}</td><td>${esc(m.origen)}</td><td>${esc(m.destino)}</td><td>${esc(m.responsable)}</td><td>${esc(m.observacion)}</td><td>${esc(m.contrato||'-')}</td></tr>`).join(''):'<tr><td colspan="10" class="vacio">Sin resultados</td></tr>';
-}
+$('tablaMovimientos').innerHTML =
+  filas.length
+    ? filas
+        .slice()
+        .reverse()
+        .map(
+          m => `
+            <tr>
 
+              <td>
+                ${esc(m.fecha)}
+              </td>
+
+              <td>
+                ${esc(m.idMovimiento)}
+              </td>
+
+              <td>
+                <span class="badge">
+                  ${esc(m.tipo)}
+                </span>
+              </td>
+
+              <td>
+                ${esc(m.item)}
+              </td>
+
+              <td>
+                ${fmt(m.cantidad)}
+              </td>
+
+              <td>
+                ${esc(m.origen)}
+              </td>
+
+              <td>
+                ${esc(m.destino)}
+              </td>
+
+              <td>
+                ${esc(m.responsable)}
+              </td>
+
+              <td>
+                ${esc(m.observacion)}
+              </td>
+
+              <td>
+                ${esc(m.contrato || '-')}
+              </td>
+
+              <td>
+
+                <button
+                  type="button"
+                  class="btn-eliminar-mov"
+                  title="Eliminar movimiento completo"
+                  onclick="eliminarMovimiento(
+                    '${esc(m.idMovimiento)}'
+                  )"
+                >
+                  🗑️
+                </button>
+
+              </td>
+
+            </tr>
+          `
+        )
+        .join('')
+
+    : `
+        <tr>
+          <td
+            colspan="11"
+            class="vacio"
+          >
+            Sin resultados
+          </td>
+        </tr>
+      `;
+
+
+}
+async function eliminarMovimiento(
+  idMovimiento
+){
+
+  const id =
+    String(
+      idMovimiento || ''
+    ).trim();
+
+
+  if(!id){
+
+    alert(
+      'No se recibió el ID del movimiento.'
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Buscamos todas las líneas del mismo
+   * movimiento para poder mostrar el resumen.
+   */
+  const filasMovimiento =
+    (
+      datosControl.movimientos ||
+      []
+    ).filter(
+      item =>
+        String(
+          item.idMovimiento || ''
+        ).trim() === id
+    );
+
+
+  if(!filasMovimiento.length){
+
+    alert(
+      'No se encontró el movimiento ' +
+      id +
+      '.'
+    );
+
+    return;
+
+  }
+
+
+  const piezas =
+    filasMovimiento.reduce(
+      (total,item) =>
+        total +
+        num(
+          item.cantidad
+        ),
+      0
+    );
+
+
+  const peso =
+    filasMovimiento.reduce(
+      (total,item) =>
+        total +
+        num(
+          item.pesoTotal
+        ),
+      0
+    );
+
+
+  const primero =
+    filasMovimiento[0];
+
+
+  const confirmar =
+    confirm(
+      '¿ELIMINAR ESTE MOVIMIENTO?\n\n' +
+
+      'ID: ' +
+      id +
+
+      '\nFecha: ' +
+      (
+        primero.fecha ||
+        '-'
+      ) +
+
+      '\nOrigen: ' +
+      (
+        primero.origen ||
+        '-'
+      ) +
+
+      '\nDestino: ' +
+      (
+        primero.destino ||
+        '-'
+      ) +
+
+      '\nMateriales: ' +
+      filasMovimiento.length +
+
+      '\nPiezas: ' +
+      fmt(piezas) +
+
+      '\nPeso: ' +
+      fmt(peso) +
+      ' kg' +
+
+      '\n\nSe eliminarán todas las filas pertenecientes a este ID de movimiento.'
+    );
+
+
+  if(!confirmar){
+    return;
+  }
+
+
+  const confirmarFinal =
+    confirm(
+      'CONFIRMACIÓN FINAL\n\n' +
+      '¿Eliminar definitivamente ' +
+      id +
+      '?'
+    );
+
+
+  if(!confirmarFinal){
+    return;
+  }
+
+
+  try{
+
+    const respuesta =
+      await fetch(
+        API_URL,
+        {
+          method:
+            'POST',
+
+          headers:{
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body:
+            JSON.stringify({
+              accion:
+                'eliminarMovimientoInventario',
+
+              idMovimiento:
+                id
+            })
+        }
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.error ||
+        resultado.mensaje ||
+        'No fue posible eliminar el movimiento.'
+      );
+
+    }
+
+
+    alert(
+      resultado.mensaje ||
+      'Movimiento eliminado correctamente.'
+    );
+
+
+    /*
+     * Recargamos desde Sheets para que
+     * KPIs, movimientos y stock queden
+     * nuevamente sincronizados.
+     */
+    await cargar();
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      'No se pudo eliminar el movimiento: ' +
+      error.message
+    );
+
+  }
+
+}
 function filasUnidad(idSelect,buscarId){const u=$(idSelect).value,b=norm($(buscarId).value);return (datosControl.unidades?.[u]||[]).filter(x=>!b||norm(x.codigo+' '+x.item).includes(b));}
 function renderMaterial(){
 
