@@ -1007,73 +1007,114 @@ function renderDanados(){
   }
 
 
-  if(tipo === 'material'){
+if(tipo === 'material'){
 
-    const unidad =
-      $('matUnidad').value;
-
-
-    const filas =
-      filasUnidad(
-        'matUnidad',
-        'matBuscar'
-      )
-      .filter(
-        x =>
-          num(x.stock) !== 0 ||
-          num(x.perdido) !== 0 ||
-          num(x.dano) !== 0
-      );
+  const unidad =
+    $('matUnidad').value;
 
 
-    return {
+  const filas =
+    filasUnidad(
+      'matUnidad',
+      'matBuscar'
+    )
+    .filter(
+      x =>
+        num(x.stock) !== 0 ||
+        num(x.perdido) !== 0 ||
+        num(x.dano) !== 0
+    );
 
-      titulo:
-        'Material por Unidad',
 
-      subtitulo:
-        'Unidad: ' +
-        (
-          unidad ||
-          '—'
-        ),
+  const pesoTotalStock =
+    filas.reduce(
+      (total, x) =>
+        total +
+        num(x.pesoTotal),
+      0
+    );
 
-      nombre:
-        'material_' +
-        limpiarNombreArchivo(
-          unidad ||
-          'unidad'
-        ),
 
-      encabezados:[
-        'Código',
-        'Material',
-        'Stock',
-        'Peso stock (kg)',
-        'Perdido',
-        'Peso perdido (kg)',
-        'Dañado',
-        'Peso dañado (kg)'
+  const toneladasStock =
+    pesoTotalStock / 1000;
+
+
+  const cuerposStock =
+    Math.ceil(
+      pesoTotalStock / 240
+    );
+
+
+  return {
+
+    titulo:
+      'Material por Unidad',
+
+    subtitulo:
+      'Unidad: ' +
+      (
+        unidad ||
+        '—'
+      ),
+
+    nombre:
+      'material_' +
+      limpiarNombreArchivo(
+        unidad ||
+        'unidad'
+      ),
+
+
+    resumen:[
+      [
+        'PESO TOTAL',
+        redondear(
+          pesoTotalStock
+        ) + ' kg'
       ],
 
-filas:
-  filas.map(
-    x => [
-      x.codigo,
-      x.item,
-      num(x.stock),
-      redondear(x.pesoTotal),
-      num(x.perdido),
-      redondear(x.pesoPerdida),
-      num(x.dano),
-      redondear(x.pesoDanado)
-    ]
-  )
+      [
+        'TONELADAS',
+        toneladasStock
+          .toFixed(3) + ' t'
+      ],
 
-    };
+      [
+        'CUERPOS',
+        cuerposStock
+      ]
+    ],
 
-  }
 
+    encabezados:[
+      'Código',
+      'Material',
+      'Stock',
+      'Peso stock (kg)',
+      'Perdido',
+      'Peso perdido (kg)',
+      'Dañado',
+      'Peso dañado (kg)'
+    ],
+
+
+    filas:
+      filas.map(
+        x => [
+          x.codigo,
+          x.item,
+          num(x.stock),
+          redondear(x.pesoTotal),
+          num(x.perdido),
+          redondear(x.pesoPerdida),
+          num(x.dano),
+          redondear(x.pesoDanado)
+        ]
+      )
+
+  };
+
+}
 
   const unidad =
     $('danUnidad').value;
@@ -1194,19 +1235,23 @@ function exportarExcel(tipo){
   }
 
 
-  const contenido = [
+const contenido = [
 
-    [datos.titulo],
+  [datos.titulo],
 
-    [datos.subtitulo],
+  [datos.subtitulo],
 
-    [],
+  [],
 
-    datos.encabezados,
+  ...(datos.resumen || []),
 
-    ...datos.filas
+  [],
 
-  ];
+  datos.encabezados,
+
+  ...datos.filas
+
+];
 
 
   const hoja =
@@ -1362,13 +1407,59 @@ function exportarPDF(tipo){
     14,
     21
   );
+  let inicioTabla =
+  26;
 
+if(
+  datos.resumen &&
+  datos.resumen.length
+){
 
   doc.autoTable({
 
-    startY:
-      26,
+startY:
+  inicioTabla,
 
+    body:
+      datos.resumen,
+
+    theme:
+      'grid',
+
+    styles:{
+      fontSize:9,
+      cellPadding:2
+    },
+
+    columnStyles:{
+      0:{
+        fontStyle:'bold',
+        cellWidth:35
+      },
+
+      1:{
+        cellWidth:35
+      }
+    },
+
+    margin:{
+      left:14
+    }
+
+  });
+
+
+  inicioTabla =
+    doc.lastAutoTable.finalY +
+    6;
+
+}
+
+  doc.autoTable({
+
+startY:
+  inicioTabla,
+    
     head:[
       datos.encabezados
     ],
