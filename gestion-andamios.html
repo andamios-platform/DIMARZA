@@ -1628,6 +1628,18 @@
 
     let actividadesCargaMasiva = [];
 
+    let personalGestion = {
+
+      supervisores:[],
+    
+      responsables:[],
+    
+      cargado:false,
+    
+      promesa:null
+    
+    };
+
 let resumenCargaMasiva = {
   totalFilas: 0,
   candidatas: 0,
@@ -1671,11 +1683,29 @@ document.addEventListener(
      * cargaron simultáneamente,
      * reconstruimos los filtros al final.
      */
-    crearBotonesServicio();
+crearBotonesServicio();
 
-    aplicarFiltros();
+aplicarFiltros();
 
-  }
+
+/*
+ * Las tarjetas ya fueron cargadas.
+ * Ahora precargamos el personal
+ * en segundo plano.
+ *
+ * NO usamos await para no retrasar
+ * la aparición de las tarjetas.
+ */
+precargarPersonalGestion()
+  .catch(
+    error =>
+      console.warn(
+        'No se pudo precargar personal:',
+        error
+      )
+  );
+
+}
 );
 async function cargarConfiguracionMinas() {
 
@@ -2641,31 +2671,123 @@ function volverAtras() {
    ====================================================== */
 
 async function abrirCargaMasiva() {
+
   const modal =
     document.getElementById(
       'modalCargaMasiva'
     );
 
+
   limpiarCargaMasiva();
 
   cargarMinasMasivo();
-  await Promise.all([
-  cargarSupervisores(),
-  cargarResponsablesPrevios()
-]);
-  copiarSelectMasivo(
-    'supervisor',
-    'supervisorMasivo'
-  );
 
-  copiarSelectMasivo(
-    'responsablePrevios',
-    'responsablePreviosMasivo'
-  );
 
+  /*
+   * Abrimos el modal inmediatamente.
+   */
   modal.classList.add(
     'activo'
   );
+
+
+  const supervisor =
+    document.getElementById(
+      'supervisorMasivo'
+    );
+
+
+  const responsable =
+    document.getElementById(
+      'responsablePreviosMasivo'
+    );
+
+
+  /*
+   * Si ya precargamos el personal,
+   * aparece inmediatamente.
+   */
+  if (
+    personalGestion.cargado
+  ) {
+
+    llenarSelectSupervisores(
+      'supervisorMasivo'
+    );
+
+    llenarSelectResponsables(
+      'responsablePreviosMasivo'
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Si todavía está cargando,
+   * mostramos el estado sin bloquear
+   * la apertura del modal.
+   */
+  supervisor.innerHTML = `
+    <option value="">
+      Cargando supervisores...
+    </option>
+  `;
+
+
+  responsable.innerHTML = `
+    <option value="">
+      Cargando responsables...
+    </option>
+  `;
+
+
+  supervisor.disabled =
+    true;
+
+  responsable.disabled =
+    true;
+
+
+  try {
+
+    await precargarPersonalGestion();
+
+
+    llenarSelectSupervisores(
+      'supervisorMasivo'
+    );
+
+
+    llenarSelectResponsables(
+      'responsablePreviosMasivo'
+    );
+
+
+  } catch (error) {
+
+    supervisor.innerHTML = `
+      <option value="">
+        Error al cargar supervisores
+      </option>
+    `;
+
+
+    responsable.innerHTML = `
+      <option value="">
+        Error al cargar responsables
+      </option>
+    `;
+
+
+    supervisor.disabled =
+      false;
+
+    responsable.disabled =
+      false;
+
+  }
 
 }
 
@@ -4691,7 +4813,211 @@ function cerrarModalNuevoDesdeFondo(evento) {
     cerrarModalNuevoServicio();
   }
 }
+async function precargarPersonalGestion() {
 
+  /*
+   * Ya está cargado.
+   */
+  if (
+    personalGestion.cargado
+  ) {
+
+    return personalGestion;
+
+  }
+
+
+  /*
+   * Ya existe una consulta en curso.
+   * No hacemos otra.
+   */
+  if (
+    personalGestion.promesa
+  ) {
+
+    return personalGestion.promesa;
+
+  }
+
+
+  personalGestion.promesa =
+    (async () => {
+
+      try {
+
+        const resultado =
+          await consultarAPI(
+            `${API_URL}?accion=personalGestionAndamios`
+          );
+
+
+        if (!resultado.ok) {
+
+          throw new Error(
+            resultado.mensaje ||
+            'No se pudo cargar el personal.'
+          );
+
+        }
+
+
+        personalGestion
+          .supervisores =
+            Array.isArray(
+              resultado.supervisores
+            )
+              ? resultado.supervisores
+              : [];
+
+
+        personalGestion
+          .responsables =
+            Array.isArray(
+              resultado.responsables
+            )
+              ? resultado.responsables
+              : [];
+
+
+        personalGestion.cargado =
+          true;
+
+
+        return personalGestion;
+
+
+      } catch (error) {
+
+        console.error(
+          'Error precargando personal:',
+          error
+        );
+
+
+        personalGestion.cargado =
+          false;
+
+
+        throw error;
+
+
+      } finally {
+
+        personalGestion.promesa =
+          null;
+
+      }
+
+    })();
+
+
+  return personalGestion.promesa;
+
+}
+
+function llenarSelectSupervisores(
+  idSelector
+) {
+
+  const selector =
+    document.getElementById(
+      idSelector
+    );
+
+
+  selector.innerHTML = `
+    <option value="">
+      Seleccionar supervisor
+    </option>
+  `;
+
+
+  personalGestion
+    .supervisores
+    .forEach(
+      nombre => {
+
+        const opcion =
+          document.createElement(
+            'option'
+          );
+
+
+        opcion.value =
+          nombre;
+
+        opcion.textContent =
+          nombre;
+
+
+        selector.appendChild(
+          opcion
+        );
+
+      }
+    );
+
+
+  selector.disabled =
+    false;
+
+}
+
+
+function llenarSelectResponsables(
+  idSelector
+) {
+
+  const selector =
+    document.getElementById(
+      idSelector
+    );
+
+
+  selector.innerHTML = `
+    <option value="">
+      Seleccionar responsable
+    </option>
+  `;
+
+
+  personalGestion
+    .responsables
+    .forEach(
+      persona => {
+
+        const opcion =
+          document.createElement(
+            'option'
+          );
+
+
+        opcion.value =
+          persona.nombre;
+
+
+        opcion.textContent =
+          persona.cargo
+            ? (
+                persona.nombre +
+                ' — ' +
+                persona.cargo
+              )
+            : persona.nombre;
+
+
+        selector.appendChild(
+          opcion
+        );
+
+      }
+    );
+
+
+  selector.disabled =
+    false;
+
+}
 async function cargarSupervisores() {
 
   const selector =
@@ -5133,7 +5459,19 @@ async function actualizarTodo() {
   crearBotonesServicio();
 
   aplicarFiltros();
-
+  /*
+   * Las tarjetas ya fueron cargadas.
+   * Ahora precargamos el personal
+   * sin bloquear la pantalla.
+   */
+  precargarPersonalGestion()
+    .catch(
+      error =>
+        console.warn(
+          'No se pudo precargar personal:',
+          error
+        )
+    );
 }
   </script>
 <div
