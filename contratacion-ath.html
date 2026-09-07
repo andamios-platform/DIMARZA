@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+DIMARZA | ATH - Contratación
+</title>
+
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+
+.header {
+  background: #111827;
+  color: white;
+  padding: 20px 25px;
+}
+
+
+.header h1 {
+  margin: 0 0 5px;
+  font-size: 22px;
+}
+
+
+.header p {
+  margin: 0;
+  color: #d1d5db;
+  font-size: 13px;
+}
+
+
+.contenedor {
+  max-width: 1450px;
+  margin: auto;
+  padding: 25px;
+}
+
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 22px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.07);
+}
+
+
+.titulo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+
+.grid-kpis {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 15px;
+
+  margin-bottom: 22px;
+}
+
+
+.kpi {
+
+  background: white;
+
+  border-radius: 10px;
+
+  padding: 18px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0,0,0,.06);
+}
+
+
+.kpi-nombre {
+
+  font-size: 12px;
+
+  color: #6b7280;
+
+  margin-bottom: 7px;
+}
+
+
+.kpi-valor {
+
+  font-size: 26px;
+
+  font-weight: bold;
+}
+
+
+.grid-form {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 16px;
+}
+
+
+.campo {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.campo label {
+
+  font-size: 12px;
+
+  font-weight: bold;
+
+  color: #4b5563;
+
+  margin-bottom: 6px;
+}
+
+
+.campo input,
+.campo select,
+.campo textarea {
+
+  border:
+    1px solid #d1d5db;
+
+  border-radius: 7px;
+
+  padding: 10px;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+
+.campo textarea {
+
+  min-height: 75px;
+
+  resize: vertical;
+}
+
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+
+  border-color: #2563eb;
+}
+
+
+.completo {
+
+  grid-column:
+    1 / -1;
+}
+
+
+.documentos {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 15px;
+
+  margin-top: 18px;
+}
+
+
+.documento {
+
+  border:
+    1px dashed #9ca3af;
+
+  padding: 15px;
+
+  border-radius: 8px;
+
+  background: #f9fafb;
+}
+
+
+.documento label {
+
+  display: block;
+
+  font-size: 12px;
+
+  font-weight: bold;
+
+  margin-bottom: 9px;
+}
+
+
+.acciones {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  margin-top: 20px;
+}
+
+
+button {
+
+  border: 0;
+
+  border-radius: 7px;
+
+  padding: 11px 18px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-weight: bold;
+}
+
+
+.btn-principal {
+
+  background: #2563eb;
+
+  color: white;
+}
+
+
+.btn-principal:hover {
+
+  background: #1d4ed8;
+}
+
+
+.btn-principal:disabled {
+
+  opacity: .6;
+
+  cursor: not-allowed;
+}
+
+
+.mensaje {
+
+  display: none;
+
+  border-radius: 7px;
+
+  padding: 12px;
+
+  margin-bottom: 18px;
+
+  font-size: 13px;
+}
+
+
+.mensaje-ok {
+
+  background: #dcfce7;
+
+  color: #166534;
+}
+
+
+.mensaje-error {
+
+  background: #fee2e2;
+
+  color: #991b1b;
+}
+
+
+.tabla-contenedor {
+
+  overflow-x: auto;
+}
+
+
+table {
+
+  width: 100%;
+
+  border-collapse: collapse;
+
+  min-width: 1200px;
+}
+
+
+th {
+
+  background: #f3f4f6;
+
+  padding: 11px;
+
+  text-align: left;
+
+  color: #4b5563;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+
+td {
+
+  border-bottom:
+    1px solid #e5e7eb;
+
+  padding: 11px;
+
+  font-size: 13px;
+}
+
+
+tbody tr:hover {
+
+  background: #f9fafb;
+}
+
+
+.estado {
+
+  display: inline-block;
+
+  padding: 5px 9px;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+
+  font-weight: bold;
+}
+
+
+.estado-proceso {
+
+  background: #dbeafe;
+
+  color: #1e40af;
+}
+
+
+.estado-no-apto {
+
+  background: #fee2e2;
+
+  color: #991b1b;
+}
+
+
+.estado-contratado {
+
+  background: #dcfce7;
+
+  color: #166534;
+}
+
+
+.estado-habilitado {
+
+  background: #d1fae5;
+
+  color: #065f46;
+}
+
+
+.archivo {
+
+  text-decoration: none;
+
+  color: #2563eb;
+
+  font-weight: bold;
+}
+
+
+.vacio {
+
+  text-align: center;
+
+  padding: 28px;
+
+  color: #6b7280;
+}
+
+
+.info-requerimiento {
+
+  margin-top: 8px;
+
+  font-size: 12px;
+
+  color: #6b7280;
+}
+
+
+@media(max-width: 900px) {
+
+  .grid-form,
+  .documentos {
+
+    grid-template-columns: 1fr;
+  }
+
+
+  .grid-kpis {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+
+  .completo {
+
+    grid-column: auto;
+  }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+  <h1>
+    ATH - Seguimiento de Contratación
+  </h1>
+
+  <p>
+    Registro y filtro inicial de candidatos
+  </p>
+
+</header>
+
+
+<main class="contenedor">
+
+
+<section class="grid-kpis">
+
+  <div class="kpi">
+
+    <div class="kpi-nombre">
+      REQUERIMIENTOS ABIERTOS
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiRequerimientos"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div class="kpi-nombre">
+      PERSONAL REQUERIDO
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiRequeridos"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div class="kpi-nombre">
+      CANDIDATOS REGISTRADOS
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiCandidatos"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div class="kpi-nombre">
+      EN LEGAL
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiLegal"
+    >
+      0
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="card">
+
+  <div class="titulo">
+    Registrar candidato
+  </div>
+
+
+  <div id="mensaje"></div>
+
+
+  <form id="formCandidato">
+
+
+    <div class="grid-form">
+
+
+      <div class="campo completo">
+
+        <label>
+          REQUERIMIENTO *
+        </label>
+
+        <select
+          id="idRequerimiento"
+          required
+        >
+
+          <option value="">
+            Cargando...
+          </option>
+
+        </select>
+
+
+        <div
+          class="info-requerimiento"
+          id="infoRequerimiento"
+        ></div>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          NOMBRES Y APELLIDOS *
+        </label>
+
+        <input
+          id="nombres"
+          type="text"
+          required
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          DNI *
+        </label>
+
+        <input
+          id="dni"
+          type="text"
+          maxlength="8"
+          inputmode="numeric"
+          required
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          TELÉFONO *
+        </label>
+
+        <input
+          id="telefono"
+          type="tel"
+          required
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          RESIDENCIA ACTUAL *
+        </label>
+
+        <input
+          id="residencia"
+          type="text"
+          placeholder="Ej. Arequipa"
+          required
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          CARGO
+        </label>
+
+        <input
+          id="cargo"
+          type="text"
+          readonly
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          RESULTADO FILTRO CV *
+        </label>
+
+        <select
+          id="resultadoCV"
+          required
+        >
+
+          <option value="">
+            Seleccione...
+          </option>
+
+          <option value="APROBADO">
+            APROBADO
+          </option>
+
+          <option value="NO APTO">
+            NO APTO
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          RESPONSABLE ATH *
+        </label>
+
+        <input
+          id="responsable"
+          type="text"
+          required
+        >
+
+      </div>
+
+
+      <div class="campo completo">
+
+        <label>
+          OBSERVACIÓN
+        </label>
+
+        <textarea
+          id="observacion"
+          placeholder="Observaciones del filtro..."
+        ></textarea>
+
+      </div>
+
+
+    </div>
+
+
+    <div class="documentos">
+
+
+      <div class="documento">
+
+        <label>
+          CV *
+        </label>
+
+        <input
+          id="cv"
+          type="file"
+          accept=".pdf,.doc,.docx"
+          required
+        >
+
+      </div>
+
+
+      <div class="documento">
+
+        <label>
+          DNI - ANVERSO *
+        </label>
+
+        <input
+          id="dniAnverso"
+          type="file"
+          accept="image/*,.pdf"
+          required
+        >
+
+      </div>
+
+
+      <div class="documento">
+
+        <label>
+          DNI - REVERSO *
+        </label>
+
+        <input
+          id="dniReverso"
+          type="file"
+          accept="image/*,.pdf"
+          required
+        >
+
+      </div>
+
+
+    </div>
+
+
+    <div class="acciones">
+
+      <button
+        class="btn-principal"
+        type="submit"
+        id="btnRegistrar"
+      >
+        Registrar candidato
+      </button>
+
+    </div>
+
+
+  </form>
+
+</section>
+
+
+<section class="card">
+
+  <div class="titulo">
+    Candidatos registrados
+  </div>
+
+
+  <div class="tabla-contenedor">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            CANDIDATO
+          </th>
+
+          <th>
+            REQUERIMIENTO
+          </th>
+
+          <th>
+            NOMBRE
+          </th>
+
+          <th>
+            DNI
+          </th>
+
+          <th>
+            TELÉFONO
+          </th>
+
+          <th>
+            RESIDENCIA
+          </th>
+
+          <th>
+            CARGO
+          </th>
+
+          <th>
+            ETAPA
+          </th>
+
+          <th>
+            ÁREA ACTUAL
+          </th>
+
+          <th>
+            ESTADO
+          </th>
+
+          <th>
+            CV
+          </th>
+
+          <th>
+            DNI
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody
+        id="tablaCandidatos"
+      >
+
+        <tr>
+
+          <td
+            colspan="12"
+            class="vacio"
+          >
+
+            Cargando candidatos...
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+
+</main>
+
+
+<script>
+
+const API =
+'https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
+
+
+let requerimientos = [];
+
+let candidatos = [];
+
+
+
+document.addEventListener(
+  'DOMContentLoaded',
+  iniciar
+);
+
+
+
+async function iniciar() {
+
+  await cargarRequerimientos();
+
+  await cargarCandidatos();
+}
+
+
+
+document
+  .getElementById(
+    'idRequerimiento'
+  )
+  .addEventListener(
+    'change',
+    actualizarDatosRequerimiento
+  );
+
+
+
+document
+  .getElementById(
+    'formCandidato'
+  )
+  .addEventListener(
+    'submit',
+    registrarCandidato
+  );
+
+
+
+async function cargarRequerimientos() {
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API +
+        '?accion=listarRequerimientos'
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!resultado.ok) {
+
+      throw new Error(
+        resultado.mensaje
+      );
+    }
+
+
+    requerimientos =
+      (
+        resultado.requerimientos
+        || []
+      )
+      .filter(
+        r =>
+          String(r.estado)
+            .toUpperCase()
+          === 'ABIERTO'
+      );
+
+
+    llenarRequerimientos();
+
+    actualizarKPIs();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarMensaje(
+      'No se pudieron cargar los requerimientos.',
+      'error'
+    );
+  }
+}
+
+
+
+function llenarRequerimientos() {
+
+  const select =
+    document.getElementById(
+      'idRequerimiento'
+    );
+
+
+  if (!requerimientos.length) {
+
+    select.innerHTML = `
+      <option value="">
+        No existen requerimientos abiertos
+      </option>
+    `;
+
+    return;
+  }
+
+
+  select.innerHTML = `
+    <option value="">
+      Seleccione...
+    </option>
+  `;
+
+
+  requerimientos.forEach(r => {
+
+    const option =
+      document.createElement(
+        'option'
+      );
+
+
+    option.value =
+      r.idRequerimiento;
+
+
+    option.textContent =
+      r.idRequerimiento +
+      ' | ' +
+      r.unidad +
+      ' | ' +
+      r.cargo +
+      ' | ' +
+      r.cantidadRequerida;
+
+
+    select.appendChild(
+      option
+    );
+  });
+}
+
+
+
+function actualizarDatosRequerimiento() {
+
+  const id =
+    document
+      .getElementById(
+        'idRequerimiento'
+      )
+      .value;
+
+
+  const req =
+    requerimientos.find(
+      r =>
+        r.idRequerimiento === id
+    );
+
+
+  const cargo =
+    document.getElementById(
+      'cargo'
+    );
+
+
+  const info =
+    document.getElementById(
+      'infoRequerimiento'
+    );
+
+
+  if (!req) {
+
+    cargo.value = '';
+
+    info.textContent = '';
+
+    return;
+  }
+
+
+  cargo.value =
+    req.cargo;
+
+
+  info.textContent =
+    'Unidad: ' +
+    req.unidad +
+    ' | Servicio: ' +
+    req.servicio +
+    ' | Requeridos: ' +
+    req.cantidadRequerida +
+    ' | Fecha objetivo: ' +
+    req.fechaObjetivo;
+}
+
+
+
+async function registrarCandidato(
+  evento
+) {
+
+  evento.preventDefault();
+
+
+  const boton =
+    document.getElementById(
+      'btnRegistrar'
+    );
+
+
+  boton.disabled = true;
+
+  boton.textContent =
+    'Procesando documentos...';
+
+
+  try {
+
+    const cvInput =
+      document.getElementById(
+        'cv'
+      );
+
+
+    const anversoInput =
+      document.getElementById(
+        'dniAnverso'
+      );
+
+
+    const reversoInput =
+      document.getElementById(
+        'dniReverso'
+      );
+
+
+    validarArchivo(
+      cvInput.files[0],
+      'CV'
+    );
+
+
+    validarArchivo(
+      anversoInput.files[0],
+      'DNI anverso'
+    );
+
+
+    validarArchivo(
+      reversoInput.files[0],
+      'DNI reverso'
+    );
+
+
+    const [
+      cv,
+      dniAnverso,
+      dniReverso
+    ] =
+      await Promise.all([
+
+        archivoAObjeto(
+          cvInput.files[0]
+        ),
+
+        archivoAObjeto(
+          anversoInput.files[0]
+        ),
+
+        archivoAObjeto(
+          reversoInput.files[0]
+        )
+
+      ]);
+
+
+    boton.textContent =
+      'Registrando candidato...';
+
+
+    const datos = {
+
+      accion:
+        'registrarCandidato',
+
+      idRequerimiento:
+        document
+          .getElementById(
+            'idRequerimiento'
+          )
+          .value,
+
+      nombres:
+        document
+          .getElementById(
+            'nombres'
+          )
+          .value,
+
+      dni:
+        document
+          .getElementById(
+            'dni'
+          )
+          .value,
+
+      telefono:
+        document
+          .getElementById(
+            'telefono'
+          )
+          .value,
+
+      residencia:
+        document
+          .getElementById(
+            'residencia'
+          )
+          .value,
+
+      cargo:
+        document
+          .getElementById(
+            'cargo'
+          )
+          .value,
+
+      resultadoCV:
+        document
+          .getElementById(
+            'resultadoCV'
+          )
+          .value,
+
+      responsable:
+        document
+          .getElementById(
+            'responsable'
+          )
+          .value,
+
+      observacion:
+        document
+          .getElementById(
+            'observacion'
+          )
+          .value,
+
+      cv:
+        cv,
+
+      dniAnverso:
+        dniAnverso,
+
+      dniReverso:
+        dniReverso
+    };
+
+
+    const respuesta =
+      await fetch(
+        API,
+        {
+          method: 'POST',
+          body:
+            JSON.stringify(datos)
+        }
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!resultado.ok) {
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo registrar'
+      );
+    }
+
+
+    mostrarMensaje(
+      resultado.idCandidato +
+      ' - ' +
+      resultado.mensaje,
+      'ok'
+    );
+
+
+    document
+      .getElementById(
+        'formCandidato'
+      )
+      .reset();
+
+
+    document
+      .getElementById(
+        'cargo'
+      )
+      .value = '';
+
+
+    document
+      .getElementById(
+        'infoRequerimiento'
+      )
+      .textContent = '';
+
+
+    await cargarCandidatos();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    mostrarMensaje(
+      error.message,
+      'error'
+    );
+
+
+  } finally {
+
+    boton.disabled = false;
+
+    boton.textContent =
+      'Registrar candidato';
+  }
+}
+
+
+
+function validarArchivo(
+  archivo,
+  nombre
+) {
+
+  if (!archivo) {
+
+    throw new Error(
+      'Debe adjuntar ' +
+      nombre
+    );
+  }
+
+
+  const limite =
+    8 * 1024 * 1024;
+
+
+  if (
+    archivo.size > limite
+  ) {
+
+    throw new Error(
+      nombre +
+      ' supera el límite de 8 MB'
+    );
+  }
+}
+
+
+
+function archivoAObjeto(
+  archivo
+) {
+
+  return new Promise(
+    (
+      resolve,
+      reject
+    ) => {
+
+      const lector =
+        new FileReader();
+
+
+      lector.onload = () => {
+
+        resolve({
+
+          nombre:
+            archivo.name,
+
+          mimeType:
+            archivo.type,
+
+          base64:
+            lector.result
+
+        });
+      };
+
+
+      lector.onerror = () => {
+
+        reject(
+          new Error(
+            'No se pudo leer ' +
+            archivo.name
+          )
+        );
+      };
+
+
+      lector.readAsDataURL(
+        archivo
+      );
+    }
+  );
+}
+
+
+
+async function cargarCandidatos() {
+
+  const tbody =
+    document.getElementById(
+      'tablaCandidatos'
+    );
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API +
+        '?accion=listarCandidatos'
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!resultado.ok) {
+
+      throw new Error(
+        resultado.mensaje
+      );
+    }
+
+
+    candidatos =
+      resultado.candidatos || [];
+
+
+    actualizarKPIs();
+
+
+    if (!candidatos.length) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td
+            colspan="12"
+            class="vacio"
+          >
+            No existen candidatos registrados.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+
+    tbody.innerHTML =
+      candidatos
+        .slice()
+        .reverse()
+        .map(
+          crearFilaCandidato
+        )
+        .join('');
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    tbody.innerHTML = `
+      <tr>
+
+        <td
+          colspan="12"
+          class="vacio"
+        >
+          No se pudieron cargar los candidatos.
+        </td>
+
+      </tr>
+    `;
+  }
+}
+
+
+
+function crearFilaCandidato(c) {
+
+  const estado =
+    String(
+      c.estadoGeneral || ''
+    ).toUpperCase();
+
+
+  let clase =
+    'estado-proceso';
+
+
+  if (
+    estado === 'NO APTO'
+  ) {
+
+    clase =
+      'estado-no-apto';
+
+  } else if (
+    estado === 'CONTRATADO'
+  ) {
+
+    clase =
+      'estado-contratado';
+
+  } else if (
+    estado === 'HABILITADO'
+  ) {
+
+    clase =
+      'estado-habilitado';
+  }
+
+
+  return `
+
+    <tr>
+
+      <td>
+        <strong>
+          ${escapar(c.idCandidato)}
+        </strong>
+      </td>
+
+
+      <td>
+        ${escapar(c.idRequerimiento)}
+      </td>
+
+
+      <td>
+        ${escapar(c.nombres)}
+      </td>
+
+
+      <td>
+        ${escapar(c.dni)}
+      </td>
+
+
+      <td>
+        ${escapar(c.telefono)}
+      </td>
+
+
+      <td>
+        ${escapar(c.residencia)}
+      </td>
+
+
+      <td>
+        ${escapar(c.cargo)}
+      </td>
+
+
+      <td>
+        ${escapar(c.etapaActual)}
+      </td>
+
+
+      <td>
+        ${escapar(c.areaActual)}
+      </td>
+
+
+      <td>
+
+        <span
+          class="estado ${clase}"
+        >
+
+          ${escapar(c.estadoGeneral)}
+
+        </span>
+
+      </td>
+
+
+      <td>
+
+        ${
+          c.cv
+
+          ? `
+            <a
+              href="${escapar(c.cv)}"
+              target="_blank"
+              class="archivo"
+            >
+              Ver CV
+            </a>
+          `
+
+          : '-'
+        }
+
+      </td>
+
+
+      <td>
+
+        ${
+          c.dniAnverso
+
+          ? `
+            <a
+              href="${escapar(c.dniAnverso)}"
+              target="_blank"
+              class="archivo"
+            >
+              Anverso
+            </a>
+          `
+
+          : '-'
+        }
+
+        &nbsp;
+
+        ${
+          c.dniReverso
+
+          ? `
+            <a
+              href="${escapar(c.dniReverso)}"
+              target="_blank"
+              class="archivo"
+            >
+              Reverso
+            </a>
+          `
+
+          : '-'
+        }
+
+      </td>
+
+    </tr>
+  `;
+}
+
+
+
+function actualizarKPIs() {
+
+  const abiertos =
+    requerimientos.length;
+
+
+  const requeridos =
+    requerimientos.reduce(
+      (
+        suma,
+        r
+      ) =>
+        suma +
+        Number(
+          r.cantidadRequerida || 0
+        ),
+      0
+    );
+
+
+  const totalCandidatos =
+    candidatos.length;
+
+
+  const enLegal =
+    candidatos.filter(
+      c =>
+        String(c.areaActual)
+          .toUpperCase()
+        === 'LEGAL'
+    ).length;
+
+
+  document
+    .getElementById(
+      'kpiRequerimientos'
+    )
+    .textContent =
+      abiertos;
+
+
+  document
+    .getElementById(
+      'kpiRequeridos'
+    )
+    .textContent =
+      requeridos;
+
+
+  document
+    .getElementById(
+      'kpiCandidatos'
+    )
+    .textContent =
+      totalCandidatos;
+
+
+  document
+    .getElementById(
+      'kpiLegal'
+    )
+    .textContent =
+      enLegal;
+}
+
+
+
+function mostrarMensaje(
+  texto,
+  tipo
+) {
+
+  const mensaje =
+    document.getElementById(
+      'mensaje'
+    );
+
+
+  mensaje.className =
+    tipo === 'ok'
+
+      ? 'mensaje mensaje-ok'
+
+      : 'mensaje mensaje-error';
+
+
+  mensaje.textContent =
+    texto;
+
+
+  mensaje.style.display =
+    'block';
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+
+
+  setTimeout(() => {
+
+    mensaje.style.display =
+      'none';
+
+  }, 6000);
+}
+
+
+
+function escapar(valor) {
+
+  return String(
+    valor ?? ''
+  )
+
+  .replaceAll(
+    '&',
+    '&amp;'
+  )
+
+  .replaceAll(
+    '<',
+    '&lt;'
+  )
+
+  .replaceAll(
+    '>',
+    '&gt;'
+  )
+
+  .replaceAll(
+    '"',
+    '&quot;'
+  )
+
+  .replaceAll(
+    "'",
+    '&#039;'
+  );
+}
+
+</script>
+
+
+</body>
+
+</html>
