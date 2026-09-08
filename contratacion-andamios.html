@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>DIMARZA | Contratación de Andamieros</title>
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    DIMARZA | Contratación de Andamieros
+  </title>
+
 
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
 
     body {
       font-family: Arial, sans-serif;
@@ -19,21 +30,25 @@
       color: #1f2937;
     }
 
+
     .header {
       background: #111827;
       color: white;
       padding: 18px 25px;
     }
 
+
     .header h1 {
       font-size: 22px;
       margin-bottom: 4px;
     }
 
+
     .header p {
       color: #d1d5db;
       font-size: 13px;
     }
+
 
     .contenedor {
       max-width: 1400px;
@@ -41,13 +56,16 @@
       padding: 25px;
     }
 
+
     .card {
       background: white;
       border-radius: 12px;
       padding: 22px;
       margin-bottom: 22px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      box-shadow:
+        0 2px 8px rgba(0,0,0,.08);
     }
+
 
     .titulo-card {
       font-size: 18px;
@@ -55,16 +73,20 @@
       margin-bottom: 20px;
     }
 
+
     .grid-form {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns:
+        repeat(3, 1fr);
       gap: 16px;
     }
+
 
     .campo {
       display: flex;
       flex-direction: column;
     }
+
 
     .campo label {
       font-size: 12px;
@@ -73,292 +95,720 @@
       color: #4b5563;
     }
 
+
     .campo input,
     .campo select,
     .campo textarea {
-      border: 1px solid #d1d5db;
+
+      border:
+        1px solid #d1d5db;
+
       border-radius: 7px;
+
       padding: 10px;
+
       font-size: 14px;
+
       outline: none;
+
+      background: white;
     }
+
 
     .campo input:focus,
     .campo select:focus,
     .campo textarea:focus {
-      border-color: #2563eb;
+
+      border-color:
+        #2563eb;
     }
 
+
+    .campo input[readonly] {
+
+      background:
+        #f3f4f6;
+
+      color:
+        #374151;
+
+      cursor:
+        not-allowed;
+    }
+
+
     .campo textarea {
+
       resize: vertical;
+
       min-height: 75px;
     }
 
+
     .ancho-completo {
-      grid-column: 1 / -1;
+
+      grid-column:
+        1 / -1;
     }
+
 
     .acciones {
+
       margin-top: 20px;
+
       display: flex;
-      justify-content: flex-end;
+
+      justify-content:
+        flex-end;
     }
 
+
     button {
+
       border: none;
+
       border-radius: 7px;
-      padding: 11px 18px;
+
+      padding:
+        11px 18px;
+
       font-size: 14px;
+
       font-weight: bold;
+
       cursor: pointer;
     }
 
+
     .btn-principal {
-      background: #2563eb;
+
+      background:
+        #2563eb;
+
       color: white;
     }
 
+
     .btn-principal:hover {
-      background: #1d4ed8;
+
+      background:
+        #1d4ed8;
     }
+
 
     .btn-principal:disabled {
+
       opacity: .6;
-      cursor: not-allowed;
+
+      cursor:
+        not-allowed;
     }
 
-    /* KPIs */
+
+    /* =========================
+       KPIs
+    ========================= */
 
     .kpis {
+
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+
+      grid-template-columns:
+        repeat(4, 1fr);
+
       gap: 15px;
+
       margin-bottom: 22px;
     }
 
+
     .kpi {
+
       background: white;
+
       padding: 18px;
+
       border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+
+      box-shadow:
+        0 2px 8px rgba(0,0,0,.06);
     }
 
+
     .kpi .nombre {
+
       font-size: 12px;
+
       color: #6b7280;
+
       margin-bottom: 7px;
     }
 
+
     .kpi .valor {
+
       font-size: 25px;
+
       font-weight: bold;
     }
 
-    /* Tabla */
+
+    /* =========================
+       TABLA
+    ========================= */
 
     .tabla-contenedor {
+
       overflow-x: auto;
     }
 
+
     table {
+
       width: 100%;
-      border-collapse: collapse;
-      min-width: 1050px;
+
+      border-collapse:
+        collapse;
+
+      min-width:
+        1100px;
     }
 
+
     th {
-      background: #f3f4f6;
+
+      background:
+        #f3f4f6;
+
       text-align: left;
+
       font-size: 12px;
+
       padding: 11px;
+
       color: #4b5563;
+
       white-space: nowrap;
     }
 
+
     td {
-      padding: 12px 11px;
-      border-bottom: 1px solid #e5e7eb;
+
+      padding:
+        12px 11px;
+
+      border-bottom:
+        1px solid #e5e7eb;
+
       font-size: 13px;
     }
+
 
     tbody tr:hover {
-      background: #f9fafb;
+
+      background:
+        #f9fafb;
     }
+
 
     .estado {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: bold;
+
+      display:
+        inline-block;
+
+      padding:
+        5px 9px;
+
+      border-radius:
+        20px;
+
+      font-size:
+        11px;
+
+      font-weight:
+        bold;
     }
+
 
     .estado-abierto {
-      background: #dcfce7;
-      color: #166534;
+
+      background:
+        #dcfce7;
+
+      color:
+        #166534;
     }
+
 
     .estado-cerrado {
-      background: #e5e7eb;
-      color: #374151;
+
+      background:
+        #e5e7eb;
+
+      color:
+        #374151;
     }
+
 
     .progreso {
-      width: 110px;
-      height: 7px;
-      background: #e5e7eb;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 5px;
+
+      width:
+        110px;
+
+      height:
+        7px;
+
+      background:
+        #e5e7eb;
+
+      border-radius:
+        10px;
+
+      overflow:
+        hidden;
+
+      margin-top:
+        5px;
     }
+
 
     .progreso-barra {
-      height: 100%;
-      background: #2563eb;
+
+      height:
+        100%;
+
+      background:
+        #2563eb;
     }
+
+
+    /* =========================
+       MENSAJES
+    ========================= */
 
     .mensaje {
-      padding: 12px;
-      border-radius: 7px;
-      margin-bottom: 15px;
-      display: none;
-      font-size: 13px;
+
+      padding:
+        12px;
+
+      border-radius:
+        7px;
+
+      margin-bottom:
+        15px;
+
+      display:
+        none;
+
+      font-size:
+        13px;
     }
+
 
     .mensaje-ok {
-      background: #dcfce7;
-      color: #166534;
+
+      background:
+        #dcfce7;
+
+      color:
+        #166534;
     }
+
 
     .mensaje-error {
-      background: #fee2e2;
-      color: #991b1b;
+
+      background:
+        #fee2e2;
+
+      color:
+        #991b1b;
     }
 
+
     .vacio {
-      text-align: center;
-      padding: 30px;
-      color: #6b7280;
+
+      text-align:
+        center;
+
+      padding:
+        30px;
+
+      color:
+        #6b7280;
     }
+
 
     @media(max-width: 900px) {
 
       .grid-form {
-        grid-template-columns: 1fr;
+
+        grid-template-columns:
+          1fr;
       }
+
 
       .kpis {
-        grid-template-columns: repeat(2, 1fr);
+
+        grid-template-columns:
+          repeat(2, 1fr);
       }
 
+
       .ancho-completo {
-        grid-column: auto;
+
+        grid-column:
+          auto;
       }
+
     }
+
   </style>
+
 </head>
+
+
 
 <body>
 
+
+  <!-- =========================
+       CABECERA
+  ========================== -->
+
   <header class="header">
-    <h1>Seguimiento de Contratación de Andamieros</h1>
-    <p>Gestión de requerimientos de personal</p>
+
+    <h1>
+      Seguimiento de Contratación de Andamieros
+    </h1>
+
+    <p>
+      Gestión de requerimientos de personal
+    </p>
+
   </header>
+
+
 
   <main class="contenedor">
 
-    <!-- FORMULARIO -->
+
+    <!-- =========================
+         FORMULARIO
+    ========================== -->
 
     <section class="card">
+
 
       <div class="titulo-card">
         Nuevo requerimiento de personal
       </div>
 
+
       <div id="mensaje"></div>
+
 
       <form id="formRequerimiento">
 
+
         <div class="grid-form">
 
+
+          <!-- UNIDAD MINERA -->
+
           <div class="campo">
-            <label>UNIDAD MINERA *</label>
-            <input
+
+            <label>
+              UNIDAD MINERA *
+            </label>
+
+
+            <select
               id="unidad"
-              type="text"
-              placeholder="Ej. CENTINELA"
               required
             >
-          </div>
 
-          <div class="campo">
-            <label>SERVICIO *</label>
-            <input
-              id="servicio"
-              type="text"
-              placeholder="Ej. OXE"
-              required
-            >
-          </div>
+              <option value="">
+                Seleccione...
+              </option>
 
-          <div class="campo">
-            <label>CARGO *</label>
 
-            <select id="cargo" required>
-              <option value="">Seleccione...</option>
-              <option>OPERARIO ANDAMIERO</option>
-              <option>LIDER ANDAMIERO</option>
-              <option>SUPERVISOR ANDAMIERO</option>
+              <optgroup label="Perú">
+
+                <option>
+                  CERRO VERDE
+                </option>
+
+                <option>
+                  QUELLAVECO
+                </option>
+
+                <option>
+                  ANTAPACCAY
+                </option>
+
+                <option>
+                  LAS BAMBAS
+                </option>
+
+                <option>
+                  ANTAMINA
+                </option>
+
+                <option>
+                  TOROMOCHO
+                </option>
+
+                <option>
+                  CONSTANCIA
+                </option>
+
+                <option>
+                  MINA JUSTA
+                </option>
+
+                <option>
+                  TOQUEPALA
+                </option>
+
+                <option>
+                  CUAJONE
+                </option>
+
+                <option>
+                  YANACOCHA
+                </option>
+
+                <option>
+                  SAN RAFAEL
+                </option>
+
+                <option>
+                  PUCAMARCA
+                </option>
+
+                <option>
+                  SHOUGANG - MARCONA
+                </option>
+
+              </optgroup>
+
+
+              <optgroup label="Chile">
+
+                <option>
+                  CENTINELA
+                </option>
+
+                <option>
+                  SIERRA GORDA
+                </option>
+
+                <option>
+                  ESCONDIDA
+                </option>
+
+                <option>
+                  COLLAHUASI
+                </option>
+
+                <option>
+                  CHUQUICAMATA
+                </option>
+
+                <option>
+                  RADOMIRO TOMIC
+                </option>
+
+                <option>
+                  MINISTRO HALES
+                </option>
+
+                <option>
+                  SPENCE
+                </option>
+
+                <option>
+                  LOS PELAMBRES
+                </option>
+
+                <option>
+                  LOS BRONCES
+                </option>
+
+                <option>
+                  EL TENIENTE
+                </option>
+
+              </optgroup>
+
+
+              <option value="OTRA">
+                OTRA
+              </option>
+
             </select>
+
           </div>
 
+
+
+          <!-- TIPO DE CONTRATO -->
+
           <div class="campo">
-            <label>CANTIDAD REQUERIDA *</label>
+
+            <label>
+              TIPO DE CONTRATO *
+            </label>
+
+
+            <select
+              id="tipoContrato"
+              required
+            >
+
+              <option value="">
+                Seleccione...
+              </option>
+
+              <option value="INTERMITENTE">
+                INTERMITENTE
+              </option>
+
+              <option value="PERMANENTE">
+                PERMANENTE
+              </option>
+
+            </select>
+
+          </div>
+
+
+
+          <!-- CARGO -->
+
+          <div class="campo">
+
+            <label>
+              CARGO *
+            </label>
+
+
+            <select
+              id="cargo"
+              required
+            >
+
+              <option value="">
+                Cargando cargos...
+              </option>
+
+            </select>
+
+          </div>
+
+
+
+          <!-- CANTIDAD -->
+
+          <div class="campo">
+
+            <label>
+              CANTIDAD REQUERIDA *
+            </label>
+
+
             <input
               id="cantidad"
               type="number"
               min="1"
               required
             >
+
           </div>
 
+
+
+          <!-- FECHA OBJETIVO -->
+
           <div class="campo">
-            <label>FECHA OBJETIVO DE LLEGADA *</label>
+
+            <label>
+              FECHA OBJETIVO DE LLEGADA *
+            </label>
+
+
             <input
               id="fechaObjetivo"
               type="date"
               required
             >
+
           </div>
 
+
+
+          <!-- SOLICITANTE -->
+
           <div class="campo">
-            <label>SOLICITANTE *</label>
+
+            <label>
+              SOLICITANTE *
+            </label>
+
+
             <input
               id="solicitante"
               type="text"
+              readonly
               required
+              placeholder="Cargando residente..."
             >
+
           </div>
 
+
+
+          <!-- MOTIVO -->
+
           <div class="campo ancho-completo">
-            <label>MOTIVO / JUSTIFICACIÓN</label>
+
+            <label>
+              MOTIVO / JUSTIFICACIÓN
+            </label>
+
+
             <textarea
               id="motivo"
               placeholder="Indique el motivo de la necesidad de personal..."
             ></textarea>
+
           </div>
 
+
+
+          <!-- OBSERVACIONES -->
+
           <div class="campo ancho-completo">
-            <label>OBSERVACIONES</label>
+
+            <label>
+              OBSERVACIONES
+            </label>
+
+
             <textarea
               id="observaciones"
               placeholder="Información adicional..."
             ></textarea>
+
           </div>
+
 
         </div>
 
+
+
         <div class="acciones">
+
           <button
             type="submit"
             class="btn-principal"
@@ -366,157 +816,272 @@
           >
             Registrar requerimiento
           </button>
+
         </div>
+
 
       </form>
 
+
     </section>
 
 
-    <!-- KPIs -->
+
+    <!-- =========================
+         KPIs
+    ========================== -->
 
     <section class="kpis">
 
-      <div class="kpi">
-        <div class="nombre">REQUERIMIENTOS ABIERTOS</div>
-        <div class="valor" id="kpiRequerimientos">0</div>
-      </div>
 
       <div class="kpi">
-        <div class="nombre">PERSONAL REQUERIDO</div>
-        <div class="valor" id="kpiRequeridos">0</div>
+
+        <div class="nombre">
+          REQUERIMIENTOS ABIERTOS
+        </div>
+
+        <div
+          class="valor"
+          id="kpiRequerimientos"
+        >
+          0
+        </div>
+
       </div>
 
-      <div class="kpi">
-        <div class="nombre">CONTRATADOS</div>
-        <div class="valor" id="kpiContratados">0</div>
-      </div>
+
 
       <div class="kpi">
-        <div class="nombre">HABILITADOS</div>
-        <div class="valor" id="kpiHabilitados">0</div>
+
+        <div class="nombre">
+          PERSONAL REQUERIDO
+        </div>
+
+        <div
+          class="valor"
+          id="kpiRequeridos"
+        >
+          0
+        </div>
+
       </div>
+
+
+
+      <div class="kpi">
+
+        <div class="nombre">
+          CONTRATADOS
+        </div>
+
+        <div
+          class="valor"
+          id="kpiContratados"
+        >
+          0
+        </div>
+
+      </div>
+
+
+
+      <div class="kpi">
+
+        <div class="nombre">
+          HABILITADOS
+        </div>
+
+        <div
+          class="valor"
+          id="kpiHabilitados"
+        >
+          0
+        </div>
+
+      </div>
+
 
     </section>
 
 
-    <!-- LISTADO -->
+
+    <!-- =========================
+         LISTADO
+    ========================== -->
 
     <section class="card">
+
 
       <div class="titulo-card">
         Requerimientos registrados
       </div>
 
+
       <div class="tabla-contenedor">
+
 
         <table>
 
+
           <thead>
+
             <tr>
-              <th>REQUERIMIENTO</th>
-              <th>UNIDAD</th>
-              <th>SERVICIO</th>
-              <th>CARGO</th>
-              <th>REQUERIDOS</th>
-              <th>CONTRATADOS</th>
-              <th>HABILITADOS</th>
-              <th>FECHA OBJETIVO</th>
-              <th>ESTADO</th>
-              <th>AVANCE</th>
+
+              <th>
+                REQUERIMIENTO
+              </th>
+
+              <th>
+                UNIDAD
+              </th>
+
+              <th>
+                TIPO CONTRATO
+              </th>
+
+              <th>
+                CARGO
+              </th>
+
+              <th>
+                REQUERIDOS
+              </th>
+
+              <th>
+                CONTRATADOS
+              </th>
+
+              <th>
+                HABILITADOS
+              </th>
+
+              <th>
+                FECHA OBJETIVO
+              </th>
+
+              <th>
+                ESTADO
+              </th>
+
+              <th>
+                AVANCE
+              </th>
+
             </tr>
+
           </thead>
+
+
 
           <tbody id="tablaRequerimientos">
 
             <tr>
-              <td colspan="10" class="vacio">
+
+              <td
+                colspan="10"
+                class="vacio"
+              >
                 Cargando requerimientos...
               </td>
+
             </tr>
 
           </tbody>
 
+
         </table>
+
 
       </div>
 
+
     </section>
+
 
   </main>
 
 
+
 <script>
 
+
+/* =====================================================
+   APIs
+===================================================== */
+
+
 const API =
-'https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
+  'https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
+
+
+const API_PERSONAL =
+  'https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIHr9XP7SA81SoZZSxo4OoB5N7VaMLLklU9ym82vCwDQN/exec';
+
+
+
+/* =====================================================
+   INICIO
+===================================================== */
 
 
 document.addEventListener(
   'DOMContentLoaded',
-  cargarRequerimientos
+  async () => {
+
+    await cargarPersonal();
+
+    await cargarRequerimientos();
+
+  }
 );
 
 
+
 document
-  .getElementById('formRequerimiento')
+  .getElementById(
+    'formRequerimiento'
+  )
   .addEventListener(
     'submit',
     registrarRequerimiento
   );
 
 
-async function registrarRequerimiento(evento) {
 
-  evento.preventDefault();
+/* =====================================================
+   DATA PERSONAL
+===================================================== */
 
-  const boton =
-    document.getElementById('btnGuardar');
 
-  boton.disabled = true;
-  boton.textContent = 'Registrando...';
+async function cargarPersonal() {
+
+
+  const selectCargo =
+    document.getElementById(
+      'cargo'
+    );
+
+
+  const solicitante =
+    document.getElementById(
+      'solicitante'
+    );
+
 
   try {
-
-    const datos = {
-
-      accion: 'crearRequerimiento',
-
-      unidad:
-        document.getElementById('unidad').value,
-
-      servicio:
-        document.getElementById('servicio').value,
-
-      cargo:
-        document.getElementById('cargo').value,
-
-      cantidad:
-        Number(
-          document.getElementById('cantidad').value
-        ),
-
-      fechaObjetivo:
-        document.getElementById('fechaObjetivo').value,
-
-      solicitante:
-        document.getElementById('solicitante').value,
-
-      motivo:
-        document.getElementById('motivo').value,
-
-      observaciones:
-        document.getElementById('observaciones').value
-    };
 
 
     const respuesta =
       await fetch(
-        API,
-        {
-          method: 'POST',
-          body: JSON.stringify(datos)
-        }
+
+        API_PERSONAL +
+
+        '?accion=personalContratacion' +
+
+        '&t=' +
+
+        Date.now()
+
       );
 
 
@@ -525,24 +1090,277 @@ async function registrarRequerimiento(evento) {
 
 
     if (!resultado.ok) {
+
       throw new Error(
+
         resultado.mensaje ||
-        'No se pudo registrar el requerimiento'
+
+        'No se pudo cargar DATA PERSONAL'
+
       );
+
     }
 
 
-    mostrarMensaje(
-      'Requerimiento ' +
-      resultado.idRequerimiento +
-      ' registrado correctamente.',
-      'ok'
+
+    const cargos =
+      resultado.cargos || [];
+
+
+
+    selectCargo.innerHTML =
+
+      `
+        <option value="">
+          Seleccione...
+        </option>
+      `
+
+      +
+
+      cargos
+
+        .map(
+
+          cargo => `
+
+            <option value="${escapar(cargo)}">
+
+              ${escapar(cargo)}
+
+            </option>
+
+          `
+
+        )
+
+        .join('');
+
+
+
+    solicitante.value =
+      resultado.residente || '';
+
+
+
+    if (!resultado.residente) {
+
+      solicitante.placeholder =
+        'No se encontró RESIDENTE en DATA PERSONAL';
+
+    }
+
+
+  } catch (error) {
+
+
+    console.error(
+      'Error cargando personal:',
+      error
     );
 
 
+    selectCargo.innerHTML = `
+
+      <option value="">
+        No se pudieron cargar los cargos
+      </option>
+
+    `;
+
+
+    solicitante.value = '';
+
+
+    solicitante.placeholder =
+      'No se pudo cargar el residente';
+
+  }
+
+}
+
+
+
+/* =====================================================
+   REGISTRAR REQUERIMIENTO
+===================================================== */
+
+
+async function registrarRequerimiento(
+  evento
+) {
+
+
+  evento.preventDefault();
+
+
+  const boton =
+    document.getElementById(
+      'btnGuardar'
+    );
+
+
+  boton.disabled = true;
+
+
+  boton.textContent =
+    'Registrando...';
+
+
+
+  try {
+
+
+    const datos = {
+
+
+      accion:
+        'crearRequerimiento',
+
+
+      unidad:
+        document
+          .getElementById(
+            'unidad'
+          )
+          .value,
+
+
+      tipoContrato:
+        document
+          .getElementById(
+            'tipoContrato'
+          )
+          .value,
+
+
+      cargo:
+        document
+          .getElementById(
+            'cargo'
+          )
+          .value,
+
+
+      cantidad:
+        Number(
+
+          document
+            .getElementById(
+              'cantidad'
+            )
+            .value
+
+        ),
+
+
+      fechaObjetivo:
+        document
+          .getElementById(
+            'fechaObjetivo'
+          )
+          .value,
+
+
+      solicitante:
+        document
+          .getElementById(
+            'solicitante'
+          )
+          .value,
+
+
+      motivo:
+        document
+          .getElementById(
+            'motivo'
+          )
+          .value,
+
+
+      observaciones:
+        document
+          .getElementById(
+            'observaciones'
+          )
+          .value
+
+    };
+
+
+
+    const respuesta =
+      await fetch(
+
+        API,
+
+        {
+
+          method:
+            'POST',
+
+          body:
+            JSON.stringify(
+              datos
+            )
+
+        }
+
+      );
+
+
+
+    const resultado =
+      await respuesta.json();
+
+
+
+    if (!resultado.ok) {
+
+
+      throw new Error(
+
+        resultado.mensaje ||
+
+        'No se pudo registrar el requerimiento'
+
+      );
+
+    }
+
+
+
+    mostrarMensaje(
+
+      'Requerimiento ' +
+
+      resultado.idRequerimiento +
+
+      ' registrado correctamente.',
+
+      'ok'
+
+    );
+
+
+
     document
-      .getElementById('formRequerimiento')
+      .getElementById(
+        'formRequerimiento'
+      )
       .reset();
+
+
+
+    /*
+      El reset limpia también el
+      solicitante y los cargos.
+
+      Los volvemos a cargar.
+    */
+
+    await cargarPersonal();
+
 
 
     await cargarRequerimientos();
@@ -550,267 +1368,562 @@ async function registrarRequerimiento(evento) {
 
   } catch (error) {
 
+
     console.error(error);
 
+
     mostrarMensaje(
+
       error.message,
+
       'error'
+
     );
+
 
   } finally {
 
+
     boton.disabled = false;
+
+
     boton.textContent =
       'Registrar requerimiento';
+
   }
+
 }
 
 
 
+/* =====================================================
+   CARGAR REQUERIMIENTOS
+===================================================== */
+
+
 async function cargarRequerimientos() {
+
 
   const tbody =
     document.getElementById(
       'tablaRequerimientos'
     );
 
+
   try {
+
 
     const respuesta =
       await fetch(
+
         API +
-        '?accion=listarRequerimientos'
+
+        '?accion=listarRequerimientos' +
+
+        '&t=' +
+
+        Date.now()
+
       );
+
 
     const resultado =
       await respuesta.json();
 
 
+
     if (!resultado.ok) {
+
+
       throw new Error(
+
         resultado.mensaje ||
+
         'Error cargando requerimientos'
+
       );
+
     }
+
 
 
     const lista =
       resultado.requerimientos || [];
 
 
-    actualizarKPIs(lista);
+
+    actualizarKPIs(
+      lista
+    );
+
 
 
     if (!lista.length) {
 
+
       tbody.innerHTML = `
+
         <tr>
-          <td colspan="10" class="vacio">
+
+          <td
+            colspan="10"
+            class="vacio"
+          >
             No existen requerimientos registrados.
           </td>
+
         </tr>
+
       `;
 
+
       return;
+
     }
 
 
+
     tbody.innerHTML =
+
       lista
-      .slice()
-      .reverse()
-      .map(r => {
 
-        const requerido =
-          Number(r.cantidadRequerida || 0);
+        .slice()
 
-        const contratado =
-          Number(r.cantidadContratada || 0);
+        .reverse()
 
-        const habilitado =
-          Number(r.cantidadHabilitada || 0);
+        .map(
+
+          r => {
 
 
-        const porcentaje =
-          requerido > 0
-            ? Math.min(
-                100,
-                Math.round(
-                  habilitado /
-                  requerido *
-                  100
-                )
+            const requerido =
+              Number(
+                r.cantidadRequerida ||
+                0
+              );
+
+
+            const contratado =
+              Number(
+                r.cantidadContratada ||
+                0
+              );
+
+
+            const habilitado =
+              Number(
+                r.cantidadHabilitada ||
+                0
+              );
+
+
+
+            const porcentaje =
+
+              requerido > 0
+
+                ? Math.min(
+
+                    100,
+
+                    Math.round(
+
+                      habilitado /
+
+                      requerido *
+
+                      100
+
+                    )
+
+                  )
+
+                : 0;
+
+
+
+            const claseEstado =
+
+              String(
+                r.estado || ''
               )
-            : 0;
+                .toUpperCase()
+
+              === 'ABIERTO'
+
+                ? 'estado-abierto'
+
+                : 'estado-cerrado';
 
 
-        const claseEstado =
-          String(r.estado).toUpperCase()
-          === 'ABIERTO'
-            ? 'estado-abierto'
-            : 'estado-cerrado';
+
+            return `
+
+              <tr>
 
 
-        return `
-          <tr>
+                <td>
 
-            <td>
-              <strong>
-                ${escapar(r.idRequerimiento)}
-              </strong>
-            </td>
+                  <strong>
 
-            <td>
-              ${escapar(r.unidad)}
-            </td>
+                    ${escapar(
+                      r.idRequerimiento
+                    )}
 
-            <td>
-              ${escapar(r.servicio)}
-            </td>
+                  </strong>
 
-            <td>
-              ${escapar(r.cargo)}
-            </td>
+                </td>
 
-            <td>
-              ${requerido}
-            </td>
 
-            <td>
-              ${contratado}
-            </td>
+                <td>
 
-            <td>
-              ${habilitado}
-            </td>
+                  ${escapar(
+                    r.unidad
+                  )}
 
-            <td>
-              ${escapar(r.fechaObjetivo)}
-            </td>
+                </td>
 
-            <td>
-              <span class="estado ${claseEstado}">
-                ${escapar(r.estado)}
-              </span>
-            </td>
 
-            <td>
+                <td>
 
-              <strong>
-                ${porcentaje}%
-              </strong>
+                  ${escapar(
+                    r.tipoContrato
+                  )}
 
-              <div class="progreso">
-                <div
-                  class="progreso-barra"
-                  style="width:${porcentaje}%"
-                ></div>
-              </div>
+                </td>
 
-            </td>
 
-          </tr>
-        `;
+                <td>
 
-      })
-      .join('');
+                  ${escapar(
+                    r.cargo
+                  )}
+
+                </td>
+
+
+                <td>
+
+                  ${requerido}
+
+                </td>
+
+
+                <td>
+
+                  ${contratado}
+
+                </td>
+
+
+                <td>
+
+                  ${habilitado}
+
+                </td>
+
+
+                <td>
+
+                  ${escapar(
+                    r.fechaObjetivo
+                  )}
+
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="
+                      estado
+                      ${claseEstado}
+                    "
+                  >
+
+                    ${escapar(
+                      r.estado
+                    )}
+
+                  </span>
+
+                </td>
+
+
+                <td>
+
+
+                  <strong>
+
+                    ${porcentaje}%
+
+                  </strong>
+
+
+                  <div class="progreso">
+
+                    <div
+                      class="progreso-barra"
+                      style="
+                        width:
+                        ${porcentaje}%
+                      "
+                    ></div>
+
+                  </div>
+
+
+                </td>
+
+
+              </tr>
+
+            `;
+
+          }
+
+        )
+
+        .join('');
 
 
   } catch (error) {
 
+
     console.error(error);
 
+
     tbody.innerHTML = `
+
       <tr>
-        <td colspan="10" class="vacio">
-          No se pudieron cargar los requerimientos.
+
+        <td
+          colspan="10"
+          class="vacio"
+        >
+
+          No se pudieron cargar
+          los requerimientos.
+
         </td>
+
       </tr>
+
     `;
+
   }
+
 }
 
 
 
-function actualizarKPIs(lista) {
+/* =====================================================
+   KPIs
+===================================================== */
+
+
+function actualizarKPIs(
+  lista
+) {
+
 
   let abiertos = 0;
+
   let requeridos = 0;
+
   let contratados = 0;
+
   let habilitados = 0;
 
 
-  lista.forEach(r => {
 
-    if (
-      String(r.estado)
-      .toUpperCase() === 'ABIERTO'
-    ) {
-      abiertos++;
+  lista.forEach(
+
+    r => {
+
+
+      if (
+
+        String(
+          r.estado || ''
+        )
+          .toUpperCase()
+
+        === 'ABIERTO'
+
+      ) {
+
+        abiertos++;
+
+      }
+
+
+
+      requeridos +=
+
+        Number(
+          r.cantidadRequerida ||
+          0
+        );
+
+
+      contratados +=
+
+        Number(
+          r.cantidadContratada ||
+          0
+        );
+
+
+      habilitados +=
+
+        Number(
+          r.cantidadHabilitada ||
+          0
+        );
+
     }
 
-    requeridos +=
-      Number(r.cantidadRequerida || 0);
-
-    contratados +=
-      Number(r.cantidadContratada || 0);
-
-    habilitados +=
-      Number(r.cantidadHabilitada || 0);
-  });
+  );
 
 
-  document.getElementById(
-    'kpiRequerimientos'
-  ).textContent = abiertos;
 
-  document.getElementById(
-    'kpiRequeridos'
-  ).textContent = requeridos;
+  document
+    .getElementById(
+      'kpiRequerimientos'
+    )
+    .textContent =
+    abiertos;
 
-  document.getElementById(
-    'kpiContratados'
-  ).textContent = contratados;
 
-  document.getElementById(
-    'kpiHabilitados'
-  ).textContent = habilitados;
+
+  document
+    .getElementById(
+      'kpiRequeridos'
+    )
+    .textContent =
+    requeridos;
+
+
+
+  document
+    .getElementById(
+      'kpiContratados'
+    )
+    .textContent =
+    contratados;
+
+
+
+  document
+    .getElementById(
+      'kpiHabilitados'
+    )
+    .textContent =
+    habilitados;
+
 }
 
 
 
-function mostrarMensaje(texto, tipo) {
+/* =====================================================
+   MENSAJE
+===================================================== */
+
+
+function mostrarMensaje(
+  texto,
+  tipo
+) {
+
 
   const mensaje =
-    document.getElementById('mensaje');
+    document.getElementById(
+      'mensaje'
+    );
+
 
   mensaje.className =
+
     tipo === 'ok'
+
       ? 'mensaje mensaje-ok'
+
       : 'mensaje mensaje-error';
 
-  mensaje.textContent = texto;
-  mensaje.style.display = 'block';
 
 
-  setTimeout(() => {
-    mensaje.style.display = 'none';
-  }, 5000);
+  mensaje.textContent =
+    texto;
+
+
+  mensaje.style.display =
+    'block';
+
+
+
+  setTimeout(
+
+    () => {
+
+      mensaje.style.display =
+        'none';
+
+    },
+
+    5000
+
+  );
+
 }
 
 
 
-function escapar(valor) {
+/* =====================================================
+   ESCAPAR HTML
+===================================================== */
 
-  return String(valor ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+
+function escapar(
+  valor
+) {
+
+
+  return String(
+    valor ?? ''
+  )
+
+    .replaceAll(
+      '&',
+      '&amp;'
+    )
+
+    .replaceAll(
+      '<',
+      '&lt;'
+    )
+
+    .replaceAll(
+      '>',
+      '&gt;'
+    )
+
+    .replaceAll(
+      '"',
+      '&quot;'
+    )
+
+    .replaceAll(
+      "'",
+      '&#039;'
+    );
+
 }
+
 
 </script>
 
+
 </body>
+
 </html>
