@@ -30,18 +30,30 @@ body {
 }
 
 
+/* =====================================================
+   CABECERA
+===================================================== */
+
 .header {
   background: #111827;
   color: white;
   padding: 20px 25px;
 }
 
+.header-contenido {
+  max-width: 1450px;
+  margin: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
 
 .header h1 {
   margin: 0 0 5px;
   font-size: 22px;
 }
-
 
 .header p {
   margin: 0;
@@ -49,6 +61,34 @@ body {
   font-size: 13px;
 }
 
+.btn-volver {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 9px 16px;
+
+  background: #374151;
+  color: white;
+
+  border-radius: 7px;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: bold;
+
+  white-space: nowrap;
+}
+
+.btn-volver:hover {
+  background: #4b5563;
+}
+
+
+/* =====================================================
+   CONTENEDOR
+===================================================== */
 
 .contenedor {
   max-width: 1450px;
@@ -56,6 +96,10 @@ body {
   padding: 25px;
 }
 
+
+/* =====================================================
+   CARDS
+===================================================== */
 
 .card {
   background: white;
@@ -68,7 +112,6 @@ body {
     rgba(0,0,0,.07);
 }
 
-
 .titulo {
   font-size: 18px;
   font-weight: bold;
@@ -76,8 +119,11 @@ body {
 }
 
 
-.grid-kpis {
+/* =====================================================
+   KPIs
+===================================================== */
 
+.grid-kpis {
   display: grid;
 
   grid-template-columns:
@@ -88,9 +134,7 @@ body {
   margin-bottom: 22px;
 }
 
-
 .kpi {
-
   background: white;
 
   border-radius: 10px;
@@ -102,9 +146,7 @@ body {
     rgba(0,0,0,.06);
 }
 
-
 .kpi-nombre {
-
   font-size: 12px;
 
   color: #6b7280;
@@ -112,17 +154,18 @@ body {
   margin-bottom: 7px;
 }
 
-
 .kpi-valor {
-
   font-size: 26px;
 
   font-weight: bold;
 }
 
 
-.grid-form {
+/* =====================================================
+   FORMULARIO
+===================================================== */
 
+.grid-form {
   display: grid;
 
   grid-template-columns:
@@ -131,17 +174,13 @@ body {
   gap: 16px;
 }
 
-
 .campo {
-
   display: flex;
 
   flex-direction: column;
 }
 
-
 .campo label {
-
   font-size: 12px;
 
   font-weight: bold;
@@ -151,11 +190,9 @@ body {
   margin-bottom: 6px;
 }
 
-
 .campo input,
 .campo select,
 .campo textarea {
-
   border:
     1px solid #d1d5db;
 
@@ -168,45 +205,45 @@ body {
   outline: none;
 }
 
-
 .campo textarea {
-
   min-height: 75px;
 
   resize: vertical;
 }
 
-
 .campo input:focus,
 .campo select:focus,
 .campo textarea:focus {
-
   border-color: #2563eb;
 }
 
+.campo input[readonly] {
+  background: #f3f4f6;
+  color: #374151;
+}
 
 .completo {
-
   grid-column:
     1 / -1;
 }
 
 
-.documentos {
+/* =====================================================
+   DOCUMENTOS
+===================================================== */
 
+.documentos {
   display: grid;
 
   grid-template-columns:
-    repeat(3, 1fr);
+    repeat(2, 1fr);
 
   gap: 15px;
 
   margin-top: 18px;
 }
 
-
 .documento {
-
   border:
     1px dashed #9ca3af;
 
@@ -217,9 +254,7 @@ body {
   background: #f9fafb;
 }
 
-
 .documento label {
-
   display: block;
 
   font-size: 12px;
@@ -230,8 +265,11 @@ body {
 }
 
 
-.acciones {
+/* =====================================================
+   BOTONES
+===================================================== */
 
+.acciones {
   display: flex;
 
   justify-content: flex-end;
@@ -239,9 +277,7 @@ body {
   margin-top: 20px;
 }
 
-
 button {
-
   border: 0;
 
   border-radius: 7px;
@@ -255,31 +291,28 @@ button {
   font-weight: bold;
 }
 
-
 .btn-principal {
-
   background: #2563eb;
 
   color: white;
 }
 
-
 .btn-principal:hover {
-
   background: #1d4ed8;
 }
 
-
 .btn-principal:disabled {
-
   opacity: .6;
 
   cursor: not-allowed;
 }
 
 
-.mensaje {
+/* =====================================================
+   MENSAJES
+===================================================== */
 
+.mensaje {
   display: none;
 
   border-radius: 7px;
@@ -291,31 +324,28 @@ button {
   font-size: 13px;
 }
 
-
 .mensaje-ok {
-
   background: #dcfce7;
 
   color: #166534;
 }
 
-
 .mensaje-error {
-
   background: #fee2e2;
 
   color: #991b1b;
 }
 
 
-.tabla-contenedor {
+/* =====================================================
+   TABLA
+===================================================== */
 
+.tabla-contenedor {
   overflow-x: auto;
 }
 
-
 table {
-
   width: 100%;
 
   border-collapse: collapse;
@@ -323,9 +353,7 @@ table {
   min-width: 1200px;
 }
 
-
 th {
-
   background: #f3f4f6;
 
   padding: 11px;
@@ -339,9 +367,7 @@ th {
   white-space: nowrap;
 }
 
-
 td {
-
   border-bottom:
     1px solid #e5e7eb;
 
@@ -350,15 +376,16 @@ td {
   font-size: 13px;
 }
 
-
 tbody tr:hover {
-
   background: #f9fafb;
 }
 
 
-.estado {
+/* =====================================================
+   ESTADOS
+===================================================== */
 
+.estado {
   display: inline-block;
 
   padding: 5px 9px;
@@ -370,41 +397,31 @@ tbody tr:hover {
   font-weight: bold;
 }
 
-
 .estado-proceso {
-
   background: #dbeafe;
 
   color: #1e40af;
 }
 
-
 .estado-no-apto {
-
   background: #fee2e2;
 
   color: #991b1b;
 }
 
-
 .estado-contratado {
-
   background: #dcfce7;
 
   color: #166534;
 }
 
-
 .estado-habilitado {
-
   background: #d1fae5;
 
   color: #065f46;
 }
 
-
 .archivo {
-
   text-decoration: none;
 
   color: #2563eb;
@@ -412,9 +429,7 @@ tbody tr:hover {
   font-weight: bold;
 }
 
-
 .vacio {
-
   text-align: center;
 
   padding: 28px;
@@ -422,9 +437,7 @@ tbody tr:hover {
   color: #6b7280;
 }
 
-
 .info-requerimiento {
-
   margin-top: 8px;
 
   font-size: 12px;
@@ -433,25 +446,54 @@ tbody tr:hover {
 }
 
 
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+  text-align: center;
+
+  padding: 20px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
 @media(max-width: 900px) {
 
   .grid-form,
   .documentos {
-
     grid-template-columns: 1fr;
   }
 
-
   .grid-kpis {
-
     grid-template-columns:
       repeat(2, 1fr);
   }
 
-
   .completo {
-
     grid-column: auto;
+  }
+
+  .header-contenido {
+    align-items: flex-start;
+  }
+}
+
+@media(max-width: 560px) {
+
+  .header-contenido {
+    flex-direction: column;
+  }
+
+  .grid-kpis {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -465,13 +507,29 @@ tbody tr:hover {
 
 <header class="header">
 
-  <h1>
-    ATH - Seguimiento de Contratación
-  </h1>
+  <div class="header-contenido">
 
-  <p>
-    Registro y filtro inicial de candidatos
-  </p>
+    <div>
+
+      <h1>
+        ATH - Seguimiento de Contratación
+      </h1>
+
+      <p>
+        Registro y filtro inicial de candidatos
+      </p>
+
+    </div>
+
+
+    <a
+      href="contratacion.html"
+      class="btn-volver"
+    >
+      ← Volver
+    </a>
+
+  </div>
 
 </header>
 
@@ -480,6 +538,7 @@ tbody tr:hover {
 
 
 <section class="grid-kpis">
+
 
   <div class="kpi">
 
@@ -543,6 +602,7 @@ tbody tr:hover {
     </div>
 
   </div>
+
 
 </section>
 
@@ -749,29 +809,13 @@ tbody tr:hover {
       <div class="documento">
 
         <label>
-          DNI - ANVERSO *
+          DNI *
         </label>
 
         <input
-          id="dniAnverso"
+          id="archivoDni"
           type="file"
-          accept="image/*,.pdf"
-          required
-        >
-
-      </div>
-
-
-      <div class="documento">
-
-        <label>
-          DNI - REVERSO *
-        </label>
-
-        <input
-          id="dniReverso"
-          type="file"
-          accept="image/*,.pdf"
+          accept=".pdf"
           required
         >
 
@@ -814,53 +858,29 @@ tbody tr:hover {
 
         <tr>
 
-          <th>
-            CANDIDATO
-          </th>
+          <th>CANDIDATO</th>
 
-          <th>
-            REQUERIMIENTO
-          </th>
+          <th>REQUERIMIENTO</th>
 
-          <th>
-            NOMBRE
-          </th>
+          <th>NOMBRE</th>
 
-          <th>
-            DNI
-          </th>
+          <th>DNI</th>
 
-          <th>
-            TELÉFONO
-          </th>
+          <th>TELÉFONO</th>
 
-          <th>
-            RESIDENCIA
-          </th>
+          <th>RESIDENCIA</th>
 
-          <th>
-            CARGO
-          </th>
+          <th>CARGO</th>
 
-          <th>
-            ETAPA
-          </th>
+          <th>ETAPA</th>
 
-          <th>
-            ÁREA ACTUAL
-          </th>
+          <th>ÁREA ACTUAL</th>
 
-          <th>
-            ESTADO
-          </th>
+          <th>ESTADO</th>
 
-          <th>
-            CV
-          </th>
+          <th>CV</th>
 
-          <th>
-            DNI
-          </th>
+          <th>ARCHIVO DNI</th>
 
         </tr>
 
@@ -877,9 +897,7 @@ tbody tr:hover {
             colspan="12"
             class="vacio"
           >
-
             Cargando candidatos...
-
           </td>
 
         </tr>
@@ -894,6 +912,11 @@ tbody tr:hover {
 
 
 </main>
+
+
+<footer class="footer">
+  © 2026 Ruben Romero. Todos los derechos reservados.
+</footer>
 
 
 <script>
@@ -953,7 +976,9 @@ async function cargarRequerimientos() {
     const respuesta =
       await fetch(
         API +
-        '?accion=listarRequerimientos'
+        '?accion=listarRequerimientos' +
+        '&t=' +
+        Date.now()
       );
 
 
@@ -1103,8 +1128,8 @@ function actualizarDatosRequerimiento() {
   info.textContent =
     'Unidad: ' +
     req.unidad +
-    ' | Servicio: ' +
-    req.servicio +
+    ' | Tipo de contrato: ' +
+    req.tipoContrato +
     ' | Requeridos: ' +
     req.cantidadRequerida +
     ' | Fecha objetivo: ' +
@@ -1140,15 +1165,9 @@ async function registrarCandidato(
       );
 
 
-    const anversoInput =
+    const dniInput =
       document.getElementById(
-        'dniAnverso'
-      );
-
-
-    const reversoInput =
-      document.getElementById(
-        'dniReverso'
+        'archivoDni'
       );
 
 
@@ -1159,21 +1178,14 @@ async function registrarCandidato(
 
 
     validarArchivo(
-      anversoInput.files[0],
-      'DNI anverso'
-    );
-
-
-    validarArchivo(
-      reversoInput.files[0],
-      'DNI reverso'
+      dniInput.files[0],
+      'DNI'
     );
 
 
     const [
       cv,
-      dniAnverso,
-      dniReverso
+      archivoDni
     ] =
       await Promise.all([
 
@@ -1182,11 +1194,7 @@ async function registrarCandidato(
         ),
 
         archivoAObjeto(
-          anversoInput.files[0]
-        ),
-
-        archivoAObjeto(
-          reversoInput.files[0]
+          dniInput.files[0]
         )
 
       ]);
@@ -1267,11 +1275,8 @@ async function registrarCandidato(
       cv:
         cv,
 
-      dniAnverso:
-        dniAnverso,
-
-      dniReverso:
-        dniReverso
+      archivoDni:
+        archivoDni
     };
 
 
@@ -1280,6 +1285,7 @@ async function registrarCandidato(
         API,
         {
           method: 'POST',
+
           body:
             JSON.stringify(datos)
         }
@@ -1334,6 +1340,7 @@ async function registrarCandidato(
   } catch (error) {
 
     console.error(error);
+
 
     mostrarMensaje(
       error.message,
@@ -1447,7 +1454,9 @@ async function cargarCandidatos() {
     const respuesta =
       await fetch(
         API +
-        '?accion=listarCandidatos'
+        '?accion=listarCandidatos' +
+        '&t=' +
+        Date.now()
       );
 
 
@@ -1474,12 +1483,14 @@ async function cargarCandidatos() {
 
       tbody.innerHTML = `
         <tr>
+
           <td
             colspan="12"
             class="vacio"
           >
             No existen candidatos registrados.
           </td>
+
         </tr>
       `;
 
@@ -1610,9 +1621,7 @@ function crearFilaCandidato(c) {
         <span
           class="estado ${clase}"
         >
-
           ${escapar(c.estadoGeneral)}
-
         </span>
 
       </td>
@@ -1642,33 +1651,15 @@ function crearFilaCandidato(c) {
       <td>
 
         ${
-          c.dniAnverso
+          c.archivoDni
 
           ? `
             <a
-              href="${escapar(c.dniAnverso)}"
+              href="${escapar(c.archivoDni)}"
               target="_blank"
               class="archivo"
             >
-              Anverso
-            </a>
-          `
-
-          : '-'
-        }
-
-        &nbsp;
-
-        ${
-          c.dniReverso
-
-          ? `
-            <a
-              href="${escapar(c.dniReverso)}"
-              target="_blank"
-              class="archivo"
-            >
-              Reverso
+              Ver DNI
             </a>
           `
 
@@ -1827,7 +1818,10 @@ function escapar(valor) {
 
 </script>
 
+
 <script src="contratacion-guard.js"></script>
+
+
 </body>
 
 </html>
