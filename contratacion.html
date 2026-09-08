@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Contratación de Andamieros | DIMARZA</title>
+
+  <style>
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      min-height:100vh;
+      font-family:Arial, Helvetica, sans-serif;
+      background:
+        linear-gradient(
+          135deg,
+          #0f172a,
+          #1e293b
+        );
+      color:#fff;
+    }
+
+    /* =========================
+       CABECERA
+    ========================= */
+
+    .header{
+      background:#fff;
+      color:#111827;
+      padding:18px 30px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 3px 12px rgba(0,0,0,.25);
+    }
+
+    .header h1{
+      font-size:22px;
+    }
+
+    .header p{
+      margin-top:4px;
+      color:#64748b;
+      font-size:13px;
+    }
+
+    .volver{
+      text-decoration:none;
+      background:#334155;
+      color:white;
+      padding:10px 16px;
+      border-radius:9px;
+      font-size:14px;
+      font-weight:bold;
+    }
+
+    .volver:hover{
+      background:#1e293b;
+    }
+
+    /* =========================
+       CONTENIDO
+    ========================= */
+
+    .contenedor{
+      width:min(1050px, 92%);
+      margin:50px auto;
+    }
+
+    /* =========================
+       LOGIN
+    ========================= */
+
+    .login{
+      max-width:430px;
+      margin:70px auto;
+      background:#fff;
+      color:#111827;
+      padding:35px;
+      border-radius:18px;
+      box-shadow:
+        0 20px 45px rgba(0,0,0,.35);
+    }
+
+    .login-icono{
+      width:72px;
+      height:72px;
+      margin:0 auto 18px;
+      border-radius:50%;
+      background:#b45309;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:34px;
+      color:#fff;
+    }
+
+    .login h2{
+      text-align:center;
+      font-size:24px;
+      margin-bottom:8px;
+    }
+
+    .login .descripcion{
+      text-align:center;
+      color:#64748b;
+      font-size:14px;
+      line-height:1.5;
+      margin-bottom:25px;
+    }
+
+    .login label{
+      display:block;
+      font-size:13px;
+      font-weight:bold;
+      margin-bottom:7px;
+    }
+
+    .login input{
+      width:100%;
+      height:46px;
+      padding:0 14px;
+      border:1px solid #cbd5e1;
+      border-radius:9px;
+      font-size:16px;
+      outline:none;
+    }
+
+    .login input:focus{
+      border-color:#b45309;
+      box-shadow:
+        0 0 0 3px rgba(180,83,9,.15);
+    }
+
+    .btn-ingresar{
+      width:100%;
+      margin-top:18px;
+      border:0;
+      height:46px;
+      border-radius:9px;
+      background:#b45309;
+      color:white;
+      font-size:15px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .btn-ingresar:hover{
+      background:#92400e;
+    }
+
+    .btn-ingresar:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+    }
+
+    .mensaje{
+      display:none;
+      margin-top:16px;
+      padding:11px 13px;
+      border-radius:8px;
+      font-size:13px;
+      text-align:center;
+    }
+
+    .mensaje.error{
+      display:block;
+      background:#fee2e2;
+      color:#991b1b;
+    }
+
+    /* =========================
+       PANEL
+    ========================= */
+
+    #panelArea{
+      display:none;
+    }
+
+    .bienvenida{
+      text-align:center;
+      margin-bottom:35px;
+    }
+
+    .bienvenida h2{
+      font-size:28px;
+      margin-bottom:8px;
+    }
+
+    .bienvenida p{
+      color:#cbd5e1;
+      font-size:14px;
+    }
+
+    .area-actual{
+      color:#fbbf24;
+      font-weight:bold;
+    }
+
+    .tarjetas{
+      display:grid;
+      grid-template-columns:
+        repeat(auto-fit,minmax(240px,1fr));
+      gap:22px;
+      max-width:800px;
+      margin:auto;
+    }
+
+    .tarjeta{
+      display:none;
+      min-height:190px;
+      padding:28px 22px;
+      border-radius:16px;
+      text-decoration:none;
+      color:white;
+      text-align:center;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      transition:
+        transform .2s,
+        box-shadow .2s;
+      box-shadow:
+        0 12px 25px rgba(0,0,0,.25);
+    }
+
+    .tarjeta.visible{
+      display:flex;
+    }
+
+    .tarjeta:hover{
+      transform:translateY(-5px);
+      box-shadow:
+        0 18px 35px rgba(0,0,0,.35);
+    }
+
+    .tarjeta .icono{
+      font-size:48px;
+      margin-bottom:16px;
+    }
+
+    .tarjeta h3{
+      font-size:18px;
+      margin-bottom:8px;
+    }
+
+    .tarjeta p{
+      font-size:13px;
+      line-height:1.4;
+      color:rgba(255,255,255,.85);
+    }
+
+    .ath-registro{
+      background:
+        linear-gradient(135deg,#0369a1,#075985);
+    }
+
+    .ath-vh{
+      background:
+        linear-gradient(135deg,#7c3aed,#5b21b6);
+    }
+
+    .legal{
+      background:
+        linear-gradient(135deg,#be123c,#881337);
+    }
+
+    .operaciones{
+      background:
+        linear-gradient(135deg,#047857,#065f46);
+    }
+
+    .gth{
+      background:
+        linear-gradient(135deg,#c2410c,#9a3412);
+    }
+
+    .dotacion{
+      background:
+        linear-gradient(135deg,#4338ca,#3730a3);
+    }
+
+    .acciones{
+      text-align:center;
+      margin-top:35px;
+    }
+
+    .cerrar{
+      border:1px solid rgba(255,255,255,.4);
+      background:transparent;
+      color:#fff;
+      padding:10px 18px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    .cerrar:hover{
+      background:rgba(255,255,255,.1);
+    }
+
+    @media(max-width:600px){
+
+      .header{
+        padding:15px;
+      }
+
+      .header h1{
+        font-size:17px;
+      }
+
+      .header p{
+        display:none;
+      }
+
+      .contenedor{
+        margin-top:30px;
+      }
+
+      .login{
+        margin-top:35px;
+        padding:28px 22px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+
+    <div>
+      <h1>Contratación de Andamieros</h1>
+      <p>
+        DIMARZA · Seguimiento interáreas
+      </p>
+    </div>
+
+    <a
+      href="index.html"
+      class="volver"
+    >
+      ← Volver
+    </a>
+
+  </header>
+
+
+  <main class="contenedor">
+
+    <!-- ======================
+         LOGIN
+    ======================= -->
+
+    <section
+      id="login"
+      class="login"
+    >
+
+      <div class="login-icono">
+        👥
+      </div>
+
+      <h2>Acceso por área</h2>
+
+      <p class="descripcion">
+        Ingrese la clave asignada a su área
+        para acceder a las etapas de contratación
+        que le corresponden.
+      </p>
+
+      <label for="clave">
+        Clave de acceso
+      </label>
+
+      <input
+        id="clave"
+        type="password"
+        autocomplete="off"
+        placeholder="Ingrese su clave"
+      >
+
+      <button
+        id="btnIngresar"
+        class="btn-ingresar"
+        type="button"
+        onclick="ingresar()"
+      >
+        Ingresar
+      </button>
+
+      <div
+        id="mensaje"
+        class="mensaje"
+      ></div>
+
+    </section>
+
+
+    <!-- ======================
+         PANEL DEL ÁREA
+    ======================= -->
+
+    <section id="panelArea">
+
+      <div class="bienvenida">
+
+        <h2>
+          Gestión de Contratación
+        </h2>
+
+        <p>
+          Área:
+          <span
+            id="nombreArea"
+            class="area-actual"
+          ></span>
+        </p>
+
+      </div>
+
+
+      <div class="tarjetas">
+
+        <!-- ATH - REGISTRO -->
+
+        <a
+          href="contratacion-ath.html"
+          class="tarjeta ath-registro"
+          data-area="ATH"
+        >
+          <div class="icono">📄</div>
+
+          <h3>
+            Registro / Filtro de CV
+          </h3>
+
+          <p>
+            Registrar candidatos, documentación
+            y resultado del filtro curricular.
+          </p>
+        </a>
+
+
+        <!-- ATH - VH -->
+
+        <a
+          href="contratacion-ath-vh.html"
+          class="tarjeta ath-vh"
+          data-area="ATH"
+        >
+          <div class="icono">💰</div>
+
+          <h3>
+            Cierre de VH
+          </h3>
+
+          <p>
+            Registrar y cerrar el Valor Hora
+            del candidato aprobado.
+          </p>
+        </a>
+
+
+        <!-- LEGAL -->
+
+        <a
+          href="contratacion-legal.html"
+          class="tarjeta legal"
+          data-area="LEGAL"
+        >
+          <div class="icono">⚖️</div>
+
+          <h3>
+            Verificativa
+          </h3>
+
+          <p>
+            Revisión legal y verificación
+            de antecedentes del candidato.
+          </p>
+        </a>
+
+
+        <!-- OPERACIONES -->
+
+        <a
+          href="contratacion-operaciones.html"
+          class="tarjeta operaciones"
+          data-area="OPERACIONES"
+        >
+          <div class="icono">🛠️</div>
+
+          <h3>
+            Entrevista Técnica
+          </h3>
+
+          <p>
+            Evaluación técnica y aprobación
+            operacional del candidato.
+          </p>
+        </a>
+
+
+        <!-- GTH -->
+
+        <a
+          href="contratacion-gth.html"
+          class="tarjeta gth"
+          data-area="GTH"
+        >
+          <div class="icono">✍️</div>
+
+          <h3>
+            Contrato
+          </h3>
+
+          <p>
+            Seguimiento de elaboración y
+            firma del contrato al 100%.
+          </p>
+        </a>
+
+
+        <!-- DOTACIÓN -->
+
+        <a
+          href="contratacion-dotacion.html"
+          class="tarjeta dotacion"
+          data-area="DOTACION"
+        >
+          <div class="icono">🪪</div>
+
+          <h3>
+            Acreditación / Habilitación
+          </h3>
+
+          <p>
+            Programación, acreditación y
+            habilitación final del trabajador.
+          </p>
+        </a>
+
+      </div>
+
+
+      <div class="acciones">
+
+        <button
+          type="button"
+          class="cerrar"
+          onclick="cerrarSesion()"
+        >
+          Cerrar sesión
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script>
+
+    const API_CONTRATACION =
+      'https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
+
+    const CLAVE_ROL =
+      'dimarzaRolContratacion';
+
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+
+        const rol =
+          sessionStorage.getItem(
+            CLAVE_ROL
+          );
+
+        if (rol) {
+          mostrarPanel(rol);
+        }
+
+
+        document
+          .getElementById('clave')
+          .addEventListener(
+            'keydown',
+            e => {
+
+              if (e.key === 'Enter') {
+                ingresar();
+              }
+
+            }
+          );
+
+      }
+    );
+
+
+    async function ingresar() {
+
+      const input =
+        document.getElementById(
+          'clave'
+        );
+
+      const boton =
+        document.getElementById(
+          'btnIngresar'
+        );
+
+      const mensaje =
+        document.getElementById(
+          'mensaje'
+        );
+
+
+      const clave =
+        input.value.trim();
+
+
+      mensaje.className =
+        'mensaje';
+
+      mensaje.textContent =
+        '';
+
+
+      if (!clave) {
+
+        mostrarError(
+          'Ingrese la clave de acceso.'
+        );
+
+        return;
+      }
+
+
+      boton.disabled = true;
+
+      boton.textContent =
+        'Validando...';
+
+
+      try {
+
+        const url =
+          API_CONTRATACION +
+          '?accion=validarAccesoContratacion' +
+          '&clave=' +
+          encodeURIComponent(clave) +
+          '&t=' +
+          Date.now();
+
+
+        const respuesta =
+          await fetch(url);
+
+
+        const datos =
+          await respuesta.json();
+
+
+        if (
+          !datos.ok ||
+          !datos.autorizado ||
+          !datos.rol
+        ) {
+
+          throw new Error(
+            datos.mensaje ||
+            'Acceso no autorizado'
+          );
+        }
+
+
+        const rol =
+          String(datos.rol)
+            .trim()
+            .toUpperCase();
+
+
+        const rolesPermitidos = [
+          'ATH',
+          'LEGAL',
+          'OPERACIONES',
+          'GTH',
+          'DOTACION'
+        ];
+
+
+        if (
+          !rolesPermitidos.includes(rol)
+        ) {
+
+          throw new Error(
+            'El área recibida no es válida.'
+          );
+        }
+
+
+        sessionStorage.setItem(
+          CLAVE_ROL,
+          rol
+        );
+
+
+        input.value = '';
+
+        mostrarPanel(rol);
+
+
+      } catch (error) {
+
+        mostrarError(
+          error.message ||
+          'No se pudo validar el acceso.'
+        );
+
+      } finally {
+
+        boton.disabled = false;
+
+        boton.textContent =
+          'Ingresar';
+      }
+    }
+
+
+    function mostrarPanel(rol) {
+
+      rol =
+        String(rol || '')
+          .trim()
+          .toUpperCase();
+
+
+      const permitidos = [
+        'ATH',
+        'LEGAL',
+        'OPERACIONES',
+        'GTH',
+        'DOTACION'
+      ];
+
+
+      if (
+        !permitidos.includes(rol)
+      ) {
+
+        sessionStorage.removeItem(
+          CLAVE_ROL
+        );
+
+        return;
+      }
+
+
+      document
+        .getElementById('login')
+        .style.display =
+        'none';
+
+
+      document
+        .getElementById('panelArea')
+        .style.display =
+        'block';
+
+
+      document
+        .getElementById('nombreArea')
+        .textContent =
+        nombreBonitoArea(rol);
+
+
+      document
+        .querySelectorAll(
+          '.tarjeta'
+        )
+        .forEach(
+          tarjeta => {
+
+            tarjeta.classList.remove(
+              'visible'
+            );
+
+
+            if (
+              tarjeta.dataset.area ===
+              rol
+            ) {
+
+              tarjeta.classList.add(
+                'visible'
+              );
+            }
+
+          }
+        );
+    }
+
+
+    function nombreBonitoArea(rol) {
+
+      const nombres = {
+
+        ATH:
+          'ATH',
+
+        LEGAL:
+          'Legal',
+
+        OPERACIONES:
+          'Operaciones',
+
+        GTH:
+          'GTH',
+
+        DOTACION:
+          'Dotación'
+
+      };
+
+
+      return nombres[rol] || rol;
+    }
+
+
+    function mostrarError(texto) {
+
+      const mensaje =
+        document.getElementById(
+          'mensaje'
+        );
+
+
+      mensaje.textContent =
+        texto;
+
+      mensaje.className =
+        'mensaje error';
+    }
+
+
+    function cerrarSesion() {
+
+      sessionStorage.removeItem(
+        CLAVE_ROL
+      );
+
+
+      document
+        .getElementById('panelArea')
+        .style.display =
+        'none';
+
+
+      document
+        .getElementById('login')
+        .style.display =
+        'block';
+
+
+      document
+        .querySelectorAll(
+          '.tarjeta'
+        )
+        .forEach(
+          tarjeta =>
+            tarjeta.classList.remove(
+              'visible'
+            )
+        );
+
+
+      document
+        .getElementById('clave')
+        .focus();
+    }
+
+  </script>
+
+</body>
+</html>
