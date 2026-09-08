@@ -48,7 +48,36 @@
       color: #d1d5db;
       font-size: 13px;
     }
+    .header-contenido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
 
+.btn-volver {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 9px 16px;
+
+  background: #374151;
+  color: white;
+
+  border-radius: 7px;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: bold;
+
+  white-space: nowrap;
+}
+
+.btn-volver:hover {
+  background: #4b5563;
+}
 
     .contenedor {
       max-width: 1400px;
@@ -436,6 +465,12 @@
       color:
         #6b7280;
     }
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+  font-size: 12px;
+}
 
 
     @media(max-width: 900px) {
@@ -475,17 +510,30 @@
        CABECERA
   ========================== -->
 
-  <header class="header">
+<header class="header">
 
-    <h1>
-      Seguimiento de Contratación de Andamieros
-    </h1>
+  <div class="header-contenido">
 
-    <p>
-      Gestión de requerimientos de personal
-    </p>
+    <div>
+      <h1>
+        Seguimiento de Contratación de Andamieros
+      </h1>
 
-  </header>
+      <p>
+        Gestión de requerimientos de personal
+      </p>
+    </div>
+
+    <a
+      href="visualizacion.html"
+      class="btn-volver"
+    >
+      ← Volver
+    </a>
+
+  </div>
+
+</header>
 
 
 
@@ -1922,7 +1970,9 @@ function escapar(
 
 
 </script>
-
+<footer class="footer">
+    © 2026 Ruben Romero. Todos los derechos reservados.
+</footer>
 
 </body>
 
