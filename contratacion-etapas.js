@@ -216,7 +216,16 @@ async function cargarCandidatos(){
 function crearFila(c){
 
   let documentos = '';
+    const estado =
+    String(
+      c.estadoGeneral || ''
+    ).toUpperCase();
 
+
+  const claseFila =
+    estado === 'OBSERVADO'
+    ? 'fila-observada'
+    : '';
 
 if(
   AREA === 'LEGAL' ||
@@ -261,9 +270,9 @@ if(
   }
 
 
-  return `
+return `
 
-    <tr>
+    <tr class="${claseFila}">
 
       <td>
         <strong>
@@ -328,10 +337,20 @@ if(
 
 function actualizarKPIs(){
 
+  const pendientes =
+    candidatos.filter(
+      c =>
+        String(
+          c.estadoGeneral || ''
+        ).toUpperCase()
+        !== 'OBSERVADO'
+    ).length;
+
+
   document.getElementById(
     'kpiPendientes'
   ).textContent =
-    candidatos.length;
+    pendientes;
 
 
   const observados =
