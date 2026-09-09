@@ -101,7 +101,7 @@ document.getElementById(
             <th>RESIDENCIA</th>
             <th>CARGO</th>
             <th>UNIDAD</th>
-            <th>SERVICIO</th>
+            <th>TIPO DE CONTRATO</th>
             <th>FECHA OBJETIVO</th>
             <th>DOCUMENTOS</th>
             <th>ACCIÓN</th>
