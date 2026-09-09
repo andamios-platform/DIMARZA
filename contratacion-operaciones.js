@@ -2045,10 +2045,235 @@ function crearModalEntrevista() {
 </section>
 
 
+<section class="seccion-entrevista">
+
+  <h3>
+    3. Experiencia Laboral
+  </h3>
+
+
+  <div class="grid-entrevista">
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        Tiempo de experiencia
+      </label>
+
+      <input
+        type="text"
+        id="experienciaTiempo"
+        placeholder="Ej. 3 años"
+      >
+
+    </div>
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        Última empresa
+      </label>
+
+      <input
+        type="text"
+        id="experienciaUltimaEmpresa"
+      >
+
+    </div>
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        Tiempo en la última empresa
+      </label>
+
+      <input
+        type="text"
+        id="experienciaTiempoUltimaEmpresa"
+        placeholder="Ej. 8 meses"
+      >
+
+    </div>
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        Modalidad de trabajo
+      </label>
+
+      <select
+        id="experienciaModalidad"
+        onchange="actualizarModalidadExperiencia()"
+      >
+
+        <option value="">
+          Seleccione
+        </option>
+
+        <option value="PARADAS DE PLANTA">
+          Paradas de planta
+        </option>
+
+        <option value="PERMANENTE">
+          Permanente
+        </option>
+
+        <option value="PRACTICAS">
+          Prácticas
+        </option>
+
+        <option value="OTROS">
+          Otros
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div
+      class="campo-entrevista ancho-completo"
+      id="campoOtraModalidadExperiencia"
+      style="display:none;"
+    >
+
+      <label>
+        Especifique otra modalidad
+      </label>
+
+      <input
+        type="text"
+        id="experienciaOtraModalidad"
+      >
+
+    </div>
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        Motivo de retiro
+      </label>
+
+      <select
+        id="experienciaMotivoRetiro"
+        onchange="actualizarMotivoRetiro()"
+      >
+
+        <option value="">
+          Seleccione
+        </option>
+
+        <option value="FIN DE CONTRATO">
+          Fin de contrato
+        </option>
+
+        <option value="FIN DE PROYECTO">
+          Fin de proyecto
+        </option>
+
+        <option value="RENUNCIA">
+          Renuncia
+        </option>
+
+        <option value="OTRO">
+          Otro
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div
+      class="campo-entrevista"
+      id="campoOtroMotivoRetiro"
+      style="display:none;"
+    >
+
+      <label>
+        Otro motivo
+      </label>
+
+      <input
+        type="text"
+        id="experienciaOtroMotivo"
+      >
+
+    </div>
+
+
+    <div class="campo-entrevista ancho-completo">
+
+      <label>
+        Comentarios de experiencia laboral
+      </label>
+
+      <textarea
+        id="experienciaComentarios"
+        rows="4"
+      ></textarea>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="subtitulo-entrevista">
+    Valoración de Experiencia
+  </div>
+
+
+  <div class="bloque-valoracion">
+
+    <label>
+      Calificación
+    </label>
+
+    <select
+      id="valoracionExperiencia"
+      required
+    >
+
+      <option value="">
+        Seleccione
+      </option>
+
+      <option value="1">
+        1 - Muy por debajo del perfil
+      </option>
+
+      <option value="2">
+        2 - Por debajo del perfil
+      </option>
+
+      <option value="3">
+        3 - Cumple con el perfil
+      </option>
+
+      <option value="4">
+        4 - Por encima del perfil
+      </option>
+
+      <option value="5">
+        5 - Sobrepasa el perfil
+      </option>
+
+    </select>
+
+  </div>
+
+</section>
+
+
 <div class="aviso-entrevista-desarrollo">
 
   Siguiente bloque:
-  3. Experiencia Laboral y
   4. Conocimientos Técnicos.
 
 </div>
@@ -2246,6 +2471,84 @@ function actualizarAccidenteEntrevista() {
     tipo.value = '';
 
     detalle.value = '';
+  }
+}
+
+/* =====================================================
+   EXPERIENCIA LABORAL - CAMPOS DINÁMICOS
+===================================================== */
+
+function actualizarModalidadExperiencia() {
+
+  const valor =
+    document
+      .getElementById(
+        'experienciaModalidad'
+      )
+      .value;
+
+
+  const campo =
+    document.getElementById(
+      'campoOtraModalidadExperiencia'
+    );
+
+
+  const input =
+    document.getElementById(
+      'experienciaOtraModalidad'
+    );
+
+
+  if (valor === 'OTROS') {
+
+    campo.style.display =
+      'flex';
+
+  } else {
+
+    campo.style.display =
+      'none';
+
+    input.value = '';
+  }
+}
+
+
+
+function actualizarMotivoRetiro() {
+
+  const valor =
+    document
+      .getElementById(
+        'experienciaMotivoRetiro'
+      )
+      .value;
+
+
+  const campo =
+    document.getElementById(
+      'campoOtroMotivoRetiro'
+    );
+
+
+  const input =
+    document.getElementById(
+      'experienciaOtroMotivo'
+    );
+
+
+  if (valor === 'OTRO') {
+
+    campo.style.display =
+      'flex';
+
+  } else {
+
+    campo.style.display =
+      'none';
+
+    input.value = '';
   }
 }
 
