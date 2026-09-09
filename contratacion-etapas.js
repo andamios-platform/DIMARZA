@@ -1,7 +1,7 @@
 const API =
 'https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
 
-
+ 
 const AREA =
 document.body.dataset.area;
 
