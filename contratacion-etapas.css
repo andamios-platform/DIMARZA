@@ -243,3 +243,10 @@ a{
     grid-template-columns:repeat(2,1fr);
   }
 }
+.fila-observada {
+  background: #fff7d6;
+}
+
+.fila-observada:hover {
+  background: #ffefad;
+}
