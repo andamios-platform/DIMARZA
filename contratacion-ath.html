@@ -1357,8 +1357,6 @@ async function registrarCandidato(
   }
 }
 
-
-
 function validarArchivo(
   archivo,
   nombre
@@ -1373,8 +1371,31 @@ function validarArchivo(
   }
 
 
+  let limiteMB;
+
+
+  if (
+    nombre === 'CV'
+  ) {
+
+    limiteMB = 15;
+
+  } else if (
+    nombre === 'DNI'
+  ) {
+
+    limiteMB = 5;
+
+  } else {
+
+    limiteMB = 8;
+  }
+
+
   const limite =
-    8 * 1024 * 1024;
+    limiteMB *
+    1024 *
+    1024;
 
 
   if (
@@ -1383,10 +1404,13 @@ function validarArchivo(
 
     throw new Error(
       nombre +
-      ' supera el límite de 8 MB'
+      ' supera el límite de ' +
+      limiteMB +
+      ' MB'
     );
   }
 }
+
 
 
 
