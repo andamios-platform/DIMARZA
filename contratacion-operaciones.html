@@ -27,19 +27,83 @@ DIMARZA | Operaciones
   data-permitidos="OPERACIONES"
 >
 
+
 <header class="header">
 
-  <h1 id="tituloPagina"></h1>
+  <div>
 
-  <p id="subtituloPagina"></p>
+    <h1>
+      Operaciones - Entrevistas
+    </h1>
+
+    <p>
+      Programación y evaluación técnica de candidatos
+    </p>
+
+  </div>
+
+
+  <a
+    href="contratacion.html"
+    class="btn-volver"
+  >
+    ← Volver
+  </a>
 
 </header>
 
-<div id="contenidoBase"></div>
 
-<script src="contratacion-base-html.js"></script>
+<main class="contenedor">
+
+
+  <div class="tabs-operaciones">
+
+    <button
+      type="button"
+      class="tab-operaciones activo"
+      data-tab="agenda"
+    >
+      Agenda de entrevistas
+    </button>
+
+
+    <button
+      type="button"
+      class="tab-operaciones"
+      data-tab="entrevistas"
+    >
+      Entrevistas
+    </button>
+
+  </div>
+
+
+  <section
+    id="tabAgenda"
+    class="contenido-tab activo"
+  >
+
+    <div id="contenidoAgenda"></div>
+
+  </section>
+
+
+  <section
+    id="tabEntrevistas"
+    class="contenido-tab"
+  >
+
+    <div id="contenidoEntrevistas"></div>
+
+  </section>
+
+
+</main>
+
+
 <script src="contratacion-guard.js"></script>
-<script src="contratacion-etapas.js"></script>
+<script src="contratacion-operaciones.js"></script>
+
 
 </body>
 
