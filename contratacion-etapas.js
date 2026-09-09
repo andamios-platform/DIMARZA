@@ -457,9 +457,11 @@ function abrirGestion(id){
   ).value = '';
 
 
-  document.getElementById(
-    'observacion'
-  ).value = '';
+    document.getElementById(
+      'observacion'
+    ).value =
+      candidatoActual
+    .ultimaObservacionArea || '';
 
 
   document.getElementById(
