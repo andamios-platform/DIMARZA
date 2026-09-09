@@ -7,6 +7,8 @@ let agendaEntrevistas = [];
 
 let candidatoSeleccionado = null;
 let agendaSeleccionada = null;
+let candidatoEntrevista = null;
+let agendaEntrevistaActual = null;
 
 
 /* =====================================================
@@ -20,7 +22,9 @@ document.addEventListener(
     prepararTabs();
 
     crearModalAgenda();
-
+    
+    crearModalEntrevista();
+    
     await cargarOperaciones();
   }
 );
@@ -1344,7 +1348,7 @@ function iniciarEntrevista(
   idCandidato
 ) {
 
-  const candidato =
+  candidatoEntrevista =
     candidatosOperaciones.find(
       c =>
         String(
@@ -1356,7 +1360,7 @@ function iniciarEntrevista(
     );
 
 
-  if (!candidato) {
+  if (!candidatoEntrevista) {
 
     alert(
       'Candidato no encontrado.'
@@ -1366,14 +1370,480 @@ function iniciarEntrevista(
   }
 
 
-  alert(
-    'La ficha de entrevista de ' +
-    candidato.nombres +
-    ' será el siguiente paso.'
+  agendaEntrevistaActual =
+    agendaEntrevistas.find(
+      a =>
+        String(
+          a.idCandidato
+        ) ===
+        String(
+          idCandidato
+        )
+    ) || null;
+
+
+  if (!agendaEntrevistaActual) {
+
+    alert(
+      'Primero debe programar la entrevista.'
+    );
+
+    return;
+  }
+
+
+  document.getElementById(
+    'entrevistaNombre'
+  ).textContent =
+    candidatoEntrevista.nombres;
+
+
+  document.getElementById(
+    'entrevistaDni'
+  ).textContent =
+    candidatoEntrevista.dni;
+
+
+  document.getElementById(
+    'entrevistaTelefono'
+  ).value =
+    candidatoEntrevista.telefono || '';
+
+
+  document.getElementById(
+    'entrevistaResidencia'
+  ).value =
+    candidatoEntrevista.residencia || '';
+
+
+  document.getElementById(
+    'entrevistaPuestoPostula'
+  ).value =
+    candidatoEntrevista.cargo || '';
+
+
+  document.getElementById(
+    'entrevistaPuestoClasifica'
+  ).value =
+    candidatoEntrevista.cargo || '';
+
+
+  document.getElementById(
+    'entrevistaFecha'
+  ).value =
+    convertirFechaInput(
+      agendaEntrevistaActual
+        .fechaProgramada
+    );
+
+
+  document.getElementById(
+    'entrevistaModalidad'
+  ).value =
+    agendaEntrevistaActual
+      .modalidad || '';
+
+
+  document.getElementById(
+    'entrevistaLugar'
+  ).value =
+    agendaEntrevistaActual
+      .lugarEnlace || '';
+
+
+  document.getElementById(
+    'entrevistaEntrevistador'
+  ).value =
+    agendaEntrevistaActual
+      .entrevistador || '';
+
+
+  document
+    .getElementById(
+      'modalEntrevista'
+    )
+    .classList.add(
+      'visible'
+    );
+}
+
+/* =====================================================
+   MODAL ENTREVISTA
+===================================================== */
+
+function crearModalEntrevista() {
+
+  const modal =
+    document.createElement(
+      'div'
+    );
+
+
+  modal.id =
+    'modalEntrevista';
+
+
+  modal.className =
+    'modal-entrevista';
+
+
+  modal.innerHTML =
+    `
+
+      <div class="modal-entrevista-contenido">
+
+        <div class="modal-entrevista-header">
+
+          <div>
+
+            <h2>
+              Ficha de Entrevista para Operativos
+            </h2>
+
+            <p>
+              DMZ-RH-PR01-F11
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="cerrar-modal-entrevista"
+            onclick="cerrarEntrevista()"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="cabecera-candidato-entrevista">
+
+          <div>
+
+            <span>
+              Candidato
+            </span>
+
+            <strong
+              id="entrevistaNombre"
+            ></strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              DNI
+            </span>
+
+            <strong
+              id="entrevistaDni"
+            ></strong>
+
+          </div>
+
+        </div>
+
+
+        <form id="formEntrevistaOperaciones">
+
+          <section class="seccion-entrevista">
+
+            <h3>
+              1. Datos Generales
+            </h3>
+
+
+            <div class="grid-entrevista">
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Fecha de entrevista
+                </label>
+
+                <input
+                  type="date"
+                  id="entrevistaFecha"
+                  required
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Modalidad
+                </label>
+
+                <select
+                  id="entrevistaModalidad"
+                  required
+                >
+
+                  <option value="">
+                    Seleccione
+                  </option>
+
+                  <option value="PRESENCIAL">
+                    Presencial
+                  </option>
+
+                  <option value="VIRTUAL">
+                    Virtual
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="campo-entrevista ancho-completo">
+
+                <label>
+                  Lugar de entrevista
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaLugar"
+                  required
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Residencia actual
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaResidencia"
+                  required
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Teléfono
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaTelefono"
+                  required
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Grado académico
+                </label>
+
+                <select
+                  id="entrevistaGradoAcademico"
+                >
+
+                  <option value="">
+                    Seleccione
+                  </option>
+
+                  <option value="TECNICO">
+                    Técnico
+                  </option>
+
+                  <option value="BACHILLER">
+                    Bachiller
+                  </option>
+
+                  <option value="TITULADO">
+                    Titulado
+                  </option>
+
+                  <option value="COLEGIADO">
+                    Colegiado
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Estudios
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaEstudios"
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Puesto al que postula
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaPuestoPostula"
+                  readonly
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Puesto en que clasifica
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaPuestoClasifica"
+                  required
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Entrevistador
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaEntrevistador"
+                  required
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Disponibilidad
+                </label>
+
+                <select
+                  id="entrevistaDisponibilidad"
+                >
+
+                  <option value="">
+                    Seleccione
+                  </option>
+
+                  <option value="INMEDIATA">
+                    Inmediata
+                  </option>
+
+                  <option value="OTROS">
+                    Otros
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="campo-entrevista ancho-completo">
+
+                <label>
+                  Pretensión salarial
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaPretension"
+                >
+
+              </div>
+
+
+            </div>
+
+          </section>
+
+
+          <div class="aviso-entrevista-desarrollo">
+
+            Los demás bloques de Seguridad,
+            Experiencia Laboral y Conocimientos
+            Técnicos se agregarán a continuación.
+
+          </div>
+
+
+          <div class="acciones-modal-entrevista">
+
+            <button
+              type="button"
+              class="btn-cancelar-entrevista"
+              onclick="cerrarEntrevista()"
+            >
+              Cerrar
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+    `;
+
+
+  document.body.appendChild(
+    modal
   );
 }
 
 
+
+/* =====================================================
+   CERRAR ENTREVISTA
+===================================================== */
+
+function cerrarEntrevista() {
+
+  document
+    .getElementById(
+      'modalEntrevista'
+    )
+    .classList.remove(
+      'visible'
+    );
+
+
+  candidatoEntrevista =
+    null;
+
+
+  agendaEntrevistaActual =
+    null;
+}
 /* =====================================================
    CLASE ESTADO
 ===================================================== */
