@@ -250,3 +250,18 @@ a{
 .fila-observada:hover {
   background: #ffefad;
 }
+.btn-volver {
+  margin-left: auto;
+  padding: 9px 18px;
+  border-radius: 7px;
+  background: #374151;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-volver:hover {
+  background: #4b5563;
+}
