@@ -1788,13 +1788,270 @@ function crearModalEntrevista() {
           </section>
 
 
-          <div class="aviso-entrevista-desarrollo">
+<section class="seccion-entrevista">
 
-            Los demás bloques de Seguridad,
-            Experiencia Laboral y Conocimientos
-            Técnicos se agregarán a continuación.
+  <h3>
+    Unidades Mineras donde ha trabajado / ingresado
+  </h3>
 
-          </div>
+  <div class="tabla-unidades-contenedor">
+
+    <table class="tabla-unidades-entrevista">
+
+      <thead>
+
+        <tr>
+
+          <th>Unidad Minera</th>
+          <th>Acreditado</th>
+          <th>Liberado</th>
+          <th>Cargo</th>
+          <th>Empresa</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        ${crearFilasUnidadesEntrevista()}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+
+<section class="seccion-entrevista">
+
+  <h3>
+    2. Conocimientos de Seguridad
+  </h3>
+
+
+  <div class="preguntas-entrevista">
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="SEGURIDAD"
+      data-codigo="SEG-01"
+    >
+
+      <label>
+        ¿Con qué Decreto Supremo se trabaja en la Unidad Minera?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="SEGURIDAD"
+      data-codigo="SEG-02"
+    >
+
+      <label>
+        ¿Qué documentos de gestión se trabajan en la Unidad Minera?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="SEGURIDAD"
+      data-codigo="SEG-03"
+    >
+
+      <label>
+        ¿Qué es Seguridad para ti?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="SEGURIDAD"
+      data-codigo="SEG-04"
+    >
+
+      <label>
+        ¿Cuál sería tu aporte de Seguridad para la empresa?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="subtitulo-entrevista">
+    Valoración de Seguridad
+  </div>
+
+
+  <div class="bloque-valoracion">
+
+    <label>
+      Calificación
+    </label>
+
+    <select
+      id="valoracionSeguridad"
+      required
+    >
+
+      <option value="">
+        Seleccione
+      </option>
+
+      <option value="1">
+        1 - Muy por debajo del perfil
+      </option>
+
+      <option value="2">
+        2 - Por debajo del perfil
+      </option>
+
+      <option value="3">
+        3 - Cumple con el perfil
+      </option>
+
+      <option value="4">
+        4 - Por encima del perfil
+      </option>
+
+      <option value="5">
+        5 - Sobrepasa el perfil
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="subtitulo-entrevista">
+    Antecedentes de accidente laboral
+  </div>
+
+
+  <div class="grid-entrevista">
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        ¿Tuvo accidente laboral?
+      </label>
+
+      <select
+        id="tuvoAccidente"
+        onchange="actualizarAccidenteEntrevista()"
+      >
+
+        <option value="">
+          Seleccione
+        </option>
+
+        <option value="NO">
+          No
+        </option>
+
+        <option value="SI">
+          Sí
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div
+      class="campo-entrevista"
+      id="campoTipoAccidente"
+      style="display:none;"
+    >
+
+      <label>
+        Tipo de accidente
+      </label>
+
+      <select
+        id="tipoAccidente"
+      >
+
+        <option value="">
+          Seleccione
+        </option>
+
+        <option value="LEVE">
+          Leve
+        </option>
+
+        <option value="PERMANENTE">
+          Permanente
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div
+      class="campo-entrevista ancho-completo"
+      id="campoDetalleAccidente"
+      style="display:none;"
+    >
+
+      <label>
+        Detalle del accidente
+      </label>
+
+      <textarea
+        id="detalleAccidente"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+  </div>
+
+</section>
+
+
+<div class="aviso-entrevista-desarrollo">
+
+  Siguiente bloque:
+  3. Experiencia Laboral y
+  4. Conocimientos Técnicos.
+
+</div>
 
 
           <div class="acciones-modal-entrevista">
@@ -1820,7 +2077,177 @@ function crearModalEntrevista() {
   );
 }
 
+/* =====================================================
+   UNIDADES MINERAS - ENTREVISTA
+===================================================== */
 
+function crearFilasUnidadesEntrevista() {
+
+  const unidades = [
+
+    'ANTAPACCAY',
+    'HUDBAY',
+    'SMCV',
+    'SOUTHERN',
+    'QUELLAVECO',
+    'LAS BAMBAS',
+    'MARCOBRE',
+    'CHINALCO',
+    'SIERRA GORDA',
+    'CENTINELA',
+    'ANTAMINA',
+    'OTROS'
+
+  ];
+
+
+  return unidades
+    .map(
+      unidad => `
+
+        <tr
+          class="fila-unidad-entrevista"
+          data-unidad="${unidad}"
+        >
+
+          <td>
+            <strong>
+              ${unidad}
+            </strong>
+          </td>
+
+
+          <td>
+
+            <select
+              class="unidad-acreditado"
+            >
+
+              <option value="">
+                -
+              </option>
+
+              <option value="SI">
+                Sí
+              </option>
+
+              <option value="NO">
+                No
+              </option>
+
+            </select>
+
+          </td>
+
+
+          <td>
+
+            <select
+              class="unidad-liberado"
+            >
+
+              <option value="">
+                -
+              </option>
+
+              <option value="SI">
+                Sí
+              </option>
+
+              <option value="NO">
+                No
+              </option>
+
+            </select>
+
+          </td>
+
+
+          <td>
+
+            <input
+              type="text"
+              class="unidad-cargo"
+            >
+
+          </td>
+
+
+          <td>
+
+            <input
+              type="text"
+              class="unidad-empresa"
+            >
+
+          </td>
+
+        </tr>
+
+      `
+    )
+    .join('');
+}
+
+/* =====================================================
+   ACCIDENTE LABORAL
+===================================================== */
+
+function actualizarAccidenteEntrevista() {
+
+  const tuvo =
+    document
+      .getElementById(
+        'tuvoAccidente'
+      )
+      .value;
+
+
+  const campoTipo =
+    document.getElementById(
+      'campoTipoAccidente'
+    );
+
+
+  const campoDetalle =
+    document.getElementById(
+      'campoDetalleAccidente'
+    );
+
+
+  const tipo =
+    document.getElementById(
+      'tipoAccidente'
+    );
+
+
+  const detalle =
+    document.getElementById(
+      'detalleAccidente'
+    );
+
+
+  if (tuvo === 'SI') {
+
+    campoTipo.style.display =
+      'flex';
+
+    campoDetalle.style.display =
+      'flex';
+
+  } else {
+
+    campoTipo.style.display =
+      'none';
+
+    campoDetalle.style.display =
+      'none';
+
+    tipo.value = '';
+
+    detalle.value = '';
+  }
+}
 
 /* =====================================================
    CERRAR ENTREVISTA
