@@ -2271,10 +2271,411 @@ function crearModalEntrevista() {
 </section>
 
 
-<div class="aviso-entrevista-desarrollo">
+<section class="seccion-entrevista">
 
-  Siguiente bloque:
-  4. Conocimientos Técnicos.
+  <h3>
+    4. Conocimientos Técnicos
+  </h3>
+
+
+  <div class="subtitulo-entrevista">
+    4.1 Conocimientos generales de andamios
+  </div>
+
+
+  <div class="preguntas-entrevista">
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-01"
+    >
+
+      <label>
+        ¿Con qué norma o estándar se realiza el armado de andamios?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-02"
+    >
+
+      <label>
+        ¿Qué componentes tiene un andamio? Mencione un ejemplo.
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-03"
+    >
+
+      <label>
+        ¿Qué significan la tarjeta verde, amarilla y roja?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-04"
+    >
+
+      <label>
+        ¿Quién inspecciona el andamio y cada cuánto tiempo?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="subtitulo-entrevista">
+    Áreas / Equipos donde ha trabajado
+  </div>
+
+
+  <div class="grid-checks-entrevista">
+
+    ${crearChecksEquiposEntrevista()}
+
+  </div>
+
+
+  <div class="subtitulo-entrevista">
+    4.2 Sistemas de andamios y certificaciones
+  </div>
+
+
+  <div class="grid-entrevista">
+
+
+    <div class="campo-entrevista ancho-completo">
+
+      <label>
+        Tipos de andamio que conoce o ha armado
+      </label>
+
+      <div class="grid-checks-entrevista">
+
+        ${crearChecksSistemasAndamios()}
+
+      </div>
+
+    </div>
+
+
+    <div class="campo-entrevista ancho-completo">
+
+      <label>
+        Certificaciones
+      </label>
+
+      <div class="grid-certificaciones-entrevista">
+
+        ${crearChecksCertificaciones()}
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="subtitulo-entrevista">
+    Preguntas técnicas de montaje / desmontaje
+  </div>
+
+
+  <div class="preguntas-entrevista">
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-05"
+    >
+
+      <label>
+        ¿Cuáles son los componentes principales de un andamio multidireccional?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-06"
+    >
+
+      <label>
+        ¿Qué verificaciones se deben realizar antes de iniciar el montaje?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-07"
+    >
+
+      <label>
+        ¿Cuál es la función de las diagonales en un andamio?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-08"
+    >
+
+      <label>
+        ¿Qué protección colectiva debe tener una plataforma de trabajo?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+    <div
+      class="pregunta-entrevista"
+      data-seccion="TECNICA"
+      data-codigo="TEC-09"
+    >
+
+      <label>
+        ¿Qué haría ante una condición insegura o una modificación no autorizada del andamio?
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="3"
+      ></textarea>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="subtitulo-entrevista">
+    Valoración de Conocimientos Técnicos
+  </div>
+
+
+  <div class="bloque-valoracion">
+
+    <label>
+      Calificación
+    </label>
+
+    <select
+      id="valoracionTecnica"
+      required
+    >
+
+      <option value="">
+        Seleccione
+      </option>
+
+      <option value="1">
+        1 - Muy por debajo del perfil
+      </option>
+
+      <option value="2">
+        2 - Por debajo del perfil
+      </option>
+
+      <option value="3">
+        3 - Cumple con el perfil
+      </option>
+
+      <option value="4">
+        4 - Por encima del perfil
+      </option>
+
+      <option value="5">
+        5 - Sobrepasa el perfil
+      </option>
+
+    </select>
+
+  </div>
+
+</section>
+
+
+<section class="seccion-entrevista">
+
+  <h3>
+    Resultado Final
+  </h3>
+
+
+  <div class="grid-entrevista">
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        Resultado de entrevista
+      </label>
+
+      <select
+        id="resultadoEntrevista"
+        required
+      >
+
+        <option value="">
+          Seleccione
+        </option>
+
+        <option value="APTO">
+          APTO
+        </option>
+
+        <option value="NO APTO">
+          NO APTO
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="campo-entrevista">
+
+      <label>
+        Promedio
+      </label>
+
+      <input
+        type="text"
+        id="promedioEntrevista"
+        readonly
+      >
+
+    </div>
+
+
+    <div class="campo-entrevista ancho-completo">
+
+      <label>
+        Criterio
+      </label>
+
+      <input
+        type="text"
+        id="criterioEntrevista"
+        readonly
+      >
+
+    </div>
+
+
+    <div class="campo-entrevista ancho-completo">
+
+      <label>
+        Comentarios generales
+      </label>
+
+      <textarea
+        id="comentariosGeneralesEntrevista"
+        rows="4"
+      ></textarea>
+
+    </div>
+
+
+  </div>
+
+</section>
+
+
+<div class="acciones-modal-entrevista">
+
+  <button
+    type="button"
+    class="btn-cancelar-entrevista"
+    onclick="cerrarEntrevista()"
+  >
+    Cancelar
+  </button>
+
+
+  <button
+    type="button"
+    class="btn-iniciar-entrevista"
+    onclick="calcularResultadoEntrevista()"
+  >
+    Calcular evaluación
+  </button>
+
+
+  <button
+    type="submit"
+    class="btn-guardar-agenda"
+    id="btnGuardarEntrevista"
+  >
+    Guardar entrevista
+  </button>
 
 </div>
 
@@ -2550,6 +2951,230 @@ function actualizarMotivoRetiro() {
 
     input.value = '';
   }
+}
+
+function crearChecksEquiposEntrevista() {
+
+  const equipos = [
+    'CHANCADORA PRIMARIA',
+    'CHANCADORA SECUNDARIA',
+    'FAJAS',
+    'HPGR',
+    'MOLINOS',
+    'MOLINOS VERTIMIL',
+    'NIDO DE CICLONES',
+    'ZARANDAS VIBRATORIAS',
+    'BOMBAS',
+    'CELDAS DE FLOTACIÓN',
+    'ESPESADORES',
+    'FILTROS DE COBRE',
+    'OTROS'
+  ];
+
+
+  return equipos
+    .map(
+      equipo => `
+        <label class="check-entrevista">
+
+          <input
+            type="checkbox"
+            class="equipo-entrevista"
+            value="${equipo}"
+          >
+
+          <span>
+            ${equipo}
+          </span>
+
+        </label>
+      `
+    )
+    .join('');
+}
+
+
+
+function crearChecksSistemasAndamios() {
+
+  const sistemas = [
+    'LAYHER',
+    'ULMA',
+    'PERI',
+    'DOKA',
+    'SCFOM-RUX',
+    'OTROS'
+  ];
+
+
+  return sistemas
+    .map(
+      sistema => `
+        <label class="check-entrevista">
+
+          <input
+            type="checkbox"
+            class="sistema-andamio-entrevista"
+            value="${sistema}"
+          >
+
+          <span>
+            ${sistema}
+          </span>
+
+        </label>
+      `
+    )
+    .join('');
+}
+
+
+
+function crearChecksCertificaciones() {
+
+  const certificaciones = [
+    'LAYHER BASIC',
+    'LAYHER OFICIAL',
+    'LAYHER OPERARIO',
+    'LAYHER CAPATAZ',
+    'LAYHER SUPERVISOR',
+    'LAYHER SCHULE',
+
+    'ULMA BASIC',
+    'ULMA TÉCNICO I',
+    'ULMA TÉCNICO II',
+
+    'PERI BASIC',
+    'PERI TÉCNICO I',
+    'PERI TÉCNICO II',
+
+    'DOKA BASIC',
+    'DOKA TÉCNICO I',
+    'DOKA TÉCNICO II',
+
+    'SCFOM-RUX BASIC',
+    'SCFOM-RUX TÉCNICO I',
+    'SCFOM-RUX TÉCNICO II'
+  ];
+
+
+  return certificaciones
+    .map(
+      cert => `
+        <label class="check-entrevista">
+
+          <input
+            type="checkbox"
+            class="certificacion-entrevista"
+            value="${cert}"
+          >
+
+          <span>
+            ${cert}
+          </span>
+
+        </label>
+      `
+    )
+    .join('');
+}
+
+
+
+function calcularResultadoEntrevista() {
+
+  const seguridad =
+    Number(
+      document.getElementById(
+        'valoracionSeguridad'
+      ).value || 0
+    );
+
+
+  const experiencia =
+    Number(
+      document.getElementById(
+        'valoracionExperiencia'
+      ).value || 0
+    );
+
+
+  const tecnica =
+    Number(
+      document.getElementById(
+        'valoracionTecnica'
+      ).value || 0
+    );
+
+
+  if (
+    !seguridad ||
+    !experiencia ||
+    !tecnica
+  ) {
+
+    alert(
+      'Debe completar las tres valoraciones.'
+    );
+
+    return;
+  }
+
+
+  const promedio =
+    (
+      seguridad +
+      experiencia +
+      tecnica
+    ) / 3;
+
+
+  let criterio = '';
+
+
+  if (promedio < 2) {
+
+    criterio =
+      'MUY POR DEBAJO DEL PERFIL';
+
+  } else if (
+    promedio < 3
+  ) {
+
+    criterio =
+      'POR DEBAJO DEL PERFIL';
+
+  } else if (
+    promedio < 4
+  ) {
+
+    criterio =
+      'CUMPLE CON EL PERFIL';
+
+  } else if (
+    promedio < 5
+  ) {
+
+    criterio =
+      'POR ENCIMA DEL PERFIL';
+
+  } else {
+
+    criterio =
+      'SOBREPASA EL PERFIL';
+  }
+
+
+  document.getElementById(
+    'promedioEntrevista'
+  ).value =
+    promedio.toFixed(2);
+
+
+  document.getElementById(
+    'criterioEntrevista'
+  ).value =
+    criterio;
 }
 
 /* =====================================================
