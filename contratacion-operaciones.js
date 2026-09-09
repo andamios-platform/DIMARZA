@@ -1548,7 +1548,10 @@ function crearModalEntrevista() {
         </div>
 
 
-        <form id="formEntrevistaOperaciones">
+        <form
+  id="formEntrevistaOperaciones"
+  onsubmit="guardarEntrevistaOperaciones(event)"
+>
 
           <section class="seccion-entrevista">
 
@@ -2653,15 +2656,6 @@ function crearModalEntrevista() {
 
   <button
     type="button"
-    class="btn-cancelar-entrevista"
-    onclick="cerrarEntrevista()"
-  >
-    Cancelar
-  </button>
-
-
-  <button
-    type="button"
     class="btn-iniciar-entrevista"
     onclick="calcularResultadoEntrevista()"
   >
@@ -2678,19 +2672,6 @@ function crearModalEntrevista() {
   </button>
 
 </div>
-
-
-          <div class="acciones-modal-entrevista">
-
-            <button
-              type="button"
-              class="btn-cancelar-entrevista"
-              onclick="cerrarEntrevista()"
-            >
-              Cerrar
-            </button>
-
-          </div>
 
         </form>
 
@@ -3276,7 +3257,617 @@ function convertirFechaInput(
 
   return fecha;
 }
+/* =====================================================
+   RECOLECTAR UNIDADES MINERAS
+===================================================== */
 
+function obtenerUnidadesEntrevista() {
+
+  return Array
+    .from(
+      document.querySelectorAll(
+        '.fila-unidad-entrevista'
+      )
+    )
+    .map(fila => {
+
+      const acreditado =
+        fila.querySelector(
+          '.unidad-acreditado'
+        ).value;
+
+      const liberado =
+        fila.querySelector(
+          '.unidad-liberado'
+        ).value;
+
+      const cargo =
+        fila.querySelector(
+          '.unidad-cargo'
+        ).value.trim();
+
+      const empresa =
+        fila.querySelector(
+          '.unidad-empresa'
+        ).value.trim();
+
+
+      return {
+
+        unidadMinera:
+          fila.dataset.unidad || '',
+
+        acreditado,
+        liberado,
+        cargo,
+        empresa
+
+      };
+    })
+    .filter(u =>
+
+      u.acreditado ||
+      u.liberado ||
+      u.cargo ||
+      u.empresa
+
+    );
+}
+
+
+/* =====================================================
+   RECOLECTAR PREGUNTAS
+===================================================== */
+
+function obtenerRespuestasEntrevista() {
+
+  const respuestas = [];
+
+
+  document
+    .querySelectorAll(
+      '.pregunta-entrevista'
+    )
+    .forEach(bloque => {
+
+      const textarea =
+        bloque.querySelector(
+          '.respuesta-entrevista'
+        );
+
+
+      if (!textarea)
+        return;
+
+
+      const pregunta =
+        bloque.querySelector(
+          'label'
+        )?.textContent
+          ?.trim() || '';
+
+
+      respuestas.push({
+
+        seccion:
+          bloque.dataset.seccion || '',
+
+        codigoPregunta:
+          bloque.dataset.codigo || '',
+
+        pregunta,
+
+        respuesta:
+          textarea.value.trim(),
+
+        valor: ''
+
+      });
+
+    });
+
+
+  /* ÁREAS / EQUIPOS */
+
+  const equipos =
+    Array
+      .from(
+        document.querySelectorAll(
+          '.equipo-entrevista:checked'
+        )
+      )
+      .map(
+        x => x.value
+      );
+
+
+  respuestas.push({
+
+    seccion:
+      'TECNICA',
+
+    codigoPregunta:
+      'TEC-EQUIPOS',
+
+    pregunta:
+      'Áreas / Equipos donde ha trabajado',
+
+    respuesta:
+      equipos.join(', '),
+
+    valor: ''
+
+  });
+
+
+  /* SISTEMAS DE ANDAMIOS */
+
+  const sistemas =
+    Array
+      .from(
+        document.querySelectorAll(
+          '.sistema-andamio-entrevista:checked'
+        )
+      )
+      .map(
+        x => x.value
+      );
+
+
+  respuestas.push({
+
+    seccion:
+      'TECNICA',
+
+    codigoPregunta:
+      'TEC-SISTEMAS',
+
+    pregunta:
+      'Tipos de andamio que conoce o ha armado',
+
+    respuesta:
+      sistemas.join(', '),
+
+    valor: ''
+
+  });
+
+
+  /* CERTIFICACIONES */
+
+  const certificaciones =
+    Array
+      .from(
+        document.querySelectorAll(
+          '.certificacion-entrevista:checked'
+        )
+      )
+      .map(
+        x => x.value
+      );
+
+
+  respuestas.push({
+
+    seccion:
+      'TECNICA',
+
+    codigoPregunta:
+      'TEC-CERTIFICACIONES',
+
+    pregunta:
+      'Certificaciones',
+
+    respuesta:
+      certificaciones.join(', '),
+
+    valor: ''
+
+  });
+
+
+  return respuestas;
+}
+
+
+/* =====================================================
+   RECOLECTAR EXPERIENCIA
+===================================================== */
+
+function obtenerExperienciaEntrevista() {
+
+  let modalidad =
+    document.getElementById(
+      'experienciaModalidad'
+    ).value;
+
+
+  const otraModalidad =
+    document.getElementById(
+      'experienciaOtraModalidad'
+    )?.value.trim() || '';
+
+
+  if (
+    modalidad === 'OTROS' &&
+    otraModalidad
+  ) {
+
+    modalidad =
+      'OTROS - ' +
+      otraModalidad;
+  }
+
+
+  return {
+
+    tiempoExperiencia:
+      document.getElementById(
+        'experienciaTiempo'
+      ).value.trim(),
+
+    ultimaEmpresa:
+      document.getElementById(
+        'experienciaUltimaEmpresa'
+      ).value.trim(),
+
+    tiempoUltimaEmpresa:
+      document.getElementById(
+        'experienciaTiempoUltimaEmpresa'
+      ).value.trim(),
+
+    modalidadTrabajo:
+      modalidad,
+
+    motivoRetiro:
+      document.getElementById(
+        'experienciaMotivoRetiro'
+      ).value,
+
+    otroMotivo:
+      document.getElementById(
+        'experienciaOtroMotivo'
+      )?.value.trim() || '',
+
+    tuvoAccidente:
+      document.getElementById(
+        'tuvoAccidente'
+      ).value,
+
+    tipoAccidente:
+      document.getElementById(
+        'tipoAccidente'
+      ).value,
+
+    detalleAccidente:
+      document.getElementById(
+        'detalleAccidente'
+      ).value.trim(),
+
+    comentarios:
+      document.getElementById(
+        'experienciaComentarios'
+      ).value.trim()
+
+  };
+}
+
+
+/* =====================================================
+   GUARDAR ENTREVISTA OPERACIONES
+===================================================== */
+
+async function guardarEntrevistaOperaciones(
+  event
+) {
+
+  event.preventDefault();
+
+
+  if (
+    !candidatoEntrevista ||
+    !agendaEntrevistaActual
+  ) {
+
+    alert(
+      'No se encontró la información de la entrevista.'
+    );
+
+    return;
+  }
+
+
+  const valorSeguridad =
+    Number(
+      document.getElementById(
+        'valoracionSeguridad'
+      ).value || 0
+    );
+
+
+  const valorExperiencia =
+    Number(
+      document.getElementById(
+        'valoracionExperiencia'
+      ).value || 0
+    );
+
+
+  const valorTecnica =
+    Number(
+      document.getElementById(
+        'valoracionTecnica'
+      ).value || 0
+    );
+
+
+  if (
+    !valorSeguridad ||
+    !valorExperiencia ||
+    !valorTecnica
+  ) {
+
+    alert(
+      'Debe completar las tres valoraciones.'
+    );
+
+    return;
+  }
+
+
+  const resultado =
+    document.getElementById(
+      'resultadoEntrevista'
+    ).value;
+
+
+  if (!resultado) {
+
+    alert(
+      'Seleccione el resultado de la entrevista.'
+    );
+
+    return;
+  }
+
+
+  const comentarios =
+    document.getElementById(
+      'comentariosGeneralesEntrevista'
+    ).value.trim();
+
+
+  if (
+    resultado === 'NO APTO' &&
+    !comentarios
+  ) {
+
+    alert(
+      'Para un NO APTO debe indicar el motivo en Comentarios generales.'
+    );
+
+    return;
+  }
+
+
+  /* CALCULAR ANTES DE GUARDAR */
+
+  calcularResultadoEntrevista();
+
+
+  const boton =
+    document.getElementById(
+      'btnGuardarEntrevista'
+    );
+
+
+  const textoOriginal =
+    boton.textContent;
+
+
+  boton.disabled =
+    true;
+
+
+  boton.textContent =
+    'Guardando entrevista...';
+
+
+  try {
+
+    const payload = {
+
+      accion:
+        'guardarEntrevistaOperaciones',
+
+      idCandidato:
+        candidatoEntrevista
+          .idCandidato,
+
+      idRequerimiento:
+        candidatoEntrevista
+          .idRequerimiento,
+
+
+      /* DATOS GENERALES */
+
+      fechaEntrevista:
+        document.getElementById(
+          'entrevistaFecha'
+        ).value,
+
+      lugarEntrevista:
+        document.getElementById(
+          'entrevistaLugar'
+        ).value.trim(),
+
+      modalidadEntrevista:
+        document.getElementById(
+          'entrevistaModalidad'
+        ).value,
+
+      gradoAcademico:
+        document.getElementById(
+          'entrevistaGradoAcademico'
+        ).value,
+
+      estudios:
+        document.getElementById(
+          'entrevistaEstudios'
+        ).value.trim(),
+
+      puestoPostula:
+        document.getElementById(
+          'entrevistaPuestoPostula'
+        ).value.trim(),
+
+      puestoClasifica:
+        document.getElementById(
+          'entrevistaPuestoClasifica'
+        ).value.trim(),
+
+      entrevistador:
+        document.getElementById(
+          'entrevistaEntrevistador'
+        ).value.trim(),
+
+      disponibilidad:
+        document.getElementById(
+          'entrevistaDisponibilidad'
+        ).value,
+
+      pretensionSalarial:
+        document.getElementById(
+          'entrevistaPretension'
+        ).value.trim(),
+
+
+      /* RESULTADO */
+
+      resultado,
+
+      comentariosGenerales:
+        comentarios,
+
+      valoracionSeguridad:
+        valorSeguridad,
+
+      valoracionExperiencia:
+        valorExperiencia,
+
+      valoracionTecnica:
+        valorTecnica,
+
+
+      /* DETALLES */
+
+      unidades:
+        obtenerUnidadesEntrevista(),
+
+      respuestas:
+        obtenerRespuestasEntrevista(),
+
+      experiencia:
+        obtenerExperienciaEntrevista()
+
+    };
+
+
+    const confirmar =
+      confirm(
+        resultado === 'APTO'
+        ?
+          '¿Confirmar entrevista como APTO?\n\nEl candidato será derivado a ATH para Valor Hora.'
+        :
+          '¿Confirmar entrevista como NO APTO?\n\nEl proceso del candidato será finalizado.'
+      );
+
+
+    if (!confirmar) {
+
+      boton.disabled =
+        false;
+
+      boton.textContent =
+        textoOriginal;
+
+      return;
+    }
+
+
+    const respuesta =
+      await fetch(
+        API_CONTRATACION,
+        {
+
+          method:
+            'POST',
+
+          headers: {
+
+            'Content-Type':
+              'text/plain;charset=utf-8'
+
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            )
+
+        }
+      );
+
+
+    const datos =
+      await respuesta.json();
+
+
+    if (!datos.ok) {
+
+      throw new Error(
+        datos.mensaje ||
+        'No se pudo guardar la entrevista.'
+      );
+    }
+
+
+    alert(
+      datos.mensaje +
+      '\n\n' +
+      'Entrevista: ' +
+      datos.idEntrevista +
+      '\n' +
+      'Promedio: ' +
+      datos.promedio +
+      '\n' +
+      'Criterio: ' +
+      datos.criterio
+    );
+
+
+    cerrarEntrevista();
+
+
+    await cargarOperaciones();
+
+
+  } catch (error) {
+
+    alert(
+      error.message
+    );
+
+  } finally {
+
+    boton.disabled =
+      false;
+
+
+    boton.textContent =
+      textoOriginal;
+  }
+}
 
 /* =====================================================
    SEGURIDAD HTML
