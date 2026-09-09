@@ -9,10 +9,15 @@ body{
   color:#1f2937;
 }
 
-.header{
-  background:#111827;
-  color:white;
-  padding:20px 25px;
+.header {
+  background: #111827;
+  color: white;
+  padding: 20px 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .header h1{
