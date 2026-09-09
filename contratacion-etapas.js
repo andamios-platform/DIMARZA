@@ -218,29 +218,20 @@ function crearFila(c){
   let documentos = '';
 
 
-  if(
-    AREA === 'LEGAL' ||
-    AREA === 'DOTACION'
-  ){
+if(
+  AREA === 'LEGAL' ||
+  AREA === 'DOTACION'
+){
 
-    documentos = `
-      <a
-        href="${escapar(c.dniAnverso)}"
-        target="_blank"
-      >
-        DNI A
-      </a>
-
-      &nbsp;
-
-      <a
-        href="${escapar(c.dniReverso)}"
-        target="_blank"
-      >
-        DNI R
-      </a>
-    `;
-  }
+  documentos = `
+    <a
+      href="${escapar(c.archivoDni)}"
+      target="_blank"
+    >
+      DNI
+    </a>
+  `;
+}
 
 
   if(
@@ -305,7 +296,7 @@ function crearFila(c){
       </td>
 
       <td>
-        ${escapar(c.servicio)}
+        ${escapar(c.tipoContrato)}
       </td>
 
       <td>
@@ -425,8 +416,8 @@ function abrirGestion(id){
     </div>
 
     <div class="dato">
-      <strong>Servicio:</strong>
-      ${escapar(candidatoActual.servicio)}
+      <strong>Tipo de contrato:</strong>
+      ${escapar(candidatoActual.tipoContrato)}
     </div>
 
     <div class="dato">
