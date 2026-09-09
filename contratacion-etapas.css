@@ -591,3 +591,153 @@ a{
     grid-template-columns: 1fr;
   }
 }
+/* =====================================================
+   FICHA ENTREVISTA OPERACIONES
+===================================================== */
+
+.modal-entrevista {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(17, 24, 39, .72);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 25px;
+}
+
+.modal-entrevista.visible {
+  display: flex;
+}
+
+.modal-entrevista-contenido {
+  background: #fff;
+  width: 100%;
+  max-width: 1100px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+}
+
+.modal-entrevista-header {
+  background: #111827;
+  color: #fff;
+  padding: 20px 25px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.modal-entrevista-header h2 {
+  margin: 0 0 5px 0;
+}
+
+.modal-entrevista-header p {
+  margin: 0;
+  color: #d1d5db;
+  font-size: 13px;
+}
+
+.cerrar-modal-entrevista {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.cabecera-candidato-entrevista {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 15px;
+  padding: 18px 25px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.cabecera-candidato-entrevista span {
+  display: block;
+  color: #6b7280;
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+#formEntrevistaOperaciones {
+  padding: 25px;
+}
+
+.seccion-entrevista {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.seccion-entrevista h3 {
+  margin: 0;
+  padding: 13px 18px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 15px;
+}
+
+.grid-entrevista {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 20px;
+}
+
+.campo-entrevista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-entrevista label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.campo-entrevista input,
+.campo-entrevista select,
+.campo-entrevista textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  font-family: inherit;
+}
+
+.aviso-entrevista-desarrollo {
+  padding: 18px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 13px;
+}
+
+.acciones-modal-entrevista {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-cancelar-entrevista {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  padding: 10px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+@media (max-width: 800px) {
+
+  .grid-entrevista,
+  .cabecera-candidato-entrevista {
+    grid-template-columns: 1fr;
+  }
+}
