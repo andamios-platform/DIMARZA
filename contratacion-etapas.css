@@ -883,93 +883,177 @@ a{
   }
 }
 /* =====================================================
-   AJUSTES FINALES - ENTREVISTA OPERACIONES
-   Pegar AL FINAL de contratacion-etapas.css
+   ENTREVISTA OPERACIONES - AJUSTE COMPACTO
 ===================================================== */
 
-/* Grillas más compactas */
-.grid-entrevista {
+
+/* =====================================================
+   DATOS EN 4 COLUMNAS
+===================================================== */
+
+.grid-entrevista.grid-4 {
+  display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  padding: 16px 20px;
+  gap: 14px;
+  padding: 18px 20px;
 }
 
-.grid-entrevista-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
 
-.campo-entrevista.ancho-doble {
+/* =====================================================
+   ANCHOS
+===================================================== */
+
+.grid-entrevista .ancho-doble {
   grid-column: span 2;
 }
 
-.campo-entrevista.ancho-triple {
+.grid-entrevista .ancho-triple {
   grid-column: span 3;
 }
 
-.campo-entrevista.ancho-completo,
-.ancho-completo {
+.grid-entrevista .ancho-completo {
   grid-column: 1 / -1;
 }
 
-/* Preguntas de Seguridad y Técnicas: dos por fila */
-.preguntas-entrevista-2col {
+
+/* =====================================================
+   CAMPOS MÁS COMPACTOS
+===================================================== */
+
+.campo-entrevista {
+  min-width: 0;
+}
+
+.campo-entrevista input,
+.campo-entrevista select,
+.campo-entrevista textarea {
+  padding: 9px 10px;
+  min-height: 38px;
+}
+
+
+/* =====================================================
+   PREGUNTAS EN 2 COLUMNAS
+===================================================== */
+
+.preguntas-entrevista.preguntas-2-columnas {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  padding: 18px 20px;
 }
 
-/* También compactamos Seguridad: 2 preguntas por fila */
-.seccion-entrevista:nth-of-type(3) .preguntas-entrevista {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
 
-.pregunta-entrevista textarea {
-  min-height: 64px;
+/* =====================================================
+   RESPUESTAS MÁS PEQUEÑAS
+===================================================== */
+
+.preguntas-entrevista.preguntas-2-columnas
+.respuesta-entrevista {
+  min-height: 62px;
+  height: 62px;
   resize: vertical;
 }
 
-/* Valoraciones menos anchas */
-.bloque-valoracion-compacto,
+
+/* =====================================================
+   CHECKS
+===================================================== */
+
+.bloque-checks-entrevista {
+  padding: 18px 20px;
+}
+
+
+.bloque-checks-entrevista
+.grid-checks-entrevista,
+.bloque-checks-entrevista
+.grid-certificaciones-entrevista {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+
+.titulo-checks {
+  display: block;
+  margin: 8px 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* =====================================================
+   VALORACIONES
+===================================================== */
+
 .bloque-valoracion {
   padding: 14px 20px;
 }
 
+
 .bloque-valoracion select {
-  max-width: 360px;
+  max-width: 420px;
 }
 
-/* Select bloqueado visualmente hasta calcular */
-#entrevistaPuestoClasifica[readonly] {
+
+/* =====================================================
+   PUESTO EN QUE CLASIFICA
+===================================================== */
+
+#entrevistaPuestoClasifica:disabled {
   background: #f3f4f6;
   color: #6b7280;
   cursor: not-allowed;
 }
 
-/* Responsivo */
-@media (max-width: 1050px) {
-  .grid-entrevista,
-  .grid-entrevista-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 
-  .preguntas-entrevista-2col,
-  .seccion-entrevista:nth-of-type(3) .preguntas-entrevista {
-    grid-template-columns: 1fr;
-  }
+/* =====================================================
+   BOTONES FINALES
+===================================================== */
+
+.acciones-modal-entrevista {
+  position: sticky;
+  bottom: 0;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 14px 0 4px;
+  z-index: 5;
+  gap: 10px;
 }
 
-@media (max-width: 650px) {
-  .grid-entrevista,
-  .grid-entrevista-4 {
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1050px) {
+
+  .grid-entrevista.grid-4 {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .grid-entrevista .ancho-doble,
+  .grid-entrevista .ancho-triple {
+    grid-column: span 2;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .grid-entrevista.grid-4,
+  .preguntas-entrevista.preguntas-2-columnas {
     grid-template-columns: 1fr;
   }
 
-  .campo-entrevista.ancho-doble,
-  .campo-entrevista.ancho-triple,
-  .campo-entrevista.ancho-completo,
-  .ancho-completo {
-    grid-column: auto;
+
+  .grid-entrevista .ancho-doble,
+  .grid-entrevista .ancho-triple,
+  .grid-entrevista .ancho-completo {
+    grid-column: 1;
   }
+
 }
