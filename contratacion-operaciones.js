@@ -1748,7 +1748,15 @@ function limpiarFormularioEntrevista() {
   puestoClasifica.value = '';
   puestoClasifica.disabled = true;
 
+const labelPretension =
+  document.getElementById(
+    'labelPretension'
+  );
 
+if (labelPretension) {
+  labelPretension.textContent =
+    'Monto';
+}
   actualizarSelectEntrevistadores();
 
 }
