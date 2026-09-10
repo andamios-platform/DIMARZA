@@ -1057,3 +1057,37 @@ a{
   }
 
 }
+/* =====================================================
+   AJUSTE TABLA UNIDADES MINERAS
+===================================================== */
+
+.tabla-unidades-entrevista {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.tabla-unidades-entrevista th:nth-child(1),
+.tabla-unidades-entrevista td:nth-child(1) {
+  width: 18%;
+}
+
+.tabla-unidades-entrevista th:nth-child(2),
+.tabla-unidades-entrevista td:nth-child(2),
+.tabla-unidades-entrevista th:nth-child(3),
+.tabla-unidades-entrevista td:nth-child(3) {
+  width: 15%;
+}
+
+.tabla-unidades-entrevista th:nth-child(4),
+.tabla-unidades-entrevista td:nth-child(4),
+.tabla-unidades-entrevista th:nth-child(5),
+.tabla-unidades-entrevista td:nth-child(5) {
+  width: 26%;
+}
+
+.tabla-unidades-entrevista input,
+.tabla-unidades-entrevista select {
+  min-width: 0;
+  width: 100%;
+}
