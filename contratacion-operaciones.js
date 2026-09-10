@@ -3907,34 +3907,18 @@ async function guardarEntrevistaOperaciones(
   }
 
 
-  /* PRETENSIÓN / VH */
+ /* TIPO REMUNERACIÓN / MONTO */
 
-  const tipoPretension =
-    document.getElementById(
-      'tipoPretension'
-    ).value;
-
-
-  const montoPretension =
-    document.getElementById(
-      'entrevistaPretension'
-    ).value;
+const tipoRemuneracion =
+  document.getElementById(
+    'tipoPretension'
+  ).value;
 
 
-  let pretensionSalarial = '';
-
-
-  if (
-    tipoPretension &&
-    montoPretension
-  ) {
-
-    pretensionSalarial =
-      tipoPretension +
-      ' - ' +
-      montoPretension;
-
-  }
+const monto =
+  document.getElementById(
+    'entrevistaPretension'
+  ).value;
 
 
   const valorSeguridad =
@@ -4046,9 +4030,11 @@ async function guardarEntrevistaOperaciones(
         ).value,
 
       disponibilidad,
-
-      pretensionSalarial,
-
+      
+      tipoRemuneracion,
+      
+      monto,
+      
       resultado,
 
       comentariosGenerales:
