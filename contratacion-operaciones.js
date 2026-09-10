@@ -4061,59 +4061,144 @@ const monto =
     };
 
 
-    const respuesta =
-      await fetch(
-        API_CONTRATACION,
-        {
-
-          method:
-            'POST',
-
-          headers: {
-
-            'Content-Type':
-              'text/plain;charset=utf-8'
-
-          },
-
-          body:
-            JSON.stringify(payload)
-
-        }
-      );
+const idCandidatoGuardado =
+  candidatoEntrevista.idCandidato;
 
 
-    const datos =
-      await respuesta.json();
+const respuesta =
+  await fetch(
+    API_CONTRATACION,
+    {
 
+      method:
+        'POST',
 
-    if (!datos.ok) {
+      headers: {
 
-      throw new Error(
-        datos.mensaje ||
-        'No se pudo guardar la entrevista.'
-      );
+        'Content-Type':
+          'text/plain;charset=utf-8'
+
+      },
+
+      body:
+        JSON.stringify(payload)
 
     }
+  );
 
 
-    alert(
-      datos.mensaje +
-      '\n\n' +
-      'Entrevista: ' +
-      datos.idEntrevista +
-      '\n' +
-      'Promedio: ' +
-      datos.promedio +
-      '\n' +
-      'Criterio: ' +
-      datos.criterio
+const textoRespuesta =
+  await respuesta.text();
+
+
+let datos = null;
+
+
+try {
+
+  datos =
+    JSON.parse(
+      textoRespuesta
     );
 
+} catch (errorJSON) {
 
-    cerrarEntrevista();
+  console.warn(
+    'Apps Script no devolvió JSON:',
+    textoRespuesta
+  );
 
-    await cargarOperaciones();
+}
+
+
+/* =====================================================
+   RESPUESTA JSON NORMAL
+===================================================== */
+
+if (datos) {
+
+  if (!datos.ok) {
+
+    throw new Error(
+      datos.mensaje ||
+      'No se pudo guardar la entrevista.'
+    );
+
+  }
+
+
+  alert(
+    datos.mensaje +
+    '\n\n' +
+    'Entrevista: ' +
+    datos.idEntrevista +
+    '\n' +
+    'Promedio: ' +
+    datos.promedio +
+    '\n' +
+    'Criterio: ' +
+    datos.criterio
+  );
+
+
+  cerrarEntrevista();
+
+  await cargarOperaciones();
+
+  return;
+
+}
+
+
+/* =====================================================
+   GOOGLE DEVOLVIÓ HTML EN VEZ DE JSON
+   VERIFICAMOS SI EL CANDIDATO YA SALIÓ DE OPERACIONES
+===================================================== */
+
+await new Promise(
+  resolve =>
+    setTimeout(
+      resolve,
+      800
+    )
+);
+
+
+await cargarOperaciones();
+
+
+const sigueEnOperaciones =
+  candidatosOperaciones.some(
+    candidato =>
+      String(
+        candidato.idCandidato
+      ) ===
+      String(
+        idCandidatoGuardado
+      )
+  );
+
+
+if (!sigueEnOperaciones) {
+
+  cerrarEntrevista();
+
+
+  alert(
+    'Entrevista registrada correctamente.\n\n' +
+    'El proceso del candidato fue actualizado.'
+  );
+
+
+  return;
+
+}
+
+
+throw new Error(
+  'El servidor devolvió una respuesta no válida. ' +
+  'La entrevista no pudo confirmarse.'
+);
 
   } catch (error) {
 
