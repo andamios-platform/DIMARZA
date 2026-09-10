@@ -1,14 +1,31 @@
+/* =====================================================
+   APIs
+===================================================== */
+
 const API_CONTRATACION =
   'https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
 
+const API_PERSONAL =
+  'https://script.google.com/macros/s/AKfycbwvueeUnXA1khv-qj-xxZnPi8jq_MzBygE__2TI3w7GMK3-4ev5pMNQ5KIam8mMMlQb/exec';
+
+const API_GESTION_ANDAMIOS =
+  'https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIHr9XP7SA81SoZZSxo4OoB5N7VaMLLklU9ym82vCwDQN/exec';
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
 
 let candidatosOperaciones = [];
 let agendaEntrevistas = [];
 
 let candidatoSeleccionado = null;
 let agendaSeleccionada = null;
+
 let candidatoEntrevista = null;
 let agendaEntrevistaActual = null;
+
+let entrevistadoresOperaciones = [];
 
 
 /* =====================================================
@@ -22,10 +39,11 @@ document.addEventListener(
     prepararTabs();
 
     crearModalAgenda();
-    
     crearModalEntrevista();
-    
+
+    await cargarEntrevistadores();
     await cargarOperaciones();
+
   }
 );
 
@@ -41,73 +59,264 @@ function prepararTabs() {
       '.tab-operaciones'
     );
 
+  botones.forEach(boton => {
 
-  botones.forEach(
-    boton => {
+    boton.addEventListener(
+      'click',
+      () => {
 
-      boton.addEventListener(
-        'click',
-        () => {
+        botones.forEach(
+          b => b.classList.remove('activo')
+        );
 
-          botones.forEach(
-            b =>
-              b.classList.remove(
-                'activo'
-              )
+        document
+          .querySelectorAll('.contenido-tab')
+          .forEach(
+            c => c.classList.remove('activo')
           );
 
+        boton.classList.add('activo');
+
+        const tab =
+          boton.dataset.tab;
+
+        if (tab === 'agenda') {
 
           document
-            .querySelectorAll(
-              '.contenido-tab'
-            )
-            .forEach(
-              c =>
-                c.classList.remove(
-                  'activo'
-                )
+            .getElementById('tabAgenda')
+            .classList.add('activo');
+
+        }
+
+        if (tab === 'entrevistas') {
+
+          document
+            .getElementById('tabEntrevistas')
+            .classList.add('activo');
+
+        }
+
+      }
+    );
+
+  });
+
+}
+
+
+/* =====================================================
+   ENTREVISTADORES
+   RESIDENTE + SUPERVISOR ANDAMIERO
+===================================================== */
+
+async function cargarEntrevistadores() {
+
+  try {
+
+    const [
+      respuestaResidente,
+      respuestaSupervisores
+    ] = await Promise.all([
+
+      fetch(
+        API_PERSONAL +
+        '?action=personalContratacion&t=' +
+        Date.now()
+      ),
+
+      fetch(
+        API_GESTION_ANDAMIOS +
+        '?accion=supervisoresAndamios&t=' +
+        Date.now()
+      )
+
+    ]);
+
+
+    const datosResidente =
+      await respuestaResidente.json();
+
+    const datosSupervisores =
+      await respuestaSupervisores.json();
+
+
+    const nombres = [];
+
+
+    /* RESIDENTE */
+
+    if (
+      datosResidente.ok &&
+      datosResidente.residente
+    ) {
+
+      nombres.push(
+        String(
+          datosResidente.residente
+        ).trim()
+      );
+
+    }
+
+
+    /* SUPERVISORES */
+
+    const supervisores =
+      Array.isArray(
+        datosSupervisores.supervisores
+      )
+        ? datosSupervisores.supervisores
+        : [];
+
+
+    supervisores.forEach(item => {
+
+      const nombre =
+        typeof item === 'string'
+          ? item
+          : (
+              item.nombre ||
+              item.nombres ||
+              ''
             );
 
+      if (nombre) {
 
-          boton.classList.add(
-            'activo'
-          );
+        nombres.push(
+          String(nombre).trim()
+        );
 
+      }
 
-          const tab =
-            boton.dataset.tab;
-
-
-          if (
-            tab === 'agenda'
-          ) {
-
-            document
-              .getElementById(
-                'tabAgenda'
-              )
-              .classList.add(
-                'activo'
-              );
-          }
+    });
 
 
-          if (
-            tab === 'entrevistas'
-          ) {
-
-            document
-              .getElementById(
-                'tabEntrevistas'
-              )
-              .classList.add(
-                'activo'
-              );
-          }
-        }
+    entrevistadoresOperaciones =
+      [
+        ...new Set(
+          nombres.filter(Boolean)
+        )
+      ]
+      .sort(
+        (a, b) =>
+          a.localeCompare(
+            b,
+            'es'
+          )
       );
+
+
+    actualizarSelectEntrevistadores();
+
+  } catch (error) {
+
+    console.error(
+      'Error cargando entrevistadores:',
+      error
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   ACTUALIZAR SELECTS ENTREVISTADORES
+===================================================== */
+
+function actualizarSelectEntrevistadores() {
+
+  [
+    'entrevistadorAgenda',
+    'entrevistaEntrevistador'
+  ].forEach(id => {
+
+    const select =
+      document.getElementById(id);
+
+    if (!select)
+      return;
+
+
+    const valorAnterior =
+      select.value;
+
+
+    select.innerHTML =
+      `
+        <option value="">
+          Seleccione...
+        </option>
+      `
+      +
+      entrevistadoresOperaciones
+        .map(nombre => `
+          <option value="${escaparHTML(nombre)}">
+            ${escaparHTML(nombre)}
+          </option>
+        `)
+        .join('');
+
+
+    if (valorAnterior) {
+
+      asegurarOpcionSelect(
+        select,
+        valorAnterior
+      );
+
+      select.value =
+        valorAnterior;
+
     }
-  );
+
+  });
+
+}
+
+
+/* =====================================================
+   ASEGURAR OPCIÓN
+===================================================== */
+
+function asegurarOpcionSelect(
+  select,
+  valor
+) {
+
+  if (!select || !valor)
+    return;
+
+
+  const existe =
+    Array
+      .from(select.options)
+      .some(
+        op =>
+          String(op.value) ===
+          String(valor)
+      );
+
+
+  if (!existe) {
+
+    const opcion =
+      document.createElement(
+        'option'
+      );
+
+    opcion.value =
+      valor;
+
+    opcion.textContent =
+      valor;
+
+    select.appendChild(
+      opcion
+    );
+
+  }
+
 }
 
 
@@ -122,7 +331,6 @@ async function cargarOperaciones() {
       'contenidoAgenda'
     );
 
-
   contenedor.innerHTML =
     `
       <div class="estado-carga">
@@ -136,25 +344,25 @@ async function cargarOperaciones() {
     const [
       respuestaCandidatos,
       respuestaAgenda
-    ] =
-      await Promise.all([
+    ] = await Promise.all([
 
-        fetch(
-          API_CONTRATACION +
-          '?accion=listarPendientesArea&area=OPERACIONES'
-        ),
+      fetch(
+        API_CONTRATACION +
+        '?accion=listarPendientesArea&area=OPERACIONES&t=' +
+        Date.now()
+      ),
 
-        fetch(
-          API_CONTRATACION +
-          '?accion=listarAgendaEntrevistas'
-        )
+      fetch(
+        API_CONTRATACION +
+        '?accion=listarAgendaEntrevistas&t=' +
+        Date.now()
+      )
 
-      ]);
+    ]);
 
 
     const datosCandidatos =
       await respuestaCandidatos.json();
-
 
     const datosAgenda =
       await respuestaAgenda.json();
@@ -166,6 +374,7 @@ async function cargarOperaciones() {
         datosCandidatos.mensaje ||
         'No se pudieron cargar los candidatos'
       );
+
     }
 
 
@@ -175,19 +384,18 @@ async function cargarOperaciones() {
         datosAgenda.mensaje ||
         'No se pudo cargar la agenda'
       );
+
     }
 
 
     candidatosOperaciones =
       datosCandidatos.candidatos || [];
 
-
     agendaEntrevistas =
       datosAgenda.agenda || [];
 
 
     renderizarAgenda();
-
     renderizarEntrevistas();
 
   } catch (error) {
@@ -200,6 +408,7 @@ async function cargarOperaciones() {
       `;
 
   }
+
 }
 
 
@@ -222,19 +431,15 @@ function renderizarAgenda() {
         const agenda =
           agendaEntrevistas.find(
             a =>
-              String(
-                a.idCandidato
-              ) ===
-              String(
-                candidato.idCandidato
-              )
+              String(a.idCandidato) ===
+              String(candidato.idCandidato)
           ) || null;
-
 
         return {
           candidato,
           agenda
         };
+
       }
     );
 
@@ -302,13 +507,17 @@ function renderizarAgenda() {
         <div class="titulo-bloque-operaciones">
 
           <div>
-            <h2>Agenda de entrevistas</h2>
+
+            <h2>
+              Agenda de entrevistas
+            </h2>
 
             <p>
-              Candidatos derivados por Legal
-              para entrevista técnica.
+              Candidatos derivados por Legal para entrevista técnica.
             </p>
+
           </div>
+
 
           <button
             type="button"
@@ -328,7 +537,6 @@ function renderizarAgenda() {
             <thead>
 
               <tr>
-
                 <th>Candidato</th>
                 <th>DNI</th>
                 <th>Cargo</th>
@@ -339,7 +547,6 @@ function renderizarAgenda() {
                 <th>Modalidad</th>
                 <th>Estado</th>
                 <th>Acción</th>
-
               </tr>
 
             </thead>
@@ -348,27 +555,27 @@ function renderizarAgenda() {
 
               ${
                 candidatos.length
-                ? candidatos
-                    .map(
-                      x =>
-                        crearFilaAgenda(
-                          x.candidato,
-                          x.agenda
-                        )
-                    )
-                    .join('')
-                :
-                  `
-                    <tr>
-                      <td
-                        colspan="10"
-                        class="sin-registros"
-                      >
-                        No hay candidatos pendientes
-                        en Operaciones.
-                      </td>
-                    </tr>
-                  `
+                  ?
+                    candidatos
+                      .map(
+                        x =>
+                          crearFilaAgenda(
+                            x.candidato,
+                            x.agenda
+                          )
+                      )
+                      .join('')
+                  :
+                    `
+                      <tr>
+                        <td
+                          colspan="10"
+                          class="sin-registros"
+                        >
+                          No hay candidatos pendientes en Operaciones.
+                        </td>
+                      </tr>
+                    `
               }
 
             </tbody>
@@ -378,7 +585,9 @@ function renderizarAgenda() {
         </div>
 
       </div>
+
     `;
+
 }
 
 
@@ -397,83 +606,43 @@ function crearFilaAgenda(
 
   const fechaHora =
     tieneAgenda
-    ?
-      `
-        <strong>
-          ${escaparHTML(
-            agenda.fechaProgramada || '-'
-          )}
-        </strong>
+      ?
+        `
+          <strong>
+            ${escaparHTML(
+              agenda.fechaProgramada || '-'
+            )}
+          </strong>
 
-        <div class="dato-secundario">
-          ${
-            escaparHTML(
+          <div class="dato-secundario">
+            ${escaparHTML(
               agenda.horaProgramada || ''
-            )
-          }
-        </div>
-      `
-    :
-      `
-        <span class="texto-pendiente">
-          Sin programar
-        </span>
-      `;
-
-
-  const modalidad =
-    tieneAgenda
-    ?
-      escaparHTML(
-        agenda.modalidad || '-'
-      )
-    :
-      '-';
+            )}
+          </div>
+        `
+      :
+        `
+          <span class="texto-pendiente">
+            Sin programar
+          </span>
+        `;
 
 
   const estado =
     tieneAgenda
-    ?
-      String(
-        agenda.estadoCita ||
-        'PROGRAMADA'
-      ).toUpperCase()
-    :
-      'PENDIENTE DE PROGRAMAR';
+      ?
+        String(
+          agenda.estadoCita ||
+          'PROGRAMADA'
+        ).toUpperCase()
+      :
+        'PENDIENTE DE PROGRAMAR';
 
 
   const claseEstado =
     obtenerClaseEstadoAgenda(
       estado
     );
-
-
-  const boton =
-    tieneAgenda
-    ?
-      `
-        <button
-          type="button"
-          class="btn-agenda secundario"
-          onclick="abrirAgenda('${escaparJS(
-            candidato.idCandidato
-          )}')"
-        >
-          Reprogramar
-        </button>
-      `
-    :
-      `
-        <button
-          type="button"
-          class="btn-agenda"
-          onclick="abrirAgenda('${escaparJS(
-            candidato.idCandidato
-          )}')"
-        >
-          Programar
-        </button>
-      `;
 
 
   return `
@@ -496,15 +665,11 @@ function crearFilaAgenda(
       </td>
 
       <td>
-        ${escaparHTML(
-          candidato.dni
-        )}
+        ${escaparHTML(candidato.dni)}
       </td>
 
       <td>
-        ${escaparHTML(
-          candidato.cargo
-        )}
+        ${escaparHTML(candidato.cargo)}
       </td>
 
       <td>
@@ -530,28 +695,55 @@ function crearFilaAgenda(
       </td>
 
       <td>
-        ${modalidad}
+        ${
+          tieneAgenda
+            ? escaparHTML(
+                agenda.modalidad || '-'
+              )
+            : '-'
+        }
       </td>
 
       <td>
 
-        <span class="estado-agenda ${claseEstado}">
+        <span
+          class="estado-agenda ${claseEstado}"
+        >
           ${escaparHTML(estado)}
         </span>
 
       </td>
 
       <td>
-        ${boton}
+
+        <button
+          type="button"
+          class="btn-agenda ${
+            tieneAgenda
+              ? 'secundario'
+              : ''
+          }"
+          onclick="abrirAgenda('${escaparJS(
+            candidato.idCandidato
+          )}')"
+        >
+          ${
+            tieneAgenda
+              ? 'Reprogramar'
+              : 'Programar'
+          }
+        </button>
+
       </td>
 
     </tr>
   `;
+
 }
 
 
 /* =====================================================
-   ABRIR MODAL
+   ABRIR AGENDA
 ===================================================== */
 
 function abrirAgenda(
@@ -561,12 +753,8 @@ function abrirAgenda(
   candidatoSeleccionado =
     candidatosOperaciones.find(
       c =>
-        String(
-          c.idCandidato
-        ) ===
-        String(
-          idCandidato
-        )
+        String(c.idCandidato) ===
+        String(idCandidato)
     );
 
 
@@ -577,18 +765,15 @@ function abrirAgenda(
     );
 
     return;
+
   }
 
 
   agendaSeleccionada =
     agendaEntrevistas.find(
       a =>
-        String(
-          a.idCandidato
-        ) ===
-        String(
-          idCandidato
-        )
+        String(a.idCandidato) ===
+        String(idCandidato)
     ) || null;
 
 
@@ -646,11 +831,25 @@ function abrirAgenda(
       ?.lugarEnlace || '';
 
 
-  document.getElementById(
-    'entrevistadorAgenda'
-  ).value =
+  const selectEntrevistador =
+    document.getElementById(
+      'entrevistadorAgenda'
+    );
+
+
+  const entrevistadorActual =
     agendaSeleccionada
       ?.entrevistador || '';
+
+
+  asegurarOpcionSelect(
+    selectEntrevistador,
+    entrevistadorActual
+  );
+
+
+  selectEntrevistador.value =
+    entrevistadorActual;
 
 
   document.getElementById(
@@ -667,41 +866,37 @@ function abrirAgenda(
     'tituloModalAgenda'
   ).textContent =
     agendaSeleccionada
-    ? 'Reprogramar entrevista'
-    : 'Programar entrevista';
+      ? 'Reprogramar entrevista'
+      : 'Programar entrevista';
 
 
   document.getElementById(
     'btnGuardarAgenda'
   ).textContent =
     agendaSeleccionada
-    ? 'Guardar reprogramación'
-    : 'Programar entrevista';
+      ? 'Guardar reprogramación'
+      : 'Programar entrevista';
 
 
-  document.getElementById(
-    'modalAgenda'
-  ).classList.add(
-    'visible'
-  );
+  document
+    .getElementById('modalAgenda')
+    .classList.add('visible');
+
 }
 
 
 /* =====================================================
-   CREAR MODAL
+   MODAL AGENDA
 ===================================================== */
 
 function crearModalAgenda() {
 
   const modal =
-    document.createElement(
-      'div'
-    );
+    document.createElement('div');
 
 
   modal.id =
     'modalAgenda';
-
 
   modal.className =
     'modal-agenda';
@@ -849,12 +1044,16 @@ function crearModalAgenda() {
                 Entrevistador *
               </label>
 
-              <input
-                type="text"
+              <select
                 id="entrevistadorAgenda"
-                placeholder="Nombre del entrevistador"
                 required
               >
+
+                <option value="">
+                  Seleccione...
+                </option>
+
+              </select>
 
             </div>
 
@@ -867,8 +1066,7 @@ function crearModalAgenda() {
 
               <textarea
                 id="observacionAgenda"
-                rows="3"
-                placeholder="Observación de la programación"
+                rows="2"
               ></textarea>
 
             </div>
@@ -900,12 +1098,14 @@ function crearModalAgenda() {
         </form>
 
       </div>
+
     `;
 
 
   document.body.appendChild(
     modal
   );
+
 }
 
 
@@ -920,10 +1120,8 @@ async function guardarAgenda(
   event.preventDefault();
 
 
-  if (!candidatoSeleccionado) {
-
+  if (!candidatoSeleccionado)
     return;
-  }
 
 
   const boton =
@@ -931,14 +1129,12 @@ async function guardarAgenda(
       'btnGuardarAgenda'
     );
 
-
   const textoOriginal =
     boton.textContent;
 
 
   boton.disabled =
     true;
-
 
   boton.textContent =
     'Guardando...';
@@ -960,49 +1156,34 @@ async function guardarAgenda(
           .idRequerimiento,
 
       fechaProgramada:
-        document
-          .getElementById(
-            'fechaProgramada'
-          )
-          .value,
+        document.getElementById(
+          'fechaProgramada'
+        ).value,
 
       horaProgramada:
-        document
-          .getElementById(
-            'horaProgramada'
-          )
-          .value,
+        document.getElementById(
+          'horaProgramada'
+        ).value,
 
       modalidad:
-        document
-          .getElementById(
-            'modalidadAgenda'
-          )
-          .value,
+        document.getElementById(
+          'modalidadAgenda'
+        ).value,
 
       lugarEnlace:
-        document
-          .getElementById(
-            'lugarAgenda'
-          )
-          .value
-          .trim(),
+        document.getElementById(
+          'lugarAgenda'
+        ).value.trim(),
 
       entrevistador:
-        document
-          .getElementById(
-            'entrevistadorAgenda'
-          )
-          .value
-          .trim(),
+        document.getElementById(
+          'entrevistadorAgenda'
+        ).value,
 
       observacion:
-        document
-          .getElementById(
-            'observacionAgenda'
-          )
-          .value
-          .trim()
+        document.getElementById(
+          'observacionAgenda'
+        ).value.trim()
 
     };
 
@@ -1011,19 +1192,13 @@ async function guardarAgenda(
       await fetch(
         API_CONTRATACION,
         {
-
-          method:
-            'POST',
-
+          method: 'POST',
           headers: {
             'Content-Type':
               'text/plain;charset=utf-8'
           },
-
           body:
-            JSON.stringify(
-              payload
-            )
+            JSON.stringify(payload)
         }
       );
 
@@ -1038,6 +1213,7 @@ async function guardarAgenda(
         resultado.mensaje ||
         'No se pudo guardar la entrevista'
       );
+
     }
 
 
@@ -1050,7 +1226,6 @@ async function guardarAgenda(
 
     await cargarOperaciones();
 
-
   } catch (error) {
 
     alert(
@@ -1062,49 +1237,43 @@ async function guardarAgenda(
     boton.disabled =
       false;
 
-
     boton.textContent =
       textoOriginal;
+
   }
+
 }
 
 
 /* =====================================================
-   CERRAR MODAL
+   CERRAR AGENDA
 ===================================================== */
 
 function cerrarAgenda() {
 
   document
-    .getElementById(
-      'modalAgenda'
-    )
-    .classList.remove(
-      'visible'
-    );
-
+    .getElementById('modalAgenda')
+    .classList.remove('visible');
 
   candidatoSeleccionado =
     null;
 
-
   agendaSeleccionada =
     null;
+
 }
 
 
 /* =====================================================
-   MODALIDAD
+   MODALIDAD AGENDA
 ===================================================== */
 
 function cambiarTextoLugar() {
 
   const modalidad =
-    document
-      .getElementById(
-        'modalidadAgenda'
-      )
-      ?.value;
+    document.getElementById(
+      'modalidadAgenda'
+    )?.value;
 
 
   const label =
@@ -1119,9 +1288,7 @@ function cambiarTextoLugar() {
     );
 
 
-  if (
-    modalidad === 'VIRTUAL'
-  ) {
+  if (modalidad === 'VIRTUAL') {
 
     label.textContent =
       'Enlace de entrevista *';
@@ -1136,7 +1303,9 @@ function cambiarTextoLugar() {
 
     input.placeholder =
       'Ej. Oficina Arequipa';
+
   }
+
 }
 
 
@@ -1159,22 +1328,27 @@ function renderizarEntrevistas() {
         const agenda =
           agendaEntrevistas.find(
             a =>
-              String(
-                a.idCandidato
-              ) ===
-              String(
-                candidato.idCandidato
-              )
+              String(a.idCandidato) ===
+              String(candidato.idCandidato)
           );
-
 
         return {
           candidato,
           agenda
         };
+
       })
       .filter(
-        x => x.agenda
+        x =>
+          x.agenda &&
+          [
+            'PROGRAMADA',
+            'REPROGRAMADA'
+          ].includes(
+            String(
+              x.agenda.estadoCita || ''
+            ).toUpperCase()
+          )
       );
 
 
@@ -1192,8 +1366,7 @@ function renderizarEntrevistas() {
             </h2>
 
             <p>
-              Entrevistas programadas listas
-              para iniciar evaluación técnica.
+              Entrevistas programadas listas para iniciar evaluación técnica.
             </p>
 
           </div>
@@ -1208,7 +1381,6 @@ function renderizarEntrevistas() {
             <thead>
 
               <tr>
-
                 <th>Candidato</th>
                 <th>DNI</th>
                 <th>Cargo</th>
@@ -1218,7 +1390,6 @@ function renderizarEntrevistas() {
                 <th>Entrevistador</th>
                 <th>Estado</th>
                 <th>Acción</th>
-
               </tr>
 
             </thead>
@@ -1228,105 +1399,105 @@ function renderizarEntrevistas() {
 
               ${
                 programados.length
-                ?
-                  programados
-                    .map(
-                      x => `
-                        <tr>
+                  ?
+                    programados.map(x => `
 
-                          <td>
-                            <strong>
-                              ${escaparHTML(
-                                x.candidato.nombres
-                              )}
-                            </strong>
+                      <tr>
 
-                            <div class="dato-secundario">
-                              ${escaparHTML(
-                                x.candidato.idCandidato
-                              )}
-                            </div>
-                          </td>
+                        <td>
 
-                          <td>
+                          <strong>
                             ${escaparHTML(
-                              x.candidato.dni
+                              x.candidato.nombres
                             )}
-                          </td>
+                          </strong>
 
-                          <td>
+                          <div class="dato-secundario">
                             ${escaparHTML(
-                              x.candidato.cargo
+                              x.candidato.idCandidato
                             )}
-                          </td>
+                          </div>
 
-                          <td>
+                        </td>
+
+                        <td>
+                          ${escaparHTML(
+                            x.candidato.dni
+                          )}
+                        </td>
+
+                        <td>
+                          ${escaparHTML(
+                            x.candidato.cargo
+                          )}
+                        </td>
+
+                        <td>
+                          ${escaparHTML(
+                            x.candidato.unidad || '-'
+                          )}
+                        </td>
+
+                        <td>
+                          ${escaparHTML(
+                            x.agenda.fechaProgramada || '-'
+                          )}
+                        </td>
+
+                        <td>
+                          ${escaparHTML(
+                            x.agenda.horaProgramada || '-'
+                          )}
+                        </td>
+
+                        <td>
+                          ${escaparHTML(
+                            x.agenda.entrevistador || '-'
+                          )}
+                        </td>
+
+                        <td>
+
+                          <span
+                            class="estado-agenda estado-programada"
+                          >
                             ${escaparHTML(
-                              x.candidato.unidad || '-'
+                              x.agenda.estadoCita
                             )}
-                          </td>
+                          </span>
 
-                          <td>
-                            ${escaparHTML(
-                              x.agenda.fechaProgramada || '-'
-                            )}
-                          </td>
+                        </td>
 
-                          <td>
-                            ${escaparHTML(
-                              x.agenda.horaProgramada || '-'
-                            )}
-                          </td>
+                        <td>
 
-                          <td>
-                            ${escaparHTML(
-                              x.agenda.entrevistador || '-'
-                            )}
-                          </td>
+                          <button
+                            type="button"
+                            class="btn-iniciar-entrevista"
+                            onclick="iniciarEntrevista('${escaparJS(
+                              x.candidato.idCandidato
+                            )}')"
+                          >
+                            Iniciar entrevista
+                          </button>
 
-                          <td>
+                        </td>
 
-                            <span class="estado-agenda estado-programada">
+                      </tr>
 
-                              ${escaparHTML(
-                                x.agenda.estadoCita
-                              )}
+                    `).join('')
+                  :
+                    `
+                      <tr>
 
-                            </span>
+                        <td
+                          colspan="9"
+                          class="sin-registros"
+                        >
+                          No hay entrevistas programadas.
+                        </td>
 
-                          </td>
-
-                          <td>
-
-                            <button
-                              type="button"
-                              class="btn-iniciar-entrevista"
-                              onclick="iniciarEntrevista('${escaparJS(
-                                x.candidato.idCandidato
-                              )}')"
-                            >
-                              Iniciar entrevista
-                            </button>
-
-                          </td>
-
-                        </tr>
-                      `
-                    )
-                    .join('')
-                :
-                  `
-                    <tr>
-
-                      <td
-                        colspan="9"
-                        class="sin-registros"
-                      >
-                        No hay entrevistas programadas.
-                      </td>
-
-                    </tr>
-                  `
+                      </tr>
+                    `
               }
 
             </tbody>
@@ -1336,7 +1507,9 @@ function renderizarEntrevistas() {
         </div>
 
       </div>
+
     `;
+
 }
 
 
@@ -1351,12 +1524,8 @@ function iniciarEntrevista(
   candidatoEntrevista =
     candidatosOperaciones.find(
       c =>
-        String(
-          c.idCandidato
-        ) ===
-        String(
-          idCandidato
-        )
+        String(c.idCandidato) ===
+        String(idCandidato)
     );
 
 
@@ -1367,18 +1536,15 @@ function iniciarEntrevista(
     );
 
     return;
+
   }
 
 
   agendaEntrevistaActual =
     agendaEntrevistas.find(
       a =>
-        String(
-          a.idCandidato
-        ) ===
-        String(
-          idCandidato
-        )
+        String(a.idCandidato) ===
+        String(idCandidato)
     ) || null;
 
 
@@ -1389,8 +1555,16 @@ function iniciarEntrevista(
     );
 
     return;
+
   }
 
+
+  /* LIMPIA COMPLETAMENTE LA FICHA */
+
+  limpiarFormularioEntrevista();
+
+
+  /* CABECERA */
 
   document.getElementById(
     'entrevistaNombre'
@@ -1403,6 +1577,8 @@ function iniciarEntrevista(
   ).textContent =
     candidatoEntrevista.dni;
 
+
+  /* DATOS DEL CANDIDATO */
 
   document.getElementById(
     'entrevistaTelefono'
@@ -1422,11 +1598,7 @@ function iniciarEntrevista(
     candidatoEntrevista.cargo || '';
 
 
-  document.getElementById(
-    'entrevistaPuestoClasifica'
-  ).value =
-    candidatoEntrevista.cargo || '';
-
+  /* AGENDA */
 
   document.getElementById(
     'entrevistaFecha'
@@ -1451,9 +1623,20 @@ function iniciarEntrevista(
       .lugarEnlace || '';
 
 
-  document.getElementById(
-    'entrevistaEntrevistador'
-  ).value =
+  const selectEntrevistador =
+    document.getElementById(
+      'entrevistaEntrevistador'
+    );
+
+
+  asegurarOpcionSelect(
+    selectEntrevistador,
+    agendaEntrevistaActual
+      .entrevistador || ''
+  );
+
+
+  selectEntrevistador.value =
     agendaEntrevistaActual
       .entrevistador || '';
 
@@ -1465,7 +1648,111 @@ function iniciarEntrevista(
     .classList.add(
       'visible'
     );
+
 }
+
+
+/* =====================================================
+   LIMPIAR FICHA
+===================================================== */
+
+function limpiarFormularioEntrevista() {
+
+  const formulario =
+    document.getElementById(
+      'formEntrevistaOperaciones'
+    );
+
+
+  formulario.reset();
+
+
+  document
+    .querySelectorAll(
+      '.respuesta-entrevista'
+    )
+    .forEach(
+      campo =>
+        campo.value = ''
+    );
+
+
+  document
+    .querySelectorAll(
+      '.fila-unidad-entrevista'
+    )
+    .forEach(fila => {
+
+      fila.querySelector(
+        '.unidad-acreditado'
+      ).value = '';
+
+      fila.querySelector(
+        '.unidad-liberado'
+      ).value = '';
+
+      fila.querySelector(
+        '.unidad-cargo'
+      ).value = '';
+
+      fila.querySelector(
+        '.unidad-empresa'
+      ).value = '';
+
+    });
+
+
+  document
+    .querySelectorAll(
+      '.equipo-entrevista, .sistema-andamio-entrevista, .certificacion-entrevista'
+    )
+    .forEach(
+      check =>
+        check.checked = false
+    );
+
+
+  [
+    'campoTipoAccidente',
+    'campoDetalleAccidente',
+    'campoOtroMotivoRetiro',
+    'campoDisponibilidadOtros'
+  ].forEach(id => {
+
+    const elemento =
+      document.getElementById(id);
+
+    if (elemento)
+      elemento.style.display =
+        'none';
+
+  });
+
+
+  document.getElementById(
+    'promedioEntrevista'
+  ).value = '';
+
+
+  document.getElementById(
+    'criterioEntrevista'
+  ).value = '';
+
+
+  const puestoClasifica =
+    document.getElementById(
+      'entrevistaPuestoClasifica'
+    );
+
+
+  puestoClasifica.value = '';
+  puestoClasifica.disabled = true;
+
+
+  actualizarSelectEntrevistadores();
+
+}
+
 
 /* =====================================================
    MODAL ENTREVISTA
@@ -1474,14 +1761,11 @@ function iniciarEntrevista(
 function crearModalEntrevista() {
 
   const modal =
-    document.createElement(
-      'div'
-    );
+    document.createElement('div');
 
 
   modal.id =
     'modalEntrevista';
-
 
   modal.className =
     'modal-entrevista';
@@ -1549,9 +1833,14 @@ function crearModalEntrevista() {
 
 
         <form
-  id="formEntrevistaOperaciones"
-  onsubmit="guardarEntrevistaOperaciones(event)"
->
+          id="formEntrevistaOperaciones"
+          onsubmit="guardarEntrevistaOperaciones(event)"
+        >
+
+
+          <!-- ==========================================
+               1. DATOS GENERALES
+          =========================================== -->
 
           <section class="seccion-entrevista">
 
@@ -1560,7 +1849,7 @@ function crearModalEntrevista() {
             </h3>
 
 
-            <div class="grid-entrevista">
+            <div class="grid-entrevista grid-4">
 
 
               <div class="campo-entrevista">
@@ -1606,21 +1895,6 @@ function crearModalEntrevista() {
               </div>
 
 
-              <div class="campo-entrevista ancho-completo">
-
-                <label>
-                  Lugar de entrevista
-                </label>
-
-                <input
-                  type="text"
-                  id="entrevistaLugar"
-                  required
-                >
-
-              </div>
-
-
               <div class="campo-entrevista">
 
                 <label>
@@ -1651,6 +1925,21 @@ function crearModalEntrevista() {
               </div>
 
 
+              <div class="campo-entrevista ancho-doble">
+
+                <label>
+                  Lugar / enlace de entrevista
+                </label>
+
+                <input
+                  type="text"
+                  id="entrevistaLugar"
+                  required
+                >
+
+              </div>
+
+
               <div class="campo-entrevista">
 
                 <label>
@@ -1665,8 +1954,24 @@ function crearModalEntrevista() {
                     Seleccione
                   </option>
 
+                  <option value="SECUNDARIA INCOMPLETA">
+                    Secundaria incompleta
+                  </option>
+
+                  <option value="SECUNDARIA COMPLETA">
+                    Secundaria completa
+                  </option>
+
+                  <option value="TECNICO INCOMPLETO">
+                    Técnico incompleto
+                  </option>
+
                   <option value="TECNICO">
                     Técnico
+                  </option>
+
+                  <option value="UNIVERSITARIO INCOMPLETO">
+                    Universitario incompleto
                   </option>
 
                   <option value="BACHILLER">
@@ -1695,6 +2000,7 @@ function crearModalEntrevista() {
                 <input
                   type="text"
                   id="entrevistaEstudios"
+                  placeholder="Ej. Mecánica, Industrial..."
                 >
 
               </div>
@@ -1718,29 +2024,19 @@ function crearModalEntrevista() {
               <div class="campo-entrevista">
 
                 <label>
-                  Puesto en que clasifica
-                </label>
-
-                <input
-                  type="text"
-                  id="entrevistaPuestoClasifica"
-                  required
-                >
-
-              </div>
-
-
-              <div class="campo-entrevista">
-
-                <label>
                   Entrevistador
                 </label>
 
-                <input
-                  type="text"
+                <select
                   id="entrevistaEntrevistador"
                   required
                 >
+
+                  <option value="">
+                    Seleccione...
+                  </option>
+
+                </select>
 
               </div>
 
@@ -1753,6 +2049,7 @@ function crearModalEntrevista() {
 
                 <select
                   id="entrevistaDisponibilidad"
+                  onchange="actualizarDisponibilidadEntrevista()"
                 >
 
                   <option value="">
@@ -1772,15 +2069,64 @@ function crearModalEntrevista() {
               </div>
 
 
-              <div class="campo-entrevista ancho-completo">
+              <div
+                class="campo-entrevista"
+                id="campoDisponibilidadOtros"
+                style="display:none;"
+              >
 
                 <label>
-                  Pretensión salarial
+                  Especifique disponibilidad
                 </label>
 
                 <input
                   type="text"
+                  id="entrevistaDisponibilidadOtros"
+                  placeholder="Ej. En 7 días"
+                >
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label>
+                  Modalidad económica
+                </label>
+
+                <select
+                  id="tipoPretension"
+                  onchange="actualizarTipoPretension()"
+                >
+
+                  <option value="">
+                    Seleccione
+                  </option>
+
+                  <option value="MENSUAL">
+                    Pretensión mensual
+                  </option>
+
+                  <option value="VALOR HORA">
+                    Valor Hora / HH
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="campo-entrevista">
+
+                <label id="labelPretension">
+                  Monto
+                </label>
+
+                <input
+                  type="number"
                   id="entrevistaPretension"
+                  min="0"
+                  step="0.01"
                 >
 
               </div>
@@ -1791,901 +2137,845 @@ function crearModalEntrevista() {
           </section>
 
 
-<section class="seccion-entrevista">
+          <!-- ==========================================
+               UNIDADES MINERAS
+          =========================================== -->
 
-  <h3>
-    Unidades Mineras donde ha trabajado / ingresado
-  </h3>
+          <section class="seccion-entrevista">
 
-  <div class="tabla-unidades-contenedor">
+            <h3>
+              Unidades Mineras donde ha trabajado / ingresado
+            </h3>
 
-    <table class="tabla-unidades-entrevista">
 
-      <thead>
+            <div class="tabla-unidades-contenedor">
 
-        <tr>
+              <table class="tabla-unidades-entrevista">
 
-          <th>Unidad Minera</th>
-          <th>Acreditado</th>
-          <th>Liberado</th>
-          <th>Cargo</th>
-          <th>Empresa</th>
+                <thead>
 
-        </tr>
+                  <tr>
+                    <th>Unidad Minera</th>
+                    <th>Acreditado</th>
+                    <th>Liberado</th>
+                    <th>Cargo</th>
+                    <th>Empresa</th>
+                  </tr>
 
-      </thead>
+                </thead>
 
-      <tbody>
+                <tbody>
 
-        ${crearFilasUnidadesEntrevista()}
+                  ${crearFilasUnidadesEntrevista()}
 
-      </tbody>
+                </tbody>
 
-    </table>
+              </table>
 
-  </div>
+            </div>
 
-</section>
+          </section>
 
 
-<section class="seccion-entrevista">
+          <!-- ==========================================
+               2. SEGURIDAD
+          =========================================== -->
 
-  <h3>
-    2. Conocimientos de Seguridad
-  </h3>
+          <section class="seccion-entrevista">
 
+            <h3>
+              2. Conocimientos de Seguridad
+            </h3>
 
-  <div class="preguntas-entrevista">
 
+            <div class="preguntas-entrevista preguntas-2-columnas">
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="SEGURIDAD"
-      data-codigo="SEG-01"
-    >
 
-      <label>
-        ¿Con qué Decreto Supremo se trabaja en la Unidad Minera?
-      </label>
+              ${crearPregunta(
+                'SEGURIDAD',
+                'SEG-01',
+                '¿Con qué Decreto Supremo se trabaja en la Unidad Minera?'
+              )}
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
 
-    </div>
+              ${crearPregunta(
+                'SEGURIDAD',
+                'SEG-02',
+                '¿Qué documentos de gestión se trabajan en la Unidad Minera?'
+              )}
 
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="SEGURIDAD"
-      data-codigo="SEG-02"
-    >
+              ${crearPregunta(
+                'SEGURIDAD',
+                'SEG-03',
+                '¿Qué es Seguridad para ti?'
+              )}
 
-      <label>
-        ¿Qué documentos de gestión se trabajan en la Unidad Minera?
-      </label>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+              ${crearPregunta(
+                'SEGURIDAD',
+                'SEG-04',
+                '¿Cuál sería tu aporte de Seguridad para la empresa?'
+              )}
 
-    </div>
 
+            </div>
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="SEGURIDAD"
-      data-codigo="SEG-03"
-    >
 
-      <label>
-        ¿Qué es Seguridad para ti?
-      </label>
+            <div class="subtitulo-entrevista">
+              Valoración de Seguridad
+            </div>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
 
-    </div>
+            <div class="bloque-valoracion">
 
+              <select
+                id="valoracionSeguridad"
+                required
+              >
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="SEGURIDAD"
-      data-codigo="SEG-04"
-    >
+                ${opcionesValoracion()}
 
-      <label>
-        ¿Cuál sería tu aporte de Seguridad para la empresa?
-      </label>
+              </select>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+            </div>
 
-    </div>
 
+            <div class="subtitulo-entrevista">
+              Antecedentes de accidente laboral
+            </div>
 
-  </div>
 
+            <div class="grid-entrevista grid-4">
 
-  <div class="subtitulo-entrevista">
-    Valoración de Seguridad
-  </div>
 
+              <div class="campo-entrevista">
 
-  <div class="bloque-valoracion">
+                <label>
+                  ¿Tuvo accidente laboral?
+                </label>
 
-    <label>
-      Calificación
-    </label>
+                <select
+                  id="tuvoAccidente"
+                  onchange="actualizarAccidenteEntrevista()"
+                >
 
-    <select
-      id="valoracionSeguridad"
-      required
-    >
+                  <option value="">
+                    Seleccione
+                  </option>
 
-      <option value="">
-        Seleccione
-      </option>
+                  <option value="NO">
+                    No
+                  </option>
 
-      <option value="1">
-        1 - Muy por debajo del perfil
-      </option>
+                  <option value="SI">
+                    Sí
+                  </option>
 
-      <option value="2">
-        2 - Por debajo del perfil
-      </option>
+                </select>
 
-      <option value="3">
-        3 - Cumple con el perfil
-      </option>
+              </div>
 
-      <option value="4">
-        4 - Por encima del perfil
-      </option>
 
-      <option value="5">
-        5 - Sobrepasa el perfil
-      </option>
+              <div
+                class="campo-entrevista"
+                id="campoTipoAccidente"
+                style="display:none;"
+              >
 
-    </select>
+                <label>
+                  Tipo de accidente
+                </label>
 
-  </div>
+                <select id="tipoAccidente">
 
+                  <option value="">
+                    Seleccione
+                  </option>
 
-  <div class="subtitulo-entrevista">
-    Antecedentes de accidente laboral
-  </div>
+                  <option value="LEVE">
+                    Leve
+                  </option>
 
+                  <option value="PERMANENTE">
+                    Permanente
+                  </option>
 
-  <div class="grid-entrevista">
+                </select>
 
+              </div>
 
-    <div class="campo-entrevista">
 
-      <label>
-        ¿Tuvo accidente laboral?
-      </label>
+              <div
+                class="campo-entrevista ancho-doble"
+                id="campoDetalleAccidente"
+                style="display:none;"
+              >
 
-      <select
-        id="tuvoAccidente"
-        onchange="actualizarAccidenteEntrevista()"
-      >
+                <label>
+                  Detalle del accidente
+                </label>
 
-        <option value="">
-          Seleccione
-        </option>
+                <input
+                  type="text"
+                  id="detalleAccidente"
+                >
 
-        <option value="NO">
-          No
-        </option>
+              </div>
 
-        <option value="SI">
-          Sí
-        </option>
 
-      </select>
+            </div>
 
-    </div>
+          </section>
 
 
-    <div
-      class="campo-entrevista"
-      id="campoTipoAccidente"
-      style="display:none;"
-    >
+          <!-- ==========================================
+               3. EXPERIENCIA LABORAL
+          =========================================== -->
 
-      <label>
-        Tipo de accidente
-      </label>
+          <section class="seccion-entrevista">
 
-      <select
-        id="tipoAccidente"
-      >
+            <h3>
+              3. Experiencia Laboral
+            </h3>
 
-        <option value="">
-          Seleccione
-        </option>
 
-        <option value="LEVE">
-          Leve
-        </option>
+            <div class="grid-entrevista grid-4">
 
-        <option value="PERMANENTE">
-          Permanente
-        </option>
 
-      </select>
+              <div class="campo-entrevista">
 
-    </div>
+                <label>
+                  Tiempo de experiencia
+                </label>
 
+                <select id="experienciaTiempo">
 
-    <div
-      class="campo-entrevista ancho-completo"
-      id="campoDetalleAccidente"
-      style="display:none;"
-    >
+                  ${opcionesAniosExperiencia()}
 
-      <label>
-        Detalle del accidente
-      </label>
+                </select>
 
-      <textarea
-        id="detalleAccidente"
-        rows="3"
-      ></textarea>
+              </div>
 
-    </div>
 
+              <div class="campo-entrevista">
 
-  </div>
+                <label>
+                  Última empresa
+                </label>
 
-</section>
+                <input
+                  type="text"
+                  id="experienciaUltimaEmpresa"
+                >
 
+              </div>
 
-<section class="seccion-entrevista">
 
-  <h3>
-    3. Experiencia Laboral
-  </h3>
+              <div class="campo-entrevista">
 
+                <label>
+                  Tiempo en la última empresa
+                </label>
 
-  <div class="grid-entrevista">
+                <select id="experienciaTiempoUltimaEmpresa">
 
+                  ${opcionesTiempoUltimaEmpresa()}
 
-    <div class="campo-entrevista">
+                </select>
 
-      <label>
-        Tiempo de experiencia
-      </label>
+              </div>
 
-      <input
-        type="text"
-        id="experienciaTiempo"
-        placeholder="Ej. 3 años"
-      >
 
-    </div>
+              <div class="campo-entrevista">
 
+                <label>
+                  Modalidad de trabajo
+                </label>
 
-    <div class="campo-entrevista">
+                <select id="experienciaModalidad">
 
-      <label>
-        Última empresa
-      </label>
+                  <option value="">
+                    Seleccione
+                  </option>
 
-      <input
-        type="text"
-        id="experienciaUltimaEmpresa"
-      >
+                  <option value="PERMANENTE">
+                    Permanente
+                  </option>
 
-    </div>
+                  <option value="INTERMITENTE">
+                    Intermitente
+                  </option>
 
+                </select>
 
-    <div class="campo-entrevista">
+              </div>
 
-      <label>
-        Tiempo en la última empresa
-      </label>
 
-      <input
-        type="text"
-        id="experienciaTiempoUltimaEmpresa"
-        placeholder="Ej. 8 meses"
-      >
+              <div class="campo-entrevista">
 
-    </div>
+                <label>
+                  Motivo de retiro
+                </label>
 
+                <select
+                  id="experienciaMotivoRetiro"
+                  onchange="actualizarMotivoRetiro()"
+                >
 
-    <div class="campo-entrevista">
+                  <option value="">
+                    Seleccione
+                  </option>
 
-      <label>
-        Modalidad de trabajo
-      </label>
+                  <option value="FIN DE CONTRATO">
+                    Fin de contrato
+                  </option>
 
-      <select
-        id="experienciaModalidad"
-        onchange="actualizarModalidadExperiencia()"
-      >
+                  <option value="FIN DE PROYECTO">
+                    Fin de proyecto
+                  </option>
 
-        <option value="">
-          Seleccione
-        </option>
+                  <option value="RENUNCIA">
+                    Renuncia
+                  </option>
 
-        <option value="PARADAS DE PLANTA">
-          Paradas de planta
-        </option>
+                  <option value="OTRO">
+                    Otro
+                  </option>
 
-        <option value="PERMANENTE">
-          Permanente
-        </option>
+                </select>
 
-        <option value="PRACTICAS">
-          Prácticas
-        </option>
+              </div>
 
-        <option value="OTROS">
-          Otros
-        </option>
 
-      </select>
+              <div
+                class="campo-entrevista"
+                id="campoOtroMotivoRetiro"
+                style="display:none;"
+              >
 
-    </div>
+                <label>
+                  Otro motivo
+                </label>
 
+                <input
+                  type="text"
+                  id="experienciaOtroMotivo"
+                >
 
-    <div
-      class="campo-entrevista ancho-completo"
-      id="campoOtraModalidadExperiencia"
-      style="display:none;"
-    >
+              </div>
 
-      <label>
-        Especifique otra modalidad
-      </label>
 
-      <input
-        type="text"
-        id="experienciaOtraModalidad"
-      >
+              <div class="campo-entrevista ancho-doble">
 
-    </div>
+                <label>
+                  Comentarios de experiencia laboral
+                </label>
 
+                <input
+                  type="text"
+                  id="experienciaComentarios"
+                >
 
-    <div class="campo-entrevista">
+              </div>
 
-      <label>
-        Motivo de retiro
-      </label>
 
-      <select
-        id="experienciaMotivoRetiro"
-        onchange="actualizarMotivoRetiro()"
-      >
+            </div>
 
-        <option value="">
-          Seleccione
-        </option>
 
-        <option value="FIN DE CONTRATO">
-          Fin de contrato
-        </option>
+            <div class="subtitulo-entrevista">
+              Valoración de Experiencia
+            </div>
 
-        <option value="FIN DE PROYECTO">
-          Fin de proyecto
-        </option>
 
-        <option value="RENUNCIA">
-          Renuncia
-        </option>
+            <div class="bloque-valoracion">
 
-        <option value="OTRO">
-          Otro
-        </option>
+              <select
+                id="valoracionExperiencia"
+                required
+              >
 
-      </select>
+                ${opcionesValoracion()}
 
-    </div>
+              </select>
 
+            </div>
 
-    <div
-      class="campo-entrevista"
-      id="campoOtroMotivoRetiro"
-      style="display:none;"
-    >
+          </section>
 
-      <label>
-        Otro motivo
-      </label>
 
-      <input
-        type="text"
-        id="experienciaOtroMotivo"
-      >
+          <!-- ==========================================
+               4. CONOCIMIENTOS TÉCNICOS
+          =========================================== -->
 
-    </div>
+          <section class="seccion-entrevista">
 
+            <h3>
+              4. Conocimientos Técnicos
+            </h3>
 
-    <div class="campo-entrevista ancho-completo">
 
-      <label>
-        Comentarios de experiencia laboral
-      </label>
+            <div class="subtitulo-entrevista">
+              4.1 Conocimientos generales de andamios
+            </div>
 
-      <textarea
-        id="experienciaComentarios"
-        rows="4"
-      ></textarea>
 
-    </div>
+            <div class="preguntas-entrevista preguntas-2-columnas">
 
 
-  </div>
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-01',
+                '¿Con qué norma o estándar se realiza el armado de andamios?'
+              )}
 
 
-  <div class="subtitulo-entrevista">
-    Valoración de Experiencia
-  </div>
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-02',
+                '¿Qué componentes tiene un andamio? Mencione un ejemplo.'
+              )}
 
 
-  <div class="bloque-valoracion">
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-03',
+                '¿Qué significan la tarjeta verde, amarilla y roja?'
+              )}
 
-    <label>
-      Calificación
-    </label>
 
-    <select
-      id="valoracionExperiencia"
-      required
-    >
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-04',
+                '¿Quién inspecciona el andamio y cada cuánto tiempo?'
+              )}
 
-      <option value="">
-        Seleccione
-      </option>
 
-      <option value="1">
-        1 - Muy por debajo del perfil
-      </option>
+            </div>
 
-      <option value="2">
-        2 - Por debajo del perfil
-      </option>
 
-      <option value="3">
-        3 - Cumple con el perfil
-      </option>
+            <div class="subtitulo-entrevista">
+              Áreas / Equipos donde ha trabajado
+            </div>
 
-      <option value="4">
-        4 - Por encima del perfil
-      </option>
 
-      <option value="5">
-        5 - Sobrepasa el perfil
-      </option>
+            <div class="grid-checks-entrevista">
 
-    </select>
+              ${crearChecksEquiposEntrevista()}
 
-  </div>
+            </div>
 
-</section>
 
+            <div class="subtitulo-entrevista">
+              4.2 Sistemas de andamios y certificaciones
+            </div>
 
-<section class="seccion-entrevista">
 
-  <h3>
-    4. Conocimientos Técnicos
-  </h3>
+            <div class="bloque-checks-entrevista">
 
+              <label class="titulo-checks">
+                Tipos de andamio que conoce o ha armado
+              </label>
 
-  <div class="subtitulo-entrevista">
-    4.1 Conocimientos generales de andamios
-  </div>
+              <div class="grid-checks-entrevista">
 
+                ${crearChecksSistemasAndamios()}
 
-  <div class="preguntas-entrevista">
+              </div>
 
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-01"
-    >
+              <label class="titulo-checks">
+                Certificaciones
+              </label>
 
-      <label>
-        ¿Con qué norma o estándar se realiza el armado de andamios?
-      </label>
+              <div class="grid-certificaciones-entrevista">
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+                ${crearChecksCertificaciones()}
 
-    </div>
+              </div>
 
+            </div>
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-02"
-    >
 
-      <label>
-        ¿Qué componentes tiene un andamio? Mencione un ejemplo.
-      </label>
+            <div class="subtitulo-entrevista">
+              Preguntas técnicas de montaje / desmontaje
+            </div>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
 
-    </div>
+            <div class="preguntas-entrevista preguntas-2-columnas">
 
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-03"
-    >
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-05',
+                '¿Cuáles son los componentes principales de un andamio multidireccional?'
+              )}
 
-      <label>
-        ¿Qué significan la tarjeta verde, amarilla y roja?
-      </label>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-06',
+                '¿Qué verificaciones se deben realizar antes de iniciar el montaje?'
+              )}
 
-    </div>
 
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-07',
+                '¿Cuál es la función de las diagonales en un andamio?'
+              )}
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-04"
-    >
 
-      <label>
-        ¿Quién inspecciona el andamio y cada cuánto tiempo?
-      </label>
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-08',
+                '¿Qué protección colectiva debe tener una plataforma de trabajo?'
+              )}
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
 
-    </div>
+              ${crearPregunta(
+                'TECNICA',
+                'TEC-09',
+                '¿Qué haría ante una condición insegura o una modificación no autorizada del andamio?'
+              )}
 
 
-  </div>
+            </div>
 
 
-  <div class="subtitulo-entrevista">
-    Áreas / Equipos donde ha trabajado
-  </div>
+            <div class="subtitulo-entrevista">
+              Valoración de Conocimientos Técnicos
+            </div>
 
 
-  <div class="grid-checks-entrevista">
+            <div class="bloque-valoracion">
 
-    ${crearChecksEquiposEntrevista()}
+              <select
+                id="valoracionTecnica"
+                required
+              >
 
-  </div>
+                ${opcionesValoracion()}
 
+              </select>
 
-  <div class="subtitulo-entrevista">
-    4.2 Sistemas de andamios y certificaciones
-  </div>
+            </div>
 
+          </section>
 
-  <div class="grid-entrevista">
 
+          <!-- ==========================================
+               RESULTADO FINAL
+          =========================================== -->
 
-    <div class="campo-entrevista ancho-completo">
+          <section class="seccion-entrevista">
 
-      <label>
-        Tipos de andamio que conoce o ha armado
-      </label>
+            <h3>
+              Resultado Final
+            </h3>
 
-      <div class="grid-checks-entrevista">
 
-        ${crearChecksSistemasAndamios()}
+            <div class="grid-entrevista grid-4">
 
-      </div>
 
-    </div>
+              <div class="campo-entrevista">
 
+                <label>
+                  Promedio
+                </label>
 
-    <div class="campo-entrevista ancho-completo">
+                <input
+                  type="text"
+                  id="promedioEntrevista"
+                  readonly
+                >
 
-      <label>
-        Certificaciones
-      </label>
+              </div>
 
-      <div class="grid-certificaciones-entrevista">
 
-        ${crearChecksCertificaciones()}
+              <div class="campo-entrevista">
 
-      </div>
+                <label>
+                  Criterio
+                </label>
 
-    </div>
+                <input
+                  type="text"
+                  id="criterioEntrevista"
+                  readonly
+                >
 
+              </div>
 
-  </div>
 
+              <div class="campo-entrevista">
 
-  <div class="subtitulo-entrevista">
-    Preguntas técnicas de montaje / desmontaje
-  </div>
+                <label>
+                  Puesto en que clasifica
+                </label>
 
+                <input
+                  type="text"
+                  id="entrevistaPuestoClasifica"
+                  placeholder="Calcule primero"
+                  disabled
+                  required
+                >
 
-  <div class="preguntas-entrevista">
+              </div>
 
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-05"
-    >
+              <div class="campo-entrevista">
 
-      <label>
-        ¿Cuáles son los componentes principales de un andamio multidireccional?
-      </label>
+                <label>
+                  Resultado
+                </label>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+                <select
+                  id="resultadoEntrevista"
+                  required
+                >
 
-    </div>
+                  <option value="">
+                    Seleccione
+                  </option>
 
+                  <option value="APTO">
+                    APTO
+                  </option>
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-06"
-    >
+                  <option value="NO APTO">
+                    NO APTO
+                  </option>
 
-      <label>
-        ¿Qué verificaciones se deben realizar antes de iniciar el montaje?
-      </label>
+                </select>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+              </div>
 
-    </div>
 
+              <div class="campo-entrevista ancho-completo">
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-07"
-    >
+                <label>
+                  Comentarios generales
+                </label>
 
-      <label>
-        ¿Cuál es la función de las diagonales en un andamio?
-      </label>
+                <textarea
+                  id="comentariosGeneralesEntrevista"
+                  rows="2"
+                ></textarea>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+              </div>
 
-    </div>
 
+            </div>
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-08"
-    >
+          </section>
 
-      <label>
-        ¿Qué protección colectiva debe tener una plataforma de trabajo?
-      </label>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+          <div class="acciones-modal-entrevista">
 
-    </div>
+            <button
+              type="button"
+              class="btn-cancelar-entrevista"
+              onclick="cerrarEntrevista()"
+            >
+              Cancelar
+            </button>
 
 
-    <div
-      class="pregunta-entrevista"
-      data-seccion="TECNICA"
-      data-codigo="TEC-09"
-    >
+            <button
+              type="button"
+              class="btn-iniciar-entrevista"
+              onclick="calcularResultadoEntrevista()"
+            >
+              Calcular evaluación
+            </button>
 
-      <label>
-        ¿Qué haría ante una condición insegura o una modificación no autorizada del andamio?
-      </label>
 
-      <textarea
-        class="respuesta-entrevista"
-        rows="3"
-      ></textarea>
+            <button
+              type="submit"
+              class="btn-guardar-agenda"
+              id="btnGuardarEntrevista"
+            >
+              Guardar entrevista
+            </button>
 
-    </div>
+          </div>
 
-
-  </div>
-
-
-  <div class="subtitulo-entrevista">
-    Valoración de Conocimientos Técnicos
-  </div>
-
-
-  <div class="bloque-valoracion">
-
-    <label>
-      Calificación
-    </label>
-
-    <select
-      id="valoracionTecnica"
-      required
-    >
-
-      <option value="">
-        Seleccione
-      </option>
-
-      <option value="1">
-        1 - Muy por debajo del perfil
-      </option>
-
-      <option value="2">
-        2 - Por debajo del perfil
-      </option>
-
-      <option value="3">
-        3 - Cumple con el perfil
-      </option>
-
-      <option value="4">
-        4 - Por encima del perfil
-      </option>
-
-      <option value="5">
-        5 - Sobrepasa el perfil
-      </option>
-
-    </select>
-
-  </div>
-
-</section>
-
-
-<section class="seccion-entrevista">
-
-  <h3>
-    Resultado Final
-  </h3>
-
-
-  <div class="grid-entrevista">
-
-
-    <div class="campo-entrevista">
-
-      <label>
-        Resultado de entrevista
-      </label>
-
-      <select
-        id="resultadoEntrevista"
-        required
-      >
-
-        <option value="">
-          Seleccione
-        </option>
-
-        <option value="APTO">
-          APTO
-        </option>
-
-        <option value="NO APTO">
-          NO APTO
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div class="campo-entrevista">
-
-      <label>
-        Promedio
-      </label>
-
-      <input
-        type="text"
-        id="promedioEntrevista"
-        readonly
-      >
-
-    </div>
-
-
-    <div class="campo-entrevista ancho-completo">
-
-      <label>
-        Criterio
-      </label>
-
-      <input
-        type="text"
-        id="criterioEntrevista"
-        readonly
-      >
-
-    </div>
-
-
-    <div class="campo-entrevista ancho-completo">
-
-      <label>
-        Comentarios generales
-      </label>
-
-      <textarea
-        id="comentariosGeneralesEntrevista"
-        rows="4"
-      ></textarea>
-
-    </div>
-
-
-  </div>
-
-</section>
-
-
-<div class="acciones-modal-entrevista">
-
-  <button
-    type="button"
-    class="btn-iniciar-entrevista"
-    onclick="calcularResultadoEntrevista()"
-  >
-    Calcular evaluación
-  </button>
-
-
-  <button
-    type="submit"
-    class="btn-guardar-agenda"
-    id="btnGuardarEntrevista"
-  >
-    Guardar entrevista
-  </button>
-
-</div>
 
         </form>
 
       </div>
+
     `;
 
 
   document.body.appendChild(
     modal
   );
+
 }
 
+
 /* =====================================================
-   UNIDADES MINERAS - ENTREVISTA
+   PREGUNTA COMPACTA
+===================================================== */
+
+function crearPregunta(
+  seccion,
+  codigo,
+  pregunta
+) {
+
+  return `
+    <div
+      class="pregunta-entrevista"
+      data-seccion="${seccion}"
+      data-codigo="${codigo}"
+    >
+
+      <label>
+        ${pregunta}
+      </label>
+
+      <textarea
+        class="respuesta-entrevista"
+        rows="2"
+      ></textarea>
+
+    </div>
+  `;
+
+}
+
+
+/* =====================================================
+   VALORACIONES
+===================================================== */
+
+function opcionesValoracion() {
+
+  return `
+    <option value="">
+      Seleccione
+    </option>
+
+    <option value="1">
+      1 - Muy por debajo del perfil
+    </option>
+
+    <option value="2">
+      2 - Por debajo del perfil
+    </option>
+
+    <option value="3">
+      3 - Cumple con el perfil
+    </option>
+
+    <option value="4">
+      4 - Por encima del perfil
+    </option>
+
+    <option value="5">
+      5 - Sobrepasa el perfil
+    </option>
+  `;
+
+}
+
+
+/* =====================================================
+   AÑOS DE EXPERIENCIA
+===================================================== */
+
+function opcionesAniosExperiencia() {
+
+  let html =
+    `
+      <option value="">
+        Seleccione
+      </option>
+    `;
+
+
+  for (
+    let i = 1;
+    i <= 20;
+    i++
+  ) {
+
+    html += `
+      <option value="${i} ${i === 1 ? 'AÑO' : 'AÑOS'}">
+        ${i} ${i === 1 ? 'año' : 'años'}
+      </option>
+    `;
+
+  }
+
+
+  html += `
+    <option value="MAS DE 20 AÑOS">
+      Más de 20 años
+    </option>
+  `;
+
+
+  return html;
+
+}
+
+
+/* =====================================================
+   TIEMPO ÚLTIMA EMPRESA
+===================================================== */
+
+function opcionesTiempoUltimaEmpresa() {
+
+  let html =
+    `
+      <option value="">
+        Seleccione
+      </option>
+    `;
+
+
+  for (
+    let i = 1;
+    i <= 11;
+    i++
+  ) {
+
+    html += `
+      <option value="${i} ${i === 1 ? 'MES' : 'MESES'}">
+        ${i} ${i === 1 ? 'mes' : 'meses'}
+      </option>
+    `;
+
+  }
+
+
+  for (
+    let i = 1;
+    i <= 20;
+    i++
+  ) {
+
+    html += `
+      <option value="${i} ${i === 1 ? 'AÑO' : 'AÑOS'}">
+        ${i} ${i === 1 ? 'año' : 'años'}
+      </option>
+    `;
+
+  }
+
+
+  return html;
+
+}
+
+
+/* =====================================================
+   UNIDADES MINERAS
 ===================================================== */
 
 function crearFilasUnidadesEntrevista() {
@@ -2709,105 +2999,77 @@ function crearFilasUnidadesEntrevista() {
 
 
   return unidades
-    .map(
-      unidad => `
+    .map(unidad => `
 
-        <tr
-          class="fila-unidad-entrevista"
-          data-unidad="${unidad}"
-        >
+      <tr
+        class="fila-unidad-entrevista"
+        data-unidad="${unidad}"
+      >
 
-          <td>
-            <strong>
-              ${unidad}
-            </strong>
-          </td>
+        <td>
+          <strong>${unidad}</strong>
+        </td>
 
+        <td>
 
-          <td>
+          <select class="unidad-acreditado">
 
-            <select
-              class="unidad-acreditado"
-            >
+            <option value="">-</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
 
-              <option value="">
-                -
-              </option>
+          </select>
 
-              <option value="SI">
-                Sí
-              </option>
+        </td>
 
-              <option value="NO">
-                No
-              </option>
+        <td>
 
-            </select>
+          <select class="unidad-liberado">
 
-          </td>
+            <option value="">-</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
 
+          </select>
 
-          <td>
+        </td>
 
-            <select
-              class="unidad-liberado"
-            >
+        <td>
 
-              <option value="">
-                -
-              </option>
+          <input
+            type="text"
+            class="unidad-cargo"
+          >
 
-              <option value="SI">
-                Sí
-              </option>
+        </td>
 
-              <option value="NO">
-                No
-              </option>
+        <td>
 
-            </select>
+          <input
+            type="text"
+            class="unidad-empresa"
+          >
 
-          </td>
+        </td>
 
+      </tr>
 
-          <td>
-
-            <input
-              type="text"
-              class="unidad-cargo"
-            >
-
-          </td>
-
-
-          <td>
-
-            <input
-              type="text"
-              class="unidad-empresa"
-            >
-
-          </td>
-
-        </tr>
-
-      `
-    )
+    `)
     .join('');
+
 }
 
+
 /* =====================================================
-   ACCIDENTE LABORAL
+   ACCIDENTE
 ===================================================== */
 
 function actualizarAccidenteEntrevista() {
 
   const tuvo =
-    document
-      .getElementById(
-        'tuvoAccidente'
-      )
-      .value;
+    document.getElementById(
+      'tuvoAccidente'
+    ).value;
 
 
   const campoTipo =
@@ -2819,18 +3081,6 @@ function actualizarAccidenteEntrevista() {
   const campoDetalle =
     document.getElementById(
       'campoDetalleAccidente'
-    );
-
-
-  const tipo =
-    document.getElementById(
-      'tipoAccidente'
-    );
-
-
-  const detalle =
-    document.getElementById(
-      'detalleAccidente'
     );
 
 
@@ -2850,35 +3100,34 @@ function actualizarAccidenteEntrevista() {
     campoDetalle.style.display =
       'none';
 
-    tipo.value = '';
+    document.getElementById(
+      'tipoAccidente'
+    ).value = '';
 
-    detalle.value = '';
+    document.getElementById(
+      'detalleAccidente'
+    ).value = '';
+
   }
+
 }
 
+
 /* =====================================================
-   EXPERIENCIA LABORAL - CAMPOS DINÁMICOS
+   DISPONIBILIDAD
 ===================================================== */
 
-function actualizarModalidadExperiencia() {
+function actualizarDisponibilidadEntrevista() {
 
   const valor =
-    document
-      .getElementById(
-        'experienciaModalidad'
-      )
-      .value;
+    document.getElementById(
+      'entrevistaDisponibilidad'
+    ).value;
 
 
   const campo =
     document.getElementById(
-      'campoOtraModalidadExperiencia'
-    );
-
-
-  const input =
-    document.getElementById(
-      'experienciaOtraModalidad'
+      'campoDisponibilidadOtros'
     );
 
 
@@ -2892,31 +3141,68 @@ function actualizarModalidadExperiencia() {
     campo.style.display =
       'none';
 
-    input.value = '';
+    document.getElementById(
+      'entrevistaDisponibilidadOtros'
+    ).value = '';
+
   }
+
 }
 
 
+/* =====================================================
+   TIPO PRETENSIÓN
+===================================================== */
+
+function actualizarTipoPretension() {
+
+  const tipo =
+    document.getElementById(
+      'tipoPretension'
+    ).value;
+
+
+  const label =
+    document.getElementById(
+      'labelPretension'
+    );
+
+
+  if (tipo === 'VALOR HORA') {
+
+    label.textContent =
+      'Valor por hora / HH';
+
+  } else if (tipo === 'MENSUAL') {
+
+    label.textContent =
+      'Pretensión salarial mensual';
+
+  } else {
+
+    label.textContent =
+      'Monto';
+
+  }
+
+}
+
+
+/* =====================================================
+   MOTIVO RETIRO
+===================================================== */
 
 function actualizarMotivoRetiro() {
 
   const valor =
-    document
-      .getElementById(
-        'experienciaMotivoRetiro'
-      )
-      .value;
+    document.getElementById(
+      'experienciaMotivoRetiro'
+    ).value;
 
 
   const campo =
     document.getElementById(
       'campoOtroMotivoRetiro'
-    );
-
-
-  const input =
-    document.getElementById(
-      'experienciaOtroMotivo'
     );
 
 
@@ -2930,13 +3216,23 @@ function actualizarMotivoRetiro() {
     campo.style.display =
       'none';
 
-    input.value = '';
+    document.getElementById(
+      'experienciaOtroMotivo'
+    ).value = '';
+
   }
+
 }
+
+
+/* =====================================================
+   EQUIPOS
+===================================================== */
 
 function crearChecksEquiposEntrevista() {
 
   const equipos = [
+
     'CHANCADORA PRIMARIA',
     'CHANCADORA SECUNDARIA',
     'FAJAS',
@@ -2950,70 +3246,82 @@ function crearChecksEquiposEntrevista() {
     'ESPESADORES',
     'FILTROS DE COBRE',
     'OTROS'
+
   ];
 
 
   return equipos
-    .map(
-      equipo => `
-        <label class="check-entrevista">
+    .map(equipo => `
 
-          <input
-            type="checkbox"
-            class="equipo-entrevista"
-            value="${equipo}"
-          >
+      <label class="check-entrevista">
 
-          <span>
-            ${equipo}
-          </span>
+        <input
+          type="checkbox"
+          class="equipo-entrevista"
+          value="${equipo}"
+        >
 
-        </label>
-      `
-    )
+        <span>
+          ${equipo}
+        </span>
+
+      </label>
+
+    `)
     .join('');
+
 }
 
 
+/* =====================================================
+   SISTEMAS
+===================================================== */
 
 function crearChecksSistemasAndamios() {
 
   const sistemas = [
+
     'LAYHER',
     'ULMA',
     'PERI',
     'DOKA',
     'SCFOM-RUX',
     'OTROS'
+
   ];
 
 
   return sistemas
-    .map(
-      sistema => `
-        <label class="check-entrevista">
+    .map(sistema => `
 
-          <input
-            type="checkbox"
-            class="sistema-andamio-entrevista"
-            value="${sistema}"
-          >
+      <label class="check-entrevista">
 
-          <span>
-            ${sistema}
-          </span>
+        <input
+          type="checkbox"
+          class="sistema-andamio-entrevista"
+          value="${sistema}"
+        >
 
-        </label>
-      `
-    )
+        <span>
+          ${sistema}
+        </span>
+
+      </label>
+
+    `)
     .join('');
+
 }
 
 
+/* =====================================================
+   CERTIFICACIONES
+===================================================== */
 
 function crearChecksCertificaciones() {
 
   const certificaciones = [
+
     'LAYHER BASIC',
     'LAYHER OFICIAL',
     'LAYHER OPERARIO',
@@ -3036,31 +3344,36 @@ function crearChecksCertificaciones() {
     'SCFOM-RUX BASIC',
     'SCFOM-RUX TÉCNICO I',
     'SCFOM-RUX TÉCNICO II'
+
   ];
 
 
   return certificaciones
-    .map(
-      cert => `
-        <label class="check-entrevista">
+    .map(cert => `
 
-          <input
-            type="checkbox"
-            class="certificacion-entrevista"
-            value="${cert}"
-          >
+      <label class="check-entrevista">
 
-          <span>
-            ${cert}
-          </span>
+        <input
+          type="checkbox"
+          class="certificacion-entrevista"
+          value="${cert}"
+        >
 
-        </label>
-      `
-    )
+        <span>
+          ${cert}
+        </span>
+
+      </label>
+
+    `)
     .join('');
+
 }
 
 
+/* =====================================================
+   CALCULAR RESULTADO
+===================================================== */
 
 function calcularResultadoEntrevista() {
 
@@ -3098,7 +3411,8 @@ function calcularResultadoEntrevista() {
       'Debe completar las tres valoraciones.'
     );
 
-    return;
+    return false;
+
   }
 
 
@@ -3118,23 +3432,17 @@ function calcularResultadoEntrevista() {
     criterio =
       'MUY POR DEBAJO DEL PERFIL';
 
-  } else if (
-    promedio < 3
-  ) {
+  } else if (promedio < 3) {
 
     criterio =
       'POR DEBAJO DEL PERFIL';
 
-  } else if (
-    promedio < 4
-  ) {
+  } else if (promedio < 4) {
 
     criterio =
       'CUMPLE CON EL PERFIL';
 
-  } else if (
-    promedio < 5
-  ) {
+  } else if (promedio < 5) {
 
     criterio =
       'POR ENCIMA DEL PERFIL';
@@ -3143,6 +3451,7 @@ function calcularResultadoEntrevista() {
 
     criterio =
       'SOBREPASA EL PERFIL';
+
   }
 
 
@@ -3156,109 +3465,41 @@ function calcularResultadoEntrevista() {
     'criterioEntrevista'
   ).value =
     criterio;
-}
 
-/* =====================================================
-   CERRAR ENTREVISTA
-===================================================== */
 
-function cerrarEntrevista() {
+  /*
+   * RECIÉN DESPUÉS DE CALCULAR
+   * SE HABILITA EL CARGO EN QUE CLASIFICA
+   */
 
-  document
-    .getElementById(
-      'modalEntrevista'
-    )
-    .classList.remove(
-      'visible'
+  const puestoClasifica =
+    document.getElementById(
+      'entrevistaPuestoClasifica'
     );
 
 
-  candidatoEntrevista =
-    null;
+  puestoClasifica.disabled =
+    false;
 
 
-  agendaEntrevistaActual =
-    null;
-}
-/* =====================================================
-   CLASE ESTADO
-===================================================== */
+  if (!puestoClasifica.value) {
 
-function obtenerClaseEstadoAgenda(
-  estado
-) {
+    puestoClasifica.value =
+      candidatoEntrevista?.cargo || '';
 
-  estado =
-    String(
-      estado || ''
-    ).toUpperCase();
-
-
-  if (
-    estado ===
-    'PENDIENTE DE PROGRAMAR'
-  ) {
-
-    return 'estado-pendiente';
   }
 
 
-  if (
-    estado ===
-    'REPROGRAMADA'
-  ) {
-
-    return 'estado-reprogramada';
-  }
+  puestoClasifica.focus();
 
 
-  return 'estado-programada';
+  return true;
+
 }
 
 
 /* =====================================================
-   FECHAS
-===================================================== */
-
-function convertirFechaInput(
-  fecha
-) {
-
-  if (!fecha) {
-
-    return '';
-  }
-
-
-  const partes =
-    String(fecha)
-      .split('/');
-
-
-  if (
-    partes.length === 3
-  ) {
-
-    return (
-      partes[2] +
-      '-' +
-      partes[1].padStart(
-        2,
-        '0'
-      ) +
-      '-' +
-      partes[0].padStart(
-        2,
-        '0'
-      )
-    );
-  }
-
-
-  return fecha;
-}
-/* =====================================================
-   RECOLECTAR UNIDADES MINERAS
+   RECOLECTAR UNIDADES
 ===================================================== */
 
 function obtenerUnidadesEntrevista() {
@@ -3269,41 +3510,32 @@ function obtenerUnidadesEntrevista() {
         '.fila-unidad-entrevista'
       )
     )
-    .map(fila => {
+    .map(fila => ({
 
-      const acreditado =
+      unidadMinera:
+        fila.dataset.unidad || '',
+
+      acreditado:
         fila.querySelector(
           '.unidad-acreditado'
-        ).value;
+        ).value,
 
-      const liberado =
+      liberado:
         fila.querySelector(
           '.unidad-liberado'
-        ).value;
+        ).value,
 
-      const cargo =
+      cargo:
         fila.querySelector(
           '.unidad-cargo'
-        ).value.trim();
+        ).value.trim(),
 
-      const empresa =
+      empresa:
         fila.querySelector(
           '.unidad-empresa'
-        ).value.trim();
+        ).value.trim()
 
-
-      return {
-
-        unidadMinera:
-          fila.dataset.unidad || '',
-
-        acreditado,
-        liberado,
-        cargo,
-        empresa
-
-      };
-    })
+    }))
     .filter(u =>
 
       u.acreditado ||
@@ -3312,11 +3544,12 @@ function obtenerUnidadesEntrevista() {
       u.empresa
 
     );
+
 }
 
 
 /* =====================================================
-   RECOLECTAR PREGUNTAS
+   RECOLECTAR RESPUESTAS
 ===================================================== */
 
 function obtenerRespuestasEntrevista() {
@@ -3367,8 +3600,6 @@ function obtenerRespuestasEntrevista() {
     });
 
 
-  /* ÁREAS / EQUIPOS */
-
   const equipos =
     Array
       .from(
@@ -3376,9 +3607,7 @@ function obtenerRespuestasEntrevista() {
           '.equipo-entrevista:checked'
         )
       )
-      .map(
-        x => x.value
-      );
+      .map(x => x.value);
 
 
   respuestas.push({
@@ -3400,8 +3629,6 @@ function obtenerRespuestasEntrevista() {
   });
 
 
-  /* SISTEMAS DE ANDAMIOS */
-
   const sistemas =
     Array
       .from(
@@ -3409,9 +3636,7 @@ function obtenerRespuestasEntrevista() {
           '.sistema-andamio-entrevista:checked'
         )
       )
-      .map(
-        x => x.value
-      );
+      .map(x => x.value);
 
 
   respuestas.push({
@@ -3433,8 +3658,6 @@ function obtenerRespuestasEntrevista() {
   });
 
 
-  /* CERTIFICACIONES */
-
   const certificaciones =
     Array
       .from(
@@ -3442,9 +3665,7 @@ function obtenerRespuestasEntrevista() {
           '.certificacion-entrevista:checked'
         )
       )
-      .map(
-        x => x.value
-      );
+      .map(x => x.value);
 
 
   respuestas.push({
@@ -3467,6 +3688,7 @@ function obtenerRespuestasEntrevista() {
 
 
   return respuestas;
+
 }
 
 
@@ -3476,35 +3698,12 @@ function obtenerRespuestasEntrevista() {
 
 function obtenerExperienciaEntrevista() {
 
-  let modalidad =
-    document.getElementById(
-      'experienciaModalidad'
-    ).value;
-
-
-  const otraModalidad =
-    document.getElementById(
-      'experienciaOtraModalidad'
-    )?.value.trim() || '';
-
-
-  if (
-    modalidad === 'OTROS' &&
-    otraModalidad
-  ) {
-
-    modalidad =
-      'OTROS - ' +
-      otraModalidad;
-  }
-
-
   return {
 
     tiempoExperiencia:
       document.getElementById(
         'experienciaTiempo'
-      ).value.trim(),
+      ).value,
 
     ultimaEmpresa:
       document.getElementById(
@@ -3514,10 +3713,12 @@ function obtenerExperienciaEntrevista() {
     tiempoUltimaEmpresa:
       document.getElementById(
         'experienciaTiempoUltimaEmpresa'
-      ).value.trim(),
+      ).value,
 
     modalidadTrabajo:
-      modalidad,
+      document.getElementById(
+        'experienciaModalidad'
+      ).value,
 
     motivoRetiro:
       document.getElementById(
@@ -3527,7 +3728,7 @@ function obtenerExperienciaEntrevista() {
     otroMotivo:
       document.getElementById(
         'experienciaOtroMotivo'
-      )?.value.trim() || '',
+      ).value.trim(),
 
     tuvoAccidente:
       document.getElementById(
@@ -3550,11 +3751,12 @@ function obtenerExperienciaEntrevista() {
       ).value.trim()
 
   };
+
 }
 
 
 /* =====================================================
-   GUARDAR ENTREVISTA OPERACIONES
+   GUARDAR ENTREVISTA
 ===================================================== */
 
 async function guardarEntrevistaOperaciones(
@@ -3574,44 +3776,51 @@ async function guardarEntrevistaOperaciones(
     );
 
     return;
+
   }
 
 
-  const valorSeguridad =
-    Number(
-      document.getElementById(
-        'valoracionSeguridad'
-      ).value || 0
+  const formulario =
+    document.getElementById(
+      'formEntrevistaOperaciones'
     );
 
 
-  const valorExperiencia =
-    Number(
-      document.getElementById(
-        'valoracionExperiencia'
-      ).value || 0
-    );
+  /*
+   * Valida primero los required visibles.
+   */
 
+  if (!formulario.checkValidity()) {
 
-  const valorTecnica =
-    Number(
-      document.getElementById(
-        'valoracionTecnica'
-      ).value || 0
-    );
+    formulario.reportValidity();
+    return;
+
+  }
 
 
   if (
-    !valorSeguridad ||
-    !valorExperiencia ||
-    !valorTecnica
+    !calcularResultadoEntrevista()
   ) {
 
+    return;
+
+  }
+
+
+  const puestoClasifica =
+    document.getElementById(
+      'entrevistaPuestoClasifica'
+    ).value.trim();
+
+
+  if (!puestoClasifica) {
+
     alert(
-      'Debe completar las tres valoraciones.'
+      'Indique el puesto en que clasifica el candidato.'
     );
 
     return;
+
   }
 
 
@@ -3628,6 +3837,7 @@ async function guardarEntrevistaOperaciones(
     );
 
     return;
+
   }
 
 
@@ -3647,12 +3857,97 @@ async function guardarEntrevistaOperaciones(
     );
 
     return;
+
   }
 
 
-  /* CALCULAR ANTES DE GUARDAR */
+  /* DISPONIBILIDAD */
 
-  calcularResultadoEntrevista();
+  let disponibilidad =
+    document.getElementById(
+      'entrevistaDisponibilidad'
+    ).value;
+
+
+  if (
+    disponibilidad === 'OTROS'
+  ) {
+
+    const detalle =
+      document.getElementById(
+        'entrevistaDisponibilidadOtros'
+      ).value.trim();
+
+
+    if (!detalle) {
+
+      alert(
+        'Especifique la disponibilidad del candidato.'
+      );
+
+      return;
+
+    }
+
+
+    disponibilidad =
+      'OTROS - ' + detalle;
+
+  }
+
+
+  /* PRETENSIÓN / VH */
+
+  const tipoPretension =
+    document.getElementById(
+      'tipoPretension'
+    ).value;
+
+
+  const montoPretension =
+    document.getElementById(
+      'entrevistaPretension'
+    ).value;
+
+
+  let pretensionSalarial = '';
+
+
+  if (
+    tipoPretension &&
+    montoPretension
+  ) {
+
+    pretensionSalarial =
+      tipoPretension +
+      ' - ' +
+      montoPretension;
+
+  }
+
+
+  const valorSeguridad =
+    Number(
+      document.getElementById(
+        'valoracionSeguridad'
+      ).value
+    );
+
+
+  const valorExperiencia =
+    Number(
+      document.getElementById(
+        'valoracionExperiencia'
+      ).value
+    );
+
+
+  const valorTecnica =
+    Number(
+      document.getElementById(
+        'valoracionTecnica'
+      ).value
+    );
 
 
   const boton =
@@ -3665,9 +3960,22 @@ async function guardarEntrevistaOperaciones(
     boton.textContent;
 
 
+  const confirmar =
+    confirm(
+      resultado === 'APTO'
+        ?
+          '¿Confirmar entrevista como APTO?\n\nEl candidato será derivado a ATH para Valor Hora.'
+        :
+          '¿Confirmar entrevista como NO APTO?\n\nEl proceso del candidato será finalizado.'
+    );
+
+
+  if (!confirmar)
+    return;
+
+
   boton.disabled =
     true;
-
 
   boton.textContent =
     'Guardando entrevista...';
@@ -3688,8 +3996,6 @@ async function guardarEntrevistaOperaciones(
         candidatoEntrevista
           .idRequerimiento,
 
-
-      /* DATOS GENERALES */
 
       fechaEntrevista:
         document.getElementById(
@@ -3721,28 +4027,16 @@ async function guardarEntrevistaOperaciones(
           'entrevistaPuestoPostula'
         ).value.trim(),
 
-      puestoClasifica:
-        document.getElementById(
-          'entrevistaPuestoClasifica'
-        ).value.trim(),
+      puestoClasifica,
 
       entrevistador:
         document.getElementById(
           'entrevistaEntrevistador'
-        ).value.trim(),
-
-      disponibilidad:
-        document.getElementById(
-          'entrevistaDisponibilidad'
         ).value,
 
-      pretensionSalarial:
-        document.getElementById(
-          'entrevistaPretension'
-        ).value.trim(),
+      disponibilidad,
 
-
-      /* RESULTADO */
+      pretensionSalarial,
 
       resultado,
 
@@ -3758,9 +4052,6 @@ async function guardarEntrevistaOperaciones(
       valoracionTecnica:
         valorTecnica,
 
-
-      /* DETALLES */
-
       unidades:
         obtenerUnidadesEntrevista(),
 
@@ -3771,28 +4062,6 @@ async function guardarEntrevistaOperaciones(
         obtenerExperienciaEntrevista()
 
     };
-
-
-    const confirmar =
-      confirm(
-        resultado === 'APTO'
-        ?
-          '¿Confirmar entrevista como APTO?\n\nEl candidato será derivado a ATH para Valor Hora.'
-        :
-          '¿Confirmar entrevista como NO APTO?\n\nEl proceso del candidato será finalizado.'
-      );
-
-
-    if (!confirmar) {
-
-      boton.disabled =
-        false;
-
-      boton.textContent =
-        textoOriginal;
-
-      return;
-    }
 
 
     const respuesta =
@@ -3811,9 +4080,7 @@ async function guardarEntrevistaOperaciones(
           },
 
           body:
-            JSON.stringify(
-              payload
-            )
+            JSON.stringify(payload)
 
         }
       );
@@ -3829,6 +4096,7 @@ async function guardarEntrevistaOperaciones(
         datos.mensaje ||
         'No se pudo guardar la entrevista.'
       );
+
     }
 
 
@@ -3848,9 +4116,7 @@ async function guardarEntrevistaOperaciones(
 
     cerrarEntrevista();
 
-
     await cargarOperaciones();
-
 
   } catch (error) {
 
@@ -3863,11 +4129,113 @@ async function guardarEntrevistaOperaciones(
     boton.disabled =
       false;
 
-
     boton.textContent =
       textoOriginal;
+
   }
+
 }
+
+
+/* =====================================================
+   CERRAR ENTREVISTA
+===================================================== */
+
+function cerrarEntrevista() {
+
+  document
+    .getElementById(
+      'modalEntrevista'
+    )
+    .classList.remove(
+      'visible'
+    );
+
+
+  candidatoEntrevista =
+    null;
+
+  agendaEntrevistaActual =
+    null;
+
+}
+
+
+/* =====================================================
+   ESTADO AGENDA
+===================================================== */
+
+function obtenerClaseEstadoAgenda(
+  estado
+) {
+
+  estado =
+    String(
+      estado || ''
+    ).toUpperCase();
+
+
+  if (
+    estado ===
+    'PENDIENTE DE PROGRAMAR'
+  ) {
+
+    return 'estado-pendiente';
+
+  }
+
+
+  if (
+    estado ===
+    'REPROGRAMADA'
+  ) {
+
+    return 'estado-reprogramada';
+
+  }
+
+
+  return 'estado-programada';
+
+}
+
+
+/* =====================================================
+   FECHA PARA INPUT
+===================================================== */
+
+function convertirFechaInput(
+  fecha
+) {
+
+  if (!fecha)
+    return '';
+
+
+  const partes =
+    String(fecha)
+      .split('/');
+
+
+  if (
+    partes.length === 3
+  ) {
+
+    return (
+      partes[2] +
+      '-' +
+      partes[1].padStart(2, '0') +
+      '-' +
+      partes[0].padStart(2, '0')
+    );
+
+  }
+
+
+  return fecha;
+
+}
+
 
 /* =====================================================
    SEGURIDAD HTML
@@ -3880,28 +4248,13 @@ function escaparHTML(
   return String(
     valor ?? ''
   )
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-    .replace(
-      /</g,
-      '&lt;'
-    )
-    .replace(
-      />/g,
-      '&gt;'
-    )
-    .replace(
-      /"/g,
-      '&quot;'
-    )
-    .replace(
-      /'/g,
-      '&#039;'
-    );
-}
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 
+}
 
 
 function escaparJS(
@@ -3911,12 +4264,7 @@ function escaparJS(
   return String(
     valor ?? ''
   )
-    .replace(
-      /\\/g,
-      '\\\\'
-    )
-    .replace(
-      /'/g,
-      "\\'"
-    );
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'");
+
 }
