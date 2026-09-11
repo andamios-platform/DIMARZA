@@ -17,7 +17,9 @@ const API_GESTION_ANDAMIOS =
 ===================================================== */
 
 let candidatosOperaciones = [];
+let todosCandidatos = [];
 let agendaEntrevistas = [];
+let entrevistasRealizadas = [];
 
 let candidatoSeleccionado = null;
 let agendaSeleccionada = null;
@@ -113,10 +115,12 @@ async function cargarEntrevistadores() {
 
   try {
 
-    const [
-      respuestaResidente,
-      respuestaSupervisores
-    ] = await Promise.all([
+      const [
+        respuestaCandidatos,
+        respuestaTodosCandidatos,
+        respuestaAgenda,
+        respuestaEntrevistas
+      ] = await Promise.all([
 
       fetch(
         API_PERSONAL +
@@ -346,27 +350,44 @@ async function cargarOperaciones() {
       respuestaAgenda
     ] = await Promise.all([
 
-      fetch(
-        API_CONTRATACION +
-        '?accion=listarPendientesArea&area=OPERACIONES&t=' +
-        Date.now()
-      ),
+fetch(
+  API_CONTRATACION +
+  '?accion=listarPendientesArea&area=OPERACIONES&t=' +
+  Date.now()
+),
 
-      fetch(
-        API_CONTRATACION +
-        '?accion=listarAgendaEntrevistas&t=' +
-        Date.now()
-      )
+fetch(
+  API_CONTRATACION +
+  '?accion=listarCandidatos&t=' +
+  Date.now()
+),
+
+fetch(
+  API_CONTRATACION +
+  '?accion=listarAgendaEntrevistas&t=' +
+  Date.now()
+),
+
+fetch(
+  API_CONTRATACION +
+  '?accion=listarEntrevistasOperaciones&t=' +
+  Date.now()
+)
 
     ]);
 
 
-    const datosCandidatos =
-      await respuestaCandidatos.json();
-
-    const datosAgenda =
-      await respuestaAgenda.json();
-
+      const datosCandidatos =
+        await respuestaCandidatos.json();
+      
+      const datosTodosCandidatos =
+        await respuestaTodosCandidatos.json();
+      
+      const datosAgenda =
+        await respuestaAgenda.json();
+      
+      const datosEntrevistas =
+        await respuestaEntrevistas.json();
 
     if (!datosCandidatos.ok) {
 
@@ -388,12 +409,17 @@ async function cargarOperaciones() {
     }
 
 
-    candidatosOperaciones =
-      datosCandidatos.candidatos || [];
+candidatosOperaciones =
+  datosCandidatos.candidatos || [];
 
-    agendaEntrevistas =
-      datosAgenda.agenda || [];
+todosCandidatos =
+  datosTodosCandidatos.candidatos || [];
 
+agendaEntrevistas =
+  datosAgenda.agenda || [];
+
+entrevistasRealizadas =
+  datosEntrevistas.entrevistas || [];
 
     renderizarAgenda();
     renderizarEntrevistas();
@@ -1321,35 +1347,40 @@ function renderizarEntrevistas() {
     );
 
 
-  const programados =
-    candidatosOperaciones
-      .map(candidato => {
+  const registros =
+    agendaEntrevistas
+      .map(agenda => {
 
-        const agenda =
-          agendaEntrevistas.find(
-            a =>
-              String(a.idCandidato) ===
-              String(candidato.idCandidato)
+        const candidato =
+          todosCandidatos.find(
+            c =>
+              String(c.idCandidato) ===
+              String(agenda.idCandidato)
           );
 
+
+        if (!candidato)
+          return null;
+
+
+        const entrevista =
+          entrevistasRealizadas.find(
+            e =>
+              String(e.idCandidato) ===
+              String(candidato.idCandidato)
+          ) || null;
+
+
         return {
+
           candidato,
-          agenda
+          agenda,
+          entrevista
+
         };
 
       })
-      .filter(
-        x =>
-          x.agenda &&
-          [
-            'PROGRAMADA',
-            'REPROGRAMADA'
-          ].includes(
-            String(
-              x.agenda.estadoCita || ''
-            ).toUpperCase()
-          )
-      );
+      .filter(Boolean);
 
 
   contenedor.innerHTML =
@@ -1366,7 +1397,7 @@ function renderizarEntrevistas() {
             </h2>
 
             <p>
-              Entrevistas programadas listas para iniciar evaluación técnica.
+              Entrevistas programadas e historial de entrevistas realizadas.
             </p>
 
           </div>
@@ -1398,93 +1429,145 @@ function renderizarEntrevistas() {
             <tbody>
 
               ${
-                programados.length
+                registros.length
                   ?
-                    programados.map(x => `
+                    registros
+                      .map(x => {
 
-                      <tr>
+                        const realizada =
+                          String(
+                            x.agenda.estadoCita || ''
+                          ).toUpperCase()
+                          === 'REALIZADA';
 
-                        <td>
 
-                          <strong>
-                            ${escaparHTML(
-                              x.candidato.nombres
-                            )}
-                          </strong>
+                        return `
 
-                          <div class="dato-secundario">
-                            ${escaparHTML(
-                              x.candidato.idCandidato
-                            )}
-                          </div>
+                          <tr class="${
+                            realizada
+                              ? 'fila-entrevista-realizada'
+                              : ''
+                          }">
 
-                        </td>
+                            <td>
 
-                        <td>
-                          ${escaparHTML(
-                            x.candidato.dni
-                          )}
-                        </td>
+                              <strong>
+                                ${escaparHTML(
+                                  x.candidato.nombres
+                                )}
+                              </strong>
 
-                        <td>
-                          ${escaparHTML(
-                            x.candidato.cargo
-                          )}
-                        </td>
+                              <div class="dato-secundario">
+                                ${escaparHTML(
+                                  x.candidato.idCandidato
+                                )}
+                              </div>
 
-                        <td>
-                          ${escaparHTML(
-                            x.candidato.unidad || '-'
-                          )}
-                        </td>
+                            </td>
 
-                        <td>
-                          ${escaparHTML(
-                            x.agenda.fechaProgramada || '-'
-                          )}
-                        </td>
+                            <td>
+                              ${escaparHTML(
+                                x.candidato.dni
+                              )}
+                            </td>
 
-                        <td>
-                          ${escaparHTML(
-                            x.agenda.horaProgramada || '-'
-                          )}
-                        </td>
+                            <td>
+                              ${escaparHTML(
+                                x.candidato.cargo
+                              )}
+                            </td>
 
-                        <td>
-                          ${escaparHTML(
-                            x.agenda.entrevistador || '-'
-                          )}
-                        </td>
+                            <td>
+                              ${escaparHTML(
+                                x.candidato.unidad || '-'
+                              )}
+                            </td>
 
-                        <td>
+                            <td>
+                              ${escaparHTML(
+                                x.agenda.fechaProgramada || '-'
+                              )}
+                            </td>
 
-                          <span
-                            class="estado-agenda estado-programada"
-                          >
-                            ${escaparHTML(
-                              x.agenda.estadoCita
-                            )}
-                          </span>
+                            <td>
+                              ${escaparHTML(
+                                x.agenda.horaProgramada || '-'
+                              )}
+                            </td>
 
-                        </td>
+                            <td>
+                              ${escaparHTML(
+                                x.agenda.entrevistador || '-'
+                              )}
+                            </td>
 
-                        <td>
+                            <td>
 
-                          <button
-                            type="button"
-                            class="btn-iniciar-entrevista"
-                            onclick="iniciarEntrevista('${escaparJS(
-                              x.candidato.idCandidato
-                            )}')"
-                          >
-                            Iniciar entrevista
-                          </button>
+                              <span
+                                class="estado-agenda ${
+                                  realizada
+                                    ? 'estado-realizada'
+                                    : obtenerClaseEstadoAgenda(
+                                        x.agenda.estadoCita
+                                      )
+                                }"
+                              >
+                                ${escaparHTML(
+                                  x.agenda.estadoCita
+                                )}
+                              </span>
 
-                        </td>
+                            </td>
 
-                      </tr>
+                            <td>
 
-                    `).join('')
+                              ${
+                                realizada
+                                  ?
+                                    (
+                                      x.entrevista?.urlPdf
+                                        ?
+                                          `
+                                            <a
+                                              href="${escaparHTML(
+                                                x.entrevista.urlPdf
+                                              )}"
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              class="btn-ver-pdf"
+                                            >
+                                              Ver PDF
+                                            </a>
+                                          `
+                                        :
+                                          `
+                                            <span class="dato-secundario">
+                                              PDF no disponible
+                                            </span>
+                                          `
+                                    )
+                                  :
+                                    `
+                                      <button
+                                        type="button"
+                                        class="btn-iniciar-entrevista"
+                                        onclick="iniciarEntrevista('${escaparJS(
+                                          x.candidato.idCandidato
+                                        )}')"
+                                      >
+                                        Iniciar entrevista
+                                      </button>
+                                    `
+                              }
+
+                            </td>
+
+                          </tr>
+
+                        `;
+
+                      })
+                      .join('')
                   :
                     `
                       <tr>
@@ -1493,7 +1576,7 @@ function renderizarEntrevistas() {
                           colspan="9"
                           class="sin-registros"
                         >
-                          No hay entrevistas programadas.
+                          No hay entrevistas registradas.
                         </td>
 
                       </tr>
