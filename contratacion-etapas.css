@@ -1091,3 +1091,30 @@ a{
   min-width: 0;
   width: 100%;
 }
+.fila-entrevista-realizada {
+  background: #f1f5f9;
+}
+
+.fila-entrevista-realizada:hover {
+  background: #e2e8f0;
+}
+
+.estado-realizada {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.btn-ver-pdf {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 7px;
+  background: #2563eb;
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btn-ver-pdf:hover {
+  background: #1d4ed8;
+}
