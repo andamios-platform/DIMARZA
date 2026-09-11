@@ -127,8 +127,8 @@ async function cargarEntrevistadores() {
       ),
 
       fetch(
-        API_GESTION_ANDAMIOS +
-        '?accion=supervisoresAndamios&t=' +
+        API_CONTRATACION +
+        '?accion=listarSupervisoresEntrevista&t=' +
         Date.now()
       )
 
