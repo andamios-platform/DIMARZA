@@ -115,12 +115,10 @@ async function cargarEntrevistadores() {
 
   try {
 
-      const [
-        respuestaCandidatos,
-        respuestaTodosCandidatos,
-        respuestaAgenda,
-        respuestaEntrevistas
-      ] = await Promise.all([
+    const [
+      respuestaResidente,
+      respuestaSupervisores
+    ] = await Promise.all([
 
       fetch(
         API_PERSONAL +
@@ -183,6 +181,7 @@ async function cargarEntrevistadores() {
               item.nombres ||
               ''
             );
+
 
       if (nombre) {
 
@@ -335,6 +334,7 @@ async function cargarOperaciones() {
       'contenidoAgenda'
     );
 
+
   contenedor.innerHTML =
     `
       <div class="estado-carga">
@@ -347,53 +347,66 @@ async function cargarOperaciones() {
 
     const [
       respuestaCandidatos,
-      respuestaAgenda
+      respuestaTodosCandidatos,
+      respuestaAgenda,
+      respuestaEntrevistas
     ] = await Promise.all([
 
-fetch(
-  API_CONTRATACION +
-  '?accion=listarPendientesArea&area=OPERACIONES&t=' +
-  Date.now()
-),
+      fetch(
+        API_CONTRATACION +
+        '?accion=listarPendientesArea&area=OPERACIONES&t=' +
+        Date.now()
+      ),
 
-fetch(
-  API_CONTRATACION +
-  '?accion=listarCandidatos&t=' +
-  Date.now()
-),
+      fetch(
+        API_CONTRATACION +
+        '?accion=listarCandidatos&t=' +
+        Date.now()
+      ),
 
-fetch(
-  API_CONTRATACION +
-  '?accion=listarAgendaEntrevistas&t=' +
-  Date.now()
-),
+      fetch(
+        API_CONTRATACION +
+        '?accion=listarAgendaEntrevistas&t=' +
+        Date.now()
+      ),
 
-fetch(
-  API_CONTRATACION +
-  '?accion=listarEntrevistasOperaciones&t=' +
-  Date.now()
-)
+      fetch(
+        API_CONTRATACION +
+        '?accion=listarEntrevistasOperaciones&t=' +
+        Date.now()
+      )
 
     ]);
 
 
-      const datosCandidatos =
-        await respuestaCandidatos.json();
-      
-      const datosTodosCandidatos =
-        await respuestaTodosCandidatos.json();
-      
-      const datosAgenda =
-        await respuestaAgenda.json();
-      
-      const datosEntrevistas =
-        await respuestaEntrevistas.json();
+    const datosCandidatos =
+      await respuestaCandidatos.json();
+
+    const datosTodosCandidatos =
+      await respuestaTodosCandidatos.json();
+
+    const datosAgenda =
+      await respuestaAgenda.json();
+
+    const datosEntrevistas =
+      await respuestaEntrevistas.json();
+
 
     if (!datosCandidatos.ok) {
 
       throw new Error(
         datosCandidatos.mensaje ||
         'No se pudieron cargar los candidatos'
+      );
+
+    }
+
+
+    if (!datosTodosCandidatos.ok) {
+
+      throw new Error(
+        datosTodosCandidatos.mensaje ||
+        'No se pudo cargar el historial de candidatos'
       );
 
     }
@@ -409,20 +422,32 @@ fetch(
     }
 
 
-candidatosOperaciones =
-  datosCandidatos.candidatos || [];
+    if (!datosEntrevistas.ok) {
 
-todosCandidatos =
-  datosTodosCandidatos.candidatos || [];
+      throw new Error(
+        datosEntrevistas.mensaje ||
+        'No se pudo cargar el historial de entrevistas'
+      );
 
-agendaEntrevistas =
-  datosAgenda.agenda || [];
+    }
 
-entrevistasRealizadas =
-  datosEntrevistas.entrevistas || [];
+
+    candidatosOperaciones =
+      datosCandidatos.candidatos || [];
+
+    todosCandidatos =
+      datosTodosCandidatos.candidatos || [];
+
+    agendaEntrevistas =
+      datosAgenda.agenda || [];
+
+    entrevistasRealizadas =
+      datosEntrevistas.entrevistas || [];
+
 
     renderizarAgenda();
     renderizarEntrevistas();
+
 
   } catch (error) {
 
@@ -433,10 +458,14 @@ entrevistasRealizadas =
         </div>
       `;
 
+    console.error(
+      'Error cargando Operaciones:',
+      error
+    );
+
   }
 
 }
-
 
 /* =====================================================
    AGENDA
