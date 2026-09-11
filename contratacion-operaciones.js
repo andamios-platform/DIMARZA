@@ -1409,7 +1409,72 @@ function renderizarEntrevistas() {
         };
 
       })
-      .filter(Boolean);
+      .filter(Boolean)
+      .sort((a, b) => {
+
+        const estadoA =
+          String(
+            a.agenda.estadoCita || ''
+          ).toUpperCase();
+
+        const estadoB =
+          String(
+            b.agenda.estadoCita || ''
+          ).toUpperCase();
+
+
+        const realizadaA =
+          estadoA === 'REALIZADA'
+            ? 1
+            : 0;
+
+        const realizadaB =
+          estadoB === 'REALIZADA'
+            ? 1
+            : 0;
+
+
+        /*
+         * Primero entrevistas pendientes.
+         * Después entrevistas realizadas.
+         */
+
+        if (
+          realizadaA !== realizadaB
+        ) {
+
+          return (
+            realizadaA -
+            realizadaB
+          );
+
+        }
+
+
+        /*
+         * Dentro del mismo grupo:
+         * fecha más próxima primero.
+         */
+
+        const fechaA =
+          convertirFechaOrden(
+            a.agenda.fechaProgramada,
+            a.agenda.horaProgramada
+          );
+
+        const fechaB =
+          convertirFechaOrden(
+            b.agenda.fechaProgramada,
+            b.agenda.horaProgramada
+          );
+
+
+        return (
+          fechaA -
+          fechaB
+        );
+
+      });
 
 
   contenedor.innerHTML =
@@ -1624,7 +1689,66 @@ function renderizarEntrevistas() {
 
 }
 
+function convertirFechaOrden(
+  fecha,
+  hora
+) {
 
+  if (!fecha)
+    return Number.MAX_SAFE_INTEGER;
+
+
+  const partes =
+    String(fecha)
+      .split('/');
+
+
+  if (
+    partes.length !== 3
+  ) {
+
+    return Number.MAX_SAFE_INTEGER;
+
+  }
+
+
+  const dia =
+    Number(partes[0]);
+
+  const mes =
+    Number(partes[1]) - 1;
+
+  const anio =
+    Number(partes[2]);
+
+
+  const partesHora =
+    String(
+      hora || '00:00'
+    )
+      .split(':');
+
+
+  const horas =
+    Number(
+      partesHora[0] || 0
+    );
+
+  const minutos =
+    Number(
+      partesHora[1] || 0
+    );
+
+
+  return new Date(
+    anio,
+    mes,
+    dia,
+    horas,
+    minutos
+  ).getTime();
+
+}
 /* =====================================================
    INICIAR ENTREVISTA
 ===================================================== */
