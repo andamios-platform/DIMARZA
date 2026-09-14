@@ -103,7 +103,9 @@ document.getElementById(
             <th>UNIDAD</th>
             <th>TIPO DE CONTRATO</th>
             <th>FECHA OBJETIVO</th>
-            <th>CARPETA</th>
+            <th id="tituloDocumentos">
+  DOCUMENTOS
+</th>
             <th>ACCIÓN</th>
 
           </tr>
