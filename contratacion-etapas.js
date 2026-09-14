@@ -416,35 +416,78 @@ async function abrirGestion(id){
     candidatoActual.nombres;
 
 
-  document.getElementById(
-    'modalDatos'
-  ).innerHTML = `
+document.getElementById(
+  'modalDatos'
+).innerHTML = `
 
-    <div class="dato">
-      <strong>DNI:</strong>
-      ${escapar(candidatoActual.dni)}
+  <div class="resumen-candidato">
+
+    <div class="resumen-item">
+
+      <span class="resumen-label">
+        DNI
+      </span>
+
+      <strong class="resumen-valor">
+        ${escapar(candidatoActual.dni)}
+      </strong>
+
     </div>
 
-    <div class="dato">
-      <strong>Cargo:</strong>
-      ${escapar(candidatoActual.cargo)}
+
+    <div class="resumen-item">
+
+      <span class="resumen-label">
+        Cargo
+      </span>
+
+      <strong class="resumen-valor">
+        ${escapar(candidatoActual.cargo)}
+      </strong>
+
     </div>
 
-    <div class="dato">
-      <strong>Unidad:</strong>
-      ${escapar(candidatoActual.unidad)}
+
+    <div class="resumen-item">
+
+      <span class="resumen-label">
+        Unidad minera
+      </span>
+
+      <strong class="resumen-valor">
+        ${escapar(candidatoActual.unidad)}
+      </strong>
+
     </div>
 
-    <div class="dato">
-      <strong>Tipo de contrato:</strong>
-      ${escapar(candidatoActual.tipoContrato)}
+
+    <div class="resumen-item">
+
+      <span class="resumen-label">
+        Tipo de contrato
+      </span>
+
+      <strong class="resumen-valor">
+        ${escapar(candidatoActual.tipoContrato)}
+      </strong>
+
     </div>
 
-    <div class="dato">
-      <strong>Residencia:</strong>
-      ${escapar(candidatoActual.residencia)}
+
+    <div class="resumen-item">
+
+      <span class="resumen-label">
+        Residencia
+      </span>
+
+      <strong class="resumen-valor">
+        ${escapar(candidatoActual.residencia)}
+      </strong>
+
     </div>
-  `;
+
+  </div>
+`;
 
 
   cargarResultados();
