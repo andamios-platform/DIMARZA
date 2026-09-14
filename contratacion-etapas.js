@@ -1473,68 +1473,66 @@ if(AREA === 'ATH'){
     )?.value || '';
 
 
+if(
+  resultado === 'CERRADO'
+){
+
+  if(!tipoRemuneracion){
+
+    mostrarMensaje(
+      'Seleccione el tipo de remuneración acordada.',
+      'error'
+    );
+
+    return;
+  }
+
+
   if(
-    resultado === 'CERRADO'
+    !montoAcordado ||
+    Number(montoAcordado) <= 0
   ){
 
-    if(!tipoRemuneracion){
+    mostrarMensaje(
+      'Ingrese un monto acordado válido.',
+      'error'
+    );
 
-      mostrarMensaje(
-        'Seleccione el tipo de remuneración acordada.',
-        'error'
-      );
-
-      return;
-    }
+    return;
+  }
 
 
-    if(
-      !montoAcordado ||
-      Number(montoAcordado) <= 0
-    ){
+  if(!fechaInicioAcordada){
 
-      mostrarMensaje(
-        'Ingrese un monto acordado válido.',
-        'error'
-      );
+    mostrarMensaje(
+      'Ingrese la fecha de inicio acordada.',
+      'error'
+    );
 
-      return;
-    }
+    return;
+  }
 
-
-    if(!fechaInicioAcordada){
-
-      mostrarMensaje(
-        'Ingrese la fecha de inicio acordada.',
-        'error'
-      );
-
-      return;
-    }
-
-  
-
-
-  datos.tipoRemuneracionAcordada =
-    tipoRemuneracion;
-
-  datos.montoAcordado =
-    montoAcordado;
-
-  datos.fechaInicioAcordada =
-    fechaInicioAcordada;
-
-
-  /*
-   * Compatibilidad con el proceso anterior.
-   * Si es VH, también enviamos datos.vh.
-   */
-
-  datos.vh =
-    tipoRemuneracion === 'VALOR HORA'
-      ? montoAcordado
-      : '';
 }
+
+
+/*
+ * Estos datos se envían tanto si está
+ * CERRADO como si queda OBSERVADO.
+ */
+
+datos.tipoRemuneracionAcordada =
+  tipoRemuneracion;
+
+datos.montoAcordado =
+  montoAcordado;
+
+datos.fechaInicioAcordada =
+  fechaInicioAcordada;
+
+datos.vh =
+  tipoRemuneracion === 'VALOR HORA'
+    ? montoAcordado
+    : '';
   }
 
 
@@ -1568,7 +1566,10 @@ if(AREA === 'ATH'){
   try{
     if(
   AREA === 'ATH' &&
-  resultado === 'CERRADO'
+  (
+    resultado === 'CERRADO' ||
+    resultado === 'OBSERVADO'
+  )
 ){
 
   const datosContrato = {
@@ -1578,6 +1579,21 @@ if(AREA === 'ATH'){
 
     idCandidato:
       candidatoActual.idCandidato,
+
+   tipoRemuneracionAcordada:
+  document.getElementById(
+    'tipoRemuneracionAcordada'
+  )?.value || '',
+
+montoAcordado:
+  document.getElementById(
+    'montoAcordado'
+  )?.value || '',
+
+fechaInicioAcordada:
+  document.getElementById(
+    'fechaInicioAcordada'
+  )?.value || '',
 
     fechaEnvioContrato:
       document.getElementById(
