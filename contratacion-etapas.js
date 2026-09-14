@@ -215,60 +215,38 @@ async function cargarCandidatos(){
 
 function crearFila(c){
 
-  let documentos = '';
-    const estado =
-    String(
-      c.estadoGeneral || ''
-    ).toUpperCase();
+
+ const estado =
+  String(
+    c.estadoGeneral || ''
+  ).toUpperCase();
 
 
-  const claseFila =
-    estado === 'OBSERVADO'
-    ? 'fila-observada'
-    : '';
+const claseFila =
+  estado === 'OBSERVADO'
+  ? 'fila-observada'
+  : '';
 
-if(
-  AREA === 'LEGAL' ||
-  AREA === 'DOTACION'
-){
 
-  documentos = `
+let carpeta = '-';
+
+
+if(c.carpetaDrive){
+
+  carpeta = `
+
     <a
-      href="${escapar(c.archivoDni)}"
+      href="${escapar(c.carpetaDrive)}"
       target="_blank"
+      rel="noopener noreferrer"
+      class="btn-carpeta"
+      title="Abrir carpeta del candidato"
     >
-      DNI
+      📁 Abrir
     </a>
   `;
+
 }
-
-
-  if(
-    AREA === 'OPERACIONES' ||
-    AREA === 'DOTACION'
-  ){
-
-    documentos += `
-      &nbsp;
-      <a
-        href="${escapar(c.cv)}"
-        target="_blank"
-      >
-        CV
-      </a>
-    `;
-  }
-
-
-  if(
-    AREA === 'GTH'
-  ){
-
-    documentos =
-      'VH: ' +
-      escapar(c.vh);
-  }
-
 
 return `
 
@@ -312,9 +290,9 @@ return `
         ${escapar(c.fechaObjetivo)}
       </td>
 
-      <td>
-        ${documentos || '-'}
-      </td>
+<td>
+  ${carpeta}
+</td>
 
       <td>
         <button
