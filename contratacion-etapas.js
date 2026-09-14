@@ -450,14 +450,43 @@ async function abrirGestion(id){
   cargarResultados();
 
 
-   if(AREA === 'ATH'){
-   
-     await cargarDatosContratoATH();
-   
-   }else{
-   
-     cargarCamposEspeciales();
-     async function cargarDatosContratoATH(){
+if(AREA === 'ATH'){
+
+  await cargarDatosContratoATH();
+
+}else{
+
+  cargarCamposEspeciales();
+
+}
+
+
+document.getElementById(
+  'responsable'
+).value = '';
+
+
+document.getElementById(
+  'observacion'
+).value =
+  candidatoActual
+    .ultimaObservacionArea || '';
+
+
+document.getElementById(
+  'modal'
+).classList.add(
+  'activo'
+);
+
+}
+
+
+/* =====================================================
+   ATH - DATOS PARA CONTRATO
+===================================================== */
+
+async function cargarDatosContratoATH(){
 
   const contenedor =
     document.getElementById(
@@ -1040,30 +1069,6 @@ function actualizarLabelMontoATH(){
 
 }
 
-    
-   }
-
-
-  document.getElementById(
-    'responsable'
-  ).value = '';
-
-
-    document.getElementById(
-      'observacion'
-    ).value =
-      candidatoActual
-    .ultimaObservacionArea || '';
-
-
-  document.getElementById(
-    'modal'
-  ).classList.add(
-    'activo'
-  );
-}
-
-
 
 function cargarResultados(){
 
@@ -1107,27 +1112,6 @@ function cargarCamposEspeciales(){
   contenedor.innerHTML = '';
 
 
-  if(AREA === 'ATH'){
-
-    contenedor.innerHTML = `
-
-      <div class="campo">
-
-        <label>
-          VALOR HORA HOMBRE (VH)
-        </label>
-
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          id="vh"
-          placeholder="Ej. 7.50"
-        >
-
-      </div>
-    `;
-  }
 
 
   if(AREA === 'GTH'){
@@ -1264,7 +1248,7 @@ async function guardarGestion(){
   };
 
 
-  if(AREA === 'ATH'){
+
 
 if(AREA === 'ATH'){
 
@@ -1325,7 +1309,7 @@ if(AREA === 'ATH'){
       return;
     }
 
-  }
+  
 
 
   datos.tipoRemuneracionAcordada =
