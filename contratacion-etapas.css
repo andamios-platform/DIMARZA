@@ -1209,3 +1209,37 @@ a{
   }
 
 }
+/* =====================================================
+   BOTÓN CARPETA DRIVE
+===================================================== */
+
+.btn-carpeta{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+
+  padding:7px 11px;
+
+  background:#f1f5f9;
+  border:1px solid #cbd5e1;
+  border-radius:7px;
+
+  color:#0f172a;
+  font-size:12px;
+  font-weight:600;
+
+  text-decoration:none;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    transform .15s ease;
+}
+
+
+.btn-carpeta:hover{
+  background:#e2e8f0;
+  border-color:#94a3b8;
+  transform:translateY(-1px);
+}
