@@ -744,19 +744,42 @@ async function cargarDatosContratoATH(){
             d.fechaCaducidad
           )}
 
-          ${campoATH(
-            'FECHA DE NACIMIENTO',
-            'fechaNacimiento',
-            'date',
-            d.fechaNacimiento
-          )}
+<div class="campo">
 
-          ${campoATH(
-            'EDAD',
-            'edad',
-            'number',
-            d.edad
-          )}
+  <label>
+    FECHA DE NACIMIENTO
+  </label>
+
+  <input
+    type="date"
+    id="fechaNacimiento"
+    value="${escapar(
+      convertirFechaInputATH(
+        d.fechaNacimiento || ''
+      )
+    )}"
+    onchange="calcularEdadATH()"
+  >
+
+</div>
+
+
+<div class="campo">
+
+  <label>
+    EDAD
+  </label>
+
+  <input
+    type="number"
+    id="edad"
+    value="${escapar(
+      d.edad || ''
+    )}"
+    readonly
+  >
+
+</div>
 
           ${campoATH(
             'CELULAR 2',
@@ -835,27 +858,48 @@ async function cargarDatosContratoATH(){
             d.peso
           )}
 
-          ${campoATH(
-            'TALLA (M)',
-            'talla',
-            'number',
-            d.talla,
-            '0.01'
-          )}
+         ${campoATH(
+           'TALLA (CM)',
+           'talla',
+           'number',
+           d.talla,
+           '1'
+         )}
 
-          ${campoATH(
-            'UNIFORME',
-            'uniforme',
-            'text',
-            d.uniforme
-          )}
+         ${selectATH(
+           'UNIFORME',
+           'uniforme',
+           [
+             'XS',
+             'S',
+             'M',
+             'L',
+             'XL',
+             'XXL',
+             'XXXL'
+           ],
+           d.uniforme
+         )}
 
-          ${campoATH(
-            'ZAPATOS',
-            'zapatos',
-            'text',
-            d.zapatos
-          )}
+     ${selectATH(
+       'ZAPATOS',
+       'zapatos',
+       [
+         '35',
+         '36',
+         '37',
+         '38',
+         '39',
+         '40',
+         '41',
+         '42',
+         '43',
+         '44',
+         '45',
+         '46'
+       ],
+       d.zapatos
+     )}
 
         </div>
 
@@ -918,6 +962,7 @@ async function cargarDatosContratoATH(){
 
 
     actualizarLabelMontoATH();
+    calcularEdadATH();
 
 
   }catch(error){
@@ -932,7 +977,69 @@ async function cargarDatosContratoATH(){
 
 }
 
+function calcularEdadATH(){
 
+  const fecha =
+    document.getElementById(
+      'fechaNacimiento'
+    )?.value;
+
+
+  const campoEdad =
+    document.getElementById(
+      'edad'
+    );
+
+
+  if(
+    !fecha ||
+    !campoEdad
+  ){
+
+    return;
+  }
+
+
+  const nacimiento =
+    new Date(
+      fecha + 'T00:00:00'
+    );
+
+
+  const hoy =
+    new Date();
+
+
+  let edad =
+    hoy.getFullYear() -
+    nacimiento.getFullYear();
+
+
+  const mes =
+    hoy.getMonth() -
+    nacimiento.getMonth();
+
+
+  if(
+    mes < 0 ||
+    (
+      mes === 0 &&
+      hoy.getDate() <
+      nacimiento.getDate()
+    )
+  ){
+
+    edad--;
+
+  }
+
+
+  campoEdad.value =
+    edad >= 0
+      ? edad
+      : '';
+
+}
 function construirPretensionATH(d){
 
   const tipo =
@@ -999,7 +1106,59 @@ function campoATH(
 
 }
 
+function selectATH(
+  label,
+  id,
+  opciones,
+  valorActual
+){
 
+  const opcionesHtml =
+    opciones
+      .map(opcion => {
+
+        const seleccionado =
+          String(opcion) ===
+          String(valorActual || '')
+            ? 'selected'
+            : '';
+
+
+        return `
+          <option
+            value="${escapar(opcion)}"
+            ${seleccionado}
+          >
+            ${escapar(opcion)}
+          </option>
+        `;
+
+      })
+      .join('');
+
+
+  return `
+
+    <div class="campo">
+
+      <label>
+        ${escapar(label)}
+      </label>
+
+      <select id="${id}">
+
+        <option value="">
+          Seleccione...
+        </option>
+
+        ${opcionesHtml}
+
+      </select>
+
+    </div>
+  `;
+
+}
 function convertirFechaInputATH(fecha){
 
   if(!fecha)
