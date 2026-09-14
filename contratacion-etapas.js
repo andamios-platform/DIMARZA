@@ -396,8 +396,9 @@ function actualizarKPIs(){
 
 
 
-function abrirGestion(id){
+async function abrirGestion(id){
 
+ 
   candidatoActual =
     candidatos.find(
       c =>
@@ -449,7 +450,598 @@ function abrirGestion(id){
   cargarResultados();
 
 
-  cargarCamposEspeciales();
+   if(AREA === 'ATH'){
+   
+     await cargarDatosContratoATH();
+   
+   }else{
+   
+     cargarCamposEspeciales();
+     async function cargarDatosContratoATH(){
+
+  const contenedor =
+    document.getElementById(
+      'camposEspeciales'
+    );
+
+
+  contenedor.innerHTML = `
+    <div class="estado-carga">
+      Cargando datos del candidato...
+    </div>
+  `;
+
+
+  try{
+
+    const respuesta =
+      await fetch(
+        API +
+        '?accion=obtenerDatosContrato&idCandidato=' +
+        encodeURIComponent(
+          candidatoActual.idCandidato
+        ) +
+        '&t=' +
+        Date.now()
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudieron cargar los datos para contrato.'
+      );
+    }
+
+
+    const d =
+      resultado.datos || {};
+
+
+    contenedor.innerHTML = `
+
+      <div class="bloque-ath">
+
+        <div class="subtitulo-ath">
+          Información proveniente del proceso
+        </div>
+
+
+        <div class="grid-ath">
+
+          <div class="campo">
+
+            <label>
+              FECHA DE PARADA / FECHA OBJETIVO
+            </label>
+
+            <input
+              type="text"
+              value="${escapar(
+                d.fechaParada || ''
+              )}"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="campo">
+
+            <label>
+              UNIDAD MINERA
+            </label>
+
+            <input
+              type="text"
+              value="${escapar(
+                d.unidadMinera || ''
+              )}"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="campo">
+
+            <label>
+              CARGO EN QUE CLASIFICA
+            </label>
+
+            <input
+              type="text"
+              value="${escapar(
+                d.cargoClasifica || ''
+              )}"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="campo">
+
+            <label>
+              APROBADO POR
+            </label>
+
+            <input
+              type="text"
+              value="${escapar(
+                d.aprobadoPor || ''
+              )}"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="campo">
+
+            <label>
+              PRETENSIÓN INDICADA EN ENTREVISTA
+            </label>
+
+            <input
+              type="text"
+              value="${escapar(
+                construirPretensionATH(d)
+              )}"
+              readonly
+            >
+
+          </div>
+
+
+          <div class="campo">
+
+            <label>
+              DISPONIBILIDAD INDICADA
+            </label>
+
+            <input
+              type="text"
+              value="${escapar(
+                d.disponibilidadEntrevista || ''
+              )}"
+              readonly
+            >
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="bloque-ath">
+
+        <div class="subtitulo-ath">
+          Acuerdo con el candidato
+        </div>
+
+
+        <div class="grid-ath">
+
+          <div class="campo">
+
+            <label>
+              TIPO DE REMUNERACIÓN ACORDADA *
+            </label>
+
+            <select
+              id="tipoRemuneracionAcordada"
+              onchange="actualizarLabelMontoATH()"
+            >
+
+              <option value="">
+                Seleccione...
+              </option>
+
+              <option value="VALOR HORA">
+                Valor Hora / HH
+              </option>
+
+              <option value="MENSUAL">
+                Sueldo mensual
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="campo">
+
+            <label id="labelMontoATH">
+              MONTO ACORDADO *
+            </label>
+
+            <input
+              type="number"
+              id="montoAcordado"
+              min="0"
+              step="0.01"
+              placeholder="Ingrese monto"
+            >
+
+          </div>
+
+
+          <div class="campo">
+
+            <label>
+              FECHA DE INICIO ACORDADA *
+            </label>
+
+            <input
+              type="date"
+              id="fechaInicioAcordada"
+            >
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="bloque-ath">
+
+        <div class="subtitulo-ath">
+          Datos para contrato
+        </div>
+
+
+        <div class="grid-ath">
+
+          ${campoATH(
+            'FECHA DE ENVÍO PARA CONTRATO',
+            'fechaEnvioContrato',
+            'date',
+            d.fechaEnvioContrato
+          )}
+
+          ${campoATH(
+            'FECHA DE CADUCIDAD DNI',
+            'fechaCaducidad',
+            'date',
+            d.fechaCaducidad
+          )}
+
+          ${campoATH(
+            'FECHA DE NACIMIENTO',
+            'fechaNacimiento',
+            'date',
+            d.fechaNacimiento
+          )}
+
+          ${campoATH(
+            'EDAD',
+            'edad',
+            'number',
+            d.edad
+          )}
+
+          ${campoATH(
+            'CELULAR 2',
+            'celular2',
+            'text',
+            d.celular2
+          )}
+
+          ${campoATH(
+            'CORREO ELECTRÓNICO',
+            'correo',
+            'email',
+            d.correo
+          )}
+
+          ${campoATH(
+            'DIRECCIÓN',
+            'direccion',
+            'text',
+            d.direccion
+          )}
+
+          ${campoATH(
+            'DISTRITO',
+            'distrito',
+            'text',
+            d.distrito
+          )}
+
+          ${campoATH(
+            'PROVINCIA',
+            'provincia',
+            'text',
+            d.provincia
+          )}
+
+          ${campoATH(
+            'DEPARTAMENTO',
+            'departamento',
+            'text',
+            d.departamento
+          )}
+
+          ${campoATH(
+            'PROFESIÓN / CARRERA TÉCNICA',
+            'profesion',
+            'text',
+            d.profesion
+          )}
+
+          ${campoATH(
+            'INSTITUTO / UNIVERSIDAD',
+            'instituto',
+            'text',
+            d.instituto
+          )}
+
+          ${campoATH(
+            'AÑO DE EGRESO',
+            'anioEgreso',
+            'number',
+            d.anioEgreso
+          )}
+
+          ${campoATH(
+            'PASAPORTE',
+            'pasaporte',
+            'text',
+            d.pasaporte
+          )}
+
+          ${campoATH(
+            'PESO (KG)',
+            'peso',
+            'number',
+            d.peso
+          )}
+
+          ${campoATH(
+            'TALLA (M)',
+            'talla',
+            'number',
+            d.talla,
+            '0.01'
+          )}
+
+          ${campoATH(
+            'UNIFORME',
+            'uniforme',
+            'text',
+            d.uniforme
+          )}
+
+          ${campoATH(
+            'ZAPATOS',
+            'zapatos',
+            'text',
+            d.zapatos
+          )}
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>
+            MENSAJE DE CONFIRMACIÓN
+          </label>
+
+          <textarea
+            id="mensajeConfirmacion"
+          >${escapar(
+            d.mensajeConfirmacion || ''
+          )}</textarea>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>
+            COMENTARIO
+          </label>
+
+          <textarea
+            id="comentarioContrato"
+          >${escapar(
+            d.comentario || ''
+          )}</textarea>
+
+        </div>
+
+      </div>
+    `;
+
+
+    const tipo =
+      document.getElementById(
+        'tipoRemuneracionAcordada'
+      );
+
+
+    tipo.value =
+      d.tipoRemuneracionAcordada || '';
+
+
+    document.getElementById(
+      'montoAcordado'
+    ).value =
+      d.montoAcordado || '';
+
+
+    document.getElementById(
+      'fechaInicioAcordada'
+    ).value =
+      convertirFechaInputATH(
+        d.fechaInicioAcordada || ''
+      );
+
+
+    actualizarLabelMontoATH();
+
+
+  }catch(error){
+
+    contenedor.innerHTML = `
+      <div class="mensaje error">
+        ${escapar(error.message)}
+      </div>
+    `;
+
+  }
+
+}
+
+
+function construirPretensionATH(d){
+
+  const tipo =
+    String(
+      d.pretensionTipo || ''
+    ).trim();
+
+  const monto =
+    d.pretensionMonto;
+
+
+  if(!tipo && !monto)
+    return 'No registrada';
+
+
+  if(
+    monto !== '' &&
+    monto !== null &&
+    monto !== undefined
+  ){
+
+    return (
+      tipo +
+      ' - S/ ' +
+      monto
+    );
+
+  }
+
+
+  return tipo;
+}
+
+
+function campoATH(
+  label,
+  id,
+  tipo,
+  valor,
+  step = ''
+){
+
+  return `
+
+    <div class="campo">
+
+      <label>
+        ${escapar(label)}
+      </label>
+
+      <input
+        type="${tipo}"
+        id="${id}"
+        value="${escapar(
+          convertirFechaInputATH(
+            valor || ''
+          )
+        )}"
+        ${step ? `step="${step}"` : ''}
+      >
+
+    </div>
+  `;
+
+}
+
+
+function convertirFechaInputATH(fecha){
+
+  if(!fecha)
+    return '';
+
+
+  const texto =
+    String(fecha);
+
+
+  if(
+    /^\d{4}-\d{2}-\d{2}$/.test(
+      texto
+    )
+  ){
+
+    return texto;
+
+  }
+
+
+  const partes =
+    texto.split('/');
+
+
+  if(partes.length === 3){
+
+    return (
+      partes[2] +
+      '-' +
+      partes[1].padStart(2,'0') +
+      '-' +
+      partes[0].padStart(2,'0')
+    );
+
+  }
+
+
+  return texto;
+}
+
+
+function actualizarLabelMontoATH(){
+
+  const tipo =
+    document.getElementById(
+      'tipoRemuneracionAcordada'
+    )?.value || '';
+
+
+  const label =
+    document.getElementById(
+      'labelMontoATH'
+    );
+
+
+  if(!label)
+    return;
+
+
+  label.textContent =
+    tipo === 'VALOR HORA'
+      ? 'VALOR HORA ACORDADO (VH) *'
+      : tipo === 'MENSUAL'
+        ? 'SUELDO MENSUAL ACORDADO *'
+        : 'MONTO ACORDADO *';
+
+}
+
+    
+   }
 
 
   document.getElementById(
@@ -674,10 +1266,88 @@ async function guardarGestion(){
 
   if(AREA === 'ATH'){
 
-    datos.vh =
-      document.getElementById(
-        'vh'
-      )?.value || '';
+if(AREA === 'ATH'){
+
+  const tipoRemuneracion =
+    document.getElementById(
+      'tipoRemuneracionAcordada'
+    )?.value || '';
+
+
+  const montoAcordado =
+    document.getElementById(
+      'montoAcordado'
+    )?.value || '';
+
+
+  const fechaInicioAcordada =
+    document.getElementById(
+      'fechaInicioAcordada'
+    )?.value || '';
+
+
+  if(
+    resultado === 'CERRADO'
+  ){
+
+    if(!tipoRemuneracion){
+
+      mostrarMensaje(
+        'Seleccione el tipo de remuneración acordada.',
+        'error'
+      );
+
+      return;
+    }
+
+
+    if(
+      !montoAcordado ||
+      Number(montoAcordado) <= 0
+    ){
+
+      mostrarMensaje(
+        'Ingrese un monto acordado válido.',
+        'error'
+      );
+
+      return;
+    }
+
+
+    if(!fechaInicioAcordada){
+
+      mostrarMensaje(
+        'Ingrese la fecha de inicio acordada.',
+        'error'
+      );
+
+      return;
+    }
+
+  }
+
+
+  datos.tipoRemuneracionAcordada =
+    tipoRemuneracion;
+
+  datos.montoAcordado =
+    montoAcordado;
+
+  datos.fechaInicioAcordada =
+    fechaInicioAcordada;
+
+
+  /*
+   * Compatibilidad con el proceso anterior.
+   * Si es VH, también enviamos datos.vh.
+   */
+
+  datos.vh =
+    tipoRemuneracion === 'VALOR HORA'
+      ? montoAcordado
+      : '';
+}
   }
 
 
@@ -709,7 +1379,157 @@ async function guardarGestion(){
 
 
   try{
+    if(
+  AREA === 'ATH' &&
+  resultado === 'CERRADO'
+){
 
+  const datosContrato = {
+
+    accion:
+      'guardarDatosContrato',
+
+    idCandidato:
+      candidatoActual.idCandidato,
+
+    fechaEnvioContrato:
+      document.getElementById(
+        'fechaEnvioContrato'
+      )?.value || '',
+
+    responsable,
+
+    fechaCaducidad:
+      document.getElementById(
+        'fechaCaducidad'
+      )?.value || '',
+
+    edad:
+      document.getElementById(
+        'edad'
+      )?.value || '',
+
+    celular2:
+      document.getElementById(
+        'celular2'
+      )?.value || '',
+
+    fechaNacimiento:
+      document.getElementById(
+        'fechaNacimiento'
+      )?.value || '',
+
+    correo:
+      document.getElementById(
+        'correo'
+      )?.value.trim() || '',
+
+    direccion:
+      document.getElementById(
+        'direccion'
+      )?.value.trim() || '',
+
+    distrito:
+      document.getElementById(
+        'distrito'
+      )?.value.trim() || '',
+
+    provincia:
+      document.getElementById(
+        'provincia'
+      )?.value.trim() || '',
+
+    departamento:
+      document.getElementById(
+        'departamento'
+      )?.value.trim() || '',
+
+    profesion:
+      document.getElementById(
+        'profesion'
+      )?.value.trim() || '',
+
+    instituto:
+      document.getElementById(
+        'instituto'
+      )?.value.trim() || '',
+
+    anioEgreso:
+      document.getElementById(
+        'anioEgreso'
+      )?.value || '',
+
+    mensajeConfirmacion:
+      document.getElementById(
+        'mensajeConfirmacion'
+      )?.value.trim() || '',
+
+    pasaporte:
+      document.getElementById(
+        'pasaporte'
+      )?.value.trim() || '',
+
+    peso:
+      document.getElementById(
+        'peso'
+      )?.value || '',
+
+    talla:
+      document.getElementById(
+        'talla'
+      )?.value || '',
+
+    uniforme:
+      document.getElementById(
+        'uniforme'
+      )?.value.trim() || '',
+
+    zapatos:
+      document.getElementById(
+        'zapatos'
+      )?.value.trim() || '',
+
+    comentario:
+      document.getElementById(
+        'comentarioContrato'
+      )?.value.trim() || ''
+
+  };
+
+
+  const respuestaContrato =
+    await fetch(
+      API,
+      {
+        method:'POST',
+
+        headers:{
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body:
+          JSON.stringify(
+            datosContrato
+          )
+      }
+    );
+
+
+  const contratoJson =
+    await respuestaContrato.json();
+
+
+  if(!contratoJson.ok){
+
+    throw new Error(
+      contratoJson.mensaje ||
+      'No se pudieron guardar los datos para contrato.'
+    );
+
+  }
+
+}
     const respuesta =
       await fetch(
         API,
