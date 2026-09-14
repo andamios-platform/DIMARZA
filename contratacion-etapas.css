@@ -1161,3 +1161,51 @@ a{
   }
 
 }
+/* =====================================================
+   RESUMEN DEL CANDIDATO
+===================================================== */
+
+.resumen-candidato{
+  display:grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap:10px;
+  margin-top:12px;
+  margin-bottom:18px;
+}
+
+
+.resumen-item{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+
+.resumen-label{
+  font-size:11px;
+  font-weight:700;
+  color:#64748b;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+}
+
+
+.resumen-valor{
+  font-size:14px;
+  color:#0f172a;
+  line-height:1.3;
+}
+
+
+@media(max-width:600px){
+
+  .resumen-candidato{
+    grid-template-columns:1fr;
+  }
+
+}
