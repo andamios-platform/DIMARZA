@@ -414,6 +414,7 @@ async function abrirGestion(id){
     'modalNombre'
   ).textContent =
     candidatoActual.nombres;
+ 
 
 
 document.getElementById(
