@@ -1118,3 +1118,46 @@ a{
 .btn-ver-pdf:hover {
   background: #1d4ed8;
 }
+/* =====================================================
+   ATH - DATOS PARA CONTRATO
+===================================================== */
+
+.bloque-ath{
+  margin:18px 0;
+  padding:16px;
+  background:#f9fafb;
+  border:1px solid #e5e7eb;
+  border-radius:9px;
+}
+
+.subtitulo-ath{
+  font-size:14px;
+  font-weight:700;
+  color:#111827;
+  margin-bottom:15px;
+  padding-bottom:8px;
+  border-bottom:1px solid #e5e7eb;
+}
+
+.grid-ath{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px 16px;
+}
+
+.grid-ath .campo{
+  margin-bottom:0;
+}
+
+.grid-ath input[readonly]{
+  background:#f3f4f6;
+  color:#4b5563;
+}
+
+@media(max-width:700px){
+
+  .grid-ath{
+    grid-template-columns:1fr;
+  }
+
+}
