@@ -228,12 +228,109 @@ const claseFila =
   : '';
 
 
-let carpeta = '-';
+let documentos = '-';
 
 
-if(c.carpetaDrive){
+/* LEGAL → DNI */
 
-  carpeta = `
+if(
+  AREA === 'LEGAL' &&
+  c.archivoDni
+){
+
+  documentos = `
+
+    <a
+      href="${escapar(c.archivoDni)}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-carpeta"
+      title="Ver DNI"
+    >
+      📄 Ver DNI
+    </a>
+  `;
+
+}
+
+
+/* ATH → CARPETA COMPLETA */
+
+if(
+  AREA === 'ATH' &&
+  c.carpetaDrive
+){
+
+  documentos = `
+
+    <a
+      href="${escapar(c.carpetaDrive)}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-carpeta"
+      title="Abrir carpeta del candidato"
+    >
+      📁 Abrir
+    </a>
+  `;
+
+}
+
+
+/* OPERACIONES → CV */
+
+if(
+  AREA === 'OPERACIONES' &&
+  c.cv
+){
+
+  documentos = `
+
+    <a
+      href="${escapar(c.cv)}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-carpeta"
+      title="Ver CV"
+    >
+      📄 Ver CV
+    </a>
+  `;
+
+}
+
+
+/* GTH → CARPETA COMPLETA */
+
+if(
+  AREA === 'GTH' &&
+  c.carpetaDrive
+){
+
+  documentos = `
+
+    <a
+      href="${escapar(c.carpetaDrive)}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-carpeta"
+      title="Abrir carpeta del candidato"
+    >
+      📁 Abrir
+    </a>
+  `;
+
+}
+
+
+/* DOTACIÓN → CARPETA COMPLETA */
+
+if(
+  AREA === 'DOTACION' &&
+  c.carpetaDrive
+){
+
+  documentos = `
 
     <a
       href="${escapar(c.carpetaDrive)}"
@@ -291,9 +388,8 @@ return `
       </td>
 
 <td>
-  ${carpeta}
+  ${documentos}
 </td>
-
       <td>
         <button
           class="btn btn-accion"
