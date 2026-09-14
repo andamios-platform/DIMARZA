@@ -117,9 +117,45 @@ async function iniciar(){
     config.subtitulo;
 
 
+  const tituloDocumentos =
+    document.getElementById(
+      'tituloDocumentos'
+    );
+
+
+  if(tituloDocumentos){
+
+    if(AREA === 'LEGAL'){
+
+      tituloDocumentos.textContent =
+        'DNI';
+
+    }else if(AREA === 'OPERACIONES'){
+
+      tituloDocumentos.textContent =
+        'CV';
+
+    }else if(
+      AREA === 'ATH' ||
+      AREA === 'GTH' ||
+      AREA === 'DOTACION'
+    ){
+
+      tituloDocumentos.textContent =
+        'CARPETA';
+
+    }else{
+
+      tituloDocumentos.textContent =
+        'DOCUMENTOS';
+
+    }
+
+  }
+
+
   await cargarCandidatos();
 }
-
 
 
 async function cargarCandidatos(){
