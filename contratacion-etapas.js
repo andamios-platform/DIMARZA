@@ -1439,29 +1439,6 @@ function cargarCamposEspeciales(){
   contenedor.innerHTML = '';
 
 
-
-
-  if(AREA === 'GTH'){
-
-    contenedor.innerHTML = `
-
-      <div class="campo">
-
-        <label>
-          VH ACORDADO
-        </label>
-
-        <input
-          type="text"
-          value="${escapar(candidatoActual.vh)}"
-          readonly
-        >
-
-      </div>
-    `;
-  }
-
-
   if(AREA === 'DOTACION'){
 
     contenedor.innerHTML = `
