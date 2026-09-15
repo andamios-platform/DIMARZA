@@ -153,7 +153,21 @@ async function iniciar(){
 
   }
 
+const btnExportarExcel =
+  document.getElementById(
+    'btnExportarExcel'
+  );
 
+
+if(
+  AREA === 'GTH' &&
+  btnExportarExcel
+){
+
+  btnExportarExcel.style.display =
+    'inline-flex';
+
+}
   await cargarCandidatos();
 }
 
@@ -1960,4 +1974,235 @@ function escaparJS(v){
     "'",
     "\\'"
   );
+}
+/* =====================================================
+   GTH - EXPORTAR CONSOLIDADO
+===================================================== */
+
+async function exportarExcelGTH(){
+
+  if(AREA !== 'GTH')
+    return;
+
+
+  const boton =
+    document.getElementById(
+      'btnExportarExcel'
+    );
+
+
+  const textoOriginal =
+    boton?.textContent || '↓ Exportar Excel';
+
+
+  if(boton){
+
+    boton.disabled = true;
+
+    boton.textContent =
+      'Exportando...';
+
+  }
+
+
+  try{
+
+    const respuesta =
+      await fetch(
+        API +
+        '?accion=exportarDatosContrato&t=' +
+        Date.now()
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo obtener el consolidado.'
+      );
+
+    }
+
+
+    const filas =
+      resultado.datos || [];
+
+
+    if(!filas.length){
+
+      throw new Error(
+        'No existen datos para exportar.'
+      );
+
+    }
+
+
+    const encabezados = [
+
+      'FECHA DE PARADA',
+      'UNIDAD MINERA',
+      'FECHA DE ENVÍO PARA CONTRATO',
+      'RESPONSABLE',
+      'APELLIDOS Y NOMBRES',
+      'DNI',
+      'FECHA DE CADUCIDAD',
+      'EDAD',
+      'CELULAR 1',
+      'CELULAR 2',
+      'FECHA DE NACIMIENTO',
+      'CORREO ELECTRÓNICO',
+      'DIRECCIÓN',
+      'DISTRITO',
+      'PROVINCIA',
+      'DEPARTAMENTO',
+      'PROFESIÓN / CARRERA TÉCNICA',
+      'GRADO ACADÉMICO',
+      'INSTITUTO / UNIVERSIDAD',
+      'AÑO DE EGRESO',
+      'EXPERIENCIA',
+      'CARGO AL QUE CLASIFICA',
+      'APROBADO POR',
+      'TIPO REMUNERACIÓN ACORDADA',
+      'MONTO ACORDADO',
+      'MENSAJE DE CONFIRMACIÓN',
+      'PASAPORTE',
+      'VERIFICATIVA',
+      'ESTADO DE CONTRATO',
+      'PESO',
+      'TALLA',
+      'IMC',
+      'UNIFORME',
+      'ZAPATOS',
+      'COMENTARIO',
+      'FECHA DE INICIO ACORDADA',
+      'FECHA ÚLTIMA ACTUALIZACIÓN'
+
+    ];
+
+
+    /*
+     * CSV compatible con Excel.
+     * Usamos ; para que Excel en configuración
+     * regional de Perú lo abra correctamente.
+     */
+
+    const contenido = [
+      encabezados,
+      ...filas
+    ]
+    .map(fila =>
+      fila
+        .map(valor =>
+          '"' +
+          String(valor ?? '')
+            .replaceAll('"','""') +
+          '"'
+        )
+        .join(';')
+    )
+    .join('\r\n');
+
+
+    /*
+     * BOM UTF-8 para conservar correctamente:
+     * tildes, ñ, etc.
+     */
+
+    const blob =
+      new Blob(
+        [
+          '\uFEFF',
+          contenido
+        ],
+        {
+          type:
+            'text/csv;charset=utf-8;'
+        }
+      );
+
+
+    const url =
+      URL.createObjectURL(blob);
+
+
+    const enlace =
+      document.createElement('a');
+
+
+    const hoy =
+      new Date();
+
+
+    const fecha =
+      String(
+        hoy.getFullYear()
+      ) +
+      String(
+        hoy.getMonth() + 1
+      ).padStart(2,'0') +
+      String(
+        hoy.getDate()
+      ).padStart(2,'0');
+
+
+    enlace.href = url;
+
+    enlace.download =
+      'CONSOLIDADO_CONTRATACION_' +
+      fecha +
+      '.csv';
+
+
+    document.body.appendChild(
+      enlace
+    );
+
+
+    enlace.click();
+
+
+    enlace.remove();
+
+
+    URL.revokeObjectURL(
+      url
+    );
+
+
+    mostrarMensaje(
+      'Consolidado exportado correctamente.',
+      'ok'
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    mostrarMensaje(
+      error.message ||
+      'Error al exportar el consolidado.',
+      'error'
+    );
+
+
+  }finally{
+
+    if(boton){
+
+      boton.disabled = false;
+
+      boton.textContent =
+        textoOriginal;
+
+    }
+
+  }
+
 }
