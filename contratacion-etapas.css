@@ -1243,3 +1243,23 @@ a{
   border-color:#94a3b8;
   transform:translateY(-1px);
 }
+.filtros-entrevistas{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+}
+
+.filtros-entrevistas label{
+  font-size:12px;
+  font-weight:600;
+  color:#4b5563;
+}
+
+.filtros-entrevistas select{
+  min-width:240px;
+  padding:9px 10px;
+  border:1px solid #d1d5db;
+  border-radius:7px;
+  background:#fff;
+  font-size:13px;
+}
