@@ -1482,21 +1482,50 @@ function renderizarEntrevistas() {
 
       <div class="bloque-operaciones">
 
-        <div class="titulo-bloque-operaciones">
+<div class="titulo-bloque-operaciones">
 
-          <div>
+  <div>
 
-            <h2>
-              Entrevistas
-            </h2>
+    <h2>
+      Entrevistas
+    </h2>
 
-            <p>
-              Entrevistas programadas e historial de entrevistas realizadas.
-            </p>
+    <p>
+      Entrevistas programadas e historial de entrevistas realizadas.
+    </p>
 
-          </div>
+  </div>
 
-        </div>
+  <div class="filtros-entrevistas">
+
+    <label for="filtroEntrevistador">
+      Entrevistador
+    </label>
+
+    <select
+      id="filtroEntrevistador"
+      onchange="filtrarEntrevistas()"
+    >
+
+      <option value="">
+        Todos los entrevistadores
+      </option>
+
+      ${
+        entrevistadoresOperaciones
+          .map(nombre => `
+            <option value="${escaparHTML(nombre)}">
+              ${escaparHTML(nombre)}
+            </option>
+          `)
+          .join('')
+      }
+
+    </select>
+
+  </div>
+
+</div>
 
 
         <div class="tabla-responsive">
@@ -1537,11 +1566,16 @@ function renderizarEntrevistas() {
 
                         return `
 
-                          <tr class="${
-                            realizada
-                              ? 'fila-entrevista-realizada'
-                              : ''
-                          }">
+                              <tr
+                                class="${
+                                  realizada
+                                    ? 'fila-entrevista-realizada'
+                                    : ''
+                                }"
+                                data-entrevistador="${escaparHTML(
+                                  x.agenda.entrevistador || ''
+                                )}"
+                              >
 
                             <td>
 
@@ -1686,6 +1720,34 @@ function renderizarEntrevistas() {
       </div>
 
     `;
+
+}
+
+function filtrarEntrevistas(){
+
+  const filtro =
+    document.getElementById(
+      'filtroEntrevistador'
+    )?.value || '';
+
+
+  document
+    .querySelectorAll(
+      '#tabEntrevistas tbody tr[data-entrevistador]'
+    )
+    .forEach(fila => {
+
+      const entrevistador =
+        fila.dataset.entrevistador || '';
+
+
+      fila.style.display =
+        !filtro ||
+        entrevistador === filtro
+          ? ''
+          : 'none';
+
+    });
 
 }
 
