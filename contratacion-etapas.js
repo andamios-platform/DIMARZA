@@ -1976,7 +1976,7 @@ function escaparJS(v){
   );
 }
 /* =====================================================
-   GTH - EXPORTAR CONSOLIDADO
+   GTH - EXPORTAR CONSOLIDADO EXCEL
 ===================================================== */
 
 async function exportarExcelGTH(){
@@ -1992,7 +1992,8 @@ async function exportarExcelGTH(){
 
 
   const textoOriginal =
-    boton?.textContent || '↓ Exportar Excel';
+    boton?.textContent ||
+    '↓ Exportar Excel';
 
 
   if(boton){
@@ -2000,12 +2001,26 @@ async function exportarExcelGTH(){
     boton.disabled = true;
 
     boton.textContent =
-      'Exportando...';
+      'Generando Excel...';
 
   }
 
 
   try{
+
+    /*
+     * Verificar que SheetJS
+     * esté correctamente cargado.
+     */
+
+    if(typeof XLSX === 'undefined'){
+
+      throw new Error(
+        'No se pudo cargar el generador de Excel.'
+      );
+
+    }
+
 
     const respuesta =
       await fetch(
@@ -2041,6 +2056,17 @@ async function exportarExcelGTH(){
 
     }
 
+
+    /*
+     * 37 columnas del consolidado.
+     * No se incluyen:
+     *
+     * ID CANDIDATO
+     * ID REQUERIMIENTO
+     *
+     * Tampoco se exporta el VH
+     * solicitado en entrevista.
+     */
 
     const encabezados = [
 
@@ -2085,54 +2111,133 @@ async function exportarExcelGTH(){
     ];
 
 
-    /*
-     * CSV compatible con Excel.
-     * Usamos ; para que Excel en configuración
-     * regional de Perú lo abra correctamente.
-     */
-
-    const contenido = [
+    const datosExcel = [
       encabezados,
       ...filas
-    ]
-    .map(fila =>
-      fila
-        .map(valor =>
-          '"' +
-          String(valor ?? '')
-            .replaceAll('"','""') +
-          '"'
-        )
-        .join(';')
-    )
-    .join('\r\n');
+    ];
 
 
     /*
-     * BOM UTF-8 para conservar correctamente:
-     * tildes, ñ, etc.
+     * Crear hoja Excel.
      */
 
-    const blob =
-      new Blob(
-        [
-          '\uFEFF',
-          contenido
-        ],
-        {
-          type:
-            'text/csv;charset=utf-8;'
-        }
+    const hoja =
+      XLSX.utils.aoa_to_sheet(
+        datosExcel
       );
 
 
-    const url =
-      URL.createObjectURL(blob);
+    /*
+     * Autofiltro para las 37 columnas.
+     *
+     * A → AK = 37 columnas
+     */
+
+    hoja['!autofilter'] = {
+      ref:
+        'A1:AK' +
+        datosExcel.length
+    };
 
 
-    const enlace =
-      document.createElement('a');
+    /*
+     * Ancho de cada columna.
+     */
 
+    hoja['!cols'] = [
+
+      { wch: 16 }, // Fecha parada
+      { wch: 22 }, // Unidad minera
+      { wch: 24 }, // Fecha envío contrato
+      { wch: 24 }, // Responsable
+      { wch: 38 }, // Apellidos y nombres
+      { wch: 13 }, // DNI
+      { wch: 18 }, // Caducidad
+      { wch: 8  }, // Edad
+      { wch: 14 }, // Celular 1
+      { wch: 14 }, // Celular 2
+      { wch: 18 }, // Nacimiento
+      { wch: 32 }, // Correo
+      { wch: 38 }, // Dirección
+      { wch: 20 }, // Distrito
+      { wch: 20 }, // Provincia
+      { wch: 20 }, // Departamento
+      { wch: 34 }, // Profesión
+      { wch: 22 }, // Grado académico
+      { wch: 34 }, // Instituto
+      { wch: 16 }, // Año egreso
+      { wch: 32 }, // Experiencia
+      { wch: 30 }, // Cargo
+      { wch: 26 }, // Aprobado por
+      { wch: 30 }, // Tipo remuneración
+      { wch: 18 }, // Monto
+      { wch: 38 }, // Mensaje confirmación
+      { wch: 16 }, // Pasaporte
+      { wch: 20 }, // Verificativa
+      { wch: 22 }, // Estado contrato
+      { wch: 12 }, // Peso
+      { wch: 12 }, // Talla
+      { wch: 10 }, // IMC
+      { wch: 12 }, // Uniforme
+      { wch: 12 }, // Zapatos
+      { wch: 40 }, // Comentario
+      { wch: 24 }, // Fecha inicio acordada
+      { wch: 26 }  // Última actualización
+
+    ];
+
+
+    /*
+     * Altura del encabezado.
+     */
+
+    hoja['!rows'] = [
+      {
+        hpt: 32
+      }
+    ];
+
+
+    /*
+     * Crear libro Excel.
+     */
+
+    const libro =
+      XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+      libro,
+      hoja,
+      'CONTRATACIÓN'
+    );
+
+
+    /*
+     * Propiedades del archivo.
+     */
+
+    libro.Props = {
+
+      Title:
+        'Consolidado de Contratación',
+
+      Subject:
+        'Gestión de contratación DIMARZA',
+
+      Author:
+        'DIMARZA',
+
+      Company:
+        'DIMARZA'
+
+    };
+
+
+    /*
+     * Generar fecha para nombre
+     * del archivo.
+     */
 
     const hoy =
       new Date();
@@ -2150,32 +2255,20 @@ async function exportarExcelGTH(){
       ).padStart(2,'0');
 
 
-    enlace.href = url;
+    /*
+     * Descargar XLSX real.
+     */
 
-    enlace.download =
+    XLSX.writeFile(
+      libro,
       'CONSOLIDADO_CONTRATACION_' +
       fecha +
-      '.csv';
-
-
-    document.body.appendChild(
-      enlace
-    );
-
-
-    enlace.click();
-
-
-    enlace.remove();
-
-
-    URL.revokeObjectURL(
-      url
+      '.xlsx'
     );
 
 
     mostrarMensaje(
-      'Consolidado exportado correctamente.',
+      'Excel generado correctamente.',
       'ok'
     );
 
@@ -2187,7 +2280,7 @@ async function exportarExcelGTH(){
 
     mostrarMensaje(
       error.message ||
-      'Error al exportar el consolidado.',
+      'Error al generar el Excel.',
       'error'
     );
 
