@@ -81,9 +81,23 @@ document.getElementById(
 
   <section class="card">
 
-    <div class="titulo">
-      Candidatos pendientes
-    </div>
+<div class="cabecera-tabla">
+
+  <div class="titulo">
+    Candidatos pendientes
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-exportar"
+    id="btnExportarExcel"
+    onclick="exportarExcelGTH()"
+    style="display:none;"
+  >
+    ↓ Exportar Excel
+  </button>
+
+</div>
 
 
     <div class="tabla">
