@@ -947,6 +947,8 @@ async function iniciar() {
 
   await cargarRequerimientos();
 
+  await cargarResponsables();
+
   await cargarCandidatos();
 }
 
@@ -1028,7 +1030,95 @@ async function cargarRequerimientos() {
   }
 }
 
+async function cargarResponsables() {
 
+  const select =
+    document.getElementById(
+      'responsable'
+    );
+
+  try {
+
+    const respuesta =
+      await fetch(
+        API +
+        '?accion=listarResponsables' +
+        '&proceso=' +
+        encodeURIComponent('ATH - FILTRO DE CV') +
+        '&t=' +
+        Date.now()
+      );
+
+    const resultado =
+      await respuesta.json();
+
+    if (!resultado.ok) {
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudieron cargar los responsables'
+      );
+    }
+
+    const responsables =
+      resultado.responsables || [];
+
+    if (!responsables.length) {
+
+      select.innerHTML = `
+        <option value="">
+          No existen responsables disponibles
+        </option>
+      `;
+
+      return;
+    }
+
+    select.innerHTML = `
+      <option value="">
+        Seleccione...
+      </option>
+    `;
+
+    responsables.forEach(
+      responsable => {
+
+        const option =
+          document.createElement(
+            'option'
+          );
+
+        option.value =
+          responsable;
+
+        option.textContent =
+          responsable;
+
+        select.appendChild(
+          option
+        );
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      'Error cargando responsables:',
+      error
+    );
+
+    select.innerHTML = `
+      <option value="">
+        Error al cargar responsables
+      </option>
+    `;
+
+    mostrarMensaje(
+      'No se pudieron cargar los responsables de ATH.',
+      'error'
+    );
+  }
+}
 
 function llenarRequerimientos() {
 
