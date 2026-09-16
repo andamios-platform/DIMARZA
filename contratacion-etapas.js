@@ -1980,7 +1980,112 @@ function cargarCamposEspeciales(){
 
 
   contenedor.innerHTML = '';
+if(AREA === 'GTH'){
 
+  contenedor.innerHTML = `
+
+    <div
+      id="camposContratoFirmado"
+      style="display:none;"
+    >
+
+      <div class="campo">
+
+        <label>
+          FECHA DE FIRMA *
+        </label>
+
+        <input
+          type="date"
+          id="fechaFirmaContrato"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          INICIO DE VIGENCIA *
+        </label>
+
+        <input
+          type="date"
+          id="inicioVigenciaContrato"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          FIN DE CONTRATO *
+        </label>
+
+        <input
+          type="date"
+          id="finContrato"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          VIGENCIA
+        </label>
+
+        <input
+          type="text"
+          id="vigenciaContrato"
+          readonly
+          placeholder="Se calculará automáticamente"
+        >
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  const resultado =
+    document.getElementById(
+      'resultado'
+    );
+
+
+  resultado.addEventListener(
+    'change',
+    actualizarCamposContratoGTH
+  );
+
+
+  document
+    .getElementById(
+      'inicioVigenciaContrato'
+    )
+    .addEventListener(
+      'change',
+      calcularVigenciaContrato
+    );
+
+
+  document
+    .getElementById(
+      'finContrato'
+    )
+    .addEventListener(
+      'change',
+      calcularVigenciaContrato
+    );
+
+
+  return;
+
+}
 
   if(AREA === 'DOTACION'){
 
@@ -2017,8 +2122,95 @@ function cargarCamposEspeciales(){
   }
 }
 
+function actualizarCamposContratoGTH(){
+
+  const resultado =
+    document.getElementById(
+      'resultado'
+    ).value;
 
 
+  const campos =
+    document.getElementById(
+      'camposContratoFirmado'
+    );
+
+
+  if(!campos){
+    return;
+  }
+
+
+  campos.style.display =
+    resultado === 'FIRMADO 100%'
+      ? 'block'
+      : 'none';
+
+}
+function calcularVigenciaContrato(){
+
+  const inicio =
+    document.getElementById(
+      'inicioVigenciaContrato'
+    ).value;
+
+  const fin =
+    document.getElementById(
+      'finContrato'
+    ).value;
+
+  const campo =
+    document.getElementById(
+      'vigenciaContrato'
+    );
+
+
+  if(
+    !inicio ||
+    !fin
+  ){
+
+    campo.value = '';
+    return;
+
+  }
+
+
+  const fechaInicio =
+    new Date(
+      inicio + 'T00:00:00'
+    );
+
+  const fechaFin =
+    new Date(
+      fin + 'T00:00:00'
+    );
+
+
+  const diferencia =
+    Math.floor(
+      (
+        fechaFin -
+        fechaInicio
+      ) /
+      86400000
+    );
+
+
+  if(diferencia < 0){
+
+    campo.value =
+      'Fecha inválida';
+
+    return;
+
+  }
+
+
+  campo.value =
+    diferencia + 1 + ' días';
+
+}
 function cerrarModal(){
 
   document.getElementById(
@@ -2118,6 +2310,96 @@ async function guardarGestion(){
 
   };
 
+
+  /* =====================================================
+   GTH - FECHAS DEL CONTRATO
+===================================================== */
+
+if(AREA === 'GTH'){
+
+  const fechaFirmaContrato =
+    document.getElementById(
+      'fechaFirmaContrato'
+    )?.value || '';
+
+
+  const inicioVigenciaContrato =
+    document.getElementById(
+      'inicioVigenciaContrato'
+    )?.value || '';
+
+
+  const finContrato =
+    document.getElementById(
+      'finContrato'
+    )?.value || '';
+
+
+  if(resultado === 'FIRMADO 100%'){
+
+    if(!fechaFirmaContrato){
+
+      mostrarMensaje(
+        'Ingrese la fecha de firma del contrato.',
+        'error'
+      );
+
+      return;
+
+    }
+
+
+    if(!inicioVigenciaContrato){
+
+      mostrarMensaje(
+        'Ingrese la fecha de inicio de vigencia.',
+        'error'
+      );
+
+      return;
+
+    }
+
+
+    if(!finContrato){
+
+      mostrarMensaje(
+        'Ingrese la fecha de fin del contrato.',
+        'error'
+      );
+
+      return;
+
+    }
+
+
+    if(
+      new Date(finContrato + 'T00:00:00') <
+      new Date(inicioVigenciaContrato + 'T00:00:00')
+    ){
+
+      mostrarMensaje(
+        'La fecha de fin del contrato no puede ser anterior al inicio de vigencia.',
+        'error'
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  datos.fechaFirmaContrato =
+    fechaFirmaContrato;
+
+  datos.inicioVigenciaContrato =
+    inicioVigenciaContrato;
+
+  datos.finContrato =
+    finContrato;
+
+}
 
   /* =====================================================
      ATH
