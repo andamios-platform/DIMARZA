@@ -165,6 +165,35 @@ if(AREA === 'LEGAL'){
     'TOTAL GESTIONADOS';
 
 }
+
+ if(AREA === 'ATH'){
+
+  document.getElementById(
+    'nombreKpiPendientes'
+  ).textContent =
+    'PENDIENTES EN MI ÁREA';
+
+  document.getElementById(
+    'nombreKpiObservados'
+  ).textContent =
+    'OBSERVADOS EN PROCESO';
+
+  document.getElementById(
+    'nombreKpiTercero'
+  ).textContent =
+    'ENVIADOS A GTH';
+
+  document.getElementById(
+    'nombreKpiCuarto'
+  ).textContent =
+    'NO APTOS EN PROCESO';
+
+  document.getElementById(
+    'nombreKpiQuinto'
+  ).textContent =
+    'TOTAL GESTIONADOS ATH';
+
+}
   const tituloDocumentos =
     document.getElementById(
       'tituloDocumentos'
@@ -216,9 +245,12 @@ if(
     'inline-flex';
 
 }
-  await cargarCandidatos();
+await cargarCandidatos();
 
-if(AREA === 'LEGAL'){
+if(
+  AREA === 'LEGAL' ||
+  AREA === 'ATH'
+){
 
   await cargarKPIsArea();
 
@@ -544,34 +576,80 @@ async function cargarKPIsArea(){
       resultado.kpis || {};
 
 
-    document.getElementById(
-      'kpiPendientes'
-    ).textContent =
-      kpis.pendientes || 0;
+    /* ==============================
+       LEGAL
+    ============================== */
+
+    if(AREA === 'LEGAL'){
+
+      document.getElementById(
+        'kpiPendientes'
+      ).textContent =
+        kpis.pendientes || 0;
 
 
-    document.getElementById(
-      'kpiObservados'
-    ).textContent =
-      kpis.observados || 0;
+      document.getElementById(
+        'kpiObservados'
+      ).textContent =
+        kpis.observados || 0;
 
 
-    document.getElementById(
-      'kpiContratados'
-    ).textContent =
-      kpis.conformes || 0;
+      document.getElementById(
+        'kpiContratados'
+      ).textContent =
+        kpis.conformes || 0;
 
 
-    document.getElementById(
-      'kpiHabilitados'
-    ).textContent =
-      kpis.noAptos || 0;
+      document.getElementById(
+        'kpiHabilitados'
+      ).textContent =
+        kpis.noAptos || 0;
 
 
-    document.getElementById(
-      'kpiGestionados'
-    ).textContent =
-      kpis.gestionados || 0;
+      document.getElementById(
+        'kpiGestionados'
+      ).textContent =
+        kpis.gestionados || 0;
+
+    }
+
+
+    /* ==============================
+       ATH
+    ============================== */
+
+    if(AREA === 'ATH'){
+
+      document.getElementById(
+        'kpiPendientes'
+      ).textContent =
+        kpis.pendientes || 0;
+
+
+      document.getElementById(
+        'kpiObservados'
+      ).textContent =
+        kpis.observadosProceso || 0;
+
+
+      document.getElementById(
+        'kpiContratados'
+      ).textContent =
+        kpis.enviadosGTH || 0;
+
+
+      document.getElementById(
+        'kpiHabilitados'
+      ).textContent =
+        kpis.noAptosProceso || 0;
+
+
+      document.getElementById(
+        'kpiGestionados'
+      ).textContent =
+        kpis.gestionados || 0;
+
+    }
 
 
   }catch(error){
@@ -584,7 +662,6 @@ async function cargarKPIsArea(){
   }
 
 }
-
 function actualizarKPIs(){
 
   const pendientes =
@@ -2128,13 +2205,16 @@ fechaInicioAcordada:
     );
 
 
-   await cargarCandidatos();
-   
-   if(AREA === 'LEGAL'){
-   
-     await cargarKPIsArea();
-   
-   }
+await cargarCandidatos();
+
+if(
+  AREA === 'LEGAL' ||
+  AREA === 'ATH'
+){
+
+  await cargarKPIsArea();
+
+}
 
 
   }catch(error){
