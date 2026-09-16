@@ -1966,9 +1966,20 @@ function cargarResultados(){
       option.textContent = r;
 
       select.appendChild(option);
-    });
-}
 
+    });
+
+
+  /* GTH */
+
+  if(AREA === 'GTH'){
+
+    select.onchange =
+      actualizarCamposContratoGTH;
+
+  }
+
+}
 
 
 function cargarCamposEspeciales(){
@@ -2049,18 +2060,6 @@ if(AREA === 'GTH'){
     </div>
 
   `;
-
-
-  const resultado =
-    document.getElementById(
-      'resultado'
-    );
-
-
-  resultado.addEventListener(
-    'change',
-    actualizarCamposContratoGTH
-  );
 
 
   document
