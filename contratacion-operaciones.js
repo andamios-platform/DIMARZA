@@ -1279,7 +1279,7 @@ async function guardarAgenda(
 
     cerrarAgenda();
 
-    await cargarOperaciones();
+   window.location.reload();
 
   } catch (error) {
 
@@ -4441,7 +4441,7 @@ if (datos) {
 
   cerrarEntrevista();
 
-  await cargarOperaciones();
+  window.location.reload();
 
   return;
 
