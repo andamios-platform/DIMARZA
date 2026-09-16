@@ -614,42 +614,42 @@ async function cargarKPIsArea(){
     }
 
 
-    /* ==============================
-       ATH
-    ============================== */
+  /* ==============================
+   ATH
+============================== */
 
-    if(AREA === 'ATH'){
+if(AREA === 'ATH'){
 
-      document.getElementById(
-        'kpiPendientes'
-      ).textContent =
-        kpis.pendientes || 0;
-
-
-      document.getElementById(
-        'kpiObservados'
-      ).textContent =
-        kpis.observadosProceso || 0;
+  document.getElementById(
+    'kpiPendientes'
+  ).textContent =
+    kpis.pendientes || 0;
 
 
-      document.getElementById(
-        'kpiContratados'
-      ).textContent =
-        kpis.enviadosGTH || 0;
+  document.getElementById(
+    'kpiObservados'
+  ).textContent =
+    kpis.observados || 0;
 
 
-      document.getElementById(
-        'kpiHabilitados'
-      ).textContent =
-        kpis.noAptosProceso || 0;
+  document.getElementById(
+    'kpiContratados'
+  ).textContent =
+    kpis.conformes || 0;
 
 
-      document.getElementById(
-        'kpiGestionados'
-      ).textContent =
-        kpis.gestionados || 0;
+  document.getElementById(
+    'kpiHabilitados'
+  ).textContent =
+    kpis.noAptos || 0;
 
-    }
+
+  document.getElementById(
+    'kpiGestionados'
+  ).textContent =
+    kpis.gestionados || 0;
+
+}
 
 
   }catch(error){
