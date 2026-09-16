@@ -129,7 +129,36 @@ async function iniciar(){
     'subtituloPagina'
   ).textContent =
     config.subtitulo;
+ /* =====================================================
+   NOMBRES DE KPI SEGÚN ÁREA
+===================================================== */
 
+if(AREA === 'LEGAL'){
+
+  document.getElementById(
+    'nombreKpiPendientes'
+  ).textContent =
+    'PENDIENTES EN MI ÁREA';
+
+
+  document.getElementById(
+    'nombreKpiObservados'
+  ).textContent =
+    'OBSERVADOS';
+
+
+  document.getElementById(
+    'nombreKpiTercero'
+  ).textContent =
+    'APROBADOS POR LEGAL';
+
+
+  document.getElementById(
+    'nombreKpiCuarto'
+  ).textContent =
+    'TOTAL GESTIONADOS';
+
+}
 
   const tituloDocumentos =
     document.getElementById(
