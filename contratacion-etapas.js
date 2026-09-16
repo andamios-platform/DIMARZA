@@ -98,7 +98,21 @@ document.addEventListener(
   iniciar
 );
 
+const PROCESO_RESPONSABLE = {
 
+  LEGAL:
+    'LEGAL - VERIFICATIVA',
+
+  ATH:
+    'ATH - VALOR HORA',
+
+  GTH:
+    'GTH - FIRMA DE CONTRATO',
+
+  DOTACION:
+    'DOTACION - ACREDITACION'
+
+};
 async function iniciar(){
 
   const config =
@@ -519,7 +533,144 @@ function actualizarKPIs(){
 }
 
 
+async function cargarResponsablesArea(
+  responsableActual = ''
+){
 
+  const select =
+    document.getElementById(
+      'responsable'
+    );
+
+
+  if(!select)
+    return;
+
+
+  const proceso =
+    PROCESO_RESPONSABLE[AREA];
+
+
+  if(!proceso){
+
+    select.innerHTML = `
+      <option value="">
+        No configurado
+      </option>
+    `;
+
+    return;
+  }
+
+
+  select.innerHTML = `
+    <option value="">
+      Cargando responsables...
+    </option>
+  `;
+
+
+  try{
+
+    const respuesta =
+      await fetch(
+        API +
+        '?accion=listarResponsables' +
+        '&proceso=' +
+        encodeURIComponent(proceso) +
+        '&t=' +
+        Date.now()
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudieron cargar los responsables.'
+      );
+    }
+
+
+    const responsables =
+      resultado.responsables || [];
+
+
+    select.innerHTML = `
+      <option value="">
+        Seleccione...
+      </option>
+    `;
+
+
+    responsables.forEach(
+      nombre => {
+
+        const option =
+          document.createElement(
+            'option'
+          );
+
+        option.value =
+          nombre;
+
+        option.textContent =
+          nombre;
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+    /*
+     * Si el candidato estaba OBSERVADO,
+     * conserva/preselecciona el responsable
+     * anterior si sigue en la lista.
+     */
+
+    if(responsableActual){
+
+      select.value =
+        responsableActual;
+
+    }
+
+
+    if(!responsables.length){
+
+      select.innerHTML = `
+        <option value="">
+          No existen responsables disponibles
+        </option>
+      `;
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      'Error cargando responsables:',
+      error
+    );
+
+
+    select.innerHTML = `
+      <option value="">
+        Error al cargar responsables
+      </option>
+    `;
+
+  }
+
+}
 async function abrirGestion(id){
 
  
@@ -629,11 +780,10 @@ if(AREA === 'ATH'){
 }
 
 
-document.getElementById(
-  'responsable'
-).value = '';
-
-
+await cargarResponsablesArea(
+  candidatoActual
+    .ultimoResponsableArea || ''
+);
 document.getElementById(
   'observacion'
 ).value =
@@ -1527,7 +1677,7 @@ async function guardarGestion(){
   if(!responsable){
 
     mostrarMensaje(
-      'Ingrese responsable.',
+      'Seleccione un responsable.',
       'error'
     );
 
