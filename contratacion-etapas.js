@@ -280,29 +280,134 @@ async function cargarCandidatos(){
 
   try{
 
-    const respuesta =
+    /* =====================================================
+       CANDIDATOS ACTUALMENTE PENDIENTES EN EL ÁREA
+    ===================================================== */
+
+    const respuestaPendientes =
       await fetch(
         API +
         '?accion=listarPendientesArea&area=' +
-        encodeURIComponent(AREA)
+        encodeURIComponent(AREA) +
+        '&t=' +
+        Date.now()
       );
 
 
-    const resultado =
-      await respuesta.json();
+    const resultadoPendientes =
+      await respuestaPendientes.json();
 
 
-    if(!resultado.ok){
+    if(!resultadoPendientes.ok){
 
       throw new Error(
-        resultado.mensaje
+        resultadoPendientes.mensaje
       );
+
+    }
+
+
+    let lista =
+      (resultadoPendientes.candidatos || [])
+        .map(c => ({
+          ...c,
+          gestionATH:
+            'PENDIENTE'
+        }));
+
+
+    /* =====================================================
+       ATH
+       TAMBIÉN MOSTRAR LOS YA GESTIONADOS POR ATH
+    ===================================================== */
+
+    if(AREA === 'ATH'){
+
+      const respuestaGestionados =
+        await fetch(
+          API +
+          '?accion=listarGestionadosATH' +
+          '&t=' +
+          Date.now()
+        );
+
+
+      const resultadoGestionados =
+        await respuestaGestionados.json();
+
+
+      if(!resultadoGestionados.ok){
+
+        throw new Error(
+          resultadoGestionados.mensaje ||
+          'No se pudieron cargar los candidatos gestionados por ATH.'
+        );
+
+      }
+
+
+      const gestionados =
+        (resultadoGestionados.candidatos || [])
+          .map(c => ({
+            ...c,
+            gestionATH:
+              'GESTIONADO'
+          }));
+
+
+      /*
+       * Evitamos duplicados.
+       *
+       * Si por alguna razón un candidato
+       * aparece en ambas listas,
+       * prevalece el pendiente actual.
+       */
+
+      const idsExistentes =
+        new Set(
+          lista.map(
+            c =>
+              String(
+                c.idCandidato
+              )
+          )
+        );
+
+
+      gestionados.forEach(
+        candidato => {
+
+          if(
+            !idsExistentes.has(
+              String(
+                candidato.idCandidato
+              )
+            )
+          ){
+
+            lista.push(
+              candidato
+            );
+
+          }
+
+        }
+      );
+
     }
 
 
     candidatos =
-      resultado.candidatos || [];
+      lista;
 
+
+    /*
+     * Para LEGAL / otras áreas continúa
+     * funcionando como antes.
+     *
+     * ATH luego obtiene sus indicadores
+     * reales mediante cargarKPIsArea().
+     */
 
     actualizarKPIs();
 
@@ -315,24 +420,26 @@ async function cargarCandidatos(){
             colspan="11"
             class="vacio"
           >
-            No existen candidatos pendientes.
+            No existen candidatos.
           </td>
         </tr>
       `;
 
       return;
+
     }
 
 
     tbody.innerHTML =
       candidatos
-      .map(crearFila)
-      .join('');
+        .map(crearFila)
+        .join('');
 
 
   }catch(error){
 
     console.error(error);
+
 
     tbody.innerHTML = `
       <tr>
@@ -344,9 +451,10 @@ async function cargarCandidatos(){
         </td>
       </tr>
     `;
-  }
-}
 
+  }
+
+}
 
 
 function crearFila(c){
@@ -527,6 +635,28 @@ return `
   ${documentos}
 </td>
       <td>
+
+  ${
+    AREA === 'ATH' &&
+    c.gestionATH === 'GESTIONADO'
+
+      ? `
+
+        <button
+          class="btn btn-accion"
+          onclick="
+            abrirGestion(
+              '${escaparJS(c.idCandidato)}'
+            )
+          "
+        >
+          ✏️ Editar
+        </button>
+
+      `
+
+      : `
+
         <button
           class="btn btn-accion"
           onclick="
@@ -537,8 +667,11 @@ return `
         >
           Gestionar
         </button>
-      </td>
 
+      `
+  }
+
+</td>
     </tr>
   `;
 }
@@ -872,7 +1005,9 @@ async function abrirGestion(id){
 
   if(!candidatoActual)
     return;
-
+ const esEdicionATH =
+  AREA === 'ATH' &&
+  candidatoActual.gestionATH === 'GESTIONADO';
 
   document.getElementById(
     'modalNombre'
@@ -957,7 +1092,26 @@ document.getElementById(
 
   cargarResultados();
 
+if(esEdicionATH){
 
+  document.getElementById(
+    'resultado'
+  ).closest(
+    '.campo'
+  ).style.display =
+    'none';
+
+}else{
+
+  document.getElementById(
+    'resultado'
+  ).closest(
+    '.campo'
+  ).style.display =
+    '';
+
+}
+ 
 if(AREA === 'ATH'){
 
   await cargarDatosContratoATH();
@@ -978,7 +1132,26 @@ document.getElementById(
 ).value =
   candidatoActual
     .ultimaObservacionArea || '';
+const btnGuardar =
+  document.getElementById(
+    'btnGuardar'
+  );
 
+
+if(
+  AREA === 'ATH' &&
+  candidatoActual.gestionATH === 'GESTIONADO'
+){
+
+  btnGuardar.textContent =
+    'Guardar cambios';
+
+}else{
+
+  btnGuardar.textContent =
+    'Guardar';
+
+}
 
 document.getElementById(
   'modal'
@@ -1834,6 +2007,11 @@ async function guardarGestion(){
     return;
 
 
+  const esEdicionATH =
+    AREA === 'ATH' &&
+    candidatoActual.gestionATH === 'GESTIONADO';
+
+
   const resultado =
     document.getElementById(
       'resultado'
@@ -1852,7 +2030,18 @@ async function guardarGestion(){
     ).value.trim();
 
 
-  if(!resultado){
+  /* =====================================================
+     VALIDACIONES GENERALES
+
+     En edición ATH:
+     - NO pedimos resultado
+     - NO pedimos nuevamente responsable
+  ===================================================== */
+
+  if(
+    !esEdicionATH &&
+    !resultado
+  ){
 
     mostrarMensaje(
       'Seleccione un resultado.',
@@ -1863,7 +2052,10 @@ async function guardarGestion(){
   }
 
 
-  if(!responsable){
+  if(
+    !esEdicionATH &&
+    !responsable
+  ){
 
     mostrarMensaje(
       'Seleccione un responsable.',
@@ -1873,6 +2065,10 @@ async function guardarGestion(){
     return;
   }
 
+
+  /* =====================================================
+     DATOS DE LA GESTIÓN DE ETAPA
+  ===================================================== */
 
   const datos = {
 
@@ -1888,93 +2084,112 @@ async function guardarGestion(){
     resultado,
     responsable,
     observacion
+
   };
 
 
+  /* =====================================================
+     ATH
+  ===================================================== */
+
+  if(AREA === 'ATH'){
+
+    const tipoRemuneracion =
+      document.getElementById(
+        'tipoRemuneracionAcordada'
+      )?.value || '';
 
 
-if(AREA === 'ATH'){
-
-  const tipoRemuneracion =
-    document.getElementById(
-      'tipoRemuneracionAcordada'
-    )?.value || '';
+    const montoAcordado =
+      document.getElementById(
+        'montoAcordado'
+      )?.value || '';
 
 
-  const montoAcordado =
-    document.getElementById(
-      'montoAcordado'
-    )?.value || '';
+    const fechaInicioAcordada =
+      document.getElementById(
+        'fechaInicioAcordada'
+      )?.value || '';
 
 
-  const fechaInicioAcordada =
-    document.getElementById(
-      'fechaInicioAcordada'
-    )?.value || '';
+    /*
+     * Cuando:
+     *
+     * 1. se está cerrando ATH por primera vez
+     * 2. O se está editando un ATH ya cerrado
+     *
+     * estos datos deben ser válidos.
+     */
+
+    if(
+      resultado === 'CERRADO' ||
+      esEdicionATH
+    ){
+
+      if(!tipoRemuneracion){
+
+        mostrarMensaje(
+          'Seleccione el tipo de remuneración acordada.',
+          'error'
+        );
+
+        return;
+
+      }
 
 
-if(
-  resultado === 'CERRADO'
-){
+      if(
+        !montoAcordado ||
+        Number(montoAcordado) <= 0
+      ){
 
-  if(!tipoRemuneracion){
+        mostrarMensaje(
+          'Ingrese un monto acordado válido.',
+          'error'
+        );
 
-    mostrarMensaje(
-      'Seleccione el tipo de remuneración acordada.',
-      'error'
-    );
+        return;
 
-    return;
+      }
+
+
+      if(!fechaInicioAcordada){
+
+        mostrarMensaje(
+          'Ingrese la fecha de inicio acordada.',
+          'error'
+        );
+
+        return;
+
+      }
+
+    }
+
+
+    datos.tipoRemuneracionAcordada =
+      tipoRemuneracion;
+
+
+    datos.montoAcordado =
+      montoAcordado;
+
+
+    datos.fechaInicioAcordada =
+      fechaInicioAcordada;
+
+
+    datos.vh =
+      tipoRemuneracion === 'VALOR HORA'
+        ? montoAcordado
+        : '';
+
   }
 
 
-  if(
-    !montoAcordado ||
-    Number(montoAcordado) <= 0
-  ){
-
-    mostrarMensaje(
-      'Ingrese un monto acordado válido.',
-      'error'
-    );
-
-    return;
-  }
-
-
-  if(!fechaInicioAcordada){
-
-    mostrarMensaje(
-      'Ingrese la fecha de inicio acordada.',
-      'error'
-    );
-
-    return;
-  }
-
-}
-
-
-/*
- * Estos datos se envían tanto si está
- * CERRADO como si queda OBSERVADO.
- */
-
-datos.tipoRemuneracionAcordada =
-  tipoRemuneracion;
-
-datos.montoAcordado =
-  montoAcordado;
-
-datos.fechaInicioAcordada =
-  fechaInicioAcordada;
-
-datos.vh =
-  tipoRemuneracion === 'VALOR HORA'
-    ? montoAcordado
-    : '';
-  }
-
+  /* =====================================================
+     DOTACIÓN
+  ===================================================== */
 
   if(AREA === 'DOTACION'){
 
@@ -1988,6 +2203,7 @@ datos.vh =
       document.getElementById(
         'lugarAcreditacion'
       )?.value || '';
+
   }
 
 
@@ -2000,186 +2216,291 @@ datos.vh =
   boton.disabled = true;
 
   boton.textContent =
-    'Guardando...';
+    esEdicionATH
+      ? 'Guardando cambios...'
+      : 'Guardando...';
 
 
   try{
+
+
+    /* =====================================================
+       GUARDAR DATOS PARA CONTRATO - ATH
+
+       Se ejecuta:
+       - al cerrar
+       - al observar
+       - al editar un registro ya gestionado
+    ===================================================== */
+
     if(
-  AREA === 'ATH' &&
-  (
-    resultado === 'CERRADO' ||
-    resultado === 'OBSERVADO'
-  )
-){
+      AREA === 'ATH' &&
+      (
+        resultado === 'CERRADO' ||
+        resultado === 'OBSERVADO' ||
+        esEdicionATH
+      )
+    ){
 
-  const datosContrato = {
+      /*
+       * En modo edición el select de responsable
+       * puede estar vacío.
+       *
+       * Conservamos el responsable que tenía
+       * anteriormente el registro.
+       */
 
-    accion:
-      'guardarDatosContrato',
-
-    idCandidato:
-      candidatoActual.idCandidato,
-
-   tipoRemuneracionAcordada:
-  document.getElementById(
-    'tipoRemuneracionAcordada'
-  )?.value || '',
-
-montoAcordado:
-  document.getElementById(
-    'montoAcordado'
-  )?.value || '',
-
-fechaInicioAcordada:
-  document.getElementById(
-    'fechaInicioAcordada'
-  )?.value || '',
-
-    fechaEnvioContrato:
-      document.getElementById(
-        'fechaEnvioContrato'
-      )?.value || '',
-
-    responsable,
-
-    fechaCaducidad:
-      document.getElementById(
-        'fechaCaducidad'
-      )?.value || '',
-
-    edad:
-      document.getElementById(
-        'edad'
-      )?.value || '',
-
-    celular2:
-      document.getElementById(
-        'celular2'
-      )?.value || '',
-
-    fechaNacimiento:
-      document.getElementById(
-        'fechaNacimiento'
-      )?.value || '',
-
-    correo:
-      document.getElementById(
-        'correo'
-      )?.value.trim() || '',
-
-    direccion:
-      document.getElementById(
-        'direccion'
-      )?.value.trim() || '',
-
-    distrito:
-      document.getElementById(
-        'distrito'
-      )?.value.trim() || '',
-
-    provincia:
-      document.getElementById(
-        'provincia'
-      )?.value.trim() || '',
-
-    departamento:
-      document.getElementById(
-        'departamento'
-      )?.value.trim() || '',
-
-    profesion:
-      document.getElementById(
-        'profesion'
-      )?.value.trim() || '',
-
-    instituto:
-      document.getElementById(
-        'instituto'
-      )?.value.trim() || '',
-
-    anioEgreso:
-      document.getElementById(
-        'anioEgreso'
-      )?.value || '',
-
-    mensajeConfirmacion:
-      document.getElementById(
-        'mensajeConfirmacion'
-      )?.value.trim() || '',
-
-    pasaporte:
-      document.getElementById(
-        'pasaporte'
-      )?.value.trim() || '',
-
-    peso:
-      document.getElementById(
-        'peso'
-      )?.value || '',
-
-    talla:
-      document.getElementById(
-        'talla'
-      )?.value || '',
-
-    uniforme:
-      document.getElementById(
-        'uniforme'
-      )?.value.trim() || '',
-
-    zapatos:
-      document.getElementById(
-        'zapatos'
-      )?.value.trim() || '',
-
-    comentario:
-      document.getElementById(
-        'comentarioContrato'
-      )?.value.trim() || ''
-
-  };
+      const responsableContrato =
+        esEdicionATH
+          ? (
+              responsable ||
+              candidatoActual.responsableATH ||
+              candidatoActual.ultimoResponsableArea ||
+              ''
+            )
+          : responsable;
 
 
-  const respuestaContrato =
-    await fetch(
-      API,
-      {
-        method:'POST',
+      const datosContrato = {
 
-        headers:{
-          'Content-Type':
-            'text/plain;charset=utf-8'
-        },
+        accion:
+          'guardarDatosContrato',
 
-        body:
-          JSON.stringify(
-            datosContrato
-          )
+        idCandidato:
+          candidatoActual.idCandidato,
+
+
+        tipoRemuneracionAcordada:
+          document.getElementById(
+            'tipoRemuneracionAcordada'
+          )?.value || '',
+
+
+        montoAcordado:
+          document.getElementById(
+            'montoAcordado'
+          )?.value || '',
+
+
+        fechaInicioAcordada:
+          document.getElementById(
+            'fechaInicioAcordada'
+          )?.value || '',
+
+
+        fechaEnvioContrato:
+          document.getElementById(
+            'fechaEnvioContrato'
+          )?.value || '',
+
+
+        responsable:
+          responsableContrato,
+
+
+        fechaCaducidad:
+          document.getElementById(
+            'fechaCaducidad'
+          )?.value || '',
+
+
+        edad:
+          document.getElementById(
+            'edad'
+          )?.value || '',
+
+
+        celular2:
+          document.getElementById(
+            'celular2'
+          )?.value || '',
+
+
+        fechaNacimiento:
+          document.getElementById(
+            'fechaNacimiento'
+          )?.value || '',
+
+
+        correo:
+          document.getElementById(
+            'correo'
+          )?.value.trim() || '',
+
+
+        direccion:
+          document.getElementById(
+            'direccion'
+          )?.value.trim() || '',
+
+
+        distrito:
+          document.getElementById(
+            'distrito'
+          )?.value.trim() || '',
+
+
+        provincia:
+          document.getElementById(
+            'provincia'
+          )?.value.trim() || '',
+
+
+        departamento:
+          document.getElementById(
+            'departamento'
+          )?.value.trim() || '',
+
+
+        profesion:
+          document.getElementById(
+            'profesion'
+          )?.value.trim() || '',
+
+
+        instituto:
+          document.getElementById(
+            'instituto'
+          )?.value.trim() || '',
+
+
+        anioEgreso:
+          document.getElementById(
+            'anioEgreso'
+          )?.value || '',
+
+
+        mensajeConfirmacion:
+          document.getElementById(
+            'mensajeConfirmacion'
+          )?.value.trim() || '',
+
+
+        pasaporte:
+          document.getElementById(
+            'pasaporte'
+          )?.value.trim() || '',
+
+
+        peso:
+          document.getElementById(
+            'peso'
+          )?.value || '',
+
+
+        talla:
+          document.getElementById(
+            'talla'
+          )?.value || '',
+
+
+        uniforme:
+          document.getElementById(
+            'uniforme'
+          )?.value.trim() || '',
+
+
+        zapatos:
+          document.getElementById(
+            'zapatos'
+          )?.value.trim() || '',
+
+
+        comentario:
+          document.getElementById(
+            'comentarioContrato'
+          )?.value.trim() || ''
+
+      };
+
+
+      const respuestaContrato =
+        await fetch(
+          API,
+          {
+            method:
+              'POST',
+
+            headers:{
+              'Content-Type':
+                'text/plain;charset=utf-8'
+            },
+
+            body:
+              JSON.stringify(
+                datosContrato
+              )
+          }
+        );
+
+
+      const contratoJson =
+        await respuestaContrato.json();
+
+
+      if(!contratoJson.ok){
+
+        throw new Error(
+          contratoJson.mensaje ||
+          'No se pudieron guardar los datos para contrato.'
+        );
+
       }
-    );
 
 
-  const contratoJson =
-    await respuestaContrato.json();
+      /* =================================================
+         EDICIÓN DE UN ATH YA GESTIONADO
+
+         AQUÍ TERMINAMOS.
+
+         NO:
+         - actualizarEtapa
+         - cambiar área
+         - crear seguimiento
+         - volver a enviar a GTH
+      ================================================= */
+
+      if(esEdicionATH){
+
+        cerrarModal();
 
 
-  if(!contratoJson.ok){
+        mostrarMensaje(
+          'Datos actualizados correctamente.',
+          'ok'
+        );
 
-    throw new Error(
-      contratoJson.mensaje ||
-      'No se pudieron guardar los datos para contrato.'
-    );
 
-  }
+        await cargarCandidatos();
 
-}
+        await cargarKPIsArea();
+
+
+        return;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       GESTIÓN NORMAL
+
+       Solo llegamos aquí cuando NO estamos
+       editando un ATH ya gestionado.
+    ===================================================== */
+
     const respuesta =
       await fetch(
         API,
         {
-          method:'POST',
+          method:
+            'POST',
+
           body:
-            JSON.stringify(datos)
+            JSON.stringify(
+              datos
+            )
         }
       );
 
@@ -2193,6 +2514,7 @@ fechaInicioAcordada:
       throw new Error(
         respuestaJson.mensaje
       );
+
     }
 
 
@@ -2205,19 +2527,25 @@ fechaInicioAcordada:
     );
 
 
-await cargarCandidatos();
+    await cargarCandidatos();
 
-if(
-  AREA === 'LEGAL' ||
-  AREA === 'ATH'
-){
 
-  await cargarKPIsArea();
+    if(
+      AREA === 'LEGAL' ||
+      AREA === 'ATH'
+    ){
 
-}
+      await cargarKPIsArea();
+
+    }
 
 
   }catch(error){
+
+    console.error(
+      error
+    );
+
 
     mostrarMensaje(
       error.message,
@@ -2227,14 +2555,24 @@ if(
 
   }finally{
 
-    boton.disabled = false;
+    boton.disabled =
+      false;
+
+
+    /*
+     * cerrarModal() pone candidatoActual = null,
+     * por eso aquí no volvemos a consultar
+     * esEdicionATH desde candidatoActual.
+     */
 
     boton.textContent =
-      'Guardar';
+      esEdicionATH
+        ? 'Guardar cambios'
+        : 'Guardar';
+
   }
+
 }
-
-
 
 function mostrarMensaje(
   texto,
