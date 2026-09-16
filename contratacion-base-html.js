@@ -11,84 +11,103 @@ document.getElementById(
   ></div>
 
 
-  <section class="kpis">
+<section class="kpis">
 
-    <div class="kpi">
+  <div class="kpi">
 
-<div
-  class="kpi-nombre"
-  id="nombreKpiPendientes"
->
-  PENDIENTES EN MI ÁREA
-</div>
-
-      <div
-        class="kpi-valor"
-        id="kpiPendientes"
-      >
-        0
-      </div>
-
+    <div
+      class="kpi-nombre"
+      id="nombreKpiPendientes"
+    >
+      PENDIENTES EN MI ÁREA
     </div>
 
-
-    <div class="kpi">
-
-<div
-  class="kpi-nombre"
-  id="nombreKpiObservados"
->
-  OBSERVADOS
-</div>
-
-      <div
-        class="kpi-valor"
-        id="kpiObservados"
-      >
-        0
-      </div>
-
+    <div
+      class="kpi-valor"
+      id="kpiPendientes"
+    >
+      0
     </div>
 
+  </div>
 
-    <div class="kpi">
 
-<div
-  class="kpi-nombre"
-  id="nombreKpiTercero"
->
-  CONTRATADOS
-</div>
+  <div class="kpi">
 
-      <div
-        class="kpi-valor"
-        id="kpiContratados"
-      >
-        0
-      </div>
-
+    <div
+      class="kpi-nombre"
+      id="nombreKpiObservados"
+    >
+      OBSERVADOS
     </div>
 
-
-    <div class="kpi">
-
-<div
-  class="kpi-nombre"
-  id="nombreKpiCuarto"
->
-  HABILITADOS
-</div>
-
-      <div
-        class="kpi-valor"
-        id="kpiHabilitados"
-      >
-        0
-      </div>
-
+    <div
+      class="kpi-valor"
+      id="kpiObservados"
+    >
+      0
     </div>
 
-  </section>
+  </div>
+
+
+  <div class="kpi">
+
+    <div
+      class="kpi-nombre"
+      id="nombreKpiTercero"
+    >
+      CONFORMES
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiContratados"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div
+      class="kpi-nombre"
+      id="nombreKpiCuarto"
+    >
+      NO APTOS
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiHabilitados"
+    >
+      0
+    </div>
+
+  </div>
+
+
+  <div class="kpi">
+
+    <div
+      class="kpi-nombre"
+      id="nombreKpiQuinto"
+    >
+      TOTAL GESTIONADOS
+    </div>
+
+    <div
+      class="kpi-valor"
+      id="kpiGestionados"
+    >
+      0
+    </div>
+
+  </div>
+
+</section>
 
 
   <section class="card">
