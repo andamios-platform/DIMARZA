@@ -150,16 +150,21 @@ if(AREA === 'LEGAL'){
   document.getElementById(
     'nombreKpiTercero'
   ).textContent =
-    'APROBADOS POR LEGAL';
+    'CONFORMES';
 
 
   document.getElementById(
     'nombreKpiCuarto'
   ).textContent =
+    'NO APTOS';
+
+
+  document.getElementById(
+    'nombreKpiQuinto'
+  ).textContent =
     'TOTAL GESTIONADOS';
 
 }
-
   const tituloDocumentos =
     document.getElementById(
       'tituloDocumentos'
@@ -212,6 +217,12 @@ if(
 
 }
   await cargarCandidatos();
+
+if(AREA === 'LEGAL'){
+
+  await cargarKPIsArea();
+
+}
 }
 
 
@@ -500,7 +511,79 @@ return `
   `;
 }
 
+async function cargarKPIsArea(){
 
+  try{
+
+    const respuesta =
+      await fetch(
+        API +
+        '?accion=obtenerKPIsArea' +
+        '&area=' +
+        encodeURIComponent(AREA) +
+        '&t=' +
+        Date.now()
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if(!resultado.ok){
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudieron cargar los indicadores.'
+      );
+
+    }
+
+
+    const kpis =
+      resultado.kpis || {};
+
+
+    document.getElementById(
+      'kpiPendientes'
+    ).textContent =
+      kpis.pendientes || 0;
+
+
+    document.getElementById(
+      'kpiObservados'
+    ).textContent =
+      kpis.observados || 0;
+
+
+    document.getElementById(
+      'kpiContratados'
+    ).textContent =
+      kpis.conformes || 0;
+
+
+    document.getElementById(
+      'kpiHabilitados'
+    ).textContent =
+      kpis.noAptos || 0;
+
+
+    document.getElementById(
+      'kpiGestionados'
+    ).textContent =
+      kpis.gestionados || 0;
+
+
+  }catch(error){
+
+    console.error(
+      'Error cargando KPIs:',
+      error
+    );
+
+  }
+
+}
 
 function actualizarKPIs(){
 
@@ -2045,7 +2128,13 @@ fechaInicioAcordada:
     );
 
 
-    await cargarCandidatos();
+   await cargarCandidatos();
+   
+   if(AREA === 'LEGAL'){
+   
+     await cargarKPIsArea();
+   
+   }
 
 
   }catch(error){
