@@ -199,18 +199,23 @@ document.getElementById(
     ></div>
 
 
-    <div class="campo">
+<div class="campo">
 
-      <label>
-        RESPONSABLE *
-      </label>
+  <label>
+    RESPONSABLE *
+  </label>
 
-      <input
-        type="text"
-        id="responsable"
-      >
+  <select
+    id="responsable"
+  >
 
-    </div>
+    <option value="">
+      Cargando responsables...
+    </option>
+
+  </select>
+
+</div>
 
 
     <div class="campo">
