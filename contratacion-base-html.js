@@ -15,9 +15,12 @@ document.getElementById(
 
     <div class="kpi">
 
-      <div class="kpi-nombre">
-        PENDIENTES EN MI ÁREA
-      </div>
+<div
+  class="kpi-nombre"
+  id="nombreKpiPendientes"
+>
+  PENDIENTES EN MI ÁREA
+</div>
 
       <div
         class="kpi-valor"
@@ -31,9 +34,12 @@ document.getElementById(
 
     <div class="kpi">
 
-      <div class="kpi-nombre">
-        OBSERVADOS
-      </div>
+<div
+  class="kpi-nombre"
+  id="nombreKpiObservados"
+>
+  OBSERVADOS
+</div>
 
       <div
         class="kpi-valor"
@@ -47,9 +53,12 @@ document.getElementById(
 
     <div class="kpi">
 
-      <div class="kpi-nombre">
-        CONTRATADOS
-      </div>
+<div
+  class="kpi-nombre"
+  id="nombreKpiTercero"
+>
+  CONTRATADOS
+</div>
 
       <div
         class="kpi-valor"
@@ -63,9 +72,12 @@ document.getElementById(
 
     <div class="kpi">
 
-      <div class="kpi-nombre">
-        HABILITADOS
-      </div>
+<div
+  class="kpi-nombre"
+  id="nombreKpiCuarto"
+>
+  HABILITADOS
+</div>
 
       <div
         class="kpi-valor"
