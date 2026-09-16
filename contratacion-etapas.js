@@ -194,6 +194,37 @@ if(AREA === 'LEGAL'){
     'TOTAL GESTIONADOS ATH';
 
 }
+
+ if(AREA === 'GTH'){
+
+  document.getElementById(
+    'nombreKpiPendientes'
+  ).textContent =
+    'PENDIENTES EN GTH';
+
+  document.getElementById(
+    'nombreKpiObservados'
+  ).textContent =
+    'OBSERVADOS EN GTH';
+
+  document.getElementById(
+    'nombreKpiTercero'
+  ).textContent =
+    'CONTRATOS FIRMADOS';
+
+  document.getElementById(
+    'nombreKpiCuarto'
+  ).textContent =
+    'CONTRATOS POR VENCER';
+
+  document.getElementById(
+    'nombreKpiQuinto'
+  ).textContent =
+    'TOTAL GESTIONADOS GTH';
+
+}
+
+ 
   const tituloDocumentos =
     document.getElementById(
       'tituloDocumentos'
