@@ -595,16 +595,83 @@ if(AREA === 'GTH'){
 function crearFila(c){
 
 
- const estado =
+const estado =
   String(
     c.estadoGeneral || ''
   ).toUpperCase();
 
 
-const claseFila =
+let claseFila =
   estado === 'OBSERVADO'
-  ? 'fila-observada'
-  : '';
+    ? 'fila-observada'
+    : '';
+
+
+/* =====================================================
+   GTH - ALERTA DE VENCIMIENTO DE CONTRATO
+===================================================== */
+
+if(
+  AREA === 'GTH' &&
+  c.finContrato
+){
+
+  const partes =
+    String(
+      c.finContrato
+    ).split('/');
+
+
+  if(partes.length === 3){
+
+    const fechaFin =
+      new Date(
+        Number(partes[2]),
+        Number(partes[1]) - 1,
+        Number(partes[0])
+      );
+
+
+    fechaFin.setHours(
+      0, 0, 0, 0
+    );
+
+
+    const hoy =
+      new Date();
+
+
+    hoy.setHours(
+      0, 0, 0, 0
+    );
+
+
+    const limite =
+      new Date(hoy);
+
+
+    limite.setDate(
+      limite.getDate() + 30
+    );
+
+
+    if(fechaFin < hoy){
+
+      claseFila =
+        'fila-contrato-vencido';
+
+    }else if(
+      fechaFin <= limite
+    ){
+
+      claseFila =
+        'fila-contrato-por-vencer';
+
+    }
+
+  }
+
+}
 
 
 let documentos = '-';
@@ -3369,7 +3436,10 @@ async function exportarExcelGTH(){
       'ZAPATOS',
       'COMENTARIO',
       'FECHA DE INICIO ACORDADA',
-      'FECHA ÚLTIMA ACTUALIZACIÓN'
+      'FECHA ÚLTIMA ACTUALIZACIÓN',
+      'FECHA DE FIRMA DE CONTRATO',
+      'INICIO DE VIGENCIA',
+      'FIN DE CONTRATO'
 
     ];
 
