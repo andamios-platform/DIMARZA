@@ -1273,17 +1273,10 @@ tbody tr:last-child td {
                 HABILITADOS
               </th>
 
-              <th>
-                FECHA OBJETIVO
-              </th>
-
-              <th>
-                ESTADO
-              </th>
-
-              <th>
-                AVANCE
-              </th>
+              <th>FECHA OBJETIVO</th>
+              <th>ESTADO</th>
+              <th>AVANCE CONTRATACIÓN</th>
+              <th>AVANCE HABILITACIÓN</th>
 
             </tr>
 
@@ -1296,7 +1289,7 @@ tbody tr:last-child td {
             <tr>
 
               <td
-                colspan="10"
+                colspan="11"
                 class="vacio"
               >
                 Cargando requerimientos...
@@ -1784,7 +1777,7 @@ async function cargarRequerimientos() {
         <tr>
 
           <td
-            colspan="10"
+            colspan="11"
             class="vacio"
           >
             No existen requerimientos registrados.
@@ -1835,28 +1828,50 @@ async function cargarRequerimientos() {
               );
 
 
+const porcentajeContratacion =
 
-            const porcentaje =
+  requerido > 0
 
-              requerido > 0
+    ? Math.min(
 
-                ? Math.min(
+        100,
 
-                    100,
+        Math.round(
 
-                    Math.round(
+          contratado /
 
-                      habilitado /
+          requerido *
 
-                      requerido *
+          100
 
-                      100
+        )
 
-                    )
+      )
 
-                  )
+    : 0;
 
-                : 0;
+
+const porcentajeHabilitacion =
+
+  requerido > 0
+
+    ? Math.min(
+
+        100,
+
+        Math.round(
+
+          habilitado /
+
+          requerido *
+
+          100
+
+        )
+
+      )
+
+    : 0;
 
 
 
@@ -1968,30 +1983,40 @@ async function cargarRequerimientos() {
                 </td>
 
 
-                <td>
+<td>
+
+  <strong>
+    ${porcentajeContratacion}%
+  </strong>
+
+  <div class="progreso">
+
+    <div
+      class="progreso-barra progreso-contratacion"
+      style="width:${porcentajeContratacion}%"
+    ></div>
+
+  </div>
+
+</td>
 
 
-                  <strong>
+<td>
 
-                    ${porcentaje}%
+  <strong>
+    ${porcentajeHabilitacion}%
+  </strong>
 
-                  </strong>
+  <div class="progreso">
 
+    <div
+      class="progreso-barra progreso-habilitacion"
+      style="width:${porcentajeHabilitacion}%"
+    ></div>
 
-                  <div class="progreso">
+  </div>
 
-                    <div
-                      class="progreso-barra"
-                      style="
-                        width:
-                        ${porcentaje}%
-                      "
-                    ></div>
-
-                  </div>
-
-
-                </td>
+</td>
 
 
               </tr>
@@ -2016,7 +2041,7 @@ async function cargarRequerimientos() {
       <tr>
 
         <td
-          colspan="10"
+          colspan="11"
           class="vacio"
         >
 
