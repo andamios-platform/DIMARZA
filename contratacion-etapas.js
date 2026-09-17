@@ -291,6 +291,23 @@ if(
     '';
 
 }
+
+const filtrosGTH =
+  document.getElementById(
+    'filtrosGTH'
+  );
+
+
+if(
+  AREA === 'GTH' &&
+  filtrosGTH
+){
+
+  filtrosGTH.style.display =
+    'flex';
+
+}
+ 
 await cargarCandidatos();
 
 if(
@@ -535,6 +552,12 @@ if(AREA === 'GTH'){
     candidatos =
       lista;
 
+   if(AREA === 'GTH'){
+
+  cargarOpcionesFiltrosGTH();
+
+}
+
 
     /*
      * Para LEGAL / otras áreas continúa
@@ -591,7 +614,363 @@ if(AREA === 'GTH'){
 
 }
 
+/* =====================================================
+   GTH - FILTROS
+===================================================== */
 
+function cargarOpcionesFiltrosGTH(){
+
+  if(AREA !== 'GTH')
+    return;
+
+
+  const selectCargo =
+    document.getElementById(
+      'filtroCargoGTH'
+    );
+
+
+  const selectTipo =
+    document.getElementById(
+      'filtroTipoContratoGTH'
+    );
+
+
+  if(
+    !selectCargo ||
+    !selectTipo
+  ){
+
+    return;
+
+  }
+
+
+  /*
+   * Guardamos selección actual para que
+   * no se pierda al recargar candidatos.
+   */
+
+  const cargoActual =
+    selectCargo.value;
+
+
+  const tipoActual =
+    selectTipo.value;
+
+
+  const cargos =
+    [
+      ...new Set(
+        candidatos
+          .map(
+            c =>
+              String(
+                c.cargo || ''
+              ).trim()
+          )
+          .filter(Boolean)
+      )
+    ].sort();
+
+
+  const tipos =
+    [
+      ...new Set(
+        candidatos
+          .map(
+            c =>
+              String(
+                c.tipoContrato || ''
+              ).trim()
+          )
+          .filter(Boolean)
+      )
+    ].sort();
+
+
+  selectCargo.innerHTML = `
+    <option value="">
+      Todos los cargos
+    </option>
+  `;
+
+
+  cargos.forEach(
+    cargo => {
+
+      const option =
+        document.createElement(
+          'option'
+        );
+
+
+      option.value =
+        cargo;
+
+
+      option.textContent =
+        cargo;
+
+
+      selectCargo.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  selectTipo.innerHTML = `
+    <option value="">
+      Todos los tipos de contrato
+    </option>
+  `;
+
+
+  tipos.forEach(
+    tipo => {
+
+      const option =
+        document.createElement(
+          'option'
+        );
+
+
+      option.value =
+        tipo;
+
+
+      option.textContent =
+        tipo;
+
+
+      selectTipo.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  /*
+   * Recuperar selección anterior.
+   */
+
+  if(
+    cargos.includes(
+      cargoActual
+    )
+  ){
+
+    selectCargo.value =
+      cargoActual;
+
+  }
+
+
+  if(
+    tipos.includes(
+      tipoActual
+    )
+  ){
+
+    selectTipo.value =
+      tipoActual;
+
+  }
+
+}
+
+
+function obtenerEstadoContratoGTH(
+  finContrato
+){
+
+  if(!finContrato){
+
+    return '';
+
+  }
+
+
+  const partes =
+    String(
+      finContrato
+    ).split('/');
+
+
+  if(partes.length !== 3){
+
+    return '';
+
+  }
+
+
+  const fechaFin =
+    new Date(
+      Number(partes[2]),
+      Number(partes[1]) - 1,
+      Number(partes[0])
+    );
+
+
+  fechaFin.setHours(
+    0, 0, 0, 0
+  );
+
+
+  const hoy =
+    new Date();
+
+
+  hoy.setHours(
+    0, 0, 0, 0
+  );
+
+
+  const limite =
+    new Date(hoy);
+
+
+  limite.setDate(
+    limite.getDate() + 30
+  );
+
+
+  if(fechaFin < hoy){
+
+    return 'VENCIDO';
+
+  }
+
+
+  if(fechaFin <= limite){
+
+    return 'POR VENCER';
+
+  }
+
+
+  return 'VIGENTE';
+
+}
+
+
+function aplicarFiltrosGTH(){
+
+  if(AREA !== 'GTH')
+    return;
+
+
+  const nombre =
+    String(
+      document.getElementById(
+        'filtroNombreGTH'
+      )?.value || ''
+    )
+    .trim()
+    .toUpperCase();
+
+
+  const cargo =
+    document.getElementById(
+      'filtroCargoGTH'
+    )?.value || '';
+
+
+  const tipoContrato =
+    document.getElementById(
+      'filtroTipoContratoGTH'
+    )?.value || '';
+
+
+  const vencimiento =
+    document.getElementById(
+      'filtroVencimientoGTH'
+    )?.value || '';
+
+
+  const filtrados =
+    candidatos.filter(
+      c => {
+
+        const coincideNombre =
+          !nombre ||
+          String(
+            c.nombres || ''
+          )
+          .toUpperCase()
+          .includes(nombre);
+
+
+        const coincideCargo =
+          !cargo ||
+          String(
+            c.cargo || ''
+          ) === cargo;
+
+
+        const coincideTipo =
+          !tipoContrato ||
+          String(
+            c.tipoContrato || ''
+          ) === tipoContrato;
+
+
+        const estadoContrato =
+          obtenerEstadoContratoGTH(
+            c.finContrato
+          );
+
+
+        const coincideVencimiento =
+          !vencimiento ||
+          estadoContrato ===
+            vencimiento;
+
+
+        return (
+          coincideNombre &&
+          coincideCargo &&
+          coincideTipo &&
+          coincideVencimiento
+        );
+
+      }
+    );
+
+
+  const tbody =
+    document.getElementById(
+      'tablaCandidatos'
+    );
+
+
+  if(!filtrados.length){
+
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="12"
+          class="vacio"
+        >
+          No existen resultados con los filtros seleccionados.
+        </td>
+      </tr>
+    `;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    filtrados
+      .map(crearFila)
+      .join('');
+
+}
 function crearFila(c){
 
 
