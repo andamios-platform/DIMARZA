@@ -280,11 +280,10 @@ await cargarCandidatos();
 
 if(
   AREA === 'LEGAL' ||
-  AREA === 'ATH'
+  AREA === 'ATH' ||
+  AREA === 'GTH'
 ){
-
   await cargarKPIsArea();
-
 }
 }
 
@@ -427,7 +426,97 @@ async function cargarCandidatos(){
 
     }
 
+/* =====================================================
+   GTH
+   TAMBIÉN MOSTRAR CONTRATOS YA FIRMADOS
+===================================================== */
 
+if(AREA === 'GTH'){
+
+  const respuestaGestionadosGTH =
+    await fetch(
+      API +
+      '?accion=listarGestionadosGTH' +
+      '&t=' +
+      Date.now()
+    );
+
+
+  const resultadoGestionadosGTH =
+    await respuestaGestionadosGTH.json();
+
+
+  if(!resultadoGestionadosGTH.ok){
+
+    throw new Error(
+      resultadoGestionadosGTH.mensaje ||
+      'No se pudieron cargar los contratos gestionados por GTH.'
+    );
+
+  }
+
+
+  const gestionadosGTH =
+    (resultadoGestionadosGTH.candidatos || [])
+      .map(c => ({
+        ...c,
+        gestionGTH:
+          'GESTIONADO'
+      }));
+
+
+  /*
+   * Marcamos los candidatos que actualmente
+   * siguen pendientes en GTH.
+   */
+
+  lista =
+    lista.map(c => ({
+      ...c,
+      gestionGTH:
+        'PENDIENTE'
+    }));
+
+
+  /*
+   * Evitar duplicados.
+   *
+   * Si aparece en pendientes y gestionados,
+   * prevalece el pendiente actual.
+   */
+
+  const idsExistentesGTH =
+    new Set(
+      lista.map(
+        c =>
+          String(
+            c.idCandidato
+          )
+      )
+    );
+
+
+  gestionadosGTH.forEach(
+    candidato => {
+
+      if(
+        !idsExistentesGTH.has(
+          String(
+            candidato.idCandidato
+          )
+        )
+      ){
+
+        lista.push(
+          candidato
+        );
+
+      }
+
+    }
+  );
+
+}
     candidatos =
       lista;
 
@@ -665,11 +754,17 @@ return `
 <td>
   ${documentos}
 </td>
-      <td>
+<td>
 
   ${
-    AREA === 'ATH' &&
-    c.gestionATH === 'GESTIONADO'
+    (
+      AREA === 'ATH' &&
+      c.gestionATH === 'GESTIONADO'
+    ) ||
+    (
+      AREA === 'GTH' &&
+      c.gestionGTH === 'GESTIONADO'
+    )
 
       ? `
 
@@ -1039,6 +1134,9 @@ async function abrirGestion(id){
  const esEdicionATH =
   AREA === 'ATH' &&
   candidatoActual.gestionATH === 'GESTIONADO';
+ const esEdicionGTH =
+  AREA === 'GTH' &&
+  candidatoActual.gestionGTH === 'GESTIONADO';
 
   document.getElementById(
     'modalNombre'
@@ -1123,7 +1221,10 @@ document.getElementById(
 
   cargarResultados();
 
-if(esEdicionATH){
+if(
+  esEdicionATH ||
+  esEdicionGTH
+){
 
   document.getElementById(
     'resultado'
@@ -1151,6 +1252,51 @@ if(AREA === 'ATH'){
 
   cargarCamposEspeciales();
 
+
+  if(esEdicionGTH){
+
+    const campos =
+      document.getElementById(
+        'camposContratoFirmado'
+      );
+
+
+    if(campos){
+
+      campos.style.display =
+        'block';
+
+    }
+
+
+    document.getElementById(
+      'fechaFirmaContrato'
+    ).value =
+      convertirFechaInputATH(
+        candidatoActual.fechaFirmaContrato || ''
+      );
+
+
+    document.getElementById(
+      'inicioVigenciaContrato'
+    ).value =
+      convertirFechaInputATH(
+        candidatoActual.inicioVigenciaContrato || ''
+      );
+
+
+    document.getElementById(
+      'finContrato'
+    ).value =
+      convertirFechaInputATH(
+        candidatoActual.finContrato || ''
+      );
+
+
+    calcularVigenciaContrato();
+
+  }
+
 }
 
 
@@ -1170,8 +1316,8 @@ const btnGuardar =
 
 
 if(
-  AREA === 'ATH' &&
-  candidatoActual.gestionATH === 'GESTIONADO'
+  esEdicionATH ||
+  esEdicionGTH
 ){
 
   btnGuardar.textContent =
@@ -2232,7 +2378,9 @@ async function guardarGestion(){
   const esEdicionATH =
     AREA === 'ATH' &&
     candidatoActual.gestionATH === 'GESTIONADO';
-
+    const esEdicionGTH =
+  AREA === 'GTH' &&
+  candidatoActual.gestionGTH === 'GESTIONADO';
 
   const resultado =
     document.getElementById(
@@ -2260,10 +2408,11 @@ async function guardarGestion(){
      - NO pedimos nuevamente responsable
   ===================================================== */
 
-  if(
-    !esEdicionATH &&
-    !resultado
-  ){
+if(
+  !esEdicionATH &&
+  !esEdicionGTH &&
+  !resultado
+){
 
     mostrarMensaje(
       'Seleccione un resultado.',
@@ -2273,12 +2422,11 @@ async function guardarGestion(){
     return;
   }
 
-
-  if(
-    !esEdicionATH &&
-    !responsable
-  ){
-
+if(
+  !esEdicionATH &&
+  !esEdicionGTH &&
+  !responsable
+){
     mostrarMensaje(
       'Seleccione un responsable.',
       'error'
@@ -2334,7 +2482,10 @@ if(AREA === 'GTH'){
     )?.value || '';
 
 
-  if(resultado === 'FIRMADO 100%'){
+if(
+  resultado === 'FIRMADO 100%' ||
+  esEdicionGTH
+){
 
     if(!fechaFirmaContrato){
 
@@ -2527,11 +2678,13 @@ if(AREA === 'GTH'){
 
   boton.disabled = true;
 
-  boton.textContent =
-    esEdicionATH
-      ? 'Guardando cambios...'
-      : 'Guardando...';
-
+boton.textContent =
+  (
+    esEdicionATH ||
+    esEdicionGTH
+  )
+    ? 'Guardando cambios...'
+    : 'Guardando...';
 
   try{
 
@@ -2793,7 +2946,76 @@ if(AREA === 'GTH'){
       }
 
     }
+/* =====================================================
+   EDICIÓN DE CONTRATO YA FIRMADO - GTH
+===================================================== */
 
+if(esEdicionGTH){
+
+  const respuestaEdicionGTH =
+    await fetch(
+      API,
+      {
+        method:
+          'POST',
+
+        headers:{
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body:
+          JSON.stringify({
+            accion:
+              'actualizarFechasContrato',
+
+            idCandidato:
+              candidatoActual.idCandidato,
+
+            fechaFirmaContrato:
+              datos.fechaFirmaContrato,
+
+            inicioVigenciaContrato:
+              datos.inicioVigenciaContrato,
+
+            finContrato:
+              datos.finContrato
+          })
+      }
+    );
+
+
+  const resultadoEdicionGTH =
+    await respuestaEdicionGTH.json();
+
+
+  if(!resultadoEdicionGTH.ok){
+
+    throw new Error(
+      resultadoEdicionGTH.mensaje ||
+      'No se pudieron actualizar las fechas del contrato.'
+    );
+
+  }
+
+
+  cerrarModal();
+
+
+  mostrarMensaje(
+    'Contrato actualizado correctamente.',
+    'ok'
+  );
+
+
+  await cargarCandidatos();
+
+  await cargarKPIsArea();
+
+
+  return;
+
+}
 
     /* =====================================================
        GESTIÓN NORMAL
@@ -2842,14 +3064,15 @@ if(AREA === 'GTH'){
     await cargarCandidatos();
 
 
-    if(
-      AREA === 'LEGAL' ||
-      AREA === 'ATH'
-    ){
+if(
+  AREA === 'LEGAL' ||
+  AREA === 'ATH' ||
+  AREA === 'GTH'
+){
 
-      await cargarKPIsArea();
+  await cargarKPIsArea();
 
-    }
+}
 
 
   }catch(error){
@@ -2877,10 +3100,13 @@ if(AREA === 'GTH'){
      * esEdicionATH desde candidatoActual.
      */
 
-    boton.textContent =
-      esEdicionATH
-        ? 'Guardar cambios'
-        : 'Guardar';
+boton.textContent =
+  (
+    esEdicionATH ||
+    esEdicionGTH
+  )
+    ? 'Guardar cambios'
+    : 'Guardar';
 
   }
 
