@@ -1286,3 +1286,106 @@ a{
 .fila-contrato-vencido:hover td {
   background-color: #ffcaca;
 }
+/* =====================================================
+   GTH - FILTROS DE CONTRATOS
+===================================================== */
+
+.filtros-gth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.filtros-gth input,
+.filtros-gth select {
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #1f2937;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.filtros-gth input {
+  width: 210px;
+}
+
+.filtros-gth select {
+  min-width: 170px;
+}
+
+.filtros-gth input:focus,
+.filtros-gth select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.filtros-gth input::placeholder {
+  color: #9ca3af;
+}
+
+
+/* =====================================================
+   GTH - CABECERA DE TABLA
+===================================================== */
+
+.cabecera-tabla {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.cabecera-tabla .titulo {
+  margin-bottom: 0;
+  margin-right: auto;
+}
+
+.btn-exportar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  white-space: nowrap;
+  background: #059669;
+  color: #ffffff;
+}
+
+.btn-exportar:hover {
+  background: #047857;
+}
+
+
+/* =====================================================
+   GTH - RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .filtros-gth {
+    width: 100%;
+    order: 3;
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .filtros-gth {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtros-gth input,
+  .filtros-gth select {
+    width: 100%;
+    min-width: 0;
+  }
+
+}
