@@ -331,7 +331,7 @@ async function cargarCandidatos(){
   tbody.innerHTML = `
     <tr>
       <td
-        colspan="11"
+        colspan="${AREA === 'GTH' ? 12 : 11}"
         class="vacio"
       >
         Cargando...
@@ -575,7 +575,7 @@ if(AREA === 'GTH'){
       tbody.innerHTML = `
         <tr>
           <td
-            colspan="11"
+            colspan="${AREA === 'GTH' ? 12 : 11}"
             class="vacio"
           >
             No existen candidatos.
@@ -602,7 +602,7 @@ if(AREA === 'GTH'){
     tbody.innerHTML = `
       <tr>
         <td
-          colspan="11"
+          colspan="${AREA === 'GTH' ? 12 : 11}"
           class="vacio"
         >
           Error cargando candidatos.
