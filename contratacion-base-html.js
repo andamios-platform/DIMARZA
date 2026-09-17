@@ -117,7 +117,59 @@ document.getElementById(
   <div class="titulo">
     Candidatos pendientes
   </div>
+<div
+  id="filtrosGTH"
+  class="filtros-gth"
+  style="display:none;"
+>
 
+  <input
+    type="text"
+    id="filtroNombreGTH"
+    placeholder="Buscar por nombre..."
+    oninput="aplicarFiltrosGTH()"
+  >
+
+  <select
+    id="filtroCargoGTH"
+    onchange="aplicarFiltrosGTH()"
+  >
+    <option value="">
+      Todos los cargos
+    </option>
+  </select>
+
+  <select
+    id="filtroTipoContratoGTH"
+    onchange="aplicarFiltrosGTH()"
+  >
+    <option value="">
+      Todos los tipos de contrato
+    </option>
+  </select>
+
+  <select
+    id="filtroVencimientoGTH"
+    onchange="aplicarFiltrosGTH()"
+  >
+    <option value="">
+      Todos los contratos
+    </option>
+
+    <option value="POR VENCER">
+      Por vencer
+    </option>
+
+    <option value="VENCIDO">
+      Vencidos
+    </option>
+
+    <option value="VIGENTE">
+      Vigentes
+    </option>
+  </select>
+
+</div>
   <button
     type="button"
     class="btn btn-exportar"
