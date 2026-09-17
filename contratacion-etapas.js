@@ -276,6 +276,21 @@ if(
     'inline-flex';
 
 }
+
+ const tituloFinContrato =
+  document.getElementById(
+    'tituloFinContrato'
+  );
+
+if(
+  AREA === 'GTH' &&
+  tituloFinContrato
+){
+
+  tituloFinContrato.style.display =
+    '';
+
+}
 await cargarCandidatos();
 
 if(
@@ -747,9 +762,19 @@ return `
         ${escapar(c.tipoContrato)}
       </td>
 
+<td>
+  ${escapar(c.fechaObjetivo)}
+</td>
+
+${
+  AREA === 'GTH'
+    ? `
       <td>
-        ${escapar(c.fechaObjetivo)}
+        ${escapar(c.finContrato || '-')}
       </td>
+    `
+    : ''
+}
 
 <td>
   ${documentos}
@@ -873,42 +898,80 @@ async function cargarKPIsArea(){
     }
 
 
-  /* ==============================
-   ATH
-============================== */
+    /* ==============================
+       ATH
+    ============================== */
 
-if(AREA === 'ATH'){
+    if(AREA === 'ATH'){
 
-  document.getElementById(
-    'kpiPendientes'
-  ).textContent =
-    kpis.pendientes || 0;
-
-
-  document.getElementById(
-    'kpiObservados'
-  ).textContent =
-    kpis.observados || 0;
+      document.getElementById(
+        'kpiPendientes'
+      ).textContent =
+        kpis.pendientes || 0;
 
 
-  document.getElementById(
-    'kpiContratados'
-  ).textContent =
-    kpis.conformes || 0;
+      document.getElementById(
+        'kpiObservados'
+      ).textContent =
+        kpis.observados || 0;
 
 
-  document.getElementById(
-    'kpiHabilitados'
-  ).textContent =
-    kpis.noAptos || 0;
+      document.getElementById(
+        'kpiContratados'
+      ).textContent =
+        kpis.conformes || 0;
 
 
-  document.getElementById(
-    'kpiGestionados'
-  ).textContent =
-    kpis.gestionados || 0;
+      document.getElementById(
+        'kpiHabilitados'
+      ).textContent =
+        kpis.noAptos || 0;
 
-}
+
+      document.getElementById(
+        'kpiGestionados'
+      ).textContent =
+        kpis.gestionados || 0;
+
+    }
+
+
+    /* ==============================
+       GTH
+    ============================== */
+
+    if(AREA === 'GTH'){
+
+      document.getElementById(
+        'kpiPendientes'
+      ).textContent =
+        kpis.pendientes || 0;
+
+
+      document.getElementById(
+        'kpiObservados'
+      ).textContent =
+        kpis.observados || 0;
+
+
+      document.getElementById(
+        'kpiContratados'
+      ).textContent =
+        kpis.contratosFirmados || 0;
+
+
+      document.getElementById(
+        'kpiHabilitados'
+      ).textContent =
+        kpis.contratosPorVencer || 0;
+
+
+      document.getElementById(
+        'kpiGestionados'
+      ).textContent =
+        kpis.gestionados || 0;
+
+    }
 
 
   }catch(error){
@@ -3073,7 +3136,6 @@ if(
   await cargarKPIsArea();
 
 }
-
 
   }catch(error){
 
