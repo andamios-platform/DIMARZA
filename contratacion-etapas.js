@@ -3388,7 +3388,7 @@ async function exportarExcelGTH(){
 
 
     /*
-     * 37 columnas del consolidado.
+     * 40 columnas del consolidado.
      * No se incluyen:
      *
      * ID CANDIDATO
@@ -3460,17 +3460,17 @@ async function exportarExcelGTH(){
       );
 
 
-    /*
-     * Autofiltro para las 37 columnas.
-     *
-     * A → AK = 37 columnas
-     */
+/*
+ * Autofiltro para las 40 columnas.
+ *
+ * A → AN = 40 columnas
+ */
 
-    hoja['!autofilter'] = {
-      ref:
-        'A1:AK' +
-        datosExcel.length
-    };
+hoja['!autofilter'] = {
+  ref:
+    'A1:AN' +
+    datosExcel.length
+};
 
 
     /*
@@ -3515,7 +3515,10 @@ async function exportarExcelGTH(){
       { wch: 12 }, // Zapatos
       { wch: 40 }, // Comentario
       { wch: 24 }, // Fecha inicio acordada
-      { wch: 26 }  // Última actualización
+      { wch: 26 }, // Última actualización
+      { wch: 22 }, // Fecha firma contrato
+      { wch: 22 }, // Inicio vigencia
+      { wch: 22 }  // Fin contrato
 
     ];
 
