@@ -148,9 +148,18 @@ document.getElementById(
             <th>UNIDAD</th>
             <th>TIPO DE CONTRATO</th>
             <th>FECHA OBJETIVO</th>
+            
+            <th
+              id="tituloFinContrato"
+              style="display:none;"
+            >
+              FIN DE CONTRATO
+            </th>
+            
             <th id="tituloDocumentos">
-  DOCUMENTOS
-</th>
+              DOCUMENTOS
+            </th>
+            
             <th>ACCIÓN</th>
 
           </tr>
