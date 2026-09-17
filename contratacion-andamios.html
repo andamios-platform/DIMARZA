@@ -1449,7 +1449,7 @@ tbody tr:last-child td {
             <tr>
 
               <td
-                colspan="11"
+                colspan="9"
                 class="vacio"
               >
                 Cargando requerimientos...
@@ -1494,12 +1494,12 @@ tbody tr:last-child td {
 <th>REQUERIMIENTO</th>
 <th>UNIDAD</th>
 <th>CARGO</th>
-<th>RECORRIDO</th>
 <th>ÁREA / ETAPA ACTUAL</th>
 <th>ESTADO</th>
-<th>ÚLTIMO MOVIMIENTO</th>
-<th>DÍAS EN ETAPA</th>
-<th>DETALLE</th>
+<th>DÍAS EN ÁREA</th>
+<th>RECORRIDO</th>
+
+            
           </tr>
 
         </thead>
@@ -1510,7 +1510,7 @@ tbody tr:last-child td {
           <tr>
 
             <td
-              colspan="11"
+              colspan="9"
               class="vacio"
             >
               Cargando seguimiento de personal...
@@ -2064,7 +2064,7 @@ async function cargarRequerimientos() {
         <tr>
 
           <td
-            colspan="11"
+            colspan="9"
             class="vacio"
           >
             No existen requerimientos registrados.
@@ -2328,7 +2328,7 @@ const porcentajeHabilitacion =
       <tr>
 
         <td
-          colspan="11"
+          colspan="9"
           class="vacio"
         >
 
@@ -2533,7 +2533,7 @@ async function cargarSeguimientoPersonas() {
         <tr>
 
           <td
-            colspan="11"
+            colspan="9"
             class="vacio"
           >
             No existen personas en seguimiento.
@@ -2578,18 +2578,6 @@ async function cargarSeguimientoPersonas() {
         ${escapar(p.cargo)}
       </td>
 
-
-      <td>
-
-        <div class="recorrido-persona">
-
-          ${crearRecorridoPersona(p)}
-
-        </div>
-
-      </td>
-
-
       <td class="etapa-actual-persona">
 
         ${escapar(p.areaActual)}
@@ -2604,12 +2592,6 @@ async function cargarSeguimientoPersonas() {
       <td>
         ${escapar(p.estadoActual)}
       </td>
-
-
-      <td>
-        ${escapar(p.ultimaActualizacion)}
-      </td>
-
 
       <td>
 
@@ -2629,7 +2611,7 @@ async function cargarSeguimientoPersonas() {
           class="btn-detalle-persona"
           onclick="verDetallePersona('${escapar(p.idCandidato)}')"
         >
-          Ver
+          Ver recorrido
         </button>
 
       </td>
@@ -2654,7 +2636,7 @@ async function cargarSeguimientoPersonas() {
       <tr>
 
         <td
-          colspan="11"
+          colspan="9"
           class="vacio"
         >
           No se pudo cargar el seguimiento de personal.
