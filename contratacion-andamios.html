@@ -416,7 +416,43 @@ button {
     #0f172a;
 }
 
+/* =====================================================
+   PESTAÑAS DE SEGUIMIENTO
+===================================================== */
 
+.pestanas-seguimiento {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pestana {
+  background: transparent;
+  color: #64748b;
+  border-radius: 0;
+  padding: 12px 18px;
+  border-bottom: 3px solid transparent;
+  box-shadow: none;
+}
+
+.pestana:hover {
+  color: #2563eb;
+  background: #f8fafc;
+}
+
+.pestana.activa {
+  color: #1d4ed8;
+  border-bottom-color: #2563eb;
+}
+
+.contenido-pestana {
+  display: none;
+}
+
+.contenido-pestana.activa {
+  display: block;
+}
 /* =====================================================
    TABLA
 ===================================================== */
@@ -1241,16 +1277,48 @@ tbody tr:last-child td {
 
 
 
-    <!-- =========================
-         LISTADO
-    ========================== -->
+<!-- =========================
+     SEGUIMIENTO
+========================== -->
 
-    <section class="card">
+<section class="card">
+
+  <div class="titulo-card">
+    Seguimiento de contratación
+  </div>
 
 
-      <div class="titulo-card">
-        Requerimientos registrados
-      </div>
+  <div class="pestanas-seguimiento">
+
+    <button
+      type="button"
+      class="pestana activa"
+      id="btnPestanaRequerimientos"
+      onclick="cambiarPestana('requerimientos')"
+    >
+      Requerimientos
+    </button>
+
+    <button
+      type="button"
+      class="pestana"
+      id="btnPestanaPersonas"
+      onclick="cambiarPestana('personas')"
+    >
+      Seguimiento por persona
+    </button>
+
+  </div>
+
+
+  <div
+    id="vistaRequerimientos"
+    class="contenido-pestana activa"
+  >
+
+    <div class="titulo-card">
+      Requerimientos registrados
+    </div>
 
 
       <div class="tabla-contenedor">
@@ -1320,14 +1388,75 @@ tbody tr:last-child td {
 
         </table>
 
-
       </div>
 
+  </div>
 
-    </section>
+
+  <!-- =========================
+       SEGUIMIENTO POR PERSONA
+  ========================== -->
+
+  <div
+    id="vistaPersonas"
+    class="contenido-pestana"
+  >
+
+    <div class="titulo-card">
+      Seguimiento por persona
+    </div>
 
 
-  </main>
+    <div class="tabla-contenedor">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>NOMBRE</th>
+            <th>DNI</th>
+            <th>REQUERIMIENTO</th>
+            <th>UNIDAD</th>
+            <th>CARGO</th>
+            <th>ÁREA ACTUAL</th>
+            <th>ETAPA ACTUAL</th>
+            <th>ESTADO</th>
+            <th>ÚLTIMO MOVIMIENTO</th>
+            <th>DÍAS EN ETAPA</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="tablaSeguimientoPersonas">
+
+          <tr>
+
+            <td
+              colspan="10"
+              class="vacio"
+            >
+              Cargando seguimiento de personal...
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+</section>
+
+
+</main>
 
 
 
@@ -1360,6 +1489,8 @@ document.addEventListener(
     await cargarPersonal();
 
     await cargarRequerimientos();
+
+    await cargarSeguimientoPersonas();
 
   }
 );
@@ -1688,11 +1819,11 @@ async function registrarRequerimiento(
       Los volvemos a cargar.
     */
 
-    await cargarPersonal();
+await cargarPersonal();
 
+await cargarRequerimientos();
 
-
-    await cargarRequerimientos();
+await cargarSeguimientoPersonas();
 
 
   } catch (error) {
@@ -1723,7 +1854,71 @@ async function registrarRequerimiento(
 
 }
 
+/* =====================================================
+   PESTAÑAS
+===================================================== */
 
+function cambiarPestana(
+  pestana
+) {
+
+  const vistaRequerimientos =
+    document.getElementById(
+      'vistaRequerimientos'
+    );
+
+  const vistaPersonas =
+    document.getElementById(
+      'vistaPersonas'
+    );
+
+  const btnRequerimientos =
+    document.getElementById(
+      'btnPestanaRequerimientos'
+    );
+
+  const btnPersonas =
+    document.getElementById(
+      'btnPestanaPersonas'
+    );
+
+
+  const mostrarPersonas =
+    pestana === 'personas';
+
+
+  vistaRequerimientos
+    .classList
+    .toggle(
+      'activa',
+      !mostrarPersonas
+    );
+
+
+  vistaPersonas
+    .classList
+    .toggle(
+      'activa',
+      mostrarPersonas
+    );
+
+
+  btnRequerimientos
+    .classList
+    .toggle(
+      'activa',
+      !mostrarPersonas
+    );
+
+
+  btnPersonas
+    .classList
+    .toggle(
+      'activa',
+      mostrarPersonas
+    );
+
+}
 
 /* =====================================================
    CARGAR REQUERIMIENTOS
@@ -2077,7 +2272,169 @@ const porcentajeHabilitacion =
 }
 
 
+/* =====================================================
+   CARGAR SEGUIMIENTO POR PERSONA
+===================================================== */
 
+async function cargarSeguimientoPersonas() {
+
+
+  const tbody =
+    document.getElementById(
+      'tablaSeguimientoPersonas'
+    );
+
+
+  try {
+
+
+    const respuesta =
+      await fetch(
+
+        API +
+
+        '?accion=listarSeguimientoPersonas' +
+
+        '&t=' +
+
+        Date.now()
+
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!resultado.ok) {
+
+      throw new Error(
+
+        resultado.mensaje ||
+
+        'Error cargando seguimiento'
+
+      );
+
+    }
+
+
+    const personas =
+      resultado.personas || [];
+
+
+    if (!personas.length) {
+
+      tbody.innerHTML = `
+
+        <tr>
+
+          <td
+            colspan="10"
+            class="vacio"
+          >
+            No existen personas en seguimiento.
+          </td>
+
+        </tr>
+
+      `;
+
+      return;
+
+    }
+
+
+    tbody.innerHTML =
+
+      personas
+
+        .map(
+
+          p => `
+
+            <tr>
+
+              <td>
+                <strong>
+                  ${escapar(p.nombres)}
+                </strong>
+              </td>
+
+              <td>
+                ${escapar(p.dni)}
+              </td>
+
+              <td>
+                ${escapar(p.idRequerimiento)}
+              </td>
+
+              <td>
+                ${escapar(p.unidad)}
+              </td>
+
+              <td>
+                ${escapar(p.cargo)}
+              </td>
+
+              <td>
+                ${escapar(p.areaActual)}
+              </td>
+
+              <td>
+                ${escapar(p.etapaActual)}
+              </td>
+
+              <td>
+                ${escapar(p.estadoActual)}
+              </td>
+
+              <td>
+                ${escapar(p.ultimaActualizacion)}
+              </td>
+
+              <td>
+                <strong>
+                  ${Number(p.diasEnEtapa || 0)}
+                </strong>
+              </td>
+
+            </tr>
+
+          `
+
+        )
+
+        .join('');
+
+
+  } catch (error) {
+
+
+    console.error(
+      'Error seguimiento personas:',
+      error
+    );
+
+
+    tbody.innerHTML = `
+
+      <tr>
+
+        <td
+          colspan="10"
+          class="vacio"
+        >
+          No se pudo cargar el seguimiento de personal.
+        </td>
+
+      </tr>
+
+    `;
+
+  }
+
+}
 /* =====================================================
    KPIs
 ===================================================== */
