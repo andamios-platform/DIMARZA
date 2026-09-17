@@ -1263,3 +1263,26 @@ a{
   background:#fff;
   font-size:13px;
 }
+
+/* =====================================================
+   GTH - ALERTAS DE VENCIMIENTO
+===================================================== */
+
+.fila-contrato-por-vencer td {
+  background-color: #fff4cc;
+}
+
+.fila-contrato-vencido td {
+  background-color: #ffe1e1;
+}
+
+
+/* Mantener el color al pasar el mouse */
+
+.fila-contrato-por-vencer:hover td {
+  background-color: #ffe9a3;
+}
+
+.fila-contrato-vencido:hover td {
+  background-color: #ffcaca;
+}
