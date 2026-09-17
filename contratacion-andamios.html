@@ -744,7 +744,81 @@ tbody tr:last-child td {
     12px;
 }
 
+/* =====================================================
+   SEGUIMIENTO POR PERSONA
+===================================================== */
 
+.recorrido-persona {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.paso-recorrido {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.paso-recorrido.completado {
+  color: #16a34a;
+}
+
+.paso-recorrido.actual {
+  color: #2563eb;
+}
+
+.paso-recorrido.pendiente {
+  color: #94a3b8;
+}
+
+.flecha-recorrido {
+  color: #cbd5e1;
+  font-size: 11px;
+}
+
+.etapa-actual-persona {
+  font-weight: 700;
+}
+
+.etapa-actual-persona small {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.dias-normal {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.dias-alerta {
+  color: #d97706;
+  font-weight: 700;
+}
+
+.dias-critico {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.btn-detalle-persona {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.btn-detalle-persona:hover {
+  background: #dbeafe;
+}
 /* =====================================================
    RESPONSIVE
 ===================================================== */
@@ -1415,17 +1489,17 @@ tbody tr:last-child td {
 
           <tr>
 
-            <th>NOMBRE</th>
-            <th>DNI</th>
-            <th>REQUERIMIENTO</th>
-            <th>UNIDAD</th>
-            <th>CARGO</th>
-            <th>ÁREA ACTUAL</th>
-            <th>ETAPA ACTUAL</th>
-            <th>ESTADO</th>
-            <th>ÚLTIMO MOVIMIENTO</th>
-            <th>DÍAS EN ETAPA</th>
-
+<th>NOMBRE</th>
+<th>DNI</th>
+<th>REQUERIMIENTO</th>
+<th>UNIDAD</th>
+<th>CARGO</th>
+<th>RECORRIDO</th>
+<th>ÁREA / ETAPA ACTUAL</th>
+<th>ESTADO</th>
+<th>ÚLTIMO MOVIMIENTO</th>
+<th>DÍAS EN ETAPA</th>
+<th>DETALLE</th>
           </tr>
 
         </thead>
@@ -1436,7 +1510,7 @@ tbody tr:last-child td {
           <tr>
 
             <td
-              colspan="10"
+              colspan="11"
               class="vacio"
             >
               Cargando seguimiento de personal...
@@ -2271,7 +2345,136 @@ const porcentajeHabilitacion =
 
 }
 
+function crearRecorridoPersona(persona) {
 
+  const historial =
+    persona.historial || [];
+
+
+  const areas = [
+    'LEGAL',
+    'OPERACIONES',
+    'ATH',
+    'GTH',
+    'DOTACION'
+  ];
+
+
+  const areaActual =
+    String(
+      persona.areaActual || ''
+    ).toUpperCase();
+
+
+  const indiceActual =
+    areas.indexOf(areaActual);
+
+
+  return areas.map(
+    (area, indice) => {
+
+      let clase = 'pendiente';
+      let simbolo = '○';
+
+
+      if (
+        indiceActual >= 0 &&
+        indice < indiceActual
+      ) {
+
+        clase = 'completado';
+        simbolo = '✓';
+
+      }
+
+
+      if (area === areaActual) {
+
+        clase = 'actual';
+        simbolo = '●';
+
+      }
+
+
+      /*
+       * Si existe en el historial,
+       * sabemos que la persona pasó
+       * por esa área.
+       */
+
+      const pasoPorArea =
+        historial.some(
+          h =>
+            String(
+              h.area || ''
+            ).toUpperCase() === area
+        );
+
+
+      if (
+        pasoPorArea &&
+        area !== areaActual
+      ) {
+
+        clase = 'completado';
+        simbolo = '✓';
+
+      }
+
+
+      const flecha =
+        indice < areas.length - 1
+          ? `<span class="flecha-recorrido">→</span>`
+          : '';
+
+
+      return `
+
+        <span class="paso-recorrido ${clase}">
+          ${simbolo} ${area}
+        </span>
+
+        ${flecha}
+
+      `;
+
+    }
+  ).join('');
+
+}
+
+
+function claseDiasEtapa(dias) {
+
+  dias =
+    Number(dias || 0);
+
+
+  if (dias >= 5) {
+    return 'dias-critico';
+  }
+
+
+  if (dias >= 3) {
+    return 'dias-alerta';
+  }
+
+
+  return 'dias-normal';
+
+}
+
+function verDetallePersona(
+  idCandidato
+) {
+
+  console.log(
+    'Detalle candidato:',
+    idCandidato
+  );
+
+}
+  
 /* =====================================================
    CARGAR SEGUIMIENTO POR PERSONA
 ===================================================== */
@@ -2330,7 +2533,7 @@ async function cargarSeguimientoPersonas() {
         <tr>
 
           <td
-            colspan="10"
+            colspan="11"
             class="vacio"
           >
             No existen personas en seguimiento.
@@ -2347,66 +2550,95 @@ async function cargarSeguimientoPersonas() {
 
     tbody.innerHTML =
 
-      personas
+ personas.map(
 
-        .map(
+  p => `
 
-          p => `
+    <tr>
 
-            <tr>
+      <td>
+        <strong>
+          ${escapar(p.nombres)}
+        </strong>
+      </td>
 
-              <td>
-                <strong>
-                  ${escapar(p.nombres)}
-                </strong>
-              </td>
+      <td>
+        ${escapar(p.dni)}
+      </td>
 
-              <td>
-                ${escapar(p.dni)}
-              </td>
+      <td>
+        ${escapar(p.idRequerimiento)}
+      </td>
 
-              <td>
-                ${escapar(p.idRequerimiento)}
-              </td>
+      <td>
+        ${escapar(p.unidad)}
+      </td>
 
-              <td>
-                ${escapar(p.unidad)}
-              </td>
+      <td>
+        ${escapar(p.cargo)}
+      </td>
 
-              <td>
-                ${escapar(p.cargo)}
-              </td>
 
-              <td>
-                ${escapar(p.areaActual)}
-              </td>
+      <td>
 
-              <td>
-                ${escapar(p.etapaActual)}
-              </td>
+        <div class="recorrido-persona">
 
-              <td>
-                ${escapar(p.estadoActual)}
-              </td>
+          ${crearRecorridoPersona(p)}
 
-              <td>
-                ${escapar(p.ultimaActualizacion)}
-              </td>
+        </div>
 
-              <td>
-                <strong>
-                  ${Number(p.diasEnEtapa || 0)}
-                </strong>
-              </td>
+      </td>
 
-            </tr>
 
-          `
+      <td class="etapa-actual-persona">
 
-        )
+        ${escapar(p.areaActual)}
 
-        .join('');
+        <small>
+          ${escapar(p.etapaActual)}
+        </small>
 
+      </td>
+
+
+      <td>
+        ${escapar(p.estadoActual)}
+      </td>
+
+
+      <td>
+        ${escapar(p.ultimaActualizacion)}
+      </td>
+
+
+      <td>
+
+        <span
+          class="${claseDiasEtapa(p.diasEnEtapa)}"
+        >
+          ${Number(p.diasEnEtapa || 0)}
+        </span>
+
+      </td>
+
+
+      <td>
+
+        <button
+          type="button"
+          class="btn-detalle-persona"
+          onclick="verDetallePersona('${escapar(p.idCandidato)}')"
+        >
+          Ver
+        </button>
+
+      </td>
+
+    </tr>
+
+  `
+
+).join('');
 
   } catch (error) {
 
@@ -2422,7 +2654,7 @@ async function cargarSeguimientoPersonas() {
       <tr>
 
         <td
-          colspan="10"
+          colspan="11"
           class="vacio"
         >
           No se pudo cargar el seguimiento de personal.
