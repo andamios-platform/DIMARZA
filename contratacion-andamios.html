@@ -819,6 +819,260 @@ tbody tr:last-child td {
 .btn-detalle-persona:hover {
   background: #dbeafe;
 }
+
+/* =====================================================
+   MODAL RECORRIDO
+===================================================== */
+
+.modal-recorrido {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .62);
+  z-index: 9999;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.modal-recorrido.abierto {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.modal-recorrido-contenido {
+  width: min(1200px, 100%);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15,23,42,.25);
+  overflow: hidden;
+}
+
+.modal-recorrido-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 26px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-recorrido-titulo {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.modal-recorrido-persona {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.modal-recorrido-cerrar {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.modal-recorrido-cerrar:hover {
+  background: #e2e8f0;
+}
+
+
+/* RESUMEN */
+
+.resumen-recorrido {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 20px 26px 0;
+}
+
+.resumen-recorrido-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 13px 15px;
+}
+
+.resumen-recorrido-item span {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.resumen-recorrido-item strong {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+
+/* FLUJO */
+
+.flujo-recorrido {
+  display: flex;
+  align-items: flex-start;
+  padding: 32px 26px;
+  overflow-x: auto;
+}
+
+.flujo-paso {
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.flujo-nodo {
+  width: 150px;
+  text-align: center;
+}
+
+.flujo-circulo {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 9px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.flujo-completado .flujo-circulo {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 2px solid #86efac;
+}
+
+.flujo-actual .flujo-circulo {
+  background: #dbeafe;
+  color: #2563eb;
+  border: 2px solid #93c5fd;
+}
+
+.flujo-area {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.flujo-etapa {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+  min-height: 27px;
+}
+
+.flujo-tiempo {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.flujo-actual .flujo-tiempo {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.flujo-linea {
+  width: 38px;
+  height: 2px;
+  background: #cbd5e1;
+  margin-top: 18px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.flujo-linea::after {
+  content: "›";
+  position: absolute;
+  right: -2px;
+  top: -10px;
+  color: #94a3b8;
+  font-size: 19px;
+}
+
+
+/* DETALLE */
+
+.detalle-recorrido {
+  padding: 0 26px 26px;
+}
+
+.detalle-recorrido-titulo {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.detalle-etapa {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.detalle-etapa-cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 11px;
+}
+
+.detalle-etapa-area {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.detalle-etapa-estado {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.detalle-etapa-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.detalle-dato span {
+  display: block;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.detalle-dato strong {
+  font-size: 12px;
+  color: #475569;
+}
+
+.detalle-observacion {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 12px;
+  color: #64748b;
+}
+
+    
 /* =====================================================
    RESPONSIVE
 ===================================================== */
@@ -1532,7 +1786,62 @@ tbody tr:last-child td {
 
 </main>
 
+<!-- =========================
+     MODAL RECORRIDO
+========================== -->
 
+<div
+  class="modal-recorrido"
+  id="modalRecorrido"
+  onclick="cerrarModalRecorridoFondo(event)"
+>
+
+  <div class="modal-recorrido-contenido">
+
+    <div class="modal-recorrido-cabecera">
+
+      <div>
+        <div class="modal-recorrido-titulo">
+          Recorrido de contratación
+        </div>
+
+        <div
+          class="modal-recorrido-persona"
+          id="modalRecorridoPersona"
+        ></div>
+      </div>
+
+      <button
+        type="button"
+        class="modal-recorrido-cerrar"
+        onclick="cerrarModalRecorrido()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      class="resumen-recorrido"
+      id="resumenRecorrido"
+    ></div>
+
+
+    <div
+      class="flujo-recorrido"
+      id="flujoRecorrido"
+    ></div>
+
+
+    <div
+      class="detalle-recorrido"
+      id="detalleRecorrido"
+    ></div>
+
+  </div>
+
+</div>
 
 <script>
 
@@ -1550,7 +1859,8 @@ const API_PERSONAL =
   'https://script.google.com/macros/s/AKfycbwvueeUnXA1khv-qj-xxZnPi8jq_MzBygE__2TI3w7GMK3-4ev5pMNQ5KIam8mMMlQb/exec';
 
 
-
+let seguimientoPersonas = [];
+  
 /* =====================================================
    INICIO
 ===================================================== */
@@ -2464,14 +2774,527 @@ function claseDiasEtapa(dias) {
 
 }
 
-function verDetallePersona(
-  idCandidato
+function verDetallePersona(idCandidato) {
+
+  const persona =
+    seguimientoPersonas.find(
+      p =>
+        String(p.idCandidato) ===
+        String(idCandidato)
+    );
+
+
+  if (!persona) {
+
+    alert(
+      'No se encontró el seguimiento de esta persona.'
+    );
+
+    return;
+  }
+
+
+  const historial =
+    persona.historial || [];
+
+
+  document
+    .getElementById(
+      'modalRecorridoPersona'
+    )
+    .innerHTML = `
+
+      <strong>
+        ${escapar(persona.nombres)}
+      </strong>
+
+      · DNI ${escapar(persona.dni)}
+
+      · ${escapar(persona.cargo)}
+
+      · ${escapar(persona.unidad)}
+
+    `;
+
+
+  /* =========================================
+     TIEMPO TOTAL
+  ========================================= */
+
+  const totalMinutos =
+    historial.reduce(
+      (total, movimiento) =>
+        total +
+        Number(
+          movimiento.duracionMinutos || 0
+        ),
+      0
+    );
+
+
+  const tiempoTotal =
+    formatearDuracionMinutos(
+      totalMinutos
+    );
+
+
+  const etapaMayor =
+    historial
+      .slice()
+      .sort(
+        (a, b) =>
+          Number(b.duracionMinutos || 0) -
+          Number(a.duracionMinutos || 0)
+      )[0];
+
+
+  document
+    .getElementById(
+      'resumenRecorrido'
+    )
+    .innerHTML = `
+
+      <div class="resumen-recorrido-item">
+
+        <span>
+          ETAPA ACTUAL
+        </span>
+
+        <strong>
+          ${escapar(persona.areaActual)}
+          ·
+          ${escapar(persona.etapaActual)}
+        </strong>
+
+      </div>
+
+
+      <div class="resumen-recorrido-item">
+
+        <span>
+          TIEMPO TOTAL DEL PROCESO
+        </span>
+
+        <strong>
+          ${escapar(tiempoTotal)}
+        </strong>
+
+      </div>
+
+
+      <div class="resumen-recorrido-item">
+
+        <span>
+          MAYOR TIEMPO REGISTRADO
+        </span>
+
+        <strong>
+
+          ${
+            etapaMayor
+              ? escapar(etapaMayor.area) +
+                ' · ' +
+                escapar(etapaMayor.duracion)
+              : '—'
+          }
+
+        </strong>
+
+      </div>
+
+    `;
+
+
+  /* =========================================
+     FLUJO
+  ========================================= */
+
+  if (!historial.length) {
+
+    document
+      .getElementById(
+        'flujoRecorrido'
+      )
+      .innerHTML = `
+
+        <div class="vacio">
+          No existe historial registrado.
+        </div>
+
+      `;
+
+  } else {
+
+    document
+      .getElementById(
+        'flujoRecorrido'
+      )
+      .innerHTML =
+
+        historial.map(
+          (movimiento, indice) => {
+
+            const actual =
+              movimiento.abierta === true;
+
+
+            const clase =
+              actual
+                ? 'flujo-actual'
+                : 'flujo-completado';
+
+
+            const simbolo =
+              actual
+                ? '●'
+                : '✓';
+
+
+            const linea =
+              indice <
+              historial.length - 1
+                ? `
+                    <div
+                      class="flujo-linea"
+                    ></div>
+                  `
+                : '';
+
+
+            return `
+
+              <div class="flujo-paso">
+
+                <div
+                  class="
+                    flujo-nodo
+                    ${clase}
+                  "
+                >
+
+                  <div class="flujo-circulo">
+                    ${simbolo}
+                  </div>
+
+                  <div class="flujo-area">
+                    ${escapar(movimiento.area)}
+                  </div>
+
+                  <div class="flujo-etapa">
+                    ${escapar(movimiento.etapa)}
+                  </div>
+
+                  <div class="flujo-tiempo">
+
+                    ${
+                      actual
+                        ? 'En curso · '
+                        : ''
+                    }
+
+                    ${escapar(movimiento.duracion)}
+
+                  </div>
+
+                </div>
+
+                ${linea}
+
+              </div>
+
+            `;
+
+          }
+
+        ).join('');
+
+  }
+
+
+  /* =========================================
+     DETALLE DE CADA ETAPA
+  ========================================= */
+
+  document
+    .getElementById(
+      'detalleRecorrido'
+    )
+    .innerHTML = `
+
+      <div class="detalle-recorrido-titulo">
+        Detalle de etapas
+      </div>
+
+      ${
+        historial.length
+
+          ? historial.map(
+              movimiento => `
+
+                <div class="detalle-etapa">
+
+                  <div class="detalle-etapa-cabecera">
+
+                    <div class="detalle-etapa-area">
+
+                      ${escapar(movimiento.area)}
+
+                      ·
+
+                      ${escapar(movimiento.etapa)}
+
+                    </div>
+
+                    <div class="detalle-etapa-estado">
+
+                      ${
+                        movimiento.abierta
+                          ? 'EN CURSO'
+                          : escapar(
+                              movimiento.estado
+                            )
+                      }
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="detalle-etapa-grid">
+
+
+                    <div class="detalle-dato">
+
+                      <span>
+                        INICIO
+                      </span>
+
+                      <strong>
+                        ${
+                          escapar(
+                            movimiento.fechaInicio
+                          ) || '—'
+                        }
+                      </strong>
+
+                    </div>
+
+
+                    <div class="detalle-dato">
+
+                      <span>
+                        FIN
+                      </span>
+
+                      <strong>
+
+                        ${
+                          movimiento.abierta
+                            ? 'En curso'
+                            : (
+                                escapar(
+                                  movimiento.fechaCierre
+                                ) || '—'
+                              )
+                        }
+
+                      </strong>
+
+                    </div>
+
+
+                    <div class="detalle-dato">
+
+                      <span>
+                        DURACIÓN
+                      </span>
+
+                      <strong>
+                        ${
+                          escapar(
+                            movimiento.duracion
+                          ) || '—'
+                        }
+                      </strong>
+
+                    </div>
+
+
+                    <div class="detalle-dato">
+
+                      <span>
+                        RESPONSABLE
+                      </span>
+
+                      <strong>
+                        ${
+                          escapar(
+                            movimiento.responsable
+                          ) || '—'
+                        }
+                      </strong>
+
+                    </div>
+
+                  </div>
+
+
+                  ${
+                    movimiento.observacion
+
+                      ? `
+
+                        <div class="detalle-observacion">
+
+                          <strong>
+                            Observación:
+                          </strong>
+
+                          ${escapar(
+                            movimiento.observacion
+                          )}
+
+                        </div>
+
+                      `
+
+                      : ''
+                  }
+
+                </div>
+
+              `
+
+            ).join('')
+
+          : `
+
+              <div class="vacio">
+                No existe detalle registrado.
+              </div>
+
+            `
+      }
+
+    `;
+
+
+  document
+    .getElementById(
+      'modalRecorrido'
+    )
+    .classList
+    .add(
+      'abierto'
+    );
+
+
+  document.body.style.overflow =
+    'hidden';
+
+}
+
+
+function cerrarModalRecorrido() {
+
+  document
+    .getElementById(
+      'modalRecorrido'
+    )
+    .classList
+    .remove(
+      'abierto'
+    );
+
+  document.body.style.overflow =
+    '';
+
+}
+
+
+function cerrarModalRecorridoFondo(
+  evento
 ) {
 
-  console.log(
-    'Detalle candidato:',
-    idCandidato
-  );
+  if (
+    evento.target.id ===
+    'modalRecorrido'
+  ) {
+
+    cerrarModalRecorrido();
+
+  }
+
+}
+
+
+function formatearDuracionMinutos(
+  minutosTotales
+) {
+
+  minutosTotales =
+    Number(
+      minutosTotales || 0
+    );
+
+
+  const dias =
+    Math.floor(
+      minutosTotales / 1440
+    );
+
+
+  const horas =
+    Math.floor(
+      (
+        minutosTotales % 1440
+      ) / 60
+    );
+
+
+  const minutos =
+    minutosTotales % 60;
+
+
+  const partes = [];
+
+
+  if (dias > 0) {
+
+    partes.push(
+      dias +
+      (
+        dias === 1
+          ? ' día'
+          : ' días'
+      )
+    );
+
+  }
+
+
+  if (horas > 0) {
+
+    partes.push(
+      horas + ' h'
+    );
+
+  }
+
+
+  if (
+    minutos > 0 ||
+    partes.length === 0
+  ) {
+
+    partes.push(
+      minutos + ' min'
+    );
+
+  }
+
+
+  return partes.join(' ');
 
 }
   
@@ -2524,7 +3347,7 @@ async function cargarSeguimientoPersonas() {
 
     const personas =
       resultado.personas || [];
-
+      seguimientoPersonas = personas;
 
     if (!personas.length) {
 
