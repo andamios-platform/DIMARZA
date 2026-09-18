@@ -642,7 +642,44 @@ tbody tr:last-child td {
   border-bottom:
     none;
 }
+/* =====================================================
+   ALINEACIÓN DE TABLAS
+===================================================== */
 
+/* Tabla de requerimientos */
+#tablaRequerimientos td {
+  text-align: center;
+}
+
+#tablaRequerimientos {
+  text-align: center;
+}
+
+/* Encabezados de requerimientos */
+#vistaRequerimientos th {
+  text-align: center;
+}
+
+
+/* Tabla de seguimiento por persona */
+#tablaSeguimientoPersonas td {
+  text-align: center;
+}
+
+/* Encabezados de seguimiento */
+#vistaPersonas th {
+  text-align: center;
+}
+
+
+/* Solo el nombre queda a la izquierda */
+#tablaSeguimientoPersonas td:first-child {
+  text-align: left;
+}
+
+#vistaPersonas th:first-child {
+  text-align: left;
+}
 
 /* =====================================================
    ESTADOS
@@ -709,8 +746,8 @@ tbody tr:last-child td {
   overflow:
     hidden;
 
-  margin-top:
-    6px;
+  margin:
+    6px auto 0;
 }
 
 .progreso-barra {
