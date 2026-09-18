@@ -416,6 +416,43 @@ button {
     #0f172a;
 }
 
+    /* =====================================================
+   EXPORTAR DATA DE PERSONAL
+===================================================== */
+
+.cabecera-seguimiento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cabecera-seguimiento .titulo-card {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.btn-exportar-personal {
+  background: #16a34a;
+  color: white;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+
+.btn-exportar-personal:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+}
+
+.btn-exportar-personal:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
 /* =====================================================
    TIEMPOS PROMEDIO DEL PROCESO
 ===================================================== */
@@ -1748,9 +1785,22 @@ tbody tr:last-child td {
 
 <section class="card">
 
+<div class="cabecera-seguimiento">
+
   <div class="titulo-card">
     Seguimiento de contratación
   </div>
+
+  <button
+    type="button"
+    class="btn-exportar-personal"
+    id="btnExportarDataPersonal"
+    onclick="exportarDataPersonal()"
+  >
+    ↓ Exportar Data de Personal
+  </button>
+
+</div>
 
 <!-- =========================
      TIEMPOS PROMEDIO
@@ -2013,7 +2063,7 @@ tbody tr:last-child td {
   </div>
 
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script>
 
 
@@ -3766,6 +3816,172 @@ async function cargarTiemposPromedioProceso() {
   }
 
 }
+
+/* =====================================================
+   EXPORTAR DATA DE PERSONAL
+===================================================== */
+
+async function exportarDataPersonal() {
+
+  const boton =
+    document.getElementById(
+      'btnExportarDataPersonal'
+    );
+
+
+  try {
+
+    boton.disabled = true;
+
+    boton.textContent =
+      'Generando Excel...';
+
+
+    const respuesta =
+      await fetch(
+
+        API +
+
+        '?accion=exportarDataPersonal' +
+
+        '&t=' +
+
+        Date.now()
+
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!resultado.ok) {
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudo generar DATA DE PERSONAL'
+      );
+
+    }
+
+
+    const datos =
+      resultado.datos || [];
+
+
+    if (!datos.length) {
+
+      alert(
+        'No existen trabajadores con contratación completada para exportar.'
+      );
+
+      return;
+    }
+
+
+    /*
+     * Crear hoja Excel
+     */
+
+    const hoja =
+      XLSX.utils.json_to_sheet(
+        datos
+      );
+
+
+    /*
+     * Anchos de columnas
+     */
+
+    hoja['!cols'] = [
+
+      { wch: 14 }, // EMPRESA
+      { wch: 12 }, // DNI
+      { wch: 38 }, // APELLIDOS Y NOMBRES
+      { wch: 15 }, // FECHA INGRESO
+      { wch: 25 }, // CARGO
+      { wch: 16 }, // AREA
+      { wch: 20 }, // TIPO CONTRATO
+      { wch: 14 }, // FECHA INI
+      { wch: 14 }, // FECHA FIN
+      { wch: 14 }, // ESTADO
+      { wch: 16 }, // ACCION
+      { wch: 20 }  // DIAS PARA VENCERSE
+
+    ];
+
+
+    const libro =
+      XLSX.utils.book_new();
+
+
+    XLSX.utils.book_append_sheet(
+      libro,
+      hoja,
+      'DATA DE PERSONAL'
+    );
+
+
+    /*
+     * Nombre del archivo
+     */
+
+    const hoy =
+      new Date();
+
+
+    const fecha =
+      String(
+        hoy.getDate()
+      ).padStart(2, '0')
+      +
+      '-'
+      +
+      String(
+        hoy.getMonth() + 1
+      ).padStart(2, '0')
+      +
+      '-'
+      +
+      hoy.getFullYear();
+
+
+    XLSX.writeFile(
+
+      libro,
+
+      'DATA DE PERSONAL - ' +
+      fecha +
+      '.xlsx'
+
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      'Error exportando DATA DE PERSONAL:',
+      error
+    );
+
+
+    alert(
+      error.message ||
+      'No se pudo generar el Excel.'
+    );
+
+
+  } finally {
+
+    boton.disabled = false;
+
+    boton.textContent =
+      '↓ Exportar Data de Personal';
+
+  }
+
+}
+
 /* =====================================================
    KPIs
 ===================================================== */
