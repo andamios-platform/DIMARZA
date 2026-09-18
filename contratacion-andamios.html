@@ -417,6 +417,102 @@ button {
 }
 
 /* =====================================================
+   TIEMPOS PROMEDIO DEL PROCESO
+===================================================== */
+
+.promedios-proceso {
+  margin-bottom: 24px;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.promedios-cabecera {
+  margin-bottom: 15px;
+}
+
+.promedios-titulo {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.promedios-subtitulo {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.promedios-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.promedio-etapa {
+  position: relative;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 12px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.promedio-etapa::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #2563eb;
+}
+
+.promedio-area {
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+.promedio-tiempo {
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.promedio-etapa-nombre {
+  margin-top: 5px;
+  font-size: 10px;
+  color: #64748b;
+  min-height: 24px;
+}
+
+.promedio-casos {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 3px 7px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.promedio-cargando {
+  grid-column: 1 / -1;
+  padding: 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: 12px;
+}
+
+    
+/* =====================================================
    PESTAÑAS DE SEGUIMIENTO
 ===================================================== */
 
@@ -1083,7 +1179,9 @@ tbody tr:last-child td {
     align-items:
       flex-start;
   }
-
+  .promedios-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
   .grid-form {
 
     grid-template-columns:
@@ -1111,7 +1209,9 @@ tbody tr:last-child td {
     padding:
       18px 16px;
   }
-
+  .promedios-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
   .header-contenido {
 
     flex-direction:
@@ -1615,7 +1715,41 @@ tbody tr:last-child td {
     Seguimiento de contratación
   </div>
 
+<!-- =========================
+     TIEMPOS PROMEDIO
+========================== -->
 
+<div class="promedios-proceso">
+
+  <div class="promedios-cabecera">
+
+    <div>
+      <div class="promedios-titulo">
+        Tiempo promedio del proceso
+      </div>
+
+      <div class="promedios-subtitulo">
+        Promedio histórico según etapas completadas
+      </div>
+    </div>
+
+  </div>
+
+
+  <div
+    class="promedios-grid"
+    id="promediosProceso"
+  >
+
+    <div class="promedio-cargando">
+      Calculando tiempos promedio...
+    </div>
+
+  </div>
+
+</div>
+
+  
   <div class="pestanas-seguimiento">
 
     <button
@@ -1703,7 +1837,7 @@ tbody tr:last-child td {
             <tr>
 
               <td
-                colspan="9"
+                colspan="11"
                 class="vacio"
               >
                 Cargando requerimientos...
@@ -1875,6 +2009,8 @@ document.addEventListener(
     await cargarRequerimientos();
 
     await cargarSeguimientoPersonas();
+
+    await cargarTiemposPromedioProceso();
 
   }
 );
@@ -2208,6 +2344,8 @@ await cargarPersonal();
 await cargarRequerimientos();
 
 await cargarSeguimientoPersonas();
+await cargarTiemposPromedioProceso();
+
 
 
   } catch (error) {
@@ -2374,7 +2512,7 @@ async function cargarRequerimientos() {
         <tr>
 
           <td
-            colspan="9"
+            colspan="11"
             class="vacio"
           >
             No existen requerimientos registrados.
@@ -2638,7 +2776,7 @@ const porcentajeHabilitacion =
       <tr>
 
         <td
-          colspan="9"
+          colspan="11"
           class="vacio"
         >
 
@@ -3466,6 +3604,125 @@ async function cargarSeguimientoPersonas() {
         </td>
 
       </tr>
+
+    `;
+
+  }
+
+}
+
+
+/* =====================================================
+   TIEMPOS PROMEDIO DEL PROCESO
+===================================================== */
+
+async function cargarTiemposPromedioProceso() {
+
+  const contenedor =
+    document.getElementById(
+      'promediosProceso'
+    );
+
+
+  try {
+
+    const respuesta =
+      await fetch(
+
+        API +
+
+        '?accion=obtenerTiemposPromedioProceso' +
+
+        '&t=' +
+
+        Date.now()
+
+      );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!resultado.ok) {
+
+      throw new Error(
+        resultado.mensaje ||
+        'No se pudieron obtener los tiempos promedio'
+      );
+
+    }
+
+
+    const tiempos =
+      resultado.tiempos || [];
+
+
+    if (!tiempos.length) {
+
+      contenedor.innerHTML = `
+
+        <div class="promedio-cargando">
+          Aún no existen datos suficientes para calcular promedios.
+        </div>
+
+      `;
+
+      return;
+    }
+
+
+    contenedor.innerHTML =
+
+      tiempos.map(
+        item => `
+
+          <div class="promedio-etapa">
+
+            <div class="promedio-area">
+              ${escapar(item.area)}
+            </div>
+
+            <div class="promedio-tiempo">
+              ${escapar(item.promedioTexto)}
+            </div>
+
+            <div class="promedio-etapa-nombre">
+              ${escapar(item.etapa)}
+            </div>
+
+            <div class="promedio-casos">
+
+              ${
+                Number(item.cantidadCasos || 0)
+              }
+
+              ${
+                Number(item.cantidadCasos || 0) === 1
+                  ? 'caso'
+                  : 'casos'
+              }
+
+            </div>
+
+          </div>
+
+        `
+      ).join('');
+
+  } catch (error) {
+
+    console.error(
+      'Error tiempos promedio:',
+      error
+    );
+
+
+    contenedor.innerHTML = `
+
+      <div class="promedio-cargando">
+        No se pudieron calcular los tiempos promedio.
+      </div>
 
     `;
 
