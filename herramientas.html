@@ -728,25 +728,75 @@ async function apiCall(action, payload = null) {
       return String(s || '').replace(/\s+/g, ' ').trim();
     }
 
-    async function loadInitialData() {
-      showLoading(true);
-      try {
-        const data = await apiCall("getInitialData");
-        const inv = await apiCall("getInventarioHerramientas");
-        
-        baseData = data;
-        baseData.items = inv.inventario || [];
-        fillResponsables();
-        fillSupervisores();
-        fillUnidades();
-        buildEquipos();
-        bindEvents();
-      } catch (err) {
-        alert("Error al cargar datos: " + err.message);
-      } finally {
-        showLoading(false);
-      }
+async function loadInitialData() {
+  showLoading(true);
+
+  try {
+
+    const inicio = performance.now();
+
+    /*
+      UNA SOLA LLAMADA A APPS SCRIPT
+    */
+    const data = await apiCall(
+      "getHerramientasInit"
+    );
+
+    if (!data || data.ok === false) {
+      throw new Error(
+        data?.message ||
+        "No se pudieron cargar los datos."
+      );
     }
+
+    /*
+      La respuesta ya contiene todo:
+      - responsables
+      - supervisores
+      - unidadesMap
+      - items
+    */
+    baseData = data;
+
+    fillResponsables();
+    fillSupervisores();
+    fillUnidades();
+
+    buildEquipos();
+    bindEvents();
+
+    const fin = performance.now();
+
+    console.log(
+      "Tiempo backend:",
+      data.tiempoBackendMs,
+      "ms"
+    );
+
+    console.log(
+      "Tiempo total carga:",
+      Math.round(fin - inicio),
+      "ms"
+    );
+
+  } catch (err) {
+
+    console.error(
+      "Error loadInitialData:",
+      err
+    );
+
+    alert(
+      "Error al cargar datos: " +
+      err.message
+    );
+
+  } finally {
+
+    showLoading(false);
+
+  }
+}
 
     function fillResponsables() {
       const select = document.getElementById('responsable');
