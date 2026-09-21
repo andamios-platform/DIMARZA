@@ -731,58 +731,39 @@ async function apiCall(action, payload = null) {
 async function loadInitialData() {
   showLoading(true);
 
-  const inicio = performance.now();
-
   try {
+    const inicio = performance.now();
 
-    /*
-      ==========================================
-      1. CARGAR SOLO LOS DATOS DEL PASO 1
-      ==========================================
-    */
+    const data = await apiCall("getHerramientasInit");
 
-    const data = await apiCall(
-      "getHerramientasPaso1"
-    );
+    if (!data || data.ok === false) {
+      throw new Error(
+        data?.message ||
+        "No se pudieron cargar los datos."
+      );
+    }
 
-    baseData = {
-      responsables: data.responsables || [],
-      supervisores: data.supervisores || [],
-      unidadesMap: data.unidadesMap || [],
-      items: []
-    };
+    baseData = data;
 
     fillResponsables();
     fillSupervisores();
     fillUnidades();
-
-    /*
-      Los eventos ya pueden funcionar
-      desde este momento.
-    */
+    buildEquipos();
     bindEvents();
 
-    /*
-      ==========================================
-      PASO 1 YA ESTÁ LISTO
-      ==========================================
-    */
-
-    showLoading(false);
+    const fin = performance.now();
 
     console.log(
-      "Paso 1 listo:",
-      Math.round(performance.now() - inicio),
+      "Tiempo backend:",
+      data.tiempoBackendMs,
       "ms"
     );
 
-    /*
-      ==========================================
-      2. INVENTARIO EN SEGUNDO PLANO
-      ==========================================
-    */
-
-    cargarInventarioEnSegundoPlano();
+    console.log(
+      "Tiempo total carga:",
+      Math.round(fin - inicio),
+      "ms"
+    );
 
   } catch (err) {
 
@@ -791,74 +772,18 @@ async function loadInitialData() {
       err
     );
 
-    showLoading(false);
-
     alert(
       "Error al cargar datos: " +
       err.message
     );
-  }
-}
-
-let inventarioListo = false;
-let inventarioCargando = false;
-
-async function cargarInventarioEnSegundoPlano() {
-
-  if (inventarioListo || inventarioCargando) {
-    return;
-  }
-
-  inventarioCargando = true;
-
-  const inicio = performance.now();
-
-  try {
-
-    console.log(
-      "Cargando inventario en segundo plano..."
-    );
-
-    const inv = await apiCall(
-      "getInventarioHerramientas"
-    );
-
-    baseData.items =
-      inv.inventario || [];
-
-    /*
-      Ahora sí construimos las tarjetas
-      del Paso 2.
-    */
-    buildEquipos();
-
-    inventarioListo = true;
-
-    console.log(
-      "Inventario listo:",
-      Math.round(performance.now() - inicio),
-      "ms"
-    );
-
-    console.log(
-      "Herramientas cargadas:",
-      baseData.items.length
-    );
-
-  } catch (err) {
-
-    console.error(
-      "Error cargando inventario:",
-      err
-    );
 
   } finally {
 
-    inventarioCargando = false;
+    showLoading(false);
   }
 }
 
-    
+
     function fillResponsables() {
       const select = document.getElementById('responsable');
       select.innerHTML = '<option value="">Seleccione</option>';
@@ -1308,19 +1233,6 @@ function goToStep2() {
     return;
   }
 
-  /*
-    Evitar entrar al Paso 2 si el inventario
-    todavía se está cargando.
-  */
-  if (!inventarioListo) {
-    alert(
-      "Las herramientas todavía se están cargando. " +
-      "Espere unos segundos e inténtelo nuevamente."
-    );
-
-    return;
-  }
-
   document.getElementById('screen1').classList.remove('active');
   document.getElementById('screen2').classList.add('active');
   document.getElementById('screen3').classList.remove('active');
@@ -1334,7 +1246,6 @@ function goToStep2() {
     behavior: 'smooth'
   });
 }
-
     function goToStep1() {
       document.getElementById('screen2').classList.remove('active');
       document.getElementById('screen3').classList.remove('active');
