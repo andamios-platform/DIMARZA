@@ -4,327 +4,475 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Control de Candados | DIMARZA</title>
+
+<!-- Lectura de archivos Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 :root {
-  --azul: #1e40af;
-  --fondo: #f1f5f9;
-  --texto: #1e293b;
+  --azul:#2563eb;
+  --azul-oscuro:#1e3a8a;
+  --verde:#15803d;
+  --turquesa:#0f766e;
+  --naranja:#b45309;
+  --rojo:#dc2626;
+  --fondo:#f4f8ff;
+  --texto:#1e293b;
+  --borde:#dbe4f0;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing:border-box;
+}
 
 body {
-  margin: 0;
-  background: var(--fondo);
-  color: var(--texto);
-  font-family: Arial, sans-serif;
+  margin:0;
+  background:var(--fondo);
+  color:var(--texto);
+  font-family:Arial,sans-serif;
 }
 
 .contenedor {
-  max-width: 1350px;
-  margin: auto;
-  padding: 24px;
+  max-width:1400px;
+  margin:auto;
+  padding:24px;
 }
 
 /* CABECERA */
 
 .topbar {
-  background: linear-gradient(135deg,#2563eb,#1e3a8a);
-  color: white;
-  padding: 28px;
-  border-radius: 18px;
-  margin-bottom: 24px;
+  background:linear-gradient(135deg,var(--azul),var(--azul-oscuro));
+  color:white;
+  padding:28px;
+  border-radius:18px;
+  margin-bottom:24px;
+  box-shadow:0 6px 18px #00000012;
 }
 
 .topbar-contenido {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
 }
 
 .topbar h1 {
-  margin: 0 0 8px;
-  font-size: 28px;
+  margin:0 0 8px;
+  font-size:28px;
 }
 
 .topbar p {
-  margin: 0;
-  opacity: .9;
+  margin:0;
+  opacity:.9;
 }
 
 .btn-volver {
-  background: white;
-  color: #1e40af;
-  padding: 12px 18px;
-  border-radius: 10px;
-  font-weight: bold;
-  text-decoration: none;
-  white-space: nowrap;
+  background:white;
+  color:var(--azul-oscuro);
+  padding:12px 18px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:bold;
+  white-space:nowrap;
 }
 
 /* INDICADORES */
 
 .indicadores {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:24px;
 }
 
 .indicador {
-  background: white;
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 3px 12px #0000000d;
-  border-top: 4px solid var(--color);
+  background:white;
+  padding:22px;
+  border-radius:14px;
+  border-top:4px solid var(--color);
+  box-shadow:0 4px 12px #0000000a;
 }
 
 .indicador .valor {
-  font-size: 34px;
-  font-weight: 800;
-  color: var(--color);
-  margin-bottom: 8px;
+  font-size:34px;
+  font-weight:800;
+  color:var(--color);
+  margin-bottom:8px;
 }
 
 .indicador .nombre {
-  color: #64748b;
-  font-size: 14px;
+  color:#64748b;
+  font-size:14px;
 }
 
-/* MODULOS */
+/* NAVEGACION */
 
 .modulos {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:24px;
 }
 
 .modulo {
-  background: var(--color);
-  color: white;
-  border: none;
-  border-radius: 14px;
-  padding: 25px 15px;
-  cursor: pointer;
-  text-align: center;
-  transition: .2s;
-  font-size: 15px;
+  background:var(--color);
+  color:white;
+  border:none;
+  border-radius:14px;
+  padding:26px 15px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
 }
 
 .modulo:hover {
-  transform: translateY(-4px);
+  transform:translateY(-4px);
 }
 
 .modulo.activo {
-  outline: 4px solid #93c5fd;
-  outline-offset: 3px;
+  outline:4px solid #93c5fd;
+  outline-offset:3px;
 }
 
 .modulo .icono {
-  font-size: 38px;
-  display: block;
-  margin-bottom: 14px;
+  font-size:38px;
+  display:block;
+  margin-bottom:14px;
 }
 
 .modulo strong {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 17px;
+  display:block;
+  font-size:17px;
+  margin-bottom:8px;
 }
 
 .modulo small {
-  line-height: 1.5;
-  opacity: .9;
+  opacity:.9;
+  line-height:1.5;
 }
 
-/* CONTENIDO */
+/* PANEL */
 
 .panel {
-  background: white;
-  padding: 28px;
-  border-radius: 16px;
-  box-shadow: 0 3px 12px #0000000d;
+  background:white;
+  padding:28px;
+  border-radius:16px;
+  box-shadow:0 4px 15px #0000000a;
 }
 
 .seccion {
-  display: none;
+  display:none;
 }
 
 .seccion.activa {
-  display: block;
+  display:block;
 }
 
 .seccion h2 {
-  margin-top: 0;
-  color: #1e40af;
+  color:var(--azul-oscuro);
+  margin:0 0 10px;
 }
 
 .descripcion {
-  color: #64748b;
-  margin-bottom: 24px;
+  color:#64748b;
+  margin-bottom:24px;
+  line-height:1.5;
+}
+
+.subtitulo {
+  margin:28px 0 15px;
+  font-size:19px;
+  color:var(--azul-oscuro);
+}
+
+/* TARJETAS INTERNAS */
+
+.opciones {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  margin-bottom:24px;
+}
+
+.tarjeta {
+  border:1px solid var(--borde);
+  border-radius:14px;
+  padding:22px;
+  background:#fff;
+}
+
+.tarjeta h3 {
+  margin:0 0 10px;
+  color:var(--azul-oscuro);
+}
+
+.tarjeta p {
+  color:#64748b;
+  font-size:14px;
+  line-height:1.5;
 }
 
 /* FORMULARIOS */
 
 .formulario {
-  display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 18px;
-  margin-bottom: 24px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  margin-bottom:20px;
 }
 
 .campo {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
 }
 
 .campo label {
-  font-weight: bold;
-  font-size: 14px;
+  font-weight:bold;
+  font-size:14px;
 }
 
 .campo input,
 .campo select,
 .campo textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 9px;
-  font: inherit;
+  width:100%;
+  padding:12px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  font:inherit;
+  background:white;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  outline:none;
+  border-color:var(--azul);
+  box-shadow:0 0 0 3px #2563eb18;
+}
+
+.campo input[readonly] {
+  background:#f1f5f9;
 }
 
 .campo textarea {
-  resize: vertical;
+  resize:vertical;
 }
 
 .ancho-completo {
-  grid-column: 1 / -1;
+  grid-column:1/-1;
 }
 
+/* BOTONES */
+
 .acciones {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
 }
 
 .btn {
-  border: none;
-  border-radius: 9px;
-  padding: 12px 20px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  background: #2563eb;
+  border:none;
+  border-radius:9px;
+  padding:12px 20px;
+  background:var(--azul);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn.verde {
+  background:var(--verde);
+}
+
+.btn.turquesa {
+  background:var(--turquesa);
+}
+
+.btn.secundario {
+  background:#e2e8f0;
+  color:#334155;
 }
 
 .btn:disabled {
-  opacity: .5;
-  cursor: not-allowed;
+  opacity:.5;
+  cursor:not-allowed;
 }
 
+/* AVISOS */
+
 .aviso {
-  padding: 14px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1e40af;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:20px;
+  line-height:1.5;
+}
+
+.aviso.advertencia {
+  background:#fffbeb;
+  border-color:#fde68a;
+  color:#92400e;
+}
+
+.mensaje {
+  margin-top:15px;
+  font-size:14px;
+  font-weight:bold;
+  line-height:1.5;
+}
+
+.mensaje.ok {
+  color:#15803d;
+}
+
+.mensaje.error {
+  color:#b91c1c;
 }
 
 /* TABLAS */
 
 .tabla-contenedor {
-  overflow-x: auto;
-  margin-top: 20px;
+  overflow-x:auto;
+  margin-top:18px;
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
 }
 
 th {
-  background: #1e40af;
-  color: white;
-  padding: 13px;
-  text-align: center;
-  white-space: nowrap;
+  background:var(--azul-oscuro);
+  color:white;
+  padding:13px;
+  text-align:center;
+  white-space:nowrap;
 }
 
 td {
-  padding: 12px;
-  border-bottom: 1px solid #e2e8f0;
-  text-align: center;
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #e2e8f0;
+}
+
+tbody tr:hover {
+  background:#f8fafc;
 }
 
 .estado {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
+  display:inline-block;
+  border-radius:20px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:bold;
 }
 
 .disponible {
-  background: #dcfce7;
-  color: #166534;
+  background:#dcfce7;
+  color:#166534;
+}
+
+.asignado {
+  background:#dbeafe;
+  color:#1d4ed8;
 }
 
 .pendiente {
-  background: #fef3c7;
-  color: #92400e;
+  background:#fef3c7;
+  color:#92400e;
 }
 
-.error {
-  background: #fee2e2;
-  color: #991b1b;
+/* CAMPOS DINAMICOS */
+
+.lista-candados {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.candado-item {
+  border:1px solid var(--borde);
+  border-radius:10px;
+  padding:12px;
+}
+
+.candado-item label {
+  display:block;
+  margin-bottom:8px;
+  font-weight:bold;
+  font-size:13px;
+}
+
+.candado-item select {
+  width:100%;
+  padding:11px;
+  border:1px solid #cbd5e1;
+  border-radius:8px;
+  background:white;
 }
 
 /* RESPONSIVE */
 
-@media(max-width:900px) {
+@media(max-width:950px) {
   .indicadores,
-  .modulos {
-    grid-template-columns: repeat(2,1fr);
+  .modulos,
+  .opciones {
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .lista-candados {
+    grid-template-columns:repeat(2,1fr);
   }
 }
 
 @media(max-width:600px) {
-  .contenedor { padding: 12px; }
-
-  .topbar-contenido {
-    flex-direction: column;
-    align-items: stretch;
+  .contenedor {
+    padding:12px;
   }
 
-  .btn-volver { text-align: center; }
+  .topbar-contenido {
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .btn-volver {
+    text-align:center;
+  }
 
   .indicadores,
   .modulos,
-  .formulario {
-    grid-template-columns: 1fr;
+  .opciones,
+  .formulario,
+  .lista-candados {
+    grid-template-columns:1fr;
   }
 
   .ancho-completo {
-    grid-column: auto;
+    grid-column:auto;
+  }
+
+  .panel {
+    padding:18px;
   }
 }
 </style>
 </head>
 
 <body>
+
 <div class="contenedor">
 
   <!-- CABECERA -->
 
   <header class="topbar">
     <div class="topbar-contenido">
+
       <div>
         <h1>CONTROL DE CANDADOS</h1>
         <p>Gestión de candados de bloqueo — DIMARZA</p>
@@ -333,12 +481,14 @@ td {
       <a href="index.html" class="btn-volver">
         ← Volver al menú
       </a>
+
     </div>
   </header>
 
   <!-- INDICADORES -->
 
   <div class="indicadores">
+
     <div class="indicador" style="--color:#2563eb">
       <div class="valor" id="totalCandados">—</div>
       <div class="nombre">Total de candados</div>
@@ -358,92 +508,254 @@ td {
       <div class="valor" id="totalPendientes">—</div>
       <div class="nombre">Pendientes</div>
     </div>
+
   </div>
 
-  <!-- NAVEGACION -->
+  <!-- MODULOS -->
 
   <nav class="modulos">
-    <button class="modulo activo"
+
+    <button
+      class="modulo activo"
       style="--color:#2563eb"
-      onclick="mostrarSeccion('inventario',this)">
+      onclick="mostrarSeccion('inventario',this)"
+    >
       <span class="icono">▤</span>
       <strong>Inventario</strong>
       <small>Registro y consulta de candados</small>
     </button>
 
-    <button class="modulo"
+    <button
+      class="modulo"
       style="--color:#15803d"
-      onclick="mostrarSeccion('asignaciones',this)">
+      onclick="mostrarSeccion('asignaciones',this)"
+    >
       <span class="icono">♙</span>
       <strong>Asignaciones</strong>
       <small>Entrega individual por trabajador</small>
     </button>
 
-    <button class="modulo"
+    <button
+      class="modulo"
       style="--color:#0f766e"
-      onclick="mostrarSeccion('devoluciones',this)">
+      onclick="mostrarSeccion('devoluciones',this)"
+    >
       <span class="icono">✓</span>
       <strong>Devoluciones</strong>
       <small>Verificación de números grabados</small>
     </button>
 
-    <button class="modulo"
+    <button
+      class="modulo"
       style="--color:#b45309"
-      onclick="mostrarSeccion('incidencias',this)">
+      onclick="mostrarSeccion('incidencias',this)"
+    >
       <span class="icono">⚠</span>
       <strong>Incidencias</strong>
       <small>Faltantes y candados ajenos</small>
     </button>
+
   </nav>
 
   <main class="panel">
 
-    <!-- INVENTARIO -->
+    <!-- =====================================
+         INVENTARIO
+    ====================================== -->
 
     <section id="inventario" class="seccion activa">
+
       <h2>Inventario de candados</h2>
+
       <p class="descripcion">
-        Registra y consulta todos los candados por su
-        número grabado.
+        Registra y consulta todos los candados
+        utilizando su número grabado.
       </p>
 
-      <div class="formulario">
-        <div class="campo">
-          <label>Número grabado</label>
-          <input id="numeroCandado"
-            placeholder="Ej. 00125">
+      <div class="opciones">
+
+        <!-- IMPORTACION -->
+
+        <div class="tarjeta">
+
+          <h3>📊 Importar candados desde Excel</h3>
+
+          <p>
+            Carga varios candados de una sola vez.
+            El archivo debe contener las columnas
+            NUMERO_GRABADO, UBICACION y OBSERVACIONES.
+          </p>
+
+          <div class="campo">
+            <label>Seleccionar archivo Excel</label>
+
+            <input
+              type="file"
+              id="excelCandados"
+              accept=".xlsx,.xls"
+              onchange="leerExcelCandados(event)"
+            >
+          </div>
+
+          <div class="acciones" style="margin-top:15px">
+
+            <button
+              class="btn secundario"
+              onclick="descargarPlantillaCandados()"
+            >
+              Descargar plantilla
+            </button>
+
+            <button
+              class="btn verde"
+              id="btnImportarCandados"
+              disabled
+            >
+              Importar a Google Sheets
+            </button>
+
+          </div>
+
+          <div
+            id="mensajeExcelCandados"
+            class="mensaje"
+          ></div>
+
         </div>
 
-        <div class="campo">
-          <label>Ubicación</label>
-          <input id="ubicacionCandado"
-            placeholder="Ej. Almacén">
+        <!-- REGISTRO MANUAL -->
+
+        <div class="tarjeta">
+
+          <h3>🔒 Registrar candado manualmente</h3>
+
+          <p>
+            Utiliza esta opción cuando llegue un
+            candado nuevo o necesites incorporarlo
+            individualmente.
+          </p>
+
+          <div class="campo">
+            <label>Número grabado</label>
+
+            <input
+              id="numeroCandado"
+              placeholder="Ej. 00125"
+            >
+          </div>
+
+          <div class="campo" style="margin-top:14px">
+            <label>Ubicación</label>
+
+            <input
+              id="ubicacionCandado"
+              placeholder="Ej. Almacén"
+            >
+          </div>
+
+          <div class="campo" style="margin-top:14px">
+            <label>Observaciones</label>
+
+            <textarea
+              id="observacionCandado"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="acciones" style="margin-top:15px">
+
+            <button
+              class="btn"
+              id="btnRegistrarCandado"
+              disabled
+            >
+              Registrar candado
+            </button>
+
+          </div>
+
         </div>
 
-        <div class="campo ancho-completo">
-          <label>Observaciones</label>
-          <textarea id="observacionCandado"
-            rows="3"></textarea>
-        </div>
       </div>
 
-      <div class="acciones">
-        <button class="btn" disabled>
-          Registrar candado
-        </button>
+      <!-- VISTA PREVIA -->
+
+      <div id="vistaPreviaCandados" hidden>
+
+        <h3 class="subtitulo">
+          Vista previa de la importación
+        </h3>
+
+        <div class="aviso">
+          Revisa los registros antes de importarlos.
+          Los números duplicados se identificarán
+          durante la validación definitiva.
+        </div>
+
+        <div class="tabla-contenedor">
+
+          <table>
+            <thead>
+              <tr>
+                <th>Número grabado</th>
+                <th>Ubicación</th>
+                <th>Observaciones</th>
+              </tr>
+            </thead>
+
+            <tbody id="tablaPreviaCandados"></tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+      <!-- CONSULTA -->
+
+      <h3 class="subtitulo">Consultar inventario</h3>
+
+      <div class="formulario">
+
+        <div class="campo">
+          <label>Buscar por número grabado</label>
+
+          <input
+            id="buscarCandado"
+            placeholder="Ingrese el número"
+            oninput="filtrarInventario()"
+          >
+        </div>
+
+        <div class="campo">
+          <label>Filtrar por estado</label>
+
+          <select
+            id="filtroEstado"
+            onchange="filtrarInventario()"
+          >
+            <option value="">Todos</option>
+            <option value="DISPONIBLE">Disponibles</option>
+            <option value="ASIGNADO">Asignados</option>
+            <option value="PENDIENTE">Pendientes</option>
+          </select>
+        </div>
+
       </div>
 
       <div class="tabla-contenedor">
+
         <table>
+
           <thead>
             <tr>
-              <th>N.º grabado</th>
+              <th>Número grabado</th>
               <th>Estado</th>
               <th>Trabajador actual</th>
               <th>Ubicación</th>
-              <th>Acción</th>
+              <th>Observaciones</th>
             </tr>
           </thead>
+
           <tbody id="tablaInventario">
             <tr>
               <td colspan="5">
@@ -451,98 +763,322 @@ td {
               </td>
             </tr>
           </tbody>
+
         </table>
+
       </div>
+
     </section>
 
-    <!-- ASIGNACIONES -->
+    <!-- =====================================
+         ASIGNACIONES
+    ====================================== -->
 
     <section id="asignaciones" class="seccion">
+
       <h2>Asignación de candados</h2>
+
       <p class="descripcion">
-        Registra exactamente qué candados recibe
-        cada trabajador.
+        Selecciona un trabajador y asígnale los
+        candados disponibles.
       </p>
 
+      <!-- IMPORTAR PERSONAL -->
+
+      <div class="tarjeta" style="margin-bottom:25px">
+
+        <h3>📊 Importar trabajadores desde Excel</h3>
+
+        <p>
+          Carga la base de datos del personal.
+          El archivo debe contener DNI,
+          APELLIDOS_NOMBRES y CARGO.
+        </p>
+
+        <div class="formulario">
+
+          <div class="campo">
+
+            <label>Seleccionar archivo Excel</label>
+
+            <input
+              type="file"
+              id="excelTrabajadores"
+              accept=".xlsx,.xls"
+              onchange="leerExcelTrabajadores(event)"
+            >
+
+          </div>
+
+          <div class="campo">
+
+            <label>Opciones</label>
+
+            <div class="acciones">
+
+              <button
+                class="btn secundario"
+                onclick="descargarPlantillaTrabajadores()"
+              >
+                Descargar plantilla
+              </button>
+
+              <button
+                class="btn verde"
+                id="btnImportarTrabajadores"
+                disabled
+              >
+                Importar a Google Sheets
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div
+          id="mensajeExcelTrabajadores"
+          class="mensaje"
+        ></div>
+
+        <div id="vistaPreviaTrabajadores" hidden>
+
+          <h3 class="subtitulo">
+            Vista previa de trabajadores
+          </h3>
+
+          <div class="tabla-contenedor">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>DNI</th>
+                  <th>Apellidos y nombres</th>
+                  <th>Cargo</th>
+                </tr>
+              </thead>
+
+              <tbody id="tablaPreviaTrabajadores"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- REGISTRO MANUAL DE TRABAJADORES -->
+
+      <div class="tarjeta" style="margin-bottom:25px">
+
+        <h3>Registrar trabajador manualmente</h3>
+
+        <div class="formulario">
+
+          <div class="campo">
+            <label>DNI</label>
+            <input id="nuevoDni" maxlength="12">
+          </div>
+
+          <div class="campo">
+            <label>Apellidos y nombres</label>
+            <input id="nuevoNombre">
+          </div>
+
+          <div class="campo">
+            <label>Cargo</label>
+            <input id="nuevoCargo">
+          </div>
+
+          <div class="campo">
+            <label>Observaciones</label>
+            <input id="nuevaObservacionTrabajador">
+          </div>
+
+        </div>
+
+        <button
+          class="btn"
+          id="btnRegistrarTrabajador"
+          disabled
+        >
+          Registrar trabajador
+        </button>
+
+      </div>
+
+      <!-- ASIGNACION -->
+
+      <h3 class="subtitulo">
+        Nueva asignación
+      </h3>
+
+      <div class="aviso">
+        Ingresa el DNI para recuperar automáticamente
+        los datos del trabajador. Los candados se
+        seleccionarán de la lista de disponibles.
+      </div>
+
       <div class="formulario">
+
         <div class="campo">
-          <label>DNI</label>
-          <input id="dniAsignacion"
-            placeholder="DNI del trabajador">
+
+          <label>DNI del trabajador</label>
+
+          <input
+            id="dniAsignacion"
+            list="listaDniTrabajadores"
+            placeholder="Buscar por DNI"
+            oninput="buscarTrabajadorAsignacion()"
+          >
+
+          <datalist id="listaDniTrabajadores"></datalist>
+
         </div>
 
         <div class="campo">
+
           <label>Apellidos y nombres</label>
-          <input id="nombreAsignacion"
-            placeholder="Nombre completo">
+
+          <input
+            id="nombreAsignacion"
+            readonly
+            placeholder="Se completará automáticamente"
+          >
+
         </div>
 
         <div class="campo">
+
           <label>Cargo</label>
-          <input id="cargoAsignacion"
-            placeholder="Ej. Andamiero">
+
+          <input
+            id="cargoAsignacion"
+            readonly
+            placeholder="Se completará automáticamente"
+          >
+
         </div>
 
         <div class="campo">
+
           <label>Cantidad de candados</label>
-          <input id="cantidadAsignacion"
-            type="number" min="1" value="3"
-            onchange="generarCamposCandados()">
+
+          <input
+            id="cantidadAsignacion"
+            type="number"
+            min="1"
+            max="30"
+            value="3"
+            onchange="generarCamposCandados()"
+          >
+
         </div>
 
         <div class="campo ancho-completo">
-          <label>Números de candados</label>
-          <div id="camposCandados"></div>
+
+          <label>Seleccionar candados</label>
+
+          <div
+            class="lista-candados"
+            id="camposCandados"
+          ></div>
+
         </div>
 
         <div class="campo">
+
           <label>Entregado por</label>
-          <input id="entregadoPor">
+
+          <input
+            id="entregadoPor"
+            placeholder="Responsable de entrega"
+          >
+
         </div>
 
         <div class="campo ancho-completo">
+
           <label>Observaciones</label>
-          <textarea id="observacionAsignacion"
-            rows="3"></textarea>
+
+          <textarea
+            id="observacionAsignacion"
+            rows="3"
+          ></textarea>
+
         </div>
+
       </div>
 
       <div class="acciones">
-        <button class="btn" disabled>
+
+        <button
+          class="btn verde"
+          id="btnGuardarAsignacion"
+          disabled
+        >
           Registrar asignación
         </button>
+
       </div>
 
-      <div class="aviso" style="margin-top:20px">
-        El sistema comprobará que cada candado exista,
-        esté disponible y no esté asignado a otra persona.
-      </div>
+      <div
+        id="mensajeAsignacion"
+        class="mensaje"
+      ></div>
+
     </section>
 
-    <!-- DEVOLUCIONES -->
+    <!-- =====================================
+         DEVOLUCIONES
+    ====================================== -->
 
     <section id="devoluciones" class="seccion">
+
       <h2>Devolución de candados</h2>
+
       <p class="descripcion">
-        Verifica que el trabajador devuelva los mismos
-        candados que recibió.
+        Comprueba que cada trabajador devuelva
+        exactamente los candados que recibió.
       </p>
 
       <div class="formulario">
+
         <div class="campo">
+
           <label>DNI del trabajador</label>
-          <input id="dniDevolucion">
+
+          <input
+            id="dniDevolucion"
+            list="listaDniDevolucion"
+            placeholder="Buscar por DNI"
+          >
+
+          <datalist id="listaDniDevolucion"></datalist>
+
         </div>
+
       </div>
 
       <div class="acciones">
-        <button class="btn" disabled>
-          Consultar asignaciones
+
+        <button
+          class="btn turquesa"
+          id="btnConsultarDevolucion"
+          disabled
+        >
+          Consultar candados asignados
         </button>
+
       </div>
 
       <div class="tabla-contenedor">
+
         <table>
+
           <thead>
             <tr>
               <th>Candado asignado</th>
@@ -551,104 +1087,822 @@ td {
               <th>Verificación</th>
             </tr>
           </thead>
+
           <tbody id="tablaDevolucion">
+
             <tr>
               <td colspan="4">
                 Busca un trabajador para consultar
                 sus candados pendientes.
               </td>
             </tr>
+
           </tbody>
+
         </table>
+
       </div>
 
-      <div class="aviso" style="margin-top:20px">
-        Los candados ajenos se identificarán sin
-        devolverlos automáticamente al inventario.
+      <h3 class="subtitulo">
+        Registrar devolución
+      </h3>
+
+      <div class="aviso advertencia">
+        El sistema verificará los números grabados.
+        Si un trabajador entrega un candado ajeno,
+        se identificará a quién está asignado.
+        No se considerará devuelto el candado
+        original que continúe pendiente.
       </div>
+
+      <div class="formulario">
+
+        <div class="campo">
+
+          <label>Número grabado recibido</label>
+
+          <input
+            id="candadoRecibido"
+            placeholder="Número del candado"
+          >
+
+        </div>
+
+        <div class="campo">
+
+          <label>Recibido por</label>
+
+          <input
+            id="recibidoPor"
+            placeholder="Responsable de recepción"
+          >
+
+        </div>
+
+        <div class="campo ancho-completo">
+
+          <label>Observaciones</label>
+
+          <textarea
+            id="observacionDevolucion"
+            rows="3"
+          ></textarea>
+
+        </div>
+
+      </div>
+
+      <div class="acciones">
+
+        <button
+          class="btn turquesa"
+          id="btnVerificarDevolucion"
+          disabled
+        >
+          Verificar candado
+        </button>
+
+      </div>
+
+      <div
+        id="resultadoDevolucion"
+        class="mensaje"
+      ></div>
+
     </section>
 
-    <!-- INCIDENCIAS -->
+    <!-- =====================================
+         INCIDENCIAS
+    ====================================== -->
 
     <section id="incidencias" class="seccion">
+
       <h2>Incidencias y faltantes</h2>
+
       <p class="descripcion">
-        Consulta candados pendientes, intercambios,
-        extravíos y observaciones administrativas.
+        Consulta los candados pendientes,
+        extraviados o entregados por una persona
+        distinta a su responsable.
       </p>
 
+      <div class="formulario">
+
+        <div class="campo">
+
+          <label>Buscar por DNI o número de candado</label>
+
+          <input
+            id="buscarIncidencia"
+            placeholder="Buscar"
+            oninput="filtrarIncidencias()"
+          >
+
+        </div>
+
+        <div class="campo">
+
+          <label>Estado</label>
+
+          <select
+            id="estadoIncidencia"
+            onchange="filtrarIncidencias()"
+          >
+
+            <option value="">Todos</option>
+            <option value="ABIERTA">Abiertas</option>
+            <option value="EN REVISION">En revisión</option>
+            <option value="RESUELTA">Resueltas</option>
+
+          </select>
+
+        </div>
+
+      </div>
+
       <div class="tabla-contenedor">
+
         <table>
+
           <thead>
+
             <tr>
               <th>Fecha</th>
+              <th>DNI</th>
               <th>Trabajador</th>
               <th>Tipo</th>
               <th>Candado esperado</th>
               <th>Candado recibido</th>
               <th>Estado</th>
             </tr>
+
           </thead>
+
           <tbody id="tablaIncidencias">
+
             <tr>
-              <td colspan="6">
+              <td colspan="7">
                 Pendiente de conexión con Google Sheets.
               </td>
             </tr>
+
           </tbody>
+
         </table>
+
       </div>
+
+      <div class="acciones" style="margin-top:20px">
+
+        <button
+          class="btn secundario"
+          id="btnExportarIncidencias"
+          disabled
+        >
+          Exportar reporte Excel
+        </button>
+
+      </div>
+
     </section>
 
   </main>
+
 </div>
 
 <script>
-/* NAVEGACION ENTRE SECCIONES */
 
-function mostrarSeccion(id,boton) {
-  document.querySelectorAll('.seccion')
-    .forEach(s => s.classList.remove('activa'));
+/* =====================================
+   DATOS TEMPORALES DE VISTA PREVIA
 
-  document.querySelectorAll('.modulo')
-    .forEach(b => b.classList.remove('activo'));
+   Estos datos solamente se conservan
+   mientras la página permanece abierta.
+   No son registros de Google Sheets.
+===================================== */
+
+let previaCandados = [];
+let previaTrabajadores = [];
+
+let candadosDisponibles = [];
+let trabajadores = [];
+
+/* =====================================
+   NAVEGACION
+===================================== */
+
+function mostrarSeccion(id, boton) {
+
+  document.querySelectorAll(".seccion")
+    .forEach(seccion => {
+      seccion.classList.remove("activa");
+    });
+
+  document.querySelectorAll(".modulo")
+    .forEach(modulo => {
+      modulo.classList.remove("activo");
+    });
 
   document.getElementById(id)
-    .classList.add('activa');
+    .classList.add("activa");
 
-  boton.classList.add('activo');
+  boton.classList.add("activo");
+
 }
 
-/* CAMPOS DINAMICOS DE ASIGNACION */
+/* =====================================
+   UTILIDADES
+===================================== */
 
-function generarCamposCandados() {
-  const cantidad = Number(
-    document.getElementById('cantidadAsignacion').value
-  );
+function texto(valor) {
 
-  const contenedor =
-    document.getElementById('camposCandados');
+  return String(valor ?? "").trim();
 
-  contenedor.innerHTML = '';
+}
 
-  if (!Number.isInteger(cantidad) ||
-      cantidad < 1 || cantidad > 30) {
-    contenedor.textContent =
-      'Ingresa una cantidad entre 1 y 30.';
+function mostrarMensaje(id, mensaje, tipo = "ok") {
+
+  const elemento = document.getElementById(id);
+
+  elemento.textContent = mensaje;
+
+  elemento.className = "mensaje " + tipo;
+
+}
+
+function limpiarTabla(id) {
+
+  document.getElementById(id).replaceChildren();
+
+}
+
+function agregarFila(id, valores) {
+
+  const tbody = document.getElementById(id);
+
+  const tr = document.createElement("tr");
+
+  valores.forEach(valor => {
+
+    const td = document.createElement("td");
+
+    td.textContent = texto(valor);
+
+    tr.appendChild(td);
+
+  });
+
+  tbody.appendChild(tr);
+
+}
+
+/* =====================================
+   DESCARGAR PLANTILLAS
+===================================== */
+
+function descargarExcel(nombre, encabezados) {
+
+  if (typeof XLSX === "undefined") {
+    alert("No se pudo cargar la biblioteca de Excel.");
     return;
   }
 
-  for (let i = 1; i <= cantidad; i++) {
-    const campo = document.createElement('input');
-    campo.type = 'text';
-    campo.className = 'numero-asignado';
-    campo.placeholder = 'Número del candado ' + i;
-    campo.style.marginBottom = '10px';
-    contenedor.appendChild(campo);
-  }
+  const hoja = XLSX.utils.aoa_to_sheet([
+    encabezados
+  ]);
+
+  const libro = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    hoja,
+    "DATOS"
+  );
+
+  XLSX.writeFile(libro, nombre);
+
 }
 
-generarCamposCandados();
+function descargarPlantillaCandados() {
+
+  descargarExcel(
+    "PLANTILLA_CANDADOS.xlsx",
+    [
+      "NUMERO_GRABADO",
+      "UBICACION",
+      "OBSERVACIONES"
+    ]
+  );
+
+}
+
+function descargarPlantillaTrabajadores() {
+
+  descargarExcel(
+    "PLANTILLA_TRABAJADORES.xlsx",
+    [
+      "DNI",
+      "APELLIDOS_NOMBRES",
+      "CARGO",
+      "OBSERVACIONES"
+    ]
+  );
+
+}
+
+/* =====================================
+   LECTURA DE EXCEL
+
+   raw:false conserva los valores
+   mostrados por Excel cuando es posible.
+
+   Para números grabados con ceros
+   iniciales se recomienda establecer
+   la columna como TEXTO en Excel.
+===================================== */
+
+async function leerArchivoExcel(archivo) {
+
+  if (typeof XLSX === "undefined") {
+    throw new Error(
+      "No se pudo cargar la biblioteca de Excel."
+    );
+  }
+
+  if (!archivo) {
+    throw new Error("Selecciona un archivo.");
+  }
+
+  const extension = archivo.name
+    .split(".")
+    .pop()
+    .toLowerCase();
+
+  if (!["xlsx", "xls"].includes(extension)) {
+    throw new Error(
+      "Selecciona un archivo Excel válido."
+    );
+  }
+
+  const buffer = await archivo.arrayBuffer();
+
+  const libro = XLSX.read(buffer, {
+    type:"array",
+    cellText:true
+  });
+
+  const hoja = libro.Sheets[libro.SheetNames[0]];
+
+  if (!hoja) {
+    throw new Error("El archivo no contiene hojas.");
+  }
+
+  return XLSX.utils.sheet_to_json(hoja, {
+    defval:"",
+    raw:false
+  });
+
+}
+
+/* =====================================
+   IMPORTAR CANDADOS
+===================================== */
+
+async function leerExcelCandados(evento) {
+
+  previaCandados = [];
+
+  document.getElementById(
+    "vistaPreviaCandados"
+  ).hidden = true;
+
+  limpiarTabla("tablaPreviaCandados");
+
+  try {
+
+    const archivo = evento.target.files[0];
+
+    if (!archivo) return;
+
+    const filas = await leerArchivoExcel(archivo);
+
+    if (!filas.length) {
+      throw new Error("El archivo está vacío.");
+    }
+
+    const columnas = Object.keys(filas[0]);
+
+    if (!columnas.includes("NUMERO_GRABADO")) {
+      throw new Error(
+        "Falta la columna NUMERO_GRABADO."
+      );
+    }
+
+    const vistos = new Set();
+
+    for (const fila of filas) {
+
+      const numero = texto(fila.NUMERO_GRABADO);
+
+      if (!numero) continue;
+
+      if (vistos.has(numero)) {
+        throw new Error(
+          "Número duplicado en el archivo: " + numero
+        );
+      }
+
+      vistos.add(numero);
+
+      previaCandados.push({
+        numero:numero,
+        ubicacion:texto(fila.UBICACION),
+        observaciones:texto(fila.OBSERVACIONES)
+      });
+
+    }
+
+    if (!previaCandados.length) {
+      throw new Error(
+        "No se encontraron candados válidos."
+      );
+    }
+
+    previaCandados.forEach(candado => {
+
+      agregarFila(
+        "tablaPreviaCandados",
+        [
+          candado.numero,
+          candado.ubicacion,
+          candado.observaciones
+        ]
+      );
+
+    });
+
+    document.getElementById(
+      "vistaPreviaCandados"
+    ).hidden = false;
+
+    mostrarMensaje(
+      "mensajeExcelCandados",
+      previaCandados.length +
+      " candados leídos correctamente. " +
+      "Pendientes de importación a Google Sheets."
+    );
+
+  } catch(error) {
+
+    previaCandados = [];
+
+    mostrarMensaje(
+      "mensajeExcelCandados",
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+/* =====================================
+   IMPORTAR TRABAJADORES
+===================================== */
+
+async function leerExcelTrabajadores(evento) {
+
+  previaTrabajadores = [];
+
+  document.getElementById(
+    "vistaPreviaTrabajadores"
+  ).hidden = true;
+
+  limpiarTabla("tablaPreviaTrabajadores");
+
+  try {
+
+    const archivo = evento.target.files[0];
+
+    if (!archivo) return;
+
+    const filas = await leerArchivoExcel(archivo);
+
+    if (!filas.length) {
+      throw new Error("El archivo está vacío.");
+    }
+
+    const columnas = Object.keys(filas[0]);
+
+    const obligatorias = [
+      "DNI",
+      "APELLIDOS_NOMBRES",
+      "CARGO"
+    ];
+
+    for (const columna of obligatorias) {
+
+      if (!columnas.includes(columna)) {
+        throw new Error(
+          "Falta la columna " + columna + "."
+        );
+      }
+
+    }
+
+    const vistos = new Set();
+
+    for (const fila of filas) {
+
+      const dni = texto(fila.DNI);
+
+      if (!dni) continue;
+
+      if (vistos.has(dni)) {
+        throw new Error(
+          "DNI duplicado en el archivo: " + dni
+        );
+      }
+
+      vistos.add(dni);
+
+      previaTrabajadores.push({
+        dni:dni,
+        nombre:texto(fila.APELLIDOS_NOMBRES),
+        cargo:texto(fila.CARGO),
+        observaciones:texto(fila.OBSERVACIONES)
+      });
+
+    }
+
+    if (!previaTrabajadores.length) {
+      throw new Error(
+        "No se encontraron trabajadores válidos."
+      );
+    }
+
+    previaTrabajadores.forEach(trabajador => {
+
+      agregarFila(
+        "tablaPreviaTrabajadores",
+        [
+          trabajador.dni,
+          trabajador.nombre,
+          trabajador.cargo
+        ]
+      );
+
+    });
+
+    document.getElementById(
+      "vistaPreviaTrabajadores"
+    ).hidden = false;
+
+    mostrarMensaje(
+      "mensajeExcelTrabajadores",
+      previaTrabajadores.length +
+      " trabajadores leídos correctamente. " +
+      "Pendientes de importación a Google Sheets."
+    );
+
+  } catch(error) {
+
+    previaTrabajadores = [];
+
+    mostrarMensaje(
+      "mensajeExcelTrabajadores",
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+/* =====================================
+   BUSCAR TRABAJADOR POR DNI
+===================================== */
+
+function actualizarListaTrabajadores() {
+
+  const listaAsignacion = document.getElementById(
+    "listaDniTrabajadores"
+  );
+
+  const listaDevolucion = document.getElementById(
+    "listaDniDevolucion"
+  );
+
+  listaAsignacion.replaceChildren();
+
+  listaDevolucion.replaceChildren();
+
+  trabajadores.forEach(trabajador => {
+
+    const opcion1 = document.createElement("option");
+
+    opcion1.value = trabajador.dni;
+
+    opcion1.label = trabajador.nombre;
+
+    listaAsignacion.appendChild(opcion1);
+
+    const opcion2 = document.createElement("option");
+
+    opcion2.value = trabajador.dni;
+
+    opcion2.label = trabajador.nombre;
+
+    listaDevolucion.appendChild(opcion2);
+
+  });
+
+}
+
+function buscarTrabajadorAsignacion() {
+
+  const dni = texto(
+    document.getElementById("dniAsignacion").value
+  );
+
+  const trabajador = trabajadores.find(
+    persona => persona.dni === dni
+  );
+
+  document.getElementById(
+    "nombreAsignacion"
+  ).value = trabajador ? trabajador.nombre : "";
+
+  document.getElementById(
+    "cargoAsignacion"
+  ).value = trabajador ? trabajador.cargo : "";
+
+}
+
+/* =====================================
+   CAMPOS DE CANDADOS
+===================================== */
+
+function generarCamposCandados() {
+
+  const cantidad = Number(
+    document.getElementById(
+      "cantidadAsignacion"
+    ).value
+  );
+
+  const contenedor = document.getElementById(
+    "camposCandados"
+  );
+
+  contenedor.replaceChildren();
+
+  if (
+    !Number.isInteger(cantidad) ||
+    cantidad < 1 ||
+    cantidad > 30
+  ) {
+
+    contenedor.textContent =
+      "Ingresa una cantidad entre 1 y 30.";
+
+    return;
+
+  }
+
+  for (let i = 1; i <= cantidad; i++) {
+
+    const tarjeta = document.createElement("div");
+
+    tarjeta.className = "candado-item";
+
+    const etiqueta = document.createElement("label");
+
+    etiqueta.textContent = "Candado " + i;
+
+    const selector = document.createElement("select");
+
+    selector.className = "selector-candado";
+
+    selector.addEventListener(
+      "change",
+      actualizarOpcionesCandados
+    );
+
+    tarjeta.appendChild(etiqueta);
+
+    tarjeta.appendChild(selector);
+
+    contenedor.appendChild(tarjeta);
+
+  }
+
+  actualizarOpcionesCandados();
+
+}
+
+function actualizarOpcionesCandados() {
+
+  const selectores = Array.from(
+    document.querySelectorAll(
+      ".selector-candado"
+    )
+  );
+
+  const seleccionados = selectores
+    .map(selector => selector.value)
+    .filter(Boolean);
+
+  selectores.forEach(selector => {
+
+    const valorActual = selector.value;
+
+    selector.replaceChildren();
+
+    const inicial = document.createElement("option");
+
+    inicial.value = "";
+
+    inicial.textContent = "Seleccionar candado";
+
+    selector.appendChild(inicial);
+
+    candadosDisponibles.forEach(numero => {
+
+      if (
+        seleccionados.includes(numero) &&
+        numero !== valorActual
+      ) {
+        return;
+      }
+
+      const opcion = document.createElement("option");
+
+      opcion.value = numero;
+
+      opcion.textContent = numero;
+
+      selector.appendChild(opcion);
+
+    });
+
+    selector.value = valorActual;
+
+  });
+
+}
+
+/* =====================================
+   FILTROS
+
+   Se activarán cuando el servidor
+   proporcione los registros reales.
+===================================== */
+
+function filtrarInventario() {
+
+  const busqueda = texto(
+    document.getElementById("buscarCandado").value
+  );
+
+  const estado = texto(
+    document.getElementById("filtroEstado").value
+  );
+
+  // Pendiente: aplicar filtros a los
+  // registros obtenidos de Google Sheets.
+
+}
+
+function filtrarIncidencias() {
+
+  const busqueda = texto(
+    document.getElementById("buscarIncidencia").value
+  );
+
+  const estado = texto(
+    document.getElementById("estadoIncidencia").value
+  );
+
+  // Pendiente: aplicar filtros a los
+  // registros obtenidos de Google Sheets.
+
+}
+
+/* =====================================
+   INICIALIZACION
+===================================== */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    generarCamposCandados();
+
+    actualizarListaTrabajadores();
+
+  }
+);
+
 </script>
+
 </body>
 </html>
