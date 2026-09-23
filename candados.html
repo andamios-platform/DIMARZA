@@ -3,1906 +3,2107 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Control de Candados | DIMARZA</title>
-
-<!-- Lectura de archivos Excel -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DIMARZA | Control de Candados</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 :root {
-  --azul:#2563eb;
-  --azul-oscuro:#1e3a8a;
+  --azul:#12365b;
+  --azul2:#1769aa;
   --verde:#15803d;
-  --turquesa:#0f766e;
+  --rojo:#b42318;
   --naranja:#b45309;
-  --rojo:#dc2626;
-  --fondo:#f4f8ff;
-  --texto:#1e293b;
-  --borde:#dbe4f0;
+  --fondo:#f3f6fa;
+  --borde:#dbe4ee;
 }
-
-* {
-  box-sizing:border-box;
-}
-
+* { box-sizing:border-box; }
 body {
   margin:0;
   background:var(--fondo);
-  color:var(--texto);
-  font-family:Arial,sans-serif;
+  color:#243449;
+  font:14px Arial,sans-serif;
 }
-
-.contenedor {
-  max-width:1400px;
-  margin:auto;
-  padding:24px;
-}
-
-/* CABECERA */
-
-.topbar {
-  background:linear-gradient(135deg,var(--azul),var(--azul-oscuro));
+.contenedor { max-width:1450px; margin:auto; padding:20px; }
+header {
+  background:linear-gradient(110deg,#102b4b,#1769aa);
   color:white;
-  padding:28px;
-  border-radius:18px;
-  margin-bottom:24px;
-  box-shadow:0 6px 18px #00000012;
-}
-
-.topbar-contenido {
+  padding:24px;
+  border-radius:14px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:20px;
-}
-
-.topbar h1 {
-  margin:0 0 8px;
-  font-size:28px;
-}
-
-.topbar p {
-  margin:0;
-  opacity:.9;
-}
-
-.btn-volver {
-  background:white;
-  color:var(--azul-oscuro);
-  padding:12px 18px;
-  border-radius:10px;
-  text-decoration:none;
-  font-weight:bold;
-  white-space:nowrap;
-}
-
-/* INDICADORES */
-
-.indicadores {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-  margin-bottom:24px;
-}
-
-.indicador {
-  background:white;
-  padding:22px;
-  border-radius:14px;
-  border-top:4px solid var(--color);
-  box-shadow:0 4px 12px #0000000a;
-}
-
-.indicador .valor {
-  font-size:34px;
-  font-weight:800;
-  color:var(--color);
-  margin-bottom:8px;
-}
-
-.indicador .nombre {
-  color:#64748b;
-  font-size:14px;
-}
-
-/* NAVEGACION */
-
-.modulos {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-  margin-bottom:24px;
-}
-
-.modulo {
-  background:var(--color);
-  color:white;
-  border:none;
-  border-radius:14px;
-  padding:26px 15px;
-  text-align:center;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.modulo:hover {
-  transform:translateY(-4px);
-}
-
-.modulo.activo {
-  outline:4px solid #93c5fd;
-  outline-offset:3px;
-}
-
-.modulo .icono {
-  font-size:38px;
-  display:block;
-  margin-bottom:14px;
-}
-
-.modulo strong {
-  display:block;
-  font-size:17px;
-  margin-bottom:8px;
-}
-
-.modulo small {
-  opacity:.9;
-  line-height:1.5;
-}
-
-/* PANEL */
-
-.panel {
-  background:white;
-  padding:28px;
-  border-radius:16px;
-  box-shadow:0 4px 15px #0000000a;
-}
-
-.seccion {
-  display:none;
-}
-
-.seccion.activa {
-  display:block;
-}
-
-.seccion h2 {
-  color:var(--azul-oscuro);
-  margin:0 0 10px;
-}
-
-.descripcion {
-  color:#64748b;
-  margin-bottom:24px;
-  line-height:1.5;
-}
-
-.subtitulo {
-  margin:28px 0 15px;
-  font-size:19px;
-  color:var(--azul-oscuro);
-}
-
-/* TARJETAS INTERNAS */
-
-.opciones {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-  margin-bottom:24px;
-}
-
-.tarjeta {
-  border:1px solid var(--borde);
-  border-radius:14px;
-  padding:22px;
-  background:#fff;
-}
-
-.tarjeta h3 {
-  margin:0 0 10px;
-  color:var(--azul-oscuro);
-}
-
-.tarjeta p {
-  color:#64748b;
-  font-size:14px;
-  line-height:1.5;
-}
-
-/* FORMULARIOS */
-
-.formulario {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-  margin-bottom:20px;
-}
-
-.campo {
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-
-.campo label {
-  font-weight:bold;
-  font-size:14px;
-}
-
-.campo input,
-.campo select,
-.campo textarea {
-  width:100%;
-  padding:12px;
-  border:1px solid #cbd5e1;
-  border-radius:9px;
-  font:inherit;
-  background:white;
-}
-
-.campo input:focus,
-.campo select:focus,
-.campo textarea:focus {
-  outline:none;
-  border-color:var(--azul);
-  box-shadow:0 0 0 3px #2563eb18;
-}
-
-.campo input[readonly] {
-  background:#f1f5f9;
-}
-
-.campo textarea {
-  resize:vertical;
-}
-
-.ancho-completo {
-  grid-column:1/-1;
-}
-
-/* BOTONES */
-
-.acciones {
-  display:flex;
-  gap:12px;
+  gap:15px;
   flex-wrap:wrap;
 }
-
-.btn {
-  border:none;
-  border-radius:9px;
-  padding:12px 20px;
-  background:var(--azul);
+header h1 { margin:0 0 7px; font-size:25px; }
+header a {
   color:white;
-  font-weight:bold;
-  cursor:pointer;
+  text-decoration:none;
+  border:1px solid #ffffff88;
+  border-radius:8px;
+  padding:10px 14px;
 }
-
-.btn.verde {
-  background:var(--verde);
-}
-
-.btn.turquesa {
-  background:var(--turquesa);
-}
-
-.btn.secundario {
-  background:#e2e8f0;
-  color:#334155;
-}
-
-.btn:disabled {
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-/* AVISOS */
-
+h2,h3 { color:var(--azul); margin:0 0 15px; }
+p { line-height:1.5; }
 .aviso {
-  background:#eff6ff;
-  border:1px solid #bfdbfe;
-  color:#1e40af;
+  margin:16px 0;
   padding:14px;
-  border-radius:10px;
-  margin-bottom:20px;
-  line-height:1.5;
+  background:#fff4d6;
+  border-left:4px solid #e0a100;
+  border-radius:9px;
 }
-
-.aviso.advertencia {
-  background:#fffbeb;
-  border-color:#fde68a;
-  color:#92400e;
+.tarjeta {
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:12px;
+  padding:20px;
+  margin:15px 0;
 }
-
-.mensaje {
-  margin-top:15px;
-  font-size:14px;
-  font-weight:bold;
-  line-height:1.5;
-}
-
-.mensaje.ok {
-  color:#15803d;
-}
-
-.mensaje.error {
-  color:#b91c1c;
-}
-
-/* TABLAS */
-
-.tabla-contenedor {
-  overflow-x:auto;
-  margin-top:18px;
-}
-
-table {
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-
-th {
-  background:var(--azul-oscuro);
-  color:white;
-  padding:13px;
-  text-align:center;
-  white-space:nowrap;
-}
-
-td {
-  padding:12px;
-  text-align:center;
-  border-bottom:1px solid #e2e8f0;
-}
-
-tbody tr:hover {
-  background:#f8fafc;
-}
-
-.estado {
-  display:inline-block;
-  border-radius:20px;
-  padding:6px 10px;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.disponible {
-  background:#dcfce7;
-  color:#166534;
-}
-
-.asignado {
-  background:#dbeafe;
-  color:#1d4ed8;
-}
-
-.pendiente {
-  background:#fef3c7;
-  color:#92400e;
-}
-
-/* CAMPOS DINAMICOS */
-
-.lista-candados {
+.filtros,.cuadricula,.indicadores,.modulos {
   display:grid;
-  grid-template-columns:repeat(3,1fr);
   gap:12px;
 }
-
-.candado-item {
+.filtros { grid-template-columns:repeat(2,1fr); }
+.cuadricula { grid-template-columns:repeat(3,1fr); }
+.cuadricula.dos { grid-template-columns:repeat(2,1fr); }
+.indicadores { grid-template-columns:repeat(5,1fr); margin:16px 0; }
+.indicador {
+  background:white;
   border:1px solid var(--borde);
-  border-radius:10px;
-  padding:12px;
+  border-top:4px solid var(--azul2);
+  padding:17px;
+  border-radius:11px;
 }
-
-.candado-item label {
+.indicador strong {
   display:block;
-  margin-bottom:8px;
-  font-weight:bold;
-  font-size:13px;
+  font-size:29px;
+  margin-bottom:7px;
+  color:var(--azul);
 }
-
-.candado-item select {
+.indicador span { color:#64748b; font-size:12px; }
+.indicador.rojo { border-top-color:var(--rojo); }
+.indicador.rojo strong { color:var(--rojo); }
+.indicador.verde { border-top-color:var(--verde); }
+.modulos { grid-template-columns:repeat(5,1fr); margin:18px 0; }
+.modulo {
+  border:1px solid var(--borde);
+  background:white;
+  border-radius:10px;
+  padding:15px 8px;
+  font-weight:bold;
+  color:var(--azul);
+  cursor:pointer;
+}
+.modulo.activo { background:var(--azul); color:white; }
+.seccion { display:none; }
+.seccion.activa { display:block; }
+label { display:block; font-weight:bold; margin:0 0 6px; }
+input,select,textarea {
   width:100%;
+  min-width:0;
   padding:11px;
   border:1px solid #cbd5e1;
   border-radius:8px;
+  font:inherit;
   background:white;
 }
-
-/* RESPONSIVE */
-
-@media(max-width:950px) {
-  .indicadores,
-  .modulos,
-  .opciones {
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .lista-candados {
-    grid-template-columns:repeat(2,1fr);
-  }
+input[readonly] { background:#f1f5f9; }
+textarea { min-height:75px; resize:vertical; }
+.boton {
+  background:var(--azul2);
+  color:white;
+  border:0;
+  border-radius:8px;
+  padding:11px 15px;
+  font-weight:bold;
+  cursor:pointer;
 }
-
-@media(max-width:600px) {
-  .contenedor {
-    padding:12px;
+.boton:disabled { opacity:.45; cursor:not-allowed; }
+.boton.secundario { background:#e8f0f8; color:var(--azul); }
+.boton.rojo { background:var(--rojo); }
+.boton.verde { background:var(--verde); }
+.boton.pequeno { padding:7px 10px; font-size:12px; }
+.acciones { display:flex; gap:9px; flex-wrap:wrap; margin-top:14px; }
+.tabla { overflow-x:auto; margin-top:15px; }
+table { width:100%; min-width:780px; border-collapse:collapse; }
+th,td {
+  padding:11px;
+  border-bottom:1px solid var(--borde);
+  text-align:left;
+  vertical-align:middle;
+}
+th { background:#eaf0f6; color:var(--azul); font-size:12px; }
+tr:hover td { background:#f8fafc; }
+.estado {
+  display:inline-block;
+  border-radius:20px;
+  padding:4px 9px;
+  font-size:11px;
+  font-weight:bold;
+}
+.DISPONIBLE,.DEVUELTO,.RESUELTA {
+  background:#dcfce7; color:#166534;
+}
+.ASIGNADO { background:#dbeafe; color:#1e40af; }
+.PERDIDO,.ABIERTA { background:#fee2e2; color:#991b1b; }
+.EN_REVISION { background:#fef3c7; color:#92400e; }
+.ayuda { color:#64748b; font-size:12px; }
+.mensaje { padding:10px; margin-top:12px; border-radius:8px; }
+.mensaje.ok { background:#dcfce7; color:#166534; }
+.mensaje.error { background:#fee2e2; color:#991b1b; }
+.vacio { text-align:center; padding:25px; color:#64748b; }
+.oculto { display:none!important; }
+.subpestanas { display:flex; flex-wrap:wrap; gap:9px; margin-bottom:15px; }
+.subpestana {
+  border:1px solid var(--borde);
+  background:white;
+  padding:10px 15px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.subpestana.activa { background:var(--azul); color:white; }
+.modal-fondo {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0f172acc;
+  z-index:100;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+.modal-fondo.abierto { display:flex; }
+.modal {
+  background:white;
+  padding:24px;
+  border-radius:13px;
+  width:100%;
+  max-width:580px;
+  max-height:90vh;
+  overflow:auto;
+}
+.modal label { margin-top:12px; }
+.candado-selector {
+  border:1px solid var(--borde);
+  padding:12px;
+  border-radius:9px;
+  margin:9px 0;
+}
+@media(max-width:950px) {
+  .indicadores { grid-template-columns:repeat(3,1fr); }
+  .modulos { grid-template-columns:repeat(3,1fr); }
+}
+@media(max-width:650px) {
+  .contenedor { padding:10px; }
+  .indicadores,.modulos,.cuadricula,.filtros {
+    grid-template-columns:repeat(2,1fr);
   }
-
-  .topbar-contenido {
-    flex-direction:column;
-    align-items:stretch;
-  }
-
-  .btn-volver {
-    text-align:center;
-  }
-
-  .indicadores,
-  .modulos,
-  .opciones,
-  .formulario,
-  .lista-candados {
-    grid-template-columns:1fr;
-  }
-
-  .ancho-completo {
-    grid-column:auto;
-  }
-
-  .panel {
-    padding:18px;
-  }
+  .cuadricula.dos { grid-template-columns:1fr; }
+  .tarjeta { padding:14px; }
+}
+@media(max-width:450px) {
+  .cuadricula,.filtros { grid-template-columns:1fr; }
 }
 </style>
 </head>
 
 <body>
-
 <div class="contenedor">
 
-  <!-- CABECERA -->
+<header>
+  <div>
+    <h1>CONTROL DE CANDADOS DE BLOQUEO</h1>
+    <div>DIMARZA | Control por unidad minera y servicio</div>
+  </div>
+  <a href="index.html">← Volver al menú</a>
+</header>
 
-  <header class="topbar">
-    <div class="topbar-contenido">
+<div class="aviso">
+  <b>Versión de prueba:</b> los registros se guardan únicamente
+  en este navegador. Todavía no existe sincronización con
+  Google Sheets ni entre distintos equipos.
+</div>
 
+<div class="tarjeta filtros">
+  <div>
+    <label>Unidad minera</label>
+    <select id="minaGlobal"></select>
+  </div>
+  <div>
+    <label>Servicio</label>
+    <select id="servicioGlobal"></select>
+    <p class="ayuda">
+      Selecciona una unidad y un servicio específico para registrar
+      entregas, devoluciones y pérdidas.
+    </p>
+  </div>
+</div>
+
+<div class="indicadores">
+  <div class="indicador">
+    <strong id="totalCandados">0</strong>
+    <span>Total de candados</span>
+  </div>
+  <div class="indicador verde">
+    <strong id="totalDisponibles">0</strong>
+    <span>Disponibles</span>
+  </div>
+  <div class="indicador">
+    <strong id="totalAsignados">0</strong>
+    <span>Por devolver</span>
+  </div>
+  <div class="indicador rojo">
+    <strong id="totalPerdidos">0</strong>
+    <span>Reportados perdidos</span>
+  </div>
+  <div class="indicador">
+    <strong id="totalTrabajadores">0</strong>
+    <span>Trabajadores con candados</span>
+  </div>
+</div>
+
+<nav class="modulos">
+  <button class="modulo activo" data-seccion="inventario">
+    Inventario
+  </button>
+  <button class="modulo" data-seccion="asignaciones">
+    Asignaciones
+  </button>
+  <button class="modulo" data-seccion="devoluciones">
+    Devoluciones
+  </button>
+  <button class="modulo" data-seccion="pendientes">
+    Por devolver / Perdidos
+  </button>
+  <button class="modulo" data-seccion="incidencias">
+    Incidencias
+  </button>
+</nav>
+
+<!-- INVENTARIO -->
+
+<section id="inventario" class="seccion activa">
+
+  <div class="tarjeta">
+    <h2>Registrar candado</h2>
+
+    <div class="cuadricula">
       <div>
-        <h1>CONTROL DE CANDADOS</h1>
-        <p>Gestión de candados de bloqueo — DIMARZA</p>
+        <label>Número grabado</label>
+        <input id="numeroCandado" placeholder="Ej. 00125">
       </div>
-
-      <a href="index.html" class="btn-volver">
-        ← Volver al menú
-      </a>
-
-    </div>
-  </header>
-
-  <!-- INDICADORES -->
-
-  <div class="indicadores">
-
-    <div class="indicador" style="--color:#2563eb">
-      <div class="valor" id="totalCandados">—</div>
-      <div class="nombre">Total de candados</div>
+      <div>
+        <label>Ubicación / almacén</label>
+        <input id="ubicacionCandado" placeholder="Ej. Almacén MET">
+      </div>
+      <div>
+        <label>Observaciones</label>
+        <input id="observacionCandado">
+      </div>
     </div>
 
-    <div class="indicador" style="--color:#0f766e">
-      <div class="valor" id="totalAsignados">—</div>
-      <div class="nombre">Asignados</div>
+    <div class="acciones">
+      <button class="boton" id="registrarCandado">
+        Registrar candado
+      </button>
     </div>
-
-    <div class="indicador" style="--color:#16a34a">
-      <div class="valor" id="totalDisponibles">—</div>
-      <div class="nombre">Disponibles</div>
-    </div>
-
-    <div class="indicador" style="--color:#dc2626">
-      <div class="valor" id="totalPendientes">—</div>
-      <div class="nombre">Pendientes</div>
-    </div>
-
+    <div id="mensajeCandado"></div>
   </div>
 
-  <!-- MODULOS -->
+  <div class="tarjeta">
+    <h3>Importación masiva de candados</h3>
+    <p class="ayuda">
+      Columnas: NUMERO_GRABADO, UBICACION y OBSERVACIONES.
+      Los registros se incorporarán al servicio seleccionado.
+    </p>
 
-  <nav class="modulos">
+    <div class="acciones">
+      <button class="boton secundario" id="plantillaCandados">
+        Descargar plantilla Excel
+      </button>
+      <input type="file" id="excelCandados" accept=".xlsx,.xls,.csv">
+      <button class="boton" id="importarCandados" disabled>
+        Importar registros válidos
+      </button>
+    </div>
 
-    <button
-      class="modulo activo"
-      style="--color:#2563eb"
-      onclick="mostrarSeccion('inventario',this)"
-    >
-      <span class="icono">▤</span>
-      <strong>Inventario</strong>
-      <small>Registro y consulta de candados</small>
-    </button>
+    <div id="mensajeExcelCandados"></div>
 
-    <button
-      class="modulo"
-      style="--color:#15803d"
-      onclick="mostrarSeccion('asignaciones',this)"
-    >
-      <span class="icono">♙</span>
-      <strong>Asignaciones</strong>
-      <small>Entrega individual por trabajador</small>
-    </button>
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Ubicación</th>
+            <th>Validación</th>
+          </tr>
+        </thead>
+        <tbody id="previaCandados"></tbody>
+      </table>
+    </div>
+  </div>
 
-    <button
-      class="modulo"
-      style="--color:#0f766e"
-      onclick="mostrarSeccion('devoluciones',this)"
-    >
-      <span class="icono">✓</span>
-      <strong>Devoluciones</strong>
-      <small>Verificación de números grabados</small>
-    </button>
+  <div class="tarjeta">
+    <h3>Inventario general</h3>
 
-    <button
-      class="modulo"
-      style="--color:#b45309"
-      onclick="mostrarSeccion('incidencias',this)"
-    >
-      <span class="icono">⚠</span>
-      <strong>Incidencias</strong>
-      <small>Faltantes y candados ajenos</small>
-    </button>
-
-  </nav>
-
-  <main class="panel">
-
-    <!-- =====================================
-         INVENTARIO
-    ====================================== -->
-
-    <section id="inventario" class="seccion activa">
-
-      <h2>Inventario de candados</h2>
-
-      <p class="descripcion">
-        Registra y consulta todos los candados
-        utilizando su número grabado.
-      </p>
-
-      <div class="opciones">
-
-        <!-- IMPORTACION -->
-
-        <div class="tarjeta">
-
-          <h3>📊 Importar candados desde Excel</h3>
-
-          <p>
-            Carga varios candados de una sola vez.
-            El archivo debe contener las columnas
-            NUMERO_GRABADO, UBICACION y OBSERVACIONES.
-          </p>
-
-          <div class="campo">
-            <label>Seleccionar archivo Excel</label>
-
-            <input
-              type="file"
-              id="excelCandados"
-              accept=".xlsx,.xls"
-              onchange="leerExcelCandados(event)"
-            >
-          </div>
-
-          <div class="acciones" style="margin-top:15px">
-
-            <button
-              class="btn secundario"
-              onclick="descargarPlantillaCandados()"
-            >
-              Descargar plantilla
-            </button>
-
-            <button
-              class="btn verde"
-              id="btnImportarCandados"
-              disabled
-            >
-              Importar a Google Sheets
-            </button>
-
-          </div>
-
-          <div
-            id="mensajeExcelCandados"
-            class="mensaje"
-          ></div>
-
-        </div>
-
-        <!-- REGISTRO MANUAL -->
-
-        <div class="tarjeta">
-
-          <h3>🔒 Registrar candado manualmente</h3>
-
-          <p>
-            Utiliza esta opción cuando llegue un
-            candado nuevo o necesites incorporarlo
-            individualmente.
-          </p>
-
-          <div class="campo">
-            <label>Número grabado</label>
-
-            <input
-              id="numeroCandado"
-              placeholder="Ej. 00125"
-            >
-          </div>
-
-          <div class="campo" style="margin-top:14px">
-            <label>Ubicación</label>
-
-            <input
-              id="ubicacionCandado"
-              placeholder="Ej. Almacén"
-            >
-          </div>
-
-          <div class="campo" style="margin-top:14px">
-            <label>Observaciones</label>
-
-            <textarea
-              id="observacionCandado"
-              rows="3"
-            ></textarea>
-          </div>
-
-          <div class="acciones" style="margin-top:15px">
-
-            <button
-              class="btn"
-              id="btnRegistrarCandado"
-              disabled
-            >
-              Registrar candado
-            </button>
-
-          </div>
-
-        </div>
-
+    <div class="cuadricula">
+      <div>
+        <label>Buscar</label>
+        <input id="buscarInventario"
+               placeholder="Número, DNI o trabajador">
       </div>
-
-      <!-- VISTA PREVIA -->
-
-      <div id="vistaPreviaCandados" hidden>
-
-        <h3 class="subtitulo">
-          Vista previa de la importación
-        </h3>
-
-        <div class="aviso">
-          Revisa los registros antes de importarlos.
-          Los números duplicados se identificarán
-          durante la validación definitiva.
-        </div>
-
-        <div class="tabla-contenedor">
-
-          <table>
-            <thead>
-              <tr>
-                <th>Número grabado</th>
-                <th>Ubicación</th>
-                <th>Observaciones</th>
-              </tr>
-            </thead>
-
-            <tbody id="tablaPreviaCandados"></tbody>
-          </table>
-
-        </div>
-
+      <div>
+        <label>Estado</label>
+        <select id="filtroInventario">
+          <option value="">Todos</option>
+          <option value="DISPONIBLE">Disponible</option>
+          <option value="ASIGNADO">Asignado</option>
+          <option value="PERDIDO">Perdido</option>
+        </select>
       </div>
-
-      <!-- CONSULTA -->
-
-      <h3 class="subtitulo">Consultar inventario</h3>
-
-      <div class="formulario">
-
-        <div class="campo">
-          <label>Buscar por número grabado</label>
-
-          <input
-            id="buscarCandado"
-            placeholder="Ingrese el número"
-            oninput="filtrarInventario()"
-          >
-        </div>
-
-        <div class="campo">
-          <label>Filtrar por estado</label>
-
-          <select
-            id="filtroEstado"
-            onchange="filtrarInventario()"
-          >
-            <option value="">Todos</option>
-            <option value="DISPONIBLE">Disponibles</option>
-            <option value="ASIGNADO">Asignados</option>
-            <option value="PENDIENTE">Pendientes</option>
-          </select>
-        </div>
-
-      </div>
-
-      <div class="tabla-contenedor">
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Número grabado</th>
-              <th>Estado</th>
-              <th>Trabajador actual</th>
-              <th>Ubicación</th>
-              <th>Observaciones</th>
-            </tr>
-          </thead>
-
-          <tbody id="tablaInventario">
-            <tr>
-              <td colspan="5">
-                Pendiente de conexión con Google Sheets.
-              </td>
-            </tr>
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </section>
-
-    <!-- =====================================
-         ASIGNACIONES
-    ====================================== -->
-
-    <section id="asignaciones" class="seccion">
-
-      <h2>Asignación de candados</h2>
-
-      <p class="descripcion">
-        Selecciona un trabajador y asígnale los
-        candados disponibles.
-      </p>
-
-      <!-- IMPORTAR PERSONAL -->
-
-      <div class="tarjeta" style="margin-bottom:25px">
-
-        <h3>📊 Importar trabajadores desde Excel</h3>
-
-        <p>
-          Carga la base de datos del personal.
-          El archivo debe contener DNI,
-          APELLIDOS_NOMBRES y CARGO.
-        </p>
-
-        <div class="formulario">
-
-          <div class="campo">
-
-            <label>Seleccionar archivo Excel</label>
-
-            <input
-              type="file"
-              id="excelTrabajadores"
-              accept=".xlsx,.xls"
-              onchange="leerExcelTrabajadores(event)"
-            >
-
-          </div>
-
-          <div class="campo">
-
-            <label>Opciones</label>
-
-            <div class="acciones">
-
-              <button
-                class="btn secundario"
-                onclick="descargarPlantillaTrabajadores()"
-              >
-                Descargar plantilla
-              </button>
-
-              <button
-                class="btn verde"
-                id="btnImportarTrabajadores"
-                disabled
-              >
-                Importar a Google Sheets
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <div
-          id="mensajeExcelTrabajadores"
-          class="mensaje"
-        ></div>
-
-        <div id="vistaPreviaTrabajadores" hidden>
-
-          <h3 class="subtitulo">
-            Vista previa de trabajadores
-          </h3>
-
-          <div class="tabla-contenedor">
-
-            <table>
-
-              <thead>
-                <tr>
-                  <th>DNI</th>
-                  <th>Apellidos y nombres</th>
-                  <th>Cargo</th>
-                </tr>
-              </thead>
-
-              <tbody id="tablaPreviaTrabajadores"></tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- REGISTRO MANUAL DE TRABAJADORES -->
-
-      <div class="tarjeta" style="margin-bottom:25px">
-
-        <h3>Registrar trabajador manualmente</h3>
-
-        <div class="formulario">
-
-          <div class="campo">
-            <label>DNI</label>
-            <input id="nuevoDni" maxlength="12">
-          </div>
-
-          <div class="campo">
-            <label>Apellidos y nombres</label>
-            <input id="nuevoNombre">
-          </div>
-
-          <div class="campo">
-            <label>Cargo</label>
-            <input id="nuevoCargo">
-          </div>
-
-          <div class="campo">
-            <label>Observaciones</label>
-            <input id="nuevaObservacionTrabajador">
-          </div>
-
-        </div>
-
-        <button
-          class="btn"
-          id="btnRegistrarTrabajador"
-          disabled
-        >
-          Registrar trabajador
+      <div>
+        <label>Exportar</label>
+        <button class="boton secundario" id="exportarInventario">
+          Exportar Excel
         </button>
-
       </div>
+    </div>
 
-      <!-- ASIGNACION -->
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>N.º grabado</th>
+            <th>Unidad minera</th>
+            <th>Servicio</th>
+            <th>Estado</th>
+            <th>Trabajador</th>
+            <th>DNI</th>
+            <th>Ubicación</th>
+          </tr>
+        </thead>
+        <tbody id="tablaInventario"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
-      <h3 class="subtitulo">
-        Nueva asignación
-      </h3>
+<!-- ASIGNACIONES -->
 
-      <div class="aviso">
-        Ingresa el DNI para recuperar automáticamente
-        los datos del trabajador. Los candados se
-        seleccionarán de la lista de disponibles.
+<section id="asignaciones" class="seccion">
+
+  <div class="tarjeta">
+    <h2>Registro de trabajadores</h2>
+
+    <div class="cuadricula">
+      <div>
+        <label>DNI</label>
+        <input id="nuevoDni" inputmode="numeric">
       </div>
-
-      <div class="formulario">
-
-        <div class="campo">
-
-          <label>DNI del trabajador</label>
-
-          <input
-            id="dniAsignacion"
-            list="listaDniTrabajadores"
-            placeholder="Buscar por DNI"
-            oninput="buscarTrabajadorAsignacion()"
-          >
-
-          <datalist id="listaDniTrabajadores"></datalist>
-
-        </div>
-
-        <div class="campo">
-
-          <label>Apellidos y nombres</label>
-
-          <input
-            id="nombreAsignacion"
-            readonly
-            placeholder="Se completará automáticamente"
-          >
-
-        </div>
-
-        <div class="campo">
-
-          <label>Cargo</label>
-
-          <input
-            id="cargoAsignacion"
-            readonly
-            placeholder="Se completará automáticamente"
-          >
-
-        </div>
-
-        <div class="campo">
-
-          <label>Cantidad de candados</label>
-
-          <input
-            id="cantidadAsignacion"
-            type="number"
-            min="1"
-            max="30"
-            value="3"
-            onchange="generarCamposCandados()"
-          >
-
-        </div>
-
-        <div class="campo ancho-completo">
-
-          <label>Seleccionar candados</label>
-
-          <div
-            class="lista-candados"
-            id="camposCandados"
-          ></div>
-
-        </div>
-
-        <div class="campo">
-
-          <label>Entregado por</label>
-
-          <input
-            id="entregadoPor"
-            placeholder="Responsable de entrega"
-          >
-
-        </div>
-
-        <div class="campo ancho-completo">
-
-          <label>Observaciones</label>
-
-          <textarea
-            id="observacionAsignacion"
-            rows="3"
-          ></textarea>
-
-        </div>
-
+      <div>
+        <label>Apellidos y nombres</label>
+        <input id="nuevoNombre">
       </div>
+      <div>
+        <label>Cargo</label>
+        <input id="nuevoCargo">
+      </div>
+    </div>
 
-      <div class="acciones">
+    <div style="margin-top:12px">
+      <label>Observaciones</label>
+      <input id="nuevaObservacionTrabajador">
+    </div>
 
-        <button
-          class="btn verde"
-          id="btnGuardarAsignacion"
-          disabled
-        >
-          Registrar asignación
+    <div class="acciones">
+      <button class="boton" id="registrarTrabajador">
+        Registrar / actualizar trabajador
+      </button>
+    </div>
+    <div id="mensajeTrabajador"></div>
+  </div>
+
+  <div class="tarjeta">
+    <h3>Importación masiva de trabajadores</h3>
+    <p class="ayuda">
+      Columnas: DNI, APELLIDOS_NOMBRES, CARGO y OBSERVACIONES.
+    </p>
+
+    <div class="acciones">
+      <button class="boton secundario" id="plantillaTrabajadores">
+        Descargar plantilla Excel
+      </button>
+      <input type="file" id="excelTrabajadores"
+             accept=".xlsx,.xls,.csv">
+      <button class="boton" id="importarTrabajadores" disabled>
+        Importar trabajadores
+      </button>
+    </div>
+
+    <div id="mensajeExcelTrabajadores"></div>
+
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>DNI</th>
+            <th>Trabajador</th>
+            <th>Cargo</th>
+            <th>Validación</th>
+          </tr>
+        </thead>
+        <tbody id="previaTrabajadores"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Asignar candados</h2>
+
+    <div class="cuadricula">
+      <div>
+        <label>DNI del trabajador</label>
+        <input id="dniAsignacion" list="listaDni">
+        <datalist id="listaDni"></datalist>
+      </div>
+      <div>
+        <label>Apellidos y nombres</label>
+        <input id="nombreAsignacion" readonly>
+      </div>
+      <div>
+        <label>Cargo</label>
+        <input id="cargoAsignacion" readonly>
+      </div>
+    </div>
+
+    <div class="cuadricula" style="margin-top:15px">
+      <div>
+        <label>Cantidad de candados</label>
+        <input type="number" id="cantidadAsignacion"
+               value="3" min="1" max="30">
+      </div>
+      <div>
+        <label>Entregado por</label>
+        <input id="entregadoPor"
+               placeholder="Nombre del responsable">
+      </div>
+      <div>
+        <label>Observaciones</label>
+        <input id="observacionAsignacion">
+      </div>
+    </div>
+
+    <div id="camposCandados"></div>
+
+    <div class="acciones">
+      <button class="boton" id="guardarAsignacion">
+        Registrar asignación
+      </button>
+    </div>
+
+    <div id="mensajeAsignacion"></div>
+  </div>
+</section>
+
+<!-- DEVOLUCIONES -->
+
+<section id="devoluciones" class="seccion">
+
+  <div class="tarjeta">
+    <h2>Registrar devolución</h2>
+
+    <p>
+      Busca al trabajador por DNI para consultar sus candados.
+      También puedes registrar la devolución de un candado
+      que originalmente fue asignado a otra persona.
+    </p>
+
+    <div class="cuadricula">
+      <div>
+        <label>DNI de quien devuelve</label>
+        <input id="dniDevolucion" list="listaDni">
+      </div>
+      <div>
+        <label>Número grabado recibido</label>
+        <input id="candadoRecibido"
+               placeholder="Ej. 00125">
+      </div>
+      <div>
+        <label>Recibido por</label>
+        <input id="recibidoPor"
+               placeholder="Nombre del encargado">
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <label>Observaciones</label>
+      <textarea id="observacionDevolucion"></textarea>
+    </div>
+
+    <div class="acciones">
+      <button class="boton" id="consultarDevolucion">
+        Consultar trabajador
+      </button>
+      <button class="boton verde" id="verificarDevolucion">
+        Verificar y registrar devolución
+      </button>
+    </div>
+
+    <div id="resultadoDevolucion"></div>
+  </div>
+
+  <div class="tarjeta">
+    <h3>Candados del trabajador</h3>
+
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>N.º grabado</th>
+            <th>Unidad minera</th>
+            <th>Servicio</th>
+            <th>Fecha de entrega</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tablaDevolucion"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- POR DEVOLVER / PERDIDOS -->
+
+<section id="pendientes" class="seccion">
+
+  <div class="tarjeta">
+    <h2>Control de candados por devolver y perdidos</h2>
+
+    <p>
+      Aquí se muestran los candados que todavía están asignados
+      y los que fueron reportados como perdidos.
+    </p>
+
+    <div class="subpestanas">
+      <button class="subpestana activa" data-vista="ASIGNADO">
+        Por devolver
+      </button>
+      <button class="subpestana" data-vista="PERDIDO">
+        Perdidos
+      </button>
+    </div>
+
+    <div class="cuadricula">
+      <div>
+        <label>Buscar</label>
+        <input id="buscarPendientes"
+               placeholder="Número, trabajador o DNI">
+      </div>
+      <div>
+        <label>Presentación</label>
+        <select id="agruparPendientes">
+          <option value="candado">Por candado</option>
+          <option value="trabajador">Por trabajador</option>
+        </select>
+      </div>
+      <div>
+        <label>Exportar</label>
+        <button class="boton secundario" id="exportarPendientes">
+          Exportar Excel
         </button>
-
       </div>
+    </div>
 
-      <div
-        id="mensajeAsignacion"
-        class="mensaje"
-      ></div>
+    <div id="resumenPendientes" style="margin-top:15px"></div>
 
-    </section>
+    <div class="tabla">
+      <table>
+        <thead id="cabeceraPendientes"></thead>
+        <tbody id="tablaPendientes"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
-    <!-- =====================================
-         DEVOLUCIONES
-    ====================================== -->
+<!-- INCIDENCIAS -->
 
-    <section id="devoluciones" class="seccion">
+<section id="incidencias" class="seccion">
 
-      <h2>Devolución de candados</h2>
+  <div class="tarjeta">
+    <h2>Incidencias de candados</h2>
 
-      <p class="descripcion">
-        Comprueba que cada trabajador devuelva
-        exactamente los candados que recibió.
-      </p>
-
-      <div class="formulario">
-
-        <div class="campo">
-
-          <label>DNI del trabajador</label>
-
-          <input
-            id="dniDevolucion"
-            list="listaDniDevolucion"
-            placeholder="Buscar por DNI"
-          >
-
-          <datalist id="listaDniDevolucion"></datalist>
-
-        </div>
-
+    <div class="cuadricula">
+      <div>
+        <label>Buscar</label>
+        <input id="buscarIncidencia"
+               placeholder="Candado, DNI o trabajador">
       </div>
-
-      <div class="acciones">
-
-        <button
-          class="btn turquesa"
-          id="btnConsultarDevolucion"
-          disabled
-        >
-          Consultar candados asignados
+      <div>
+        <label>Estado</label>
+        <select id="estadoIncidencia">
+          <option value="">Todos</option>
+          <option value="ABIERTA">Abierta</option>
+          <option value="RESUELTA">Resuelta</option>
+        </select>
+      </div>
+      <div>
+        <label>Exportar</label>
+        <button class="boton secundario" id="exportarIncidencias">
+          Exportar Excel
         </button>
-
       </div>
+    </div>
 
-      <div class="tabla-contenedor">
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Candado</th>
+            <th>Unidad / Servicio</th>
+            <th>Trabajador asignado</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Resolución</th>
+          </tr>
+        </thead>
+        <tbody id="tablaIncidencias"></tbody>
+      </table>
+    </div>
+  </div>
 
-        <table>
+  <div class="tarjeta">
+    <h3>Historial de movimientos</h3>
 
-          <thead>
-            <tr>
-              <th>Candado asignado</th>
-              <th>Fecha de entrega</th>
-              <th>Estado</th>
-              <th>Verificación</th>
-            </tr>
-          </thead>
-
-          <tbody id="tablaDevolucion">
-
-            <tr>
-              <td colspan="4">
-                Busca un trabajador para consultar
-                sus candados pendientes.
-              </td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      <h3 class="subtitulo">
-        Registrar devolución
-      </h3>
-
-      <div class="aviso advertencia">
-        El sistema verificará los números grabados.
-        Si un trabajador entrega un candado ajeno,
-        se identificará a quién está asignado.
-        No se considerará devuelto el candado
-        original que continúe pendiente.
-      </div>
-
-      <div class="formulario">
-
-        <div class="campo">
-
-          <label>Número grabado recibido</label>
-
-          <input
-            id="candadoRecibido"
-            placeholder="Número del candado"
-          >
-
-        </div>
-
-        <div class="campo">
-
-          <label>Recibido por</label>
-
-          <input
-            id="recibidoPor"
-            placeholder="Responsable de recepción"
-          >
-
-        </div>
-
-        <div class="campo ancho-completo">
-
-          <label>Observaciones</label>
-
-          <textarea
-            id="observacionDevolucion"
-            rows="3"
-          ></textarea>
-
-        </div>
-
-      </div>
-
-      <div class="acciones">
-
-        <button
-          class="btn turquesa"
-          id="btnVerificarDevolucion"
-          disabled
-        >
-          Verificar candado
-        </button>
-
-      </div>
-
-      <div
-        id="resultadoDevolucion"
-        class="mensaje"
-      ></div>
-
-    </section>
-
-    <!-- =====================================
-         INCIDENCIAS
-    ====================================== -->
-
-    <section id="incidencias" class="seccion">
-
-      <h2>Incidencias y faltantes</h2>
-
-      <p class="descripcion">
-        Consulta los candados pendientes,
-        extraviados o entregados por una persona
-        distinta a su responsable.
-      </p>
-
-      <div class="formulario">
-
-        <div class="campo">
-
-          <label>Buscar por DNI o número de candado</label>
-
-          <input
-            id="buscarIncidencia"
-            placeholder="Buscar"
-            oninput="filtrarIncidencias()"
-          >
-
-        </div>
-
-        <div class="campo">
-
-          <label>Estado</label>
-
-          <select
-            id="estadoIncidencia"
-            onchange="filtrarIncidencias()"
-          >
-
-            <option value="">Todos</option>
-            <option value="ABIERTA">Abiertas</option>
-            <option value="EN REVISION">En revisión</option>
-            <option value="RESUELTA">Resueltas</option>
-
-          </select>
-
-        </div>
-
-      </div>
-
-      <div class="tabla-contenedor">
-
-        <table>
-
-          <thead>
-
-            <tr>
-              <th>Fecha</th>
-              <th>DNI</th>
-              <th>Trabajador</th>
-              <th>Tipo</th>
-              <th>Candado esperado</th>
-              <th>Candado recibido</th>
-              <th>Estado</th>
-            </tr>
-
-          </thead>
-
-          <tbody id="tablaIncidencias">
-
-            <tr>
-              <td colspan="7">
-                Pendiente de conexión con Google Sheets.
-              </td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-      <div class="acciones" style="margin-top:20px">
-
-        <button
-          class="btn secundario"
-          id="btnExportarIncidencias"
-          disabled
-        >
-          Exportar reporte Excel
-        </button>
-
-      </div>
-
-    </section>
-
-  </main>
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Candado</th>
+            <th>Movimiento</th>
+            <th>Trabajador</th>
+            <th>Responsable</th>
+            <th>Unidad / Servicio</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaMovimientos"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
 </div>
 
+<!-- VENTANA DE CONFIRMACIÓN -->
+
+<div id="modalFondo" class="modal-fondo">
+  <div class="modal">
+    <h2 id="modalTitulo"></h2>
+    <p id="modalDescripcion"></p>
+    <div id="modalCampos"></div>
+    <div id="modalMensaje"></div>
+
+    <div class="acciones">
+      <button class="boton secundario" id="modalCancelar">
+        Cancelar
+      </button>
+      <button class="boton rojo" id="modalConfirmar">
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
+"use strict";
 
-/* =====================================
-   DATOS TEMPORALES DE VISTA PREVIA
+/* =====================================================
+   1. CONFIGURACIÓN GENERAL
+===================================================== */
 
-   Estos datos solamente se conservan
-   mientras la página permanece abierta.
-   No son registros de Google Sheets.
-===================================== */
+const CLAVE = "DIMARZA_CANDADOS_PRUEBA_V1";
 
+const CATALOGO = [
+  {
+    id:"UM001",
+    nombre:"ANTAPACCAY",
+    servicios:[{id:"SER001",nombre:"ANTAPACCAY"}]
+  },
+  {
+    id:"UM002",
+    nombre:"QUELLAVECO",
+    servicios:[{id:"SER002",nombre:"QUELLAVECO"}]
+  },
+  {
+    id:"UM003",
+    nombre:"CENTINELA",
+    servicios:[
+      {id:"SER003",nombre:"MET"},
+      {id:"SER004",nombre:"OXI"},
+      {id:"SER005",nombre:"RIPIOS"},
+      {id:"SER006",nombre:"CÁTODOS"}
+    ]
+  },
+  {
+    id:"UM004",
+    nombre:"SIERRA GORDA",
+    servicios:[{id:"SER007",nombre:"SIERRA GORDA"}]
+  }
+];
+
+const BASE_VACIA = {
+  candados:[],
+  trabajadores:[],
+  asignaciones:[],
+  movimientos:[],
+  incidencias:[]
+};
+
+let db;
+try {
+  db = JSON.parse(localStorage.getItem(CLAVE)) || BASE_VACIA;
+} catch {
+  db = structuredClone(BASE_VACIA);
+}
+
+for (const nombre of Object.keys(BASE_VACIA)) {
+  if (!Array.isArray(db[nombre])) db[nombre] = [];
+}
+
+let vistaPendientes = "ASIGNADO";
 let previaCandados = [];
 let previaTrabajadores = [];
+let accionModal = null;
 
-let candadosDisponibles = [];
-let trabajadores = [];
+const $ = id => document.getElementById(id);
+const limpiar = valor => String(valor ?? "").trim();
+const mayus = valor => limpiar(valor).toUpperCase();
 
-/* =====================================
-   NAVEGACION
-===================================== */
-
-function mostrarSeccion(id, boton) {
-
-  document.querySelectorAll(".seccion")
-    .forEach(seccion => {
-      seccion.classList.remove("activa");
-    });
-
-  document.querySelectorAll(".modulo")
-    .forEach(modulo => {
-      modulo.classList.remove("activo");
-    });
-
-  document.getElementById(id)
-    .classList.add("activa");
-
-  boton.classList.add("activo");
-
+function escapar(valor) {
+  return limpiar(valor).replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[c]);
 }
 
-/* =====================================
-   UTILIDADES
-===================================== */
-
-function texto(valor) {
-
-  return String(valor ?? "").trim();
-
+function identificador(prefijo) {
+  return prefijo + "_" + Date.now() + "_" +
+    Math.random().toString(36).slice(2,9);
 }
 
-function mostrarMensaje(id, mensaje, tipo = "ok") {
-
-  const elemento = document.getElementById(id);
-
-  elemento.textContent = mensaje;
-
-  elemento.className = "mensaje " + tipo;
-
+function fechaActual() {
+  return new Date().toLocaleString("es-PE");
 }
 
-function limpiarTabla(id) {
-
-  document.getElementById(id).replaceChildren();
-
+function guardar() {
+  try {
+    localStorage.setItem(CLAVE,JSON.stringify(db));
+    return true;
+  } catch {
+    alert("No se pudo guardar. Revisa el almacenamiento del navegador.");
+    return false;
+  }
 }
 
-function agregarFila(id, valores) {
+function mensaje(id,texto,tipo="ok") {
+  $(id).innerHTML =
+    '<div class="mensaje '+tipo+'">'+escapar(texto)+'</div>';
+}
 
-  const tbody = document.getElementById(id);
+function vacio(columnas,texto="Sin registros") {
+  return '<tr><td class="vacio" colspan="'+columnas+'">'+
+    escapar(texto)+'</td></tr>';
+}
 
-  const tr = document.createElement("tr");
+function etiqueta(estado) {
+  return '<span class="estado '+escapar(estado)+'">'+
+    escapar(estado)+'</span>';
+}
 
-  valores.forEach(valor => {
+function unidadNombre(id) {
+  return CATALOGO.find(u=>u.id===id)?.nombre || id || "";
+}
 
-    const td = document.createElement("td");
+function servicioNombre(id) {
+  return CATALOGO.flatMap(u=>u.servicios)
+    .find(s=>s.id===id)?.nombre || id || "";
+}
 
-    td.textContent = texto(valor);
+function trabajador(dni) {
+  return db.trabajadores.find(t=>t.dni===limpiar(dni));
+}
 
-    tr.appendChild(td);
+/* =====================================================
+   2. FILTROS DE MINA Y SERVICIO
+===================================================== */
 
+function iniciarFiltros() {
+  $("minaGlobal").innerHTML =
+    '<option value="">Todas las unidades mineras</option>'+
+    CATALOGO.map(u=>
+      '<option value="'+u.id+'">'+escapar(u.nombre)+'</option>'
+    ).join("");
+
+  $("minaGlobal").value = "UM003";
+  actualizarServicios();
+  $("servicioGlobal").value = "SER003";
+
+  $("minaGlobal").onchange = () => {
+    actualizarServicios();
+    renderizar();
+  };
+
+  $("servicioGlobal").onchange = renderizar;
+}
+
+function actualizarServicios() {
+  const unidad = $("minaGlobal").value;
+  const servicios = CATALOGO
+    .filter(u=>!unidad || u.id===unidad)
+    .flatMap(u=>u.servicios.map(s=>({
+      ...s,
+      unidad:u.nombre
+    })));
+
+  $("servicioGlobal").innerHTML =
+    '<option value="">Todos los servicios</option>'+
+    servicios.map(s=>
+      '<option value="'+s.id+'">'+
+      escapar(unidad?s.nombre:s.unidad+" / "+s.nombre)+
+      '</option>'
+    ).join("");
+}
+
+function servicioObligatorio() {
+  const unidad = $("minaGlobal").value;
+  const servicio = $("servicioGlobal").value;
+
+  if (!unidad || !servicio) {
+    alert("Selecciona una unidad minera y un servicio específico.");
+    return null;
+  }
+
+  return {unidad,servicio};
+}
+
+function dentroFiltro(registro) {
+  const unidad = $("minaGlobal").value;
+  const servicio = $("servicioGlobal").value;
+
+  return (!unidad || registro.unidad===unidad) &&
+         (!servicio || registro.servicio===servicio);
+}
+
+/* =====================================================
+   3. INVENTARIO
+===================================================== */
+
+function registrarCandado(numero,ubicacion,observacion,contexto) {
+  numero = limpiar(numero);
+
+  if (!numero) return "Ingresa el número grabado.";
+
+  if (db.candados.some(c=>
+    c.numero===numero &&
+    c.servicio===contexto.servicio
+  )) {
+    return "Ese número ya está registrado en este servicio.";
+  }
+
+  db.candados.push({
+    id:identificador("CAN"),
+    numero,
+    unidad:contexto.unidad,
+    servicio:contexto.servicio,
+    estado:"DISPONIBLE",
+    dni:"",
+    trabajador:"",
+    ubicacion:limpiar(ubicacion),
+    observacion:limpiar(observacion),
+    fechaUltimaAsignacion:""
   });
 
-  tbody.appendChild(tr);
-
+  return "";
 }
 
-/* =====================================
-   DESCARGAR PLANTILLAS
-===================================== */
+$("registrarCandado").onclick = () => {
+  const contexto = servicioObligatorio();
+  if (!contexto) return;
 
-function descargarExcel(nombre, encabezados) {
+  const error = registrarCandado(
+    $("numeroCandado").value,
+    $("ubicacionCandado").value,
+    $("observacionCandado").value,
+    contexto
+  );
 
-  if (typeof XLSX === "undefined") {
+  if (error) {
+    mensaje("mensajeCandado",error,"error");
+    return;
+  }
+
+  guardar();
+  $("numeroCandado").value = "";
+  $("observacionCandado").value = "";
+
+  mensaje("mensajeCandado","Candado registrado correctamente.");
+  renderizar();
+};
+
+function inventarioFiltrado() {
+  const buscar = mayus($("buscarInventario").value);
+  const estado = $("filtroInventario").value;
+
+  return db.candados.filter(dentroFiltro).filter(c=>
+    (!estado || c.estado===estado) &&
+    [c.numero,c.dni,c.trabajador,c.ubicacion]
+      .some(v=>mayus(v).includes(buscar))
+  );
+}
+
+function renderizarInventario() {
+  const registros = inventarioFiltrado();
+
+  $("tablaInventario").innerHTML =
+    registros.map(c=>`
+      <tr>
+        <td><b>${escapar(c.numero)}</b></td>
+        <td>${escapar(unidadNombre(c.unidad))}</td>
+        <td>${escapar(servicioNombre(c.servicio))}</td>
+        <td>${etiqueta(c.estado)}</td>
+        <td>${escapar(c.trabajador||"—")}</td>
+        <td>${escapar(c.dni||"—")}</td>
+        <td>${escapar(c.ubicacion||"—")}</td>
+      </tr>
+    `).join("") || vacio(7);
+}
+
+/* =====================================================
+   4. TRABAJADORES
+===================================================== */
+
+function registrarTrabajador(dni,nombre,cargo,observacion) {
+  dni = limpiar(dni);
+  nombre = mayus(nombre);
+
+  if (!/^\d{7,12}$/.test(dni)) {
+    return "Ingresa un documento válido.";
+  }
+
+  if (!nombre) return "Ingresa los apellidos y nombres.";
+
+  const existente = trabajador(dni);
+
+  if (existente) {
+    existente.nombre = nombre;
+    existente.cargo = mayus(cargo);
+    existente.observacion = limpiar(observacion);
+  } else {
+    db.trabajadores.push({
+      dni,
+      nombre,
+      cargo:mayus(cargo),
+      estado:"ACTIVO",
+      observacion:limpiar(observacion)
+    });
+  }
+
+  return "";
+}
+
+$("registrarTrabajador").onclick = () => {
+  const error = registrarTrabajador(
+    $("nuevoDni").value,
+    $("nuevoNombre").value,
+    $("nuevoCargo").value,
+    $("nuevaObservacionTrabajador").value
+  );
+
+  if (error) {
+    mensaje("mensajeTrabajador",error,"error");
+    return;
+  }
+
+  guardar();
+  mensaje("mensajeTrabajador","Trabajador registrado o actualizado.");
+  actualizarListaTrabajadores();
+  renderizar();
+};
+
+function actualizarListaTrabajadores() {
+  $("listaDni").innerHTML = db.trabajadores.map(t=>
+    '<option value="'+escapar(t.dni)+'" label="'+
+    escapar(t.nombre)+'"></option>'
+  ).join("");
+}
+
+/* =====================================================
+   5. ASIGNACIONES
+===================================================== */
+
+$("dniAsignacion").oninput = () => {
+  const t = trabajador($("dniAsignacion").value);
+
+  $("nombreAsignacion").value = t?.nombre || "";
+  $("cargoAsignacion").value = t?.cargo || "";
+};
+
+function candadosDisponibles() {
+  const contexto = {
+    unidad:$("minaGlobal").value,
+    servicio:$("servicioGlobal").value
+  };
+
+  return db.candados.filter(c=>
+    c.estado==="DISPONIBLE" &&
+    c.unidad===contexto.unidad &&
+    c.servicio===contexto.servicio
+  );
+}
+
+function generarSelectores() {
+  const cantidad = Math.min(
+    30,
+    Math.max(1,Number($("cantidadAsignacion").value)||3)
+  );
+
+  const disponibles = candadosDisponibles();
+
+  $("camposCandados").innerHTML =
+    '<h3 style="margin-top:20px">Seleccionar candados</h3>'+
+    Array.from({length:cantidad},(_,i)=>`
+      <div class="candado-selector">
+        <label>Candado ${i+1}</label>
+        <select class="selectorCandado">
+          <option value="">Seleccionar número grabado</option>
+          ${disponibles.map(c=>`
+            <option value="${escapar(c.id)}">
+              ${escapar(c.numero)}
+            </option>
+          `).join("")}
+        </select>
+      </div>
+    `).join("");
+
+  document.querySelectorAll(".selectorCandado")
+    .forEach(s=>s.onchange=actualizarOpcionesCandados);
+}
+
+function actualizarOpcionesCandados() {
+  const selectores = [
+    ...document.querySelectorAll(".selectorCandado")
+  ];
+
+  const elegidos = selectores.map(s=>s.value).filter(Boolean);
+
+  selectores.forEach(s=>{
+    [...s.options].forEach(o=>{
+      if (!o.value) return;
+      o.disabled = o.value!==s.value &&
+        elegidos.includes(o.value);
+    });
+  });
+}
+
+$("cantidadAsignacion").onchange = generarSelectores;
+
+$("guardarAsignacion").onclick = () => {
+  const contexto = servicioObligatorio();
+  if (!contexto) return;
+
+  const dni = limpiar($("dniAsignacion").value);
+  const t = trabajador(dni);
+  const responsable = limpiar($("entregadoPor").value);
+
+  if (!t) {
+    mensaje("mensajeAsignacion",
+      "El DNI no está registrado.","error");
+    return;
+  }
+
+  if (!responsable) {
+    mensaje("mensajeAsignacion",
+      "Indica quién entrega los candados.","error");
+    return;
+  }
+
+  const ids = [
+    ...document.querySelectorAll(".selectorCandado")
+  ].map(s=>s.value);
+
+  if (!ids.length || ids.some(v=>!v) ||
+      new Set(ids).size!==ids.length) {
+    mensaje("mensajeAsignacion",
+      "Selecciona todos los candados sin repetir números.",
+      "error");
+    return;
+  }
+
+  const candados = ids.map(id=>
+    db.candados.find(c=>c.id===id)
+  );
+
+  if (candados.some(c=>
+    !c || c.estado!=="DISPONIBLE" ||
+    c.servicio!==contexto.servicio
+  )) {
+    mensaje("mensajeAsignacion",
+      "Uno o más candados ya no están disponibles.",
+      "error");
+    return;
+  }
+
+  const grupo = identificador("GRUPO");
+
+  candados.forEach(c=>{
+    c.estado = "ASIGNADO";
+    c.dni = dni;
+    c.trabajador = t.nombre;
+    c.fechaUltimaAsignacion = fechaActual();
+
+    const asignacion = {
+      id:identificador("ASIG"),
+      grupo,
+      candadoId:c.id,
+      numero:c.numero,
+      unidad:c.unidad,
+      servicio:c.servicio,
+      dni,
+      trabajador:t.nombre,
+      cargo:t.cargo,
+      fechaEntrega:fechaActual(),
+      fechaDevolucion:"",
+      estado:"ASIGNADO",
+      entregadoPor:responsable,
+      recibidoPor:"",
+      observacion:limpiar($("observacionAsignacion").value)
+    };
+
+    db.asignaciones.push(asignacion);
+
+    movimiento(
+      c,"ASIGNACION",dni,t.nombre,responsable,
+      "Entrega de candado",asignacion.id
+    );
+  });
+
+  guardar();
+  generarSelectores();
+  $("dniAsignacion").value = "";
+  $("nombreAsignacion").value = "";
+  $("cargoAsignacion").value = "";
+
+  mensaje("mensajeAsignacion",
+    candados.length+" candados asignados correctamente.");
+  renderizar();
+};
+
+function asignacionVigente(candado) {
+  return [...db.asignaciones].reverse().find(a=>
+    a.candadoId===candado.id &&
+    ["ASIGNADO","PERDIDO"].includes(a.estado)
+  );
+}
+
+function movimiento(c,tipo,dni,nombre,responsable,detalle,idAsignacion="") {
+  db.movimientos.push({
+    id:identificador("MOV"),
+    fecha:fechaActual(),
+    candadoId:c.id,
+    numero:c.numero,
+    unidad:c.unidad,
+    servicio:c.servicio,
+    tipo,
+    dni,
+    nombre,
+    responsable,
+    detalle,
+    idAsignacion
+  });
+}
+
+/* =====================================================
+   6. DEVOLUCIONES
+===================================================== */
+
+function consultarDevolucion() {
+  const dni = limpiar($("dniDevolucion").value);
+
+  const lista = db.candados.filter(c=>
+    c.dni===dni &&
+    ["ASIGNADO","PERDIDO"].includes(c.estado) &&
+    dentroFiltro(c)
+  );
+
+  $("tablaDevolucion").innerHTML = lista.map(c=>{
+    const a = asignacionVigente(c);
+
+    return `
+      <tr>
+        <td><b>${escapar(c.numero)}</b></td>
+        <td>${escapar(unidadNombre(c.unidad))}</td>
+        <td>${escapar(servicioNombre(c.servicio))}</td>
+        <td>${escapar(a?.fechaEntrega||"—")}</td>
+        <td>${etiqueta(c.estado)}</td>
+      </tr>
+    `;
+  }).join("") || vacio(5,"No hay candados pendientes para este DNI.");
+}
+
+$("consultarDevolucion").onclick = consultarDevolucion;
+
+function completarDevolucion(c,a,dni,nombre,responsable,nota) {
+  const eraPerdido = c.estado==="PERDIDO";
+  const ajeno = dni!==a.dni;
+
+  a.estado = "DEVUELTO";
+  a.fechaDevolucion = fechaActual();
+  a.recibidoPor = responsable;
+
+  movimiento(
+    c,
+    eraPerdido?"RECUPERACION":
+      ajeno?"DEVOLUCION_AJENA":"DEVOLUCION",
+    dni,
+    nombre,
+    responsable,
+    "Titular original: "+a.trabajador+" ("+a.dni+"). "+
+    nota,
+    a.id
+  );
+
+  if (ajeno) {
+    db.incidencias.push({
+      id:identificador("INC"),
+      fecha:fechaActual(),
+      candadoId:c.id,
+      numero:c.numero,
+      unidad:c.unidad,
+      servicio:c.servicio,
+      dni:a.dni,
+      trabajador:a.trabajador,
+      tipo:"DEVOLUCION_AJENA",
+      motivo:"Devuelto por "+nombre+" ("+dni+")",
+      estado:"RESUELTA",
+      responsable,
+      observacion:nota,
+      fechaResolucion:fechaActual(),
+      resolucion:"Candado recibido y devuelto al inventario."
+    });
+  }
+
+  db.incidencias
+    .filter(i=>
+      i.candadoId===c.id &&
+      i.tipo==="PERDIDA" &&
+      i.estado==="ABIERTA"
+    )
+    .forEach(i=>{
+      i.estado="RESUELTA";
+      i.fechaResolucion=fechaActual();
+      i.resolucion=
+        "Candado recuperado. Devuelto por "+
+        nombre+" ("+dni+"). Recibido por "+responsable;
+    });
+
+  c.estado="DISPONIBLE";
+  c.dni="";
+  c.trabajador="";
+
+  guardar();
+  renderizar();
+}
+
+$("verificarDevolucion").onclick = () => {
+  const contexto = servicioObligatorio();
+  if (!contexto) return;
+
+  const dni = limpiar($("dniDevolucion").value);
+  const t = trabajador(dni);
+  const numero = limpiar($("candadoRecibido").value);
+  const responsable = limpiar($("recibidoPor").value);
+  const nota = limpiar($("observacionDevolucion").value);
+
+  if (!t || !numero || !responsable) {
+    mensaje("resultadoDevolucion",
+      "Registra un DNI válido, número grabado y responsable.",
+      "error");
+    return;
+  }
+
+  const c = db.candados.find(x=>
+    x.numero===numero &&
+    x.servicio===contexto.servicio &&
+    ["ASIGNADO","PERDIDO"].includes(x.estado)
+  );
+
+  if (!c) {
+    mensaje("resultadoDevolucion",
+      "No se encontró un candado pendiente con ese número "+
+      "en el servicio seleccionado.","error");
+    return;
+  }
+
+  const a = asignacionVigente(c);
+
+  if (!a) {
+    mensaje("resultadoDevolucion",
+      "No se encontró su asignación vigente.","error");
+    return;
+  }
+
+  const ajeno = a.dni!==dni;
+
+  abrirModal(
+    "Confirmar devolución",
+    "Candado "+c.numero+
+    ". Titular original: "+a.trabajador+
+    " ("+a.dni+"). Devuelve: "+t.nombre+
+    " ("+dni+")."+
+    (ajeno?" ATENCIÓN: lo devuelve otra persona.":""),
+    ajeno?
+      '<label>Explicación de la devolución ajena</label>'+
+      '<textarea id="modalNota" placeholder="Obligatorio"></textarea>':
+      '<p>Se registrará la devolución y quedará disponible.</p>',
+    ()=>{
+      const explicacion = ajeno?
+        limpiar($("modalNota").value):nota;
+
+      if (ajeno && !explicacion) {
+        mensaje("modalMensaje",
+          "Explica por qué otra persona devuelve el candado.",
+          "error");
+        return false;
+      }
+
+      completarDevolucion(
+        c,a,dni,t.nombre,responsable,explicacion
+      );
+
+      mensaje("resultadoDevolucion",
+        "Candado "+numero+" devuelto correctamente.");
+      $("candadoRecibido").value="";
+      consultarDevolucion();
+
+      return true;
+    },
+    "Confirmar devolución",
+    "verde"
+  );
+};
+
+/* =====================================================
+   7. POR DEVOLVER Y PERDIDOS
+===================================================== */
+
+function listaPendientes() {
+  const buscar = mayus($("buscarPendientes").value);
+
+  return db.candados.filter(dentroFiltro).filter(c=>
+    c.estado===vistaPendientes &&
+    [c.numero,c.dni,c.trabajador]
+      .some(v=>mayus(v).includes(buscar))
+  );
+}
+
+function renderizarPendientes() {
+  document.querySelectorAll(".subpestana").forEach(b=>
+    b.classList.toggle(
+      "activa",
+      b.dataset.vista===vistaPendientes
+    )
+  );
+
+  const lista = listaPendientes();
+
+  $("resumenPendientes").innerHTML =
+    '<b>'+lista.length+'</b> candados '+
+    (vistaPendientes==="PERDIDO"?
+      "reportados como perdidos":"por devolver");
+
+  if ($("agruparPendientes").value==="trabajador") {
+    const grupos = new Map();
+
+    lista.forEach(c=>{
+      const clave=c.servicio+"|"+c.dni;
+
+      if (!grupos.has(clave)) {
+        grupos.set(clave,{
+          trabajador:c.trabajador,
+          dni:c.dni,
+          unidad:c.unidad,
+          servicio:c.servicio,
+          candados:[]
+        });
+      }
+
+      grupos.get(clave).candados.push(c.numero);
+    });
+
+    $("cabeceraPendientes").innerHTML = `
+      <tr>
+        <th>Trabajador</th>
+        <th>DNI</th>
+        <th>Unidad minera</th>
+        <th>Servicio</th>
+        <th>Cantidad</th>
+        <th>Números grabados</th>
+      </tr>
+    `;
+
+    $("tablaPendientes").innerHTML =
+      [...grupos.values()].map(g=>`
+        <tr>
+          <td>${escapar(g.trabajador)}</td>
+          <td>${escapar(g.dni)}</td>
+          <td>${escapar(unidadNombre(g.unidad))}</td>
+          <td>${escapar(servicioNombre(g.servicio))}</td>
+          <td><b>${g.candados.length}</b></td>
+          <td>${g.candados.map(escapar).join(", ")}</td>
+        </tr>
+      `).join("") || vacio(6);
+
+    return;
+  }
+
+  $("cabeceraPendientes").innerHTML = `
+    <tr>
+      <th>N.º grabado</th>
+      <th>Unidad minera</th>
+      <th>Servicio</th>
+      <th>Trabajador asignado</th>
+      <th>DNI</th>
+      <th>Fecha de entrega</th>
+      <th>Acción</th>
+    </tr>
+  `;
+
+  $("tablaPendientes").innerHTML = lista.map(c=>{
+    const a = asignacionVigente(c);
+
+    return `
+      <tr>
+        <td><b>${escapar(c.numero)}</b></td>
+        <td>${escapar(unidadNombre(c.unidad))}</td>
+        <td>${escapar(servicioNombre(c.servicio))}</td>
+        <td>${escapar(c.trabajador)}</td>
+        <td>${escapar(c.dni)}</td>
+        <td>${escapar(a?.fechaEntrega||"—")}</td>
+        <td>
+          <button class="boton pequeno ${
+            c.estado==="PERDIDO"?"verde":"rojo"
+          }" data-candado="${escapar(c.id)}">
+            ${
+              c.estado==="PERDIDO"?
+              "Recuperar / devolver":
+              "Reportar perdido"
+            }
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("") || vacio(7);
+}
+
+$("tablaPendientes").onclick = event => {
+  const id = event.target.dataset.candado;
+  if (!id) return;
+
+  const c = db.candados.find(x=>x.id===id);
+  if (!c) return;
+
+  const a = asignacionVigente(c);
+  if (!a) return;
+
+  if (c.estado==="ASIGNADO") {
+    abrirModal(
+      "Reportar candado perdido",
+      "Candado "+c.numero+" asignado a "+
+      a.trabajador+" ("+a.dni+").",
+      `
+        <label>Motivo</label>
+        <select id="modalMotivo">
+          <option value="">Seleccionar motivo</option>
+          <option>No entregado al finalizar el servicio</option>
+          <option>Extravío declarado</option>
+          <option>Presunto robo (sin confirmar)</option>
+          <option>Otro</option>
+        </select>
+
+        <label>Observaciones</label>
+        <textarea id="modalNota"></textarea>
+
+        <label>Responsable del registro</label>
+        <input id="modalResponsable">
+      `,
+      ()=>{
+        const motivo = limpiar($("modalMotivo").value);
+        const nota = limpiar($("modalNota").value);
+        const responsable = limpiar($("modalResponsable").value);
+
+        if (!motivo || !nota || !responsable) {
+          mensaje("modalMensaje",
+            "Completa motivo, observaciones y responsable.",
+            "error");
+          return false;
+        }
+
+        c.estado="PERDIDO";
+        a.estado="PERDIDO";
+
+        db.incidencias.push({
+          id:identificador("INC"),
+          fecha:fechaActual(),
+          candadoId:c.id,
+          numero:c.numero,
+          unidad:c.unidad,
+          servicio:c.servicio,
+          dni:a.dni,
+          trabajador:a.trabajador,
+          tipo:"PERDIDA",
+          motivo,
+          estado:"ABIERTA",
+          responsable,
+          observacion:nota,
+          fechaResolucion:"",
+          resolucion:""
+        });
+
+        movimiento(
+          c,"REPORTE_PERDIDA",
+          a.dni,a.trabajador,responsable,
+          motivo+". "+nota,a.id
+        );
+
+        guardar();
+        renderizar();
+        return true;
+      },
+      "Reportar perdido",
+      "rojo"
+    );
+
+    return;
+  }
+
+  if (c.estado==="PERDIDO") {
+    abrirModal(
+      "Recuperar candado",
+      "Candado "+c.numero+
+      ". Titular original: "+a.trabajador+
+      " ("+a.dni+").",
+      `
+        <label>DNI de quien devuelve</label>
+        <input id="modalDni" list="listaDni">
+
+        <label>Recibido por</label>
+        <input id="modalResponsable">
+
+        <label>Observaciones</label>
+        <textarea id="modalNota"></textarea>
+      `,
+      ()=>{
+        const dni = limpiar($("modalDni").value);
+        const t = trabajador(dni);
+        const responsable = limpiar($("modalResponsable").value);
+        const nota = limpiar($("modalNota").value);
+
+        if (!t || !responsable) {
+          mensaje("modalMensaje",
+            "Indica un trabajador registrado y quién recibe.",
+            "error");
+          return false;
+        }
+
+        if (dni!==a.dni && !nota) {
+          mensaje("modalMensaje",
+            "Explica por qué lo devuelve otra persona.",
+            "error");
+          return false;
+        }
+
+        completarDevolucion(
+          c,a,dni,t.nombre,responsable,nota
+        );
+
+        return true;
+      },
+      "Confirmar recuperación",
+      "verde"
+    );
+  }
+};
+
+/* =====================================================
+   8. INCIDENCIAS E HISTORIAL
+===================================================== */
+
+function renderizarIncidencias() {
+  const buscar = mayus($("buscarIncidencia").value);
+  const estado = $("estadoIncidencia").value;
+
+  const incidencias = db.incidencias
+    .filter(dentroFiltro)
+    .filter(i=>
+      (!estado || i.estado===estado) &&
+      [i.numero,i.dni,i.trabajador,i.tipo,i.motivo]
+        .some(v=>mayus(v).includes(buscar))
+    )
+    .slice()
+    .reverse();
+
+  $("tablaIncidencias").innerHTML =
+    incidencias.map(i=>`
+      <tr>
+        <td>${escapar(i.fecha)}</td>
+        <td><b>${escapar(i.numero)}</b></td>
+        <td>
+          ${escapar(unidadNombre(i.unidad))}<br>
+          ${escapar(servicioNombre(i.servicio))}
+        </td>
+        <td>
+          ${escapar(i.trabajador)}<br>
+          <span class="ayuda">${escapar(i.dni)}</span>
+        </td>
+        <td>
+          ${escapar(i.tipo)}<br>
+          <span class="ayuda">${escapar(i.motivo)}</span>
+        </td>
+        <td>${etiqueta(i.estado)}</td>
+        <td>${escapar(i.resolucion||"—")}</td>
+      </tr>
+    `).join("") || vacio(7);
+
+  $("tablaMovimientos").innerHTML =
+    db.movimientos
+      .filter(dentroFiltro)
+      .slice()
+      .reverse()
+      .map(m=>`
+        <tr>
+          <td>${escapar(m.fecha)}</td>
+          <td>${escapar(m.numero)}</td>
+          <td>${escapar(m.tipo)}</td>
+          <td>
+            ${escapar(m.nombre)}<br>
+            <span class="ayuda">${escapar(m.dni)}</span>
+          </td>
+          <td>${escapar(m.responsable)}</td>
+          <td>
+            ${escapar(unidadNombre(m.unidad))}<br>
+            ${escapar(servicioNombre(m.servicio))}
+          </td>
+          <td>${escapar(m.detalle)}</td>
+        </tr>
+      `).join("") || vacio(7);
+}
+
+/* =====================================================
+   9. INDICADORES
+===================================================== */
+
+function renderizarIndicadores() {
+  const lista = db.candados.filter(dentroFiltro);
+
+  $("totalCandados").textContent = lista.length;
+
+  $("totalDisponibles").textContent =
+    lista.filter(c=>c.estado==="DISPONIBLE").length;
+
+  $("totalAsignados").textContent =
+    lista.filter(c=>c.estado==="ASIGNADO").length;
+
+  $("totalPerdidos").textContent =
+    lista.filter(c=>c.estado==="PERDIDO").length;
+
+  $("totalTrabajadores").textContent =
+    new Set(
+      lista.filter(c=>c.estado!=="DISPONIBLE")
+        .map(c=>c.dni)
+        .filter(Boolean)
+    ).size;
+}
+
+function renderizar() {
+  renderizarIndicadores();
+  renderizarInventario();
+  renderizarPendientes();
+  renderizarIncidencias();
+  actualizarListaTrabajadores();
+}
+
+/* =====================================================
+   10. MODALES
+===================================================== */
+
+function abrirModal(titulo,descripcion,campos,accion,
+                    textoBoton="Confirmar",color="rojo") {
+  $("modalTitulo").textContent = titulo;
+  $("modalDescripcion").textContent = descripcion;
+  $("modalCampos").innerHTML = campos;
+  $("modalMensaje").innerHTML = "";
+  $("modalConfirmar").textContent = textoBoton;
+  $("modalConfirmar").className = "boton "+color;
+
+  accionModal = accion;
+  $("modalFondo").classList.add("abierto");
+}
+
+$("modalCancelar").onclick = () => {
+  $("modalFondo").classList.remove("abierto");
+  accionModal = null;
+};
+
+$("modalConfirmar").onclick = () => {
+  if (!accionModal) return;
+
+  if (accionModal()!==false) {
+    $("modalFondo").classList.remove("abierto");
+    accionModal = null;
+  }
+};
+
+/* =====================================================
+   11. EXCEL
+===================================================== */
+
+function descargarExcel(filas,nombre) {
+  if (typeof XLSX==="undefined") {
     alert("No se pudo cargar la biblioteca de Excel.");
     return;
   }
 
-  const hoja = XLSX.utils.aoa_to_sheet([
-    encabezados
-  ]);
-
   const libro = XLSX.utils.book_new();
+  const hoja = XLSX.utils.json_to_sheet(filas);
 
-  XLSX.utils.book_append_sheet(
-    libro,
-    hoja,
-    "DATOS"
-  );
-
-  XLSX.writeFile(libro, nombre);
-
+  XLSX.utils.book_append_sheet(libro,hoja,"DATOS");
+  XLSX.writeFile(libro,nombre);
 }
 
-function descargarPlantillaCandados() {
+$("plantillaCandados").onclick = () => {
+  descargarExcel([{
+    NUMERO_GRABADO:"00125",
+    UBICACION:"Almacén",
+    OBSERVACIONES:""
+  }],"Plantilla_Candados.xlsx");
+};
 
-  descargarExcel(
-    "PLANTILLA_CANDADOS.xlsx",
-    [
-      "NUMERO_GRABADO",
-      "UBICACION",
-      "OBSERVACIONES"
-    ]
-  );
+$("plantillaTrabajadores").onclick = () => {
+  descargarExcel([{
+    DNI:"12345678",
+    APELLIDOS_NOMBRES:"APELLIDOS NOMBRES",
+    CARGO:"ANDAMIERO",
+    OBSERVACIONES:""
+  }],"Plantilla_Trabajadores.xlsx");
+};
 
-}
+async function leerExcel(archivo) {
+  if (!archivo) throw Error("Selecciona un archivo.");
 
-function descargarPlantillaTrabajadores() {
-
-  descargarExcel(
-    "PLANTILLA_TRABAJADORES.xlsx",
-    [
-      "DNI",
-      "APELLIDOS_NOMBRES",
-      "CARGO",
-      "OBSERVACIONES"
-    ]
-  );
-
-}
-
-/* =====================================
-   LECTURA DE EXCEL
-
-   raw:false conserva los valores
-   mostrados por Excel cuando es posible.
-
-   Para números grabados con ceros
-   iniciales se recomienda establecer
-   la columna como TEXTO en Excel.
-===================================== */
-
-async function leerArchivoExcel(archivo) {
-
-  if (typeof XLSX === "undefined") {
-    throw new Error(
-      "No se pudo cargar la biblioteca de Excel."
-    );
+  if (typeof XLSX==="undefined") {
+    throw Error("No se pudo cargar la biblioteca de Excel.");
   }
 
-  if (!archivo) {
-    throw new Error("Selecciona un archivo.");
-  }
-
-  const extension = archivo.name
-    .split(".")
-    .pop()
-    .toLowerCase();
-
-  if (!["xlsx", "xls"].includes(extension)) {
-    throw new Error(
-      "Selecciona un archivo Excel válido."
-    );
-  }
-
-  const buffer = await archivo.arrayBuffer();
-
-  const libro = XLSX.read(buffer, {
+  const libro = XLSX.read(await archivo.arrayBuffer(),{
     type:"array",
     cellText:true
   });
 
   const hoja = libro.Sheets[libro.SheetNames[0]];
 
-  if (!hoja) {
-    throw new Error("El archivo no contiene hojas.");
-  }
-
-  return XLSX.utils.sheet_to_json(hoja, {
+  return XLSX.utils.sheet_to_json(hoja,{
     defval:"",
     raw:false
-  });
-
+  }).map(fila=>
+    Object.fromEntries(
+      Object.entries(fila).map(([clave,valor])=>[
+        mayus(clave),
+        limpiar(valor)
+      ])
+    )
+  );
 }
 
-/* =====================================
-   IMPORTAR CANDADOS
-===================================== */
-
-async function leerExcelCandados(evento) {
-
+$("excelCandados").onchange = async event => {
   previaCandados = [];
-
-  document.getElementById(
-    "vistaPreviaCandados"
-  ).hidden = true;
-
-  limpiarTabla("tablaPreviaCandados");
+  $("importarCandados").disabled = true;
 
   try {
+    const filas = await leerExcel(event.target.files[0]);
 
-    const archivo = evento.target.files[0];
-
-    if (!archivo) return;
-
-    const filas = await leerArchivoExcel(archivo);
-
-    if (!filas.length) {
-      throw new Error("El archivo está vacío.");
-    }
-
-    const columnas = Object.keys(filas[0]);
-
-    if (!columnas.includes("NUMERO_GRABADO")) {
-      throw new Error(
-        "Falta la columna NUMERO_GRABADO."
-      );
+    if (filas.length &&
+        !("NUMERO_GRABADO" in filas[0])) {
+      throw Error("Falta la columna NUMERO_GRABADO.");
     }
 
     const vistos = new Set();
 
-    for (const fila of filas) {
-
-      const numero = texto(fila.NUMERO_GRABADO);
-
-      if (!numero) continue;
-
-      if (vistos.has(numero)) {
-        throw new Error(
-          "Número duplicado en el archivo: " + numero
-        );
-      }
+    previaCandados = filas.map(f=>{
+      const numero = limpiar(f.NUMERO_GRABADO);
+      const duplicado = vistos.has(numero);
 
       vistos.add(numero);
 
-      previaCandados.push({
-        numero:numero,
-        ubicacion:texto(fila.UBICACION),
-        observaciones:texto(fila.OBSERVACIONES)
-      });
-
-    }
-
-    if (!previaCandados.length) {
-      throw new Error(
-        "No se encontraron candados válidos."
-      );
-    }
-
-    previaCandados.forEach(candado => {
-
-      agregarFila(
-        "tablaPreviaCandados",
-        [
-          candado.numero,
-          candado.ubicacion,
-          candado.observaciones
-        ]
-      );
-
+      return {
+        numero,
+        ubicacion:f.UBICACION||"",
+        observacion:f.OBSERVACIONES||"",
+        error:!numero?
+          "Número vacío":
+          duplicado?"Duplicado en archivo":""
+      };
     });
 
-    document.getElementById(
-      "vistaPreviaCandados"
-    ).hidden = false;
+    $("previaCandados").innerHTML =
+      previaCandados.map(f=>`
+        <tr>
+          <td>${escapar(f.numero)}</td>
+          <td>${escapar(f.ubicacion)}</td>
+          <td>${escapar(f.error||"Válido")}</td>
+        </tr>
+      `).join("") || vacio(3);
 
-    mostrarMensaje(
-      "mensajeExcelCandados",
-      previaCandados.length +
-      " candados leídos correctamente. " +
-      "Pendientes de importación a Google Sheets."
-    );
+    $("importarCandados").disabled =
+      !previaCandados.some(f=>!f.error);
+
+    mensaje("mensajeExcelCandados",
+      previaCandados.length+" filas previsualizadas.");
 
   } catch(error) {
-
-    previaCandados = [];
-
-    mostrarMensaje(
-      "mensajeExcelCandados",
-      error.message,
-      "error"
-    );
-
+    mensaje("mensajeExcelCandados",error.message,"error");
   }
+};
 
-}
+$("importarCandados").onclick = () => {
+  const contexto = servicioObligatorio();
+  if (!contexto) return;
 
-/* =====================================
-   IMPORTAR TRABAJADORES
-===================================== */
+  let registrados = 0;
+  let omitidos = 0;
 
-async function leerExcelTrabajadores(evento) {
-
-  previaTrabajadores = [];
-
-  document.getElementById(
-    "vistaPreviaTrabajadores"
-  ).hidden = true;
-
-  limpiarTabla("tablaPreviaTrabajadores");
-
-  try {
-
-    const archivo = evento.target.files[0];
-
-    if (!archivo) return;
-
-    const filas = await leerArchivoExcel(archivo);
-
-    if (!filas.length) {
-      throw new Error("El archivo está vacío.");
+  previaCandados.forEach(f=>{
+    if (f.error) {
+      omitidos++;
+      return;
     }
 
-    const columnas = Object.keys(filas[0]);
+    const error = registrarCandado(
+      f.numero,f.ubicacion,f.observacion,contexto
+    );
 
-    const obligatorias = [
-      "DNI",
-      "APELLIDOS_NOMBRES",
-      "CARGO"
-    ];
+    if (error) omitidos++;
+    else registrados++;
+  });
 
-    for (const columna of obligatorias) {
+  guardar();
 
-      if (!columnas.includes(columna)) {
-        throw new Error(
-          "Falta la columna " + columna + "."
-        );
-      }
+  mensaje("mensajeExcelCandados",
+    registrados+" candados registrados. "+
+    omitidos+" omitidos.");
 
+  previaCandados = [];
+  $("importarCandados").disabled = true;
+  renderizar();
+};
+
+$("excelTrabajadores").onchange = async event => {
+  previaTrabajadores = [];
+  $("importarTrabajadores").disabled = true;
+
+  try {
+    const filas = await leerExcel(event.target.files[0]);
+
+    if (filas.length &&
+        (!("DNI" in filas[0]) ||
+         !("APELLIDOS_NOMBRES" in filas[0]))) {
+      throw Error(
+        "Faltan las columnas DNI y/o APELLIDOS_NOMBRES."
+      );
     }
 
     const vistos = new Set();
 
-    for (const fila of filas) {
-
-      const dni = texto(fila.DNI);
-
-      if (!dni) continue;
-
-      if (vistos.has(dni)) {
-        throw new Error(
-          "DNI duplicado en el archivo: " + dni
-        );
-      }
+    previaTrabajadores = filas.map(f=>{
+      const dni = limpiar(f.DNI);
+      const duplicado = vistos.has(dni);
 
       vistos.add(dni);
 
-      previaTrabajadores.push({
-        dni:dni,
-        nombre:texto(fila.APELLIDOS_NOMBRES),
-        cargo:texto(fila.CARGO),
-        observaciones:texto(fila.OBSERVACIONES)
-      });
-
-    }
-
-    if (!previaTrabajadores.length) {
-      throw new Error(
-        "No se encontraron trabajadores válidos."
-      );
-    }
-
-    previaTrabajadores.forEach(trabajador => {
-
-      agregarFila(
-        "tablaPreviaTrabajadores",
-        [
-          trabajador.dni,
-          trabajador.nombre,
-          trabajador.cargo
-        ]
-      );
-
+      return {
+        dni,
+        nombre:f.APELLIDOS_NOMBRES||"",
+        cargo:f.CARGO||"",
+        observacion:f.OBSERVACIONES||"",
+        error:!/^\d{7,12}$/.test(dni)?
+          "Documento inválido":
+          !limpiar(f.APELLIDOS_NOMBRES)?
+          "Falta nombre":
+          duplicado?"DNI duplicado":""
+      };
     });
 
-    document.getElementById(
-      "vistaPreviaTrabajadores"
-    ).hidden = false;
+    $("previaTrabajadores").innerHTML =
+      previaTrabajadores.map(f=>`
+        <tr>
+          <td>${escapar(f.dni)}</td>
+          <td>${escapar(f.nombre)}</td>
+          <td>${escapar(f.cargo)}</td>
+          <td>${escapar(f.error||"Válido")}</td>
+        </tr>
+      `).join("") || vacio(4);
 
-    mostrarMensaje(
-      "mensajeExcelTrabajadores",
-      previaTrabajadores.length +
-      " trabajadores leídos correctamente. " +
-      "Pendientes de importación a Google Sheets."
-    );
+    $("importarTrabajadores").disabled =
+      !previaTrabajadores.some(f=>!f.error);
+
+    mensaje("mensajeExcelTrabajadores",
+      previaTrabajadores.length+" filas previsualizadas.");
 
   } catch(error) {
+    mensaje("mensajeExcelTrabajadores",
+      error.message,"error");
+  }
+};
 
-    previaTrabajadores = [];
+$("importarTrabajadores").onclick = () => {
+  let registrados = 0;
+  let omitidos = 0;
 
-    mostrarMensaje(
-      "mensajeExcelTrabajadores",
-      error.message,
-      "error"
+  previaTrabajadores.forEach(f=>{
+    if (f.error) {
+      omitidos++;
+      return;
+    }
+
+    const error = registrarTrabajador(
+      f.dni,f.nombre,f.cargo,f.observacion
     );
 
-  }
-
-}
-
-/* =====================================
-   BUSCAR TRABAJADOR POR DNI
-===================================== */
-
-function actualizarListaTrabajadores() {
-
-  const listaAsignacion = document.getElementById(
-    "listaDniTrabajadores"
-  );
-
-  const listaDevolucion = document.getElementById(
-    "listaDniDevolucion"
-  );
-
-  listaAsignacion.replaceChildren();
-
-  listaDevolucion.replaceChildren();
-
-  trabajadores.forEach(trabajador => {
-
-    const opcion1 = document.createElement("option");
-
-    opcion1.value = trabajador.dni;
-
-    opcion1.label = trabajador.nombre;
-
-    listaAsignacion.appendChild(opcion1);
-
-    const opcion2 = document.createElement("option");
-
-    opcion2.value = trabajador.dni;
-
-    opcion2.label = trabajador.nombre;
-
-    listaDevolucion.appendChild(opcion2);
-
+    if (error) omitidos++;
+    else registrados++;
   });
 
-}
+  guardar();
 
-function buscarTrabajadorAsignacion() {
+  mensaje("mensajeExcelTrabajadores",
+    registrados+" trabajadores registrados o actualizados. "+
+    omitidos+" omitidos.");
 
-  const dni = texto(
-    document.getElementById("dniAsignacion").value
+  previaTrabajadores = [];
+  $("importarTrabajadores").disabled = true;
+  renderizar();
+};
+
+$("exportarInventario").onclick = () => {
+  descargarExcel(
+    inventarioFiltrado().map(c=>({
+      NUMERO_GRABADO:c.numero,
+      UNIDAD_MINERA:unidadNombre(c.unidad),
+      SERVICIO:servicioNombre(c.servicio),
+      ESTADO:c.estado,
+      DNI:c.dni,
+      TRABAJADOR:c.trabajador,
+      UBICACION:c.ubicacion
+    })),
+    "Inventario_Candados.xlsx"
   );
+};
 
-  const trabajador = trabajadores.find(
-    persona => persona.dni === dni
+$("exportarPendientes").onclick = () => {
+  descargarExcel(
+    listaPendientes().map(c=>({
+      NUMERO_GRABADO:c.numero,
+      UNIDAD_MINERA:unidadNombre(c.unidad),
+      SERVICIO:servicioNombre(c.servicio),
+      DNI:c.dni,
+      TRABAJADOR:c.trabajador,
+      ESTADO:c.estado,
+      FECHA_ENTREGA:
+        asignacionVigente(c)?.fechaEntrega||""
+    })),
+    "Candados_"+vistaPendientes+".xlsx"
   );
+};
 
-  document.getElementById(
-    "nombreAsignacion"
-  ).value = trabajador ? trabajador.nombre : "";
-
-  document.getElementById(
-    "cargoAsignacion"
-  ).value = trabajador ? trabajador.cargo : "";
-
-}
-
-/* =====================================
-   CAMPOS DE CANDADOS
-===================================== */
-
-function generarCamposCandados() {
-
-  const cantidad = Number(
-    document.getElementById(
-      "cantidadAsignacion"
-    ).value
+$("exportarIncidencias").onclick = () => {
+  descargarExcel(
+    db.incidencias.filter(dentroFiltro).map(i=>({
+      FECHA:i.fecha,
+      NUMERO_GRABADO:i.numero,
+      UNIDAD_MINERA:unidadNombre(i.unidad),
+      SERVICIO:servicioNombre(i.servicio),
+      DNI:i.dni,
+      TRABAJADOR:i.trabajador,
+      TIPO:i.tipo,
+      MOTIVO:i.motivo,
+      ESTADO:i.estado,
+      RESPONSABLE:i.responsable,
+      OBSERVACIONES:i.observacion,
+      FECHA_RESOLUCION:i.fechaResolucion,
+      RESOLUCION:i.resolucion
+    })),
+    "Incidencias_Candados.xlsx"
   );
+};
 
-  const contenedor = document.getElementById(
-    "camposCandados"
-  );
+/* =====================================================
+   12. EVENTOS E INICIALIZACIÓN
+===================================================== */
 
-  contenedor.replaceChildren();
-
-  if (
-    !Number.isInteger(cantidad) ||
-    cantidad < 1 ||
-    cantidad > 30
-  ) {
-
-    contenedor.textContent =
-      "Ingresa una cantidad entre 1 y 30.";
-
-    return;
-
-  }
-
-  for (let i = 1; i <= cantidad; i++) {
-
-    const tarjeta = document.createElement("div");
-
-    tarjeta.className = "candado-item";
-
-    const etiqueta = document.createElement("label");
-
-    etiqueta.textContent = "Candado " + i;
-
-    const selector = document.createElement("select");
-
-    selector.className = "selector-candado";
-
-    selector.addEventListener(
-      "change",
-      actualizarOpcionesCandados
+document.querySelectorAll(".modulo").forEach(b=>{
+  b.onclick = () => {
+    document.querySelectorAll(".modulo").forEach(x=>
+      x.classList.remove("activo")
     );
 
-    tarjeta.appendChild(etiqueta);
+    document.querySelectorAll(".seccion").forEach(x=>
+      x.classList.remove("activa")
+    );
 
-    tarjeta.appendChild(selector);
+    b.classList.add("activo");
+    $(b.dataset.seccion).classList.add("activa");
 
-    contenedor.appendChild(tarjeta);
+    renderizar();
+  };
+});
 
-  }
+document.querySelectorAll(".subpestana").forEach(b=>{
+  b.onclick = () => {
+    vistaPendientes = b.dataset.vista;
+    renderizarPendientes();
+  };
+});
 
-  actualizarOpcionesCandados();
+[
+  "buscarInventario",
+  "filtroInventario"
+].forEach(id=>{
+  $(id).addEventListener("input",renderizarInventario);
+});
 
-}
+[
+  "buscarPendientes",
+  "agruparPendientes"
+].forEach(id=>{
+  $(id).addEventListener("input",renderizarPendientes);
+});
 
-function actualizarOpcionesCandados() {
+[
+  "buscarIncidencia",
+  "estadoIncidencia"
+].forEach(id=>{
+  $(id).addEventListener("input",renderizarIncidencias);
+});
 
-  const selectores = Array.from(
-    document.querySelectorAll(
-      ".selector-candado"
-    )
-  );
-
-  const seleccionados = selectores
-    .map(selector => selector.value)
-    .filter(Boolean);
-
-  selectores.forEach(selector => {
-
-    const valorActual = selector.value;
-
-    selector.replaceChildren();
-
-    const inicial = document.createElement("option");
-
-    inicial.value = "";
-
-    inicial.textContent = "Seleccionar candado";
-
-    selector.appendChild(inicial);
-
-    candadosDisponibles.forEach(numero => {
-
-      if (
-        seleccionados.includes(numero) &&
-        numero !== valorActual
-      ) {
-        return;
-      }
-
-      const opcion = document.createElement("option");
-
-      opcion.value = numero;
-
-      opcion.textContent = numero;
-
-      selector.appendChild(opcion);
-
-    });
-
-    selector.value = valorActual;
-
-  });
-
-}
-
-/* =====================================
-   FILTROS
-
-   Se activarán cuando el servidor
-   proporcione los registros reales.
-===================================== */
-
-function filtrarInventario() {
-
-  const busqueda = texto(
-    document.getElementById("buscarCandado").value
-  );
-
-  const estado = texto(
-    document.getElementById("filtroEstado").value
-  );
-
-  // Pendiente: aplicar filtros a los
-  // registros obtenidos de Google Sheets.
-
-}
-
-function filtrarIncidencias() {
-
-  const busqueda = texto(
-    document.getElementById("buscarIncidencia").value
-  );
-
-  const estado = texto(
-    document.getElementById("estadoIncidencia").value
-  );
-
-  // Pendiente: aplicar filtros a los
-  // registros obtenidos de Google Sheets.
-
-}
-
-/* =====================================
-   INICIALIZACION
-===================================== */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  function() {
-
-    generarCamposCandados();
-
-    actualizarListaTrabajadores();
-
-  }
-);
+iniciarFiltros();
+generarSelectores();
+renderizar();
 
 </script>
-
 </body>
 </html>
