@@ -798,11 +798,24 @@ function renderizarInventario(){const r=inventarioFiltrado();$('tablaInventario'
 $('registrarTrabajador').onclick=async()=>{try{await apiPost('registrarTrabajador',{dni:$('nuevoDni').value,nombre:$('nuevoNombre').value,cargo:$('nuevoCargo').value,observaciones:$('nuevaObservacionTrabajador').value});mensaje('mensajeTrabajador','Trabajador registrado o actualizado.');await cargarDatos();}catch(e){mensaje('mensajeTrabajador',e.message,'error');}};
 function actualizarListaTrabajadores(){$('listaDni').innerHTML=db.trabajadores.map(t=>'<option value="'+escapar(t.dni)+'" label="'+escapar(t.nombre)+'"></option>').join('');}
 $('dniAsignacion').oninput=()=>{const t=trabajador($('dniAsignacion').value);$('nombreAsignacion').value=t?.nombre||'';$('cargoAsignacion').value=t?.cargo||'';};
-function candadosDisponibles(){const u=$('minaGlobal').value,s=$('servicioGlobal').value;return db.candados.filter(c=>c.estado==='DISPONIBLE'&&c.unidad===u&&c.servicio===s);}
-function generarSelectores(){const n=Math.min(30,Math.max(1,Number($('cantidadAsignacion').value)||3)),disp=candadosDisponibles();$('camposCandados').innerHTML='<h3 style="margin-top:20px">Seleccionar candados</h3>'+Array.from({length:n},(_,i)=>`<div class="candado-selector"><label>Candado ${i+1}</label><select class="selectorCandado"><option value="">Seleccionar número grabado</option>${disp.map(c=>`<option value="${escapar(c.id)}">${escapar(c.numero)}</option>`).join('')}</select></div>`).join('');document.querySelectorAll('.selectorCandado').forEach(s=>s.onchange=actualizarOpcionesCandados);}
-function actualizarOpcionesCandados(){const ss=[...document.querySelectorAll('.selectorCandado')],e=ss.map(s=>s.value).filter(Boolean);ss.forEach(s=>[...s.options].forEach(o=>{if(o.value)o.disabled=o.value!==s.value&&e.includes(o.value);}));}
+function candadosDelServicio(){const u=$('minaGlobal').value,s=$('servicioGlobal').value;return db.candados.filter(c=>c.unidad===u&&c.servicio===s);}
+function generarSelectores(){
+  const n=Math.min(30,Math.max(1,Number($('cantidadAsignacion').value)||3));
+  const lista=candadosDelServicio().slice().sort((a,b)=>String(a.numero).localeCompare(String(b.numero),undefined,{numeric:true}));
+  $('camposCandados').innerHTML='<h3 style="margin-top:20px">Seleccionar candados</h3>'+Array.from({length:n},(_,i)=>`<div class="candado-selector"><label>Candado ${i+1}</label><select class="selectorCandado"><option value="">Seleccionar número grabado</option>${lista.map(c=>{const ocupado=c.estado!=='DISPONIBLE';const detalle=ocupado?' — '+escapar(c.estado)+(c.trabajador?' — '+escapar(c.trabajador):''):' — DISPONIBLE';return `<option value="${escapar(c.id)}" ${ocupado?'disabled':''}>${escapar(c.numero)}${detalle}</option>`;}).join('')}</select></div>`).join('');
+  document.querySelectorAll('.selectorCandado').forEach(s=>s.onchange=actualizarOpcionesCandados);
+}
+function actualizarOpcionesCandados(){
+  const ss=[...document.querySelectorAll('.selectorCandado')],e=ss.map(s=>s.value).filter(Boolean);
+  ss.forEach(s=>[...s.options].forEach(o=>{
+    if(!o.value)return;
+    const c=db.candados.find(x=>x.id===o.value);
+    const ocupado=c&&c.estado!=='DISPONIBLE';
+    o.disabled=ocupado||(o.value!==s.value&&e.includes(o.value));
+  }));
+}
 $('cantidadAsignacion').onchange=generarSelectores;
-$('guardarAsignacion').onclick=async()=>{const c=servicioObligatorio();if(!c)return;const ids=[...document.querySelectorAll('.selectorCandado')].map(s=>s.value);if(!ids.length||ids.some(v=>!v)||new Set(ids).size!==ids.length){mensaje('mensajeAsignacion','Selecciona todos los candados sin repetir números.','error');return;}try{const r=await apiPost('asignar',{dni:$('dniAsignacion').value,entregadoPor:$('entregadoPor').value,idsCandados:ids,idUnidad:c.unidad,idServicio:c.servicio,observaciones:$('observacionAsignacion').value});mensaje('mensajeAsignacion',r.cantidad+' candados asignados correctamente.');$('dniAsignacion').value='';$('nombreAsignacion').value='';$('cargoAsignacion').value='';await cargarDatos();}catch(e){mensaje('mensajeAsignacion',e.message,'error');}};
+$('guardarAsignacion').onclick=async()=>{const c=servicioObligatorio();if(!c)return;const ids=[...document.querySelectorAll('.selectorCandado')].map(s=>s.value);if(!ids.length||ids.some(v=>!v)||new Set(ids).size!==ids.length){mensaje('mensajeAsignacion','Selecciona todos los candados sin repetir números.','error');return;}try{const r=await apiPost('asignar',{dni:$('dniAsignacion').value,entregadoPor:$('entregadoPor').value,idsCandados:ids,idUnidad:c.unidad,idServicio:c.servicio,observaciones:$('observacionAsignacion').value});sessionStorage.setItem('dimarzaAsignacionOk',r.cantidad+' candados asignados correctamente.');sessionStorage.setItem('dimarzaMina',c.unidad);sessionStorage.setItem('dimarzaServicio',c.servicio);location.reload();}catch(e){mensaje('mensajeAsignacion',e.message,'error');}};
 function asignacionVigente(c){return c&&['ASIGNADO','PERDIDO'].includes(c.estado)?{id:c.idAsignacion,candadoId:c.id,numero:c.numero,unidad:c.unidad,servicio:c.servicio,dni:c.dni,trabajador:c.trabajador,fechaEntrega:c.fechaEntrega,estado:c.estado}:null;}
 
 function consultarDevolucion(){const dni=limpiar($('dniDevolucion').value);const lista=db.candados.filter(c=>c.dni===dni&&['ASIGNADO','PERDIDO'].includes(c.estado)&&dentroFiltro(c));$('tablaDevolucion').innerHTML=lista.map(c=>`<tr><td><b>${escapar(c.numero)}</b></td><td>${escapar(unidadNombre(c.unidad))}</td><td>${escapar(servicioNombre(c.servicio))}</td><td>${escapar(c.fechaEntrega||'—')}</td><td>${etiqueta(c.estado)}</td></tr>`).join('')||vacio(5,'No hay candados pendientes para este DNI.');}
@@ -840,9 +853,30 @@ document.querySelectorAll('.subpestana').forEach(b=>b.onclick=()=>{vistaPendient
 ['buscarIncidencia','estadoIncidencia'].forEach(id=>$(id).addEventListener('input',renderizarIncidencias));
 
 iniciarFiltros();
+const minaRecarga=sessionStorage.getItem('dimarzaMina');
+const servicioRecarga=sessionStorage.getItem('dimarzaServicio');
+if(minaRecarga){
+  $('minaGlobal').value=minaRecarga;
+  actualizarServicios(servicioRecarga||'');
+  sessionStorage.removeItem('dimarzaMina');
+  sessionStorage.removeItem('dimarzaServicio');
+}
 generarSelectores();
 renderizar();
-cargarDatos();
+cargarDatos().then(()=>{
+  const ok=sessionStorage.getItem('dimarzaAsignacionOk');
+  if(ok){
+    mensaje('mensajeAsignacion',ok);
+    sessionStorage.removeItem('dimarzaAsignacionOk');
+    document.querySelectorAll('.modulo').forEach(x=>x.classList.remove('activo'));
+    document.querySelectorAll('.seccion').forEach(x=>x.classList.remove('activa'));
+    const boton=[...document.querySelectorAll('.modulo')].find(x=>x.dataset.seccion==='asignaciones');
+    if(boton)boton.classList.add('activo');
+    $('asignaciones').classList.add('activa');
+    generarSelectores();
+    renderizar();
+  }
+});
 </script>
 </body>
 </html>
