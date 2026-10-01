@@ -785,7 +785,7 @@ function iniciarFiltros(conservar=false){
   const viejaMina=conservar?$('minaGlobal').value:"UM003", viejoServ=conservar?$('servicioGlobal').value:"SER003";
   $('minaGlobal').innerHTML='<option value="">Todas las unidades mineras</option>'+CATALOGO.map(u=>'<option value="'+u.id+'">'+escapar(u.nombre)+'</option>').join('');
   $('minaGlobal').value=CATALOGO.some(u=>u.id===viejaMina)?viejaMina:""; actualizarServicios(viejoServ);
-  $('minaGlobal').onchange=()=>{actualizarServicios();renderizar();}; $('servicioGlobal').onchange=renderizar;
+  $('minaGlobal').onchange=()=>{actualizarServicios();generarSelectores();renderizar();}; $('servicioGlobal').onchange=()=>{generarSelectores();renderizar();};
 }
 function actualizarServicios(valor){const unidad=$('minaGlobal').value;const ss=CATALOGO.filter(u=>!unidad||u.id===unidad).flatMap(u=>u.servicios.map(s=>({...s,unidad:u.nombre})));$('servicioGlobal').innerHTML='<option value="">Todos los servicios</option>'+ss.map(s=>'<option value="'+s.id+'">'+escapar(unidad?s.nombre:s.unidad+' / '+s.nombre)+'</option>').join('');if(valor&&ss.some(s=>s.id===valor))$('servicioGlobal').value=valor;}
 function servicioObligatorio(){const unidad=$('minaGlobal').value,servicio=$('servicioGlobal').value;if(!unidad||!servicio){alert('Selecciona una unidad minera y un servicio específico.');return null;}return{unidad,servicio};}
@@ -833,7 +833,7 @@ $('exportarInventario').onclick=()=>descargarExcel(inventarioFiltrado().map(c=>(
 $('exportarPendientes').onclick=()=>descargarExcel(listaPendientes().map(c=>({NUMERO_GRABADO:c.numero,UNIDAD_MINERA:unidadNombre(c.unidad),SERVICIO:servicioNombre(c.servicio),DNI:c.dni,TRABAJADOR:c.trabajador,ESTADO:c.estado,FECHA_ENTREGA:c.fechaEntrega||''})),'Candados_'+vistaPendientes+'.xlsx');
 $('exportarIncidencias').onclick=()=>descargarExcel(db.incidencias.filter(dentroFiltro).map(i=>({FECHA:i.fecha,NUMERO_GRABADO:i.numero,UNIDAD_MINERA:unidadNombre(i.unidad),SERVICIO:servicioNombre(i.servicio),DNI:i.dni,TRABAJADOR:i.trabajador,TIPO:i.tipo,MOTIVO:i.motivo,ESTADO:i.estado,RESPONSABLE:i.responsable,OBSERVACIONES:i.observacion,FECHA_RESOLUCION:i.fechaResolucion,RESOLUCION:i.resolucion})),'Incidencias_Candados.xlsx');
 
-document.querySelectorAll('.modulo').forEach(b=>b.onclick=()=>{document.querySelectorAll('.modulo').forEach(x=>x.classList.remove('activo'));document.querySelectorAll('.seccion').forEach(x=>x.classList.remove('activa'));b.classList.add('activo');$(b.dataset.seccion).classList.add('activa');renderizar();});
+document.querySelectorAll('.modulo').forEach(b=>b.onclick=()=>{document.querySelectorAll('.modulo').forEach(x=>x.classList.remove('activo'));document.querySelectorAll('.seccion').forEach(x=>x.classList.remove('activa'));b.classList.add('activo');$(b.dataset.seccion).classList.add('activa');if(b.dataset.seccion==='asignaciones')generarSelectores();renderizar();});
 document.querySelectorAll('.subpestana').forEach(b=>b.onclick=()=>{vistaPendientes=b.dataset.vista;renderizarPendientes();});
 ['buscarInventario','filtroInventario'].forEach(id=>$(id).addEventListener('input',renderizarInventario));
 ['buscarPendientes','agruparPendientes'].forEach(id=>$(id).addEventListener('input',renderizarPendientes));
