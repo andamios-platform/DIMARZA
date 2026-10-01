@@ -1037,24 +1037,15 @@ $('verificarDevolucion').onclick=()=>{
     return;
   }
 
-  const ajenos=candados.filter(c=>c.dni!==dni);
   const numeros=candados.map(c=>c.numero).join(', ');
 
   abrirModal(
     'Confirmar devolución',
     'Se registrará la devolución de '+candados.length+' candado(s): '+numeros+
-      '. Devuelve: '+t.nombre+' ('+dni+').'+
-      (ajenos.length?' El sistema detectó que uno o más candados fueron asignados originalmente a otra persona.':''),
-    ajenos.length
-      ? '<label>Explicación de la devolución por otra persona</label><textarea id="modalNota" placeholder="Obligatorio"></textarea>'
-      : '<p>Los candados quedarán disponibles al completar la devolución.</p>',
+      '. Devuelve: '+t.nombre+' ('+dni+').',
+    '<p>Los candados quedarán disponibles al completar la devolución.</p>',
     async()=>{
-      const explicacion=ajenos.length?limpiar($('modalNota').value):nota;
-
-      if(ajenos.length&&!explicacion){
-        mensaje('modalMensaje','Explica por qué se están devolviendo candados asignados a otra persona.','error');
-        return false;
-      }
+      const explicacion=nota;
 
       sessionStorage.setItem('dimarzaMina',ctx.unidad);
       sessionStorage.setItem('dimarzaServicio',ctx.servicio);
