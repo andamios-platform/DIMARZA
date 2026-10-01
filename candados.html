@@ -521,9 +521,9 @@ tr:hover td { background:#f8fafc; }
     <h2>Registrar devolución</h2>
 
     <p>
-      Busca al trabajador por DNI para consultar sus candados.
-      También puedes registrar la devolución de un candado
-      que originalmente fue asignado a otra persona.
+      El DNI identifica a la persona que está devolviendo.
+      La lista de candados muestra todos los pendientes de la unidad minera
+      y servicio seleccionados, sin indicar previamente a quién pertenece cada uno.
     </p>
 
     <div class="cuadricula">
@@ -533,8 +533,9 @@ tr:hover td { background:#f8fafc; }
       </div>
       <div>
         <label>Número grabado recibido</label>
-        <input id="candadoRecibido"
-               placeholder="Ej. 00125">
+        <select id="candadoRecibido">
+          <option value="">Seleccionar candado pendiente</option>
+        </select>
       </div>
       <div>
         <label>Recibido por</label>
@@ -561,7 +562,7 @@ tr:hover td { background:#f8fafc; }
   </div>
 
   <div class="tarjeta">
-    <h3>Candados del trabajador</h3>
+    <h3>Candados pendientes del servicio</h3>
 
     <div class="tabla">
       <table>
@@ -775,7 +776,7 @@ async function cargarDatos(){
     db.candados.forEach(c=>{const p=pmap.get(c.id);if(p){c.fechaEntrega=p.FECHA_ENTREGA||"";c.idAsignacion=p.ID_ASIGNACION||"";}});
     db.incidencias=(inc||[]).map(mapIncidencia); db.movimientos=(mov||[]).map(mapMovimiento);
     if(!$('minaGlobal').options.length || $('minaGlobal').options.length===1) iniciarFiltros(true);
-    actualizarListaTrabajadores(); generarSelectores(); renderizar();
+    actualizarListaTrabajadores(); generarSelectores(); generarSelectorDevolucion(); renderizar();
     document.querySelector('.aviso').innerHTML='<b>Sincronizado con Google Sheets:</b> los registros se guardan en la base central de DIMARZA.';
   }catch(e){console.error(e); document.querySelector('.aviso').innerHTML='<b>Error de conexión:</b> '+escapar(e.message)+'<br><span class="ayuda">No se realizaron cambios locales.</span>';}
   finally{cargando=false;}
@@ -785,7 +786,7 @@ function iniciarFiltros(conservar=false){
   const viejaMina=conservar?$('minaGlobal').value:"UM003", viejoServ=conservar?$('servicioGlobal').value:"SER003";
   $('minaGlobal').innerHTML='<option value="">Todas las unidades mineras</option>'+CATALOGO.map(u=>'<option value="'+u.id+'">'+escapar(u.nombre)+'</option>').join('');
   $('minaGlobal').value=CATALOGO.some(u=>u.id===viejaMina)?viejaMina:""; actualizarServicios(viejoServ);
-  $('minaGlobal').onchange=()=>{actualizarServicios();generarSelectores();renderizar();}; $('servicioGlobal').onchange=()=>{generarSelectores();renderizar();};
+  $('minaGlobal').onchange=()=>{actualizarServicios();generarSelectores();generarSelectorDevolucion();renderizar();}; $('servicioGlobal').onchange=()=>{generarSelectores();generarSelectorDevolucion();renderizar();};
 }
 function actualizarServicios(valor){const unidad=$('minaGlobal').value;const ss=CATALOGO.filter(u=>!unidad||u.id===unidad).flatMap(u=>u.servicios.map(s=>({...s,unidad:u.nombre})));$('servicioGlobal').innerHTML='<option value="">Todos los servicios</option>'+ss.map(s=>'<option value="'+s.id+'">'+escapar(unidad?s.nombre:s.unidad+' / '+s.nombre)+'</option>').join('');if(valor&&ss.some(s=>s.id===valor))$('servicioGlobal').value=valor;}
 function servicioObligatorio(){const unidad=$('minaGlobal').value,servicio=$('servicioGlobal').value;if(!unidad||!servicio){alert('Selecciona una unidad minera y un servicio específico.');return null;}return{unidad,servicio};}
@@ -815,25 +816,15 @@ function actualizarOpcionesCandados(){
   }));
 }
 $('cantidadAsignacion').onchange=generarSelectores;
-$('guardarAsignacion').onclick=async()=>{
-  
-  $('guardarAsignacion').onclick = async () => {
+
+$('guardarAsignacion').onclick = async () => {
   const c = servicioObligatorio();
   if (!c) return;
 
-  const ids = [...document.querySelectorAll('.selectorCandado')]
-    .map(s => s.value);
+  const ids = [...document.querySelectorAll('.selectorCandado')].map(s => s.value);
 
-  if (
-    !ids.length ||
-    ids.some(v => !v) ||
-    new Set(ids).size !== ids.length
-  ) {
-    mensaje(
-      'mensajeAsignacion',
-      'Selecciona todos los candados sin repetir números.',
-      'error'
-    );
+  if (!ids.length || ids.some(v => !v) || new Set(ids).size !== ids.length) {
+    mensaje('mensajeAsignacion','Selecciona todos los candados sin repetir números.','error');
     return;
   }
 
@@ -842,138 +833,76 @@ $('guardarAsignacion').onclick=async()=>{
   const observaciones = $('observacionAsignacion').value;
 
   if (!dni) {
-    mensaje(
-      'mensajeAsignacion',
-      'Selecciona un trabajador.',
-      'error'
-    );
+    mensaje('mensajeAsignacion','Selecciona un trabajador.','error');
     return;
   }
-
   if (!entregadoPor) {
-    mensaje(
-      'mensajeAsignacion',
-      'Indica quién entrega los candados.',
-      'error'
-    );
+    mensaje('mensajeAsignacion','Indica quién entrega los candados.','error');
     return;
   }
 
-  /* Guardamos ANTES la unidad y servicio seleccionados.
-     Así no se pierden aunque el POST devuelva "Failed to fetch". */
   sessionStorage.setItem('dimarzaMina', c.unidad);
   sessionStorage.setItem('dimarzaServicio', c.servicio);
 
-  /* Guardamos los candados que estamos intentando asignar
-     para poder comprobar después si realmente se registraron. */
   const numerosSeleccionados = ids
     .map(id => db.candados.find(x => x.id === id)?.numero)
     .filter(Boolean);
 
-  mensaje(
-    'mensajeAsignacion',
-    'Registrando asignación...',
-    'ok'
-  );
+  mensaje('mensajeAsignacion','Registrando asignación...','ok');
 
   try {
-
-    const r = await apiPost('asignar', {
-      dni: dni,
-      entregadoPor: entregadoPor,
-      idsCandados: ids,
-      idUnidad: c.unidad,
-      idServicio: c.servicio,
-      observaciones: observaciones
+    const r = await apiPost('asignar',{
+      dni,
+      entregadoPor,
+      idsCandados:ids,
+      idUnidad:c.unidad,
+      idServicio:c.servicio,
+      observaciones
     });
 
     sessionStorage.setItem(
       'dimarzaAsignacionOk',
-      (r?.cantidad || ids.length) +
-      ' candados asignados correctamente.'
+      (r?.cantidad || ids.length) + ' candados asignados correctamente.'
     );
-
     location.reload();
 
   } catch (e) {
+    console.warn('No se pudo leer la respuesta del POST. Verificando asignación...',e);
+    mensaje('mensajeAsignacion','Verificando si la asignación fue registrada...','ok');
 
-    console.warn(
-      'El navegador no pudo leer la respuesta del POST. Verificando asignación...',
-      e
-    );
-
-    mensaje(
-      'mensajeAsignacion',
-      'Verificando si la asignación fue registrada...',
-      'ok'
-    );
-
-    /*
-      Esperamos un momento para que Google Sheets termine
-      de reflejar la modificación.
-    */
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve,1200));
 
     try {
-
       const inventario = await apiGet('inventario');
-
       const registrados = (inventario || []).filter(x =>
         numerosSeleccionados.includes(limpiar(x.NUMERO_GRABADO)) &&
         limpiar(x.DNI_ACTUAL) === dni &&
         mayus(x.ESTADO) === 'ASIGNADO'
       );
 
-      /*
-        Si TODOS los candados aparecen asignados al DNI,
-        significa que Apps Script sí realizó el registro.
-      */
       if (registrados.length === numerosSeleccionados.length) {
-
         sessionStorage.setItem(
           'dimarzaAsignacionOk',
-          registrados.length +
-          ' candados asignados correctamente.'
+          registrados.length + ' candados asignados correctamente.'
         );
-
         location.reload();
         return;
       }
 
-      /*
-        Si ninguno aparece asignado, entonces sí consideramos
-        que la operación falló.
-      */
       if (registrados.length === 0) {
-
-        mensaje(
-          'mensajeAsignacion',
-          'No se pudo registrar la asignación. Intenta nuevamente.',
-          'error'
-        );
-
+        mensaje('mensajeAsignacion','No se pudo registrar la asignación. Intenta nuevamente.','error');
         return;
       }
 
-      /*
-        Protección adicional:
-        si solo algunos aparecen registrados, NO repetimos
-        automáticamente la operación para evitar duplicados.
-      */
       mensaje(
         'mensajeAsignacion',
-        'La operación quedó parcialmente registrada. Se detectaron ' +
-        registrados.length +
-        ' de ' +
-        numerosSeleccionados.length +
+        'La operación quedó parcialmente registrada. Se detectaron '+
+        registrados.length+' de '+numerosSeleccionados.length+
         ' candados. Recarga la página antes de volver a intentar.',
         'error'
       );
-
     } catch (verificacionError) {
-
       console.error(verificacionError);
-
       mensaje(
         'mensajeAsignacion',
         'No se pudo confirmar automáticamente la asignación. Recarga la página para verificar el estado antes de volver a intentarlo.',
@@ -982,12 +911,147 @@ $('guardarAsignacion').onclick=async()=>{
     }
   }
 };
-  const c=servicioObligatorio();if(!c)return;const ids=[...document.querySelectorAll('.selectorCandado')].map(s=>s.value);if(!ids.length||ids.some(v=>!v)||new Set(ids).size!==ids.length){mensaje('mensajeAsignacion','Selecciona todos los candados sin repetir números.','error');return;}try{const r=await apiPost('asignar',{dni:$('dniAsignacion').value,entregadoPor:$('entregadoPor').value,idsCandados:ids,idUnidad:c.unidad,idServicio:c.servicio,observaciones:$('observacionAsignacion').value});sessionStorage.setItem('dimarzaAsignacionOk',r.cantidad+' candados asignados correctamente.');sessionStorage.setItem('dimarzaMina',c.unidad);sessionStorage.setItem('dimarzaServicio',c.servicio);location.reload();}catch(e){mensaje('mensajeAsignacion',e.message,'error');}};
+
 function asignacionVigente(c){return c&&['ASIGNADO','PERDIDO'].includes(c.estado)?{id:c.idAsignacion,candadoId:c.id,numero:c.numero,unidad:c.unidad,servicio:c.servicio,dni:c.dni,trabajador:c.trabajador,fechaEntrega:c.fechaEntrega,estado:c.estado}:null;}
 
-function consultarDevolucion(){const dni=limpiar($('dniDevolucion').value);const lista=db.candados.filter(c=>c.dni===dni&&['ASIGNADO','PERDIDO'].includes(c.estado)&&dentroFiltro(c));$('tablaDevolucion').innerHTML=lista.map(c=>`<tr><td><b>${escapar(c.numero)}</b></td><td>${escapar(unidadNombre(c.unidad))}</td><td>${escapar(servicioNombre(c.servicio))}</td><td>${escapar(c.fechaEntrega||'—')}</td><td>${etiqueta(c.estado)}</td></tr>`).join('')||vacio(5,'No hay candados pendientes para este DNI.');}
+function candadosPendientesDevolucion(){
+  const u=$('minaGlobal').value,s=$('servicioGlobal').value;
+  if(!u||!s)return [];
+  return db.candados
+    .filter(c=>c.unidad===u&&c.servicio===s&&['ASIGNADO','PERDIDO'].includes(c.estado))
+    .slice()
+    .sort((a,b)=>String(a.numero).localeCompare(String(b.numero),undefined,{numeric:true}));
+}
+
+function generarSelectorDevolucion(){
+  const lista=candadosPendientesDevolucion();
+  const actual=$('candadoRecibido').value;
+
+  $('candadoRecibido').innerHTML=
+    '<option value="">Seleccionar candado pendiente</option>'+
+    lista.map(c=>`<option value="${escapar(c.numero)}">${escapar(c.numero)} — ${escapar(c.estado)}</option>`).join('');
+
+  if(actual&&lista.some(c=>c.numero===actual))$('candadoRecibido').value=actual;
+
+  $('tablaDevolucion').innerHTML=
+    lista.map(c=>`<tr>
+      <td><b>${escapar(c.numero)}</b></td>
+      <td>${escapar(unidadNombre(c.unidad))}</td>
+      <td>${escapar(servicioNombre(c.servicio))}</td>
+      <td>${escapar(c.fechaEntrega||'—')}</td>
+      <td>${etiqueta(c.estado)}</td>
+    </tr>`).join('')||vacio(5,'No hay candados pendientes en este servicio.');
+}
+
+function consultarDevolucion(){
+  const ctx=servicioObligatorio();
+  if(!ctx)return;
+
+  const dni=limpiar($('dniDevolucion').value);
+  const t=trabajador(dni);
+
+  if(!t){
+    mensaje('resultadoDevolucion','Ingresa un DNI de trabajador registrado.','error');
+    return;
+  }
+
+  generarSelectorDevolucion();
+  mensaje(
+    'resultadoDevolucion',
+    'Trabajador identificado: '+t.nombre+'. Selecciona el candado que está devolviendo.'
+  );
+}
 $('consultarDevolucion').onclick=consultarDevolucion;
-$('verificarDevolucion').onclick=()=>{const ctx=servicioObligatorio();if(!ctx)return;const dni=limpiar($('dniDevolucion').value),t=trabajador(dni),numero=limpiar($('candadoRecibido').value),responsable=limpiar($('recibidoPor').value),nota=limpiar($('observacionDevolucion').value);if(!t||!numero||!responsable){mensaje('resultadoDevolucion','Registra un DNI válido, número grabado y responsable.','error');return;}const c=db.candados.find(x=>x.numero===numero&&x.servicio===ctx.servicio&&['ASIGNADO','PERDIDO'].includes(x.estado));if(!c){mensaje('resultadoDevolucion','No se encontró un candado pendiente con ese número en el servicio seleccionado.','error');return;}const ajeno=c.dni!==dni;abrirModal('Confirmar devolución','Candado '+c.numero+'. Titular original: '+c.trabajador+' ('+c.dni+'). Devuelve: '+t.nombre+' ('+dni+').'+(ajeno?' ATENCIÓN: lo devuelve otra persona.':''),ajeno?'<label>Explicación de la devolución ajena</label><textarea id="modalNota" placeholder="Obligatorio"></textarea>':'<p>Se registrará la devolución y quedará disponible.</p>',async()=>{const explicacion=ajeno?limpiar($('modalNota').value):nota;if(ajeno&&!explicacion){mensaje('modalMensaje','Explica por qué otra persona devuelve el candado.','error');return false;}try{await apiPost('devolver',{idCandado:c.id,recibidoPor:responsable,dniDevuelve:dni,observaciones:explicacion});mensaje('resultadoDevolucion','Candado '+numero+' devuelto correctamente.');$('candadoRecibido').value='';await cargarDatos();consultarDevolucion();return true;}catch(e){mensaje('modalMensaje',e.message,'error');return false;}},'Confirmar devolución','verde');};
+
+$('verificarDevolucion').onclick=()=>{
+  const ctx=servicioObligatorio();
+  if(!ctx)return;
+
+  const dni=limpiar($('dniDevolucion').value);
+  const t=trabajador(dni);
+  const numero=limpiar($('candadoRecibido').value);
+  const responsable=limpiar($('recibidoPor').value);
+  const nota=limpiar($('observacionDevolucion').value);
+
+  if(!t||!numero||!responsable){
+    mensaje('resultadoDevolucion','Registra un DNI válido, selecciona un candado y completa quién lo recibe.','error');
+    return;
+  }
+
+  const c=db.candados.find(x=>
+    x.numero===numero &&
+    x.unidad===ctx.unidad &&
+    x.servicio===ctx.servicio &&
+    ['ASIGNADO','PERDIDO'].includes(x.estado)
+  );
+
+  if(!c){
+    mensaje('resultadoDevolucion','No se encontró ese candado pendiente en la unidad y servicio seleccionados.','error');
+    return;
+  }
+
+  const ajeno=c.dni!==dni;
+
+  abrirModal(
+    'Confirmar devolución',
+    'Candado '+c.numero+'. Devuelve: '+t.nombre+' ('+dni+').'+
+      (ajeno?' El sistema detectó que el candado fue asignado originalmente a otra persona.':''),
+    ajeno
+      ? '<label>Explicación de la devolución por otra persona</label><textarea id="modalNota" placeholder="Obligatorio"></textarea>'
+      : '<p>Se registrará la devolución y el candado quedará disponible.</p>',
+    async()=>{
+      const explicacion=ajeno?limpiar($('modalNota').value):nota;
+
+      if(ajeno&&!explicacion){
+        mensaje('modalMensaje','Explica por qué otra persona está devolviendo el candado.','error');
+        return false;
+      }
+
+      sessionStorage.setItem('dimarzaMina',ctx.unidad);
+      sessionStorage.setItem('dimarzaServicio',ctx.servicio);
+
+      try{
+        await apiPost('devolver',{
+          idCandado:c.id,
+          recibidoPor:responsable,
+          dniDevuelve:dni,
+          observaciones:explicacion
+        });
+
+        sessionStorage.setItem('dimarzaDevolucionOk','Candado '+numero+' devuelto correctamente.');
+        location.reload();
+        return false;
+
+      }catch(e){
+        console.warn('No se pudo leer la respuesta del POST. Verificando devolución...',e);
+        mensaje('modalMensaje','Verificando si la devolución fue registrada...');
+
+        await new Promise(resolve=>setTimeout(resolve,1200));
+
+        try{
+          const inventario=await apiGet('inventario');
+          const actualizado=(inventario||[]).find(x=>limpiar(x.ID_CANDADO)===limpiar(c.id));
+
+          if(actualizado&&mayus(actualizado.ESTADO)==='DISPONIBLE'){
+            sessionStorage.setItem('dimarzaDevolucionOk','Candado '+numero+' devuelto correctamente.');
+            location.reload();
+            return false;
+          }
+
+          mensaje('modalMensaje','No se pudo confirmar la devolución. Verifica antes de volver a intentarlo.','error');
+          return false;
+
+        }catch(verificacionError){
+          console.error(verificacionError);
+          mensaje('modalMensaje','No se pudo confirmar automáticamente la devolución. Recarga la página antes de volver a intentarlo.','error');
+          return false;
+        }
+      }
+    },
+    'Confirmar devolución',
+    'verde'
+  );
+};
 
 function listaPendientes(){const b=mayus($('buscarPendientes').value);return db.candados.filter(dentroFiltro).filter(c=>c.estado===vistaPendientes&&[c.numero,c.dni,c.trabajador].some(v=>mayus(v).includes(b)));}
 function renderizarPendientes(){document.querySelectorAll('.subpestana').forEach(b=>b.classList.toggle('activa',b.dataset.vista===vistaPendientes));const lista=listaPendientes();$('resumenPendientes').innerHTML='<b>'+lista.length+'</b> candados '+(vistaPendientes==='PERDIDO'?'reportados como perdidos':'por devolver');if($('agruparPendientes').value==='trabajador'){const g=new Map();lista.forEach(c=>{const k=c.servicio+'|'+c.dni;if(!g.has(k))g.set(k,{trabajador:c.trabajador,dni:c.dni,unidad:c.unidad,servicio:c.servicio,candados:[]});g.get(k).candados.push(c.numero);});$('cabeceraPendientes').innerHTML='<tr><th>Trabajador</th><th>DNI</th><th>Unidad minera</th><th>Servicio</th><th>Cantidad</th><th>Números grabados</th></tr>';$('tablaPendientes').innerHTML=[...g.values()].map(x=>`<tr><td>${escapar(x.trabajador)}</td><td>${escapar(x.dni)}</td><td>${escapar(unidadNombre(x.unidad))}</td><td>${escapar(servicioNombre(x.servicio))}</td><td><b>${x.candados.length}</b></td><td>${x.candados.map(escapar).join(', ')}</td></tr>`).join('')||vacio(6);return;}$('cabeceraPendientes').innerHTML='<tr><th>N.º grabado</th><th>Unidad minera</th><th>Servicio</th><th>Trabajador asignado</th><th>DNI</th><th>Fecha de entrega</th><th>Acción</th></tr>';$('tablaPendientes').innerHTML=lista.map(c=>`<tr><td><b>${escapar(c.numero)}</b></td><td>${escapar(unidadNombre(c.unidad))}</td><td>${escapar(servicioNombre(c.servicio))}</td><td>${escapar(c.trabajador)}</td><td>${escapar(c.dni)}</td><td>${escapar(c.fechaEntrega||'—')}</td><td><button class="boton pequeno ${c.estado==='PERDIDO'?'verde':'rojo'}" data-candado="${escapar(c.id)}">${c.estado==='PERDIDO'?'Recuperar / devolver':'Reportar perdido'}</button></td></tr>`).join('')||vacio(7);}
@@ -1013,7 +1077,7 @@ $('exportarInventario').onclick=()=>descargarExcel(inventarioFiltrado().map(c=>(
 $('exportarPendientes').onclick=()=>descargarExcel(listaPendientes().map(c=>({NUMERO_GRABADO:c.numero,UNIDAD_MINERA:unidadNombre(c.unidad),SERVICIO:servicioNombre(c.servicio),DNI:c.dni,TRABAJADOR:c.trabajador,ESTADO:c.estado,FECHA_ENTREGA:c.fechaEntrega||''})),'Candados_'+vistaPendientes+'.xlsx');
 $('exportarIncidencias').onclick=()=>descargarExcel(db.incidencias.filter(dentroFiltro).map(i=>({FECHA:i.fecha,NUMERO_GRABADO:i.numero,UNIDAD_MINERA:unidadNombre(i.unidad),SERVICIO:servicioNombre(i.servicio),DNI:i.dni,TRABAJADOR:i.trabajador,TIPO:i.tipo,MOTIVO:i.motivo,ESTADO:i.estado,RESPONSABLE:i.responsable,OBSERVACIONES:i.observacion,FECHA_RESOLUCION:i.fechaResolucion,RESOLUCION:i.resolucion})),'Incidencias_Candados.xlsx');
 
-document.querySelectorAll('.modulo').forEach(b=>b.onclick=()=>{document.querySelectorAll('.modulo').forEach(x=>x.classList.remove('activo'));document.querySelectorAll('.seccion').forEach(x=>x.classList.remove('activa'));b.classList.add('activo');$(b.dataset.seccion).classList.add('activa');if(b.dataset.seccion==='asignaciones')generarSelectores();renderizar();});
+document.querySelectorAll('.modulo').forEach(b=>b.onclick=()=>{document.querySelectorAll('.modulo').forEach(x=>x.classList.remove('activo'));document.querySelectorAll('.seccion').forEach(x=>x.classList.remove('activa'));b.classList.add('activo');$(b.dataset.seccion).classList.add('activa');if(b.dataset.seccion==='asignaciones')generarSelectores();if(b.dataset.seccion==='devoluciones')generarSelectorDevolucion();renderizar();});
 document.querySelectorAll('.subpestana').forEach(b=>b.onclick=()=>{vistaPendientes=b.dataset.vista;renderizarPendientes();});
 ['buscarInventario','filtroInventario'].forEach(id=>$(id).addEventListener('input',renderizarInventario));
 ['buscarPendientes','agruparPendientes'].forEach(id=>$(id).addEventListener('input',renderizarPendientes));
@@ -1029,9 +1093,12 @@ if(minaRecarga){
   sessionStorage.removeItem('dimarzaServicio');
 }
 generarSelectores();
+generarSelectorDevolucion();
 renderizar();
 cargarDatos().then(()=>{
   const ok=sessionStorage.getItem('dimarzaAsignacionOk');
+  const okDev=sessionStorage.getItem('dimarzaDevolucionOk');
+
   if(ok){
     mensaje('mensajeAsignacion',ok);
     sessionStorage.removeItem('dimarzaAsignacionOk');
@@ -1041,6 +1108,18 @@ cargarDatos().then(()=>{
     if(boton)boton.classList.add('activo');
     $('asignaciones').classList.add('activa');
     generarSelectores();
+    renderizar();
+  }
+
+  if(okDev){
+    mensaje('resultadoDevolucion',okDev);
+    sessionStorage.removeItem('dimarzaDevolucionOk');
+    document.querySelectorAll('.modulo').forEach(x=>x.classList.remove('activo'));
+    document.querySelectorAll('.seccion').forEach(x=>x.classList.remove('activa'));
+    const boton=[...document.querySelectorAll('.modulo')].find(x=>x.dataset.seccion==='devoluciones');
+    if(boton)boton.classList.add('activo');
+    $('devoluciones').classList.add('activa');
+    generarSelectorDevolucion();
     renderizar();
   }
 });
