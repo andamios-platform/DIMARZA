@@ -532,10 +532,9 @@ tr:hover td { background:#f8fafc; }
         <input id="dniDevolucion" list="listaDni">
       </div>
       <div>
-        <label>Número grabado recibido</label>
-        <select id="candadoRecibido">
-          <option value="">Seleccionar candado pendiente</option>
-        </select>
+        <label>Candados a devolver</label>
+        <input type="number" id="cantidadDevolucion"
+               value="1" min="1" max="30">
       </div>
       <div>
         <label>Recibido por</label>
@@ -543,6 +542,8 @@ tr:hover td { background:#f8fafc; }
                placeholder="Nombre del encargado">
       </div>
     </div>
+
+    <div id="camposCandadosDevolucion"></div>
 
     <div style="margin-top:12px">
       <label>Observaciones</label>
@@ -925,13 +926,27 @@ function candadosPendientesDevolucion(){
 
 function generarSelectorDevolucion(){
   const lista=candadosPendientesDevolucion();
-  const actual=$('candadoRecibido').value;
+  const n=Math.min(30,Math.max(1,Number($('cantidadDevolucion').value)||1));
+  const anteriores=[...document.querySelectorAll('.selectorCandadoDevolucion')].map(x=>x.value);
 
-  $('candadoRecibido').innerHTML=
-    '<option value="">Seleccionar candado pendiente</option>'+
-    lista.map(c=>`<option value="${escapar(c.numero)}">${escapar(c.numero)} — ${escapar(c.estado)}</option>`).join('');
+  $('camposCandadosDevolucion').innerHTML=
+    '<h3 style="margin-top:20px">Seleccionar candados a devolver</h3>'+
+    Array.from({length:n},(_,i)=>`
+      <div class="candado-selector">
+        <label>Candado ${i+1}</label>
+        <select class="selectorCandadoDevolucion">
+          <option value="">Seleccionar número grabado</option>
+          ${lista.map(c=>`<option value="${escapar(c.id)}">${escapar(c.numero)} — ${escapar(c.estado)}</option>`).join('')}
+        </select>
+      </div>
+    `).join('');
 
-  if(actual&&lista.some(c=>c.numero===actual))$('candadoRecibido').value=actual;
+  const selectores=[...document.querySelectorAll('.selectorCandadoDevolucion')];
+  selectores.forEach((sel,i)=>{
+    if(anteriores[i]&&lista.some(c=>c.id===anteriores[i]))sel.value=anteriores[i];
+    sel.onchange=actualizarOpcionesDevolucion;
+  });
+  actualizarOpcionesDevolucion();
 
   $('tablaDevolucion').innerHTML=
     lista.map(c=>`<tr>
@@ -942,6 +957,21 @@ function generarSelectorDevolucion(){
       <td>${etiqueta(c.estado)}</td>
     </tr>`).join('')||vacio(5,'No hay candados pendientes en este servicio.');
 }
+
+function actualizarOpcionesDevolucion(){
+  const ss=[...document.querySelectorAll('.selectorCandadoDevolucion')];
+  const elegidos=ss.map(x=>x.value).filter(Boolean);
+
+  ss.forEach(sel=>{
+    [...sel.options].forEach(op=>{
+      if(!op.value)return;
+      op.disabled=op.value!==sel.value&&elegidos.includes(op.value);
+    });
+  });
+}
+
+$('cantidadDevolucion').oninput=generarSelectorDevolucion;
+$('cantidadDevolucion').onchange=generarSelectorDevolucion;
 
 function consultarDevolucion(){
   const ctx=servicioObligatorio();
@@ -958,10 +988,17 @@ function consultarDevolucion(){
   generarSelectorDevolucion();
   mensaje(
     'resultadoDevolucion',
-    'Trabajador identificado: '+t.nombre+'. Selecciona el candado que está devolviendo.'
+    'Trabajador identificado: '+t.nombre+'. Selecciona los candados que está devolviendo.'
   );
 }
 $('consultarDevolucion').onclick=consultarDevolucion;
+
+async function verificarCandadoDevuelto(idCandado){
+  await new Promise(resolve=>setTimeout(resolve,1200));
+  const inventario=await apiGet('inventario');
+  const actualizado=(inventario||[]).find(x=>limpiar(x.ID_CANDADO)===limpiar(idCandado));
+  return !!(actualizado&&mayus(actualizado.ESTADO)==='DISPONIBLE');
+}
 
 $('verificarDevolucion').onclick=()=>{
   const ctx=servicioObligatorio();
@@ -969,83 +1006,112 @@ $('verificarDevolucion').onclick=()=>{
 
   const dni=limpiar($('dniDevolucion').value);
   const t=trabajador(dni);
-  const numero=limpiar($('candadoRecibido').value);
   const responsable=limpiar($('recibidoPor').value);
   const nota=limpiar($('observacionDevolucion').value);
+  const ids=[...document.querySelectorAll('.selectorCandadoDevolucion')].map(x=>x.value);
 
-  if(!t||!numero||!responsable){
-    mensaje('resultadoDevolucion','Registra un DNI válido, selecciona un candado y completa quién lo recibe.','error');
+  if(!t){
+    mensaje('resultadoDevolucion','Ingresa un DNI de trabajador registrado.','error');
     return;
   }
 
-  const c=db.candados.find(x=>
-    x.numero===numero &&
-    x.unidad===ctx.unidad &&
-    x.servicio===ctx.servicio &&
-    ['ASIGNADO','PERDIDO'].includes(x.estado)
-  );
-
-  if(!c){
-    mensaje('resultadoDevolucion','No se encontró ese candado pendiente en la unidad y servicio seleccionados.','error');
+  if(!responsable){
+    mensaje('resultadoDevolucion','Completa quién recibe los candados.','error');
     return;
   }
 
-  const ajeno=c.dni!==dni;
+  if(!ids.length||ids.some(v=>!v)||new Set(ids).size!==ids.length){
+    mensaje('resultadoDevolucion','Selecciona todos los candados sin repetir números.','error');
+    return;
+  }
+
+  const candados=ids.map(id=>db.candados.find(c=>
+    c.id===id &&
+    c.unidad===ctx.unidad &&
+    c.servicio===ctx.servicio &&
+    ['ASIGNADO','PERDIDO'].includes(c.estado)
+  ));
+
+  if(candados.some(c=>!c)){
+    mensaje('resultadoDevolucion','Uno o más candados ya no están pendientes. Recarga la información.','error');
+    return;
+  }
+
+  const ajenos=candados.filter(c=>c.dni!==dni);
+  const numeros=candados.map(c=>c.numero).join(', ');
 
   abrirModal(
     'Confirmar devolución',
-    'Candado '+c.numero+'. Devuelve: '+t.nombre+' ('+dni+').'+
-      (ajeno?' El sistema detectó que el candado fue asignado originalmente a otra persona.':''),
-    ajeno
+    'Se registrará la devolución de '+candados.length+' candado(s): '+numeros+
+      '. Devuelve: '+t.nombre+' ('+dni+').'+
+      (ajenos.length?' El sistema detectó que uno o más candados fueron asignados originalmente a otra persona.':''),
+    ajenos.length
       ? '<label>Explicación de la devolución por otra persona</label><textarea id="modalNota" placeholder="Obligatorio"></textarea>'
-      : '<p>Se registrará la devolución y el candado quedará disponible.</p>',
+      : '<p>Los candados quedarán disponibles al completar la devolución.</p>',
     async()=>{
-      const explicacion=ajeno?limpiar($('modalNota').value):nota;
+      const explicacion=ajenos.length?limpiar($('modalNota').value):nota;
 
-      if(ajeno&&!explicacion){
-        mensaje('modalMensaje','Explica por qué otra persona está devolviendo el candado.','error');
+      if(ajenos.length&&!explicacion){
+        mensaje('modalMensaje','Explica por qué se están devolviendo candados asignados a otra persona.','error');
         return false;
       }
 
       sessionStorage.setItem('dimarzaMina',ctx.unidad);
       sessionStorage.setItem('dimarzaServicio',ctx.servicio);
 
+      $('modalConfirmar').disabled=true;
+      $('modalCancelar').disabled=true;
+
+      const devueltos=[];
+      const fallidos=[];
+
       try{
-        await apiPost('devolver',{
-          idCandado:c.id,
-          recibidoPor:responsable,
-          dniDevuelve:dni,
-          observaciones:explicacion
-        });
+        for(let i=0;i<candados.length;i++){
+          const c=candados[i];
+          mensaje('modalMensaje','Registrando candado '+(i+1)+' de '+candados.length+': '+c.numero+'...');
 
-        sessionStorage.setItem('dimarzaDevolucionOk','Candado '+numero+' devuelto correctamente.');
-        location.reload();
-        return false;
+          try{
+            await apiPost('devolver',{
+              idCandado:c.id,
+              recibidoPor:responsable,
+              dniDevuelve:dni,
+              observaciones:explicacion
+            });
+            devueltos.push(c.numero);
+          }catch(e){
+            console.warn('No se pudo leer la respuesta del POST para '+c.numero+'. Verificando...',e);
 
-      }catch(e){
-        console.warn('No se pudo leer la respuesta del POST. Verificando devolución...',e);
-        mensaje('modalMensaje','Verificando si la devolución fue registrada...');
-
-        await new Promise(resolve=>setTimeout(resolve,1200));
-
-        try{
-          const inventario=await apiGet('inventario');
-          const actualizado=(inventario||[]).find(x=>limpiar(x.ID_CANDADO)===limpiar(c.id));
-
-          if(actualizado&&mayus(actualizado.ESTADO)==='DISPONIBLE'){
-            sessionStorage.setItem('dimarzaDevolucionOk','Candado '+numero+' devuelto correctamente.');
-            location.reload();
-            return false;
+            try{
+              const confirmado=await verificarCandadoDevuelto(c.id);
+              if(confirmado)devueltos.push(c.numero);
+              else fallidos.push(c.numero);
+            }catch(verificacionError){
+              console.error(verificacionError);
+              fallidos.push(c.numero);
+            }
           }
+        }
 
-          mensaje('modalMensaje','No se pudo confirmar la devolución. Verifica antes de volver a intentarlo.','error');
-          return false;
-
-        }catch(verificacionError){
-          console.error(verificacionError);
-          mensaje('modalMensaje','No se pudo confirmar automáticamente la devolución. Recarga la página antes de volver a intentarlo.','error');
+        if(!fallidos.length){
+          sessionStorage.setItem(
+            'dimarzaDevolucionOk',
+            devueltos.length+' candado(s) devuelto(s) correctamente: '+devueltos.join(', ')+'.'
+          );
+          location.reload();
           return false;
         }
+
+        mensaje(
+          'modalMensaje',
+          'Se confirmaron '+devueltos.length+' devolución(es). No se pudo confirmar: '+fallidos.join(', ')+
+          '. Recarga la página antes de volver a intentar esos candados.',
+          'error'
+        );
+        return false;
+
+      }finally{
+        $('modalConfirmar').disabled=false;
+        $('modalCancelar').disabled=false;
       }
     },
     'Confirmar devolución',
