@@ -815,7 +815,174 @@ function actualizarOpcionesCandados(){
   }));
 }
 $('cantidadAsignacion').onchange=generarSelectores;
-$('guardarAsignacion').onclick=async()=>{const c=servicioObligatorio();if(!c)return;const ids=[...document.querySelectorAll('.selectorCandado')].map(s=>s.value);if(!ids.length||ids.some(v=>!v)||new Set(ids).size!==ids.length){mensaje('mensajeAsignacion','Selecciona todos los candados sin repetir números.','error');return;}try{const r=await apiPost('asignar',{dni:$('dniAsignacion').value,entregadoPor:$('entregadoPor').value,idsCandados:ids,idUnidad:c.unidad,idServicio:c.servicio,observaciones:$('observacionAsignacion').value});sessionStorage.setItem('dimarzaAsignacionOk',r.cantidad+' candados asignados correctamente.');sessionStorage.setItem('dimarzaMina',c.unidad);sessionStorage.setItem('dimarzaServicio',c.servicio);location.reload();}catch(e){mensaje('mensajeAsignacion',e.message,'error');}};
+$('guardarAsignacion').onclick=async()=>{
+  
+  $('guardarAsignacion').onclick = async () => {
+  const c = servicioObligatorio();
+  if (!c) return;
+
+  const ids = [...document.querySelectorAll('.selectorCandado')]
+    .map(s => s.value);
+
+  if (
+    !ids.length ||
+    ids.some(v => !v) ||
+    new Set(ids).size !== ids.length
+  ) {
+    mensaje(
+      'mensajeAsignacion',
+      'Selecciona todos los candados sin repetir números.',
+      'error'
+    );
+    return;
+  }
+
+  const dni = limpiar($('dniAsignacion').value);
+  const entregadoPor = limpiar($('entregadoPor').value);
+  const observaciones = $('observacionAsignacion').value;
+
+  if (!dni) {
+    mensaje(
+      'mensajeAsignacion',
+      'Selecciona un trabajador.',
+      'error'
+    );
+    return;
+  }
+
+  if (!entregadoPor) {
+    mensaje(
+      'mensajeAsignacion',
+      'Indica quién entrega los candados.',
+      'error'
+    );
+    return;
+  }
+
+  /* Guardamos ANTES la unidad y servicio seleccionados.
+     Así no se pierden aunque el POST devuelva "Failed to fetch". */
+  sessionStorage.setItem('dimarzaMina', c.unidad);
+  sessionStorage.setItem('dimarzaServicio', c.servicio);
+
+  /* Guardamos los candados que estamos intentando asignar
+     para poder comprobar después si realmente se registraron. */
+  const numerosSeleccionados = ids
+    .map(id => db.candados.find(x => x.id === id)?.numero)
+    .filter(Boolean);
+
+  mensaje(
+    'mensajeAsignacion',
+    'Registrando asignación...',
+    'ok'
+  );
+
+  try {
+
+    const r = await apiPost('asignar', {
+      dni: dni,
+      entregadoPor: entregadoPor,
+      idsCandados: ids,
+      idUnidad: c.unidad,
+      idServicio: c.servicio,
+      observaciones: observaciones
+    });
+
+    sessionStorage.setItem(
+      'dimarzaAsignacionOk',
+      (r?.cantidad || ids.length) +
+      ' candados asignados correctamente.'
+    );
+
+    location.reload();
+
+  } catch (e) {
+
+    console.warn(
+      'El navegador no pudo leer la respuesta del POST. Verificando asignación...',
+      e
+    );
+
+    mensaje(
+      'mensajeAsignacion',
+      'Verificando si la asignación fue registrada...',
+      'ok'
+    );
+
+    /*
+      Esperamos un momento para que Google Sheets termine
+      de reflejar la modificación.
+    */
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    try {
+
+      const inventario = await apiGet('inventario');
+
+      const registrados = (inventario || []).filter(x =>
+        numerosSeleccionados.includes(limpiar(x.NUMERO_GRABADO)) &&
+        limpiar(x.DNI_ACTUAL) === dni &&
+        mayus(x.ESTADO) === 'ASIGNADO'
+      );
+
+      /*
+        Si TODOS los candados aparecen asignados al DNI,
+        significa que Apps Script sí realizó el registro.
+      */
+      if (registrados.length === numerosSeleccionados.length) {
+
+        sessionStorage.setItem(
+          'dimarzaAsignacionOk',
+          registrados.length +
+          ' candados asignados correctamente.'
+        );
+
+        location.reload();
+        return;
+      }
+
+      /*
+        Si ninguno aparece asignado, entonces sí consideramos
+        que la operación falló.
+      */
+      if (registrados.length === 0) {
+
+        mensaje(
+          'mensajeAsignacion',
+          'No se pudo registrar la asignación. Intenta nuevamente.',
+          'error'
+        );
+
+        return;
+      }
+
+      /*
+        Protección adicional:
+        si solo algunos aparecen registrados, NO repetimos
+        automáticamente la operación para evitar duplicados.
+      */
+      mensaje(
+        'mensajeAsignacion',
+        'La operación quedó parcialmente registrada. Se detectaron ' +
+        registrados.length +
+        ' de ' +
+        numerosSeleccionados.length +
+        ' candados. Recarga la página antes de volver a intentar.',
+        'error'
+      );
+
+    } catch (verificacionError) {
+
+      console.error(verificacionError);
+
+      mensaje(
+        'mensajeAsignacion',
+        'No se pudo confirmar automáticamente la asignación. Recarga la página para verificar el estado antes de volver a intentarlo.',
+        'error'
+      );
+    }
+  }
+};
+  const c=servicioObligatorio();if(!c)return;const ids=[...document.querySelectorAll('.selectorCandado')].map(s=>s.value);if(!ids.length||ids.some(v=>!v)||new Set(ids).size!==ids.length){mensaje('mensajeAsignacion','Selecciona todos los candados sin repetir números.','error');return;}try{const r=await apiPost('asignar',{dni:$('dniAsignacion').value,entregadoPor:$('entregadoPor').value,idsCandados:ids,idUnidad:c.unidad,idServicio:c.servicio,observaciones:$('observacionAsignacion').value});sessionStorage.setItem('dimarzaAsignacionOk',r.cantidad+' candados asignados correctamente.');sessionStorage.setItem('dimarzaMina',c.unidad);sessionStorage.setItem('dimarzaServicio',c.servicio);location.reload();}catch(e){mensaje('mensajeAsignacion',e.message,'error');}};
 function asignacionVigente(c){return c&&['ASIGNADO','PERDIDO'].includes(c.estado)?{id:c.idAsignacion,candadoId:c.id,numero:c.numero,unidad:c.unidad,servicio:c.servicio,dni:c.dni,trabajador:c.trabajador,fechaEntrega:c.fechaEntrega,estado:c.estado}:null;}
 
 function consultarDevolucion(){const dni=limpiar($('dniDevolucion').value);const lista=db.candados.filter(c=>c.dni===dni&&['ASIGNADO','PERDIDO'].includes(c.estado)&&dentroFiltro(c));$('tablaDevolucion').innerHTML=lista.map(c=>`<tr><td><b>${escapar(c.numero)}</b></td><td>${escapar(unidadNombre(c.unidad))}</td><td>${escapar(servicioNombre(c.servicio))}</td><td>${escapar(c.fechaEntrega||'—')}</td><td>${etiqueta(c.estado)}</td></tr>`).join('')||vacio(5,'No hay candados pendientes para este DNI.');}
