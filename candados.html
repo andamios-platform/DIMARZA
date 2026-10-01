@@ -311,9 +311,20 @@ tr:hover td { background:#f8fafc; }
   <div class="tarjeta">
     <h3>Importación masiva de candados</h3>
     <p class="ayuda">
-      Columnas: NUMERO_GRABADO, UBICACION y OBSERVACIONES.
-      Los registros se incorporarán al servicio seleccionado.
+      El Excel solo debe contener la columna NUMERO_GRABADO.
+      La ubicación y las observaciones se aplicarán a todos los candados importados.
     </p>
+
+    <div class="cuadricula dos" style="margin-top:15px">
+      <div>
+        <label>Ubicación / almacén para todos los candados</label>
+        <input id="ubicacionImportacion" placeholder="Ej. ALMACEN QUELLAVECO">
+      </div>
+      <div>
+        <label>Observaciones generales (opcional)</label>
+        <input id="observacionImportacion" placeholder="Se aplicará a todos los registros">
+      </div>
+    </div>
 
     <div class="acciones">
       <button class="boton secundario" id="plantillaCandados">
@@ -332,7 +343,6 @@ tr:hover td { background:#f8fafc; }
         <thead>
           <tr>
             <th>Número</th>
-            <th>Ubicación</th>
             <th>Validación</th>
           </tr>
         </thead>
@@ -812,11 +822,11 @@ $('modalCancelar').onclick=()=>{$('modalFondo').classList.remove('abierto');acci
 $('modalConfirmar').onclick=async()=>{if(!accionModal)return;const r=await accionModal();if(r!==false){$('modalFondo').classList.remove('abierto');accionModal=null;}};
 
 function descargarExcel(filas,nombre){if(typeof XLSX==='undefined'){alert('No se pudo cargar la biblioteca de Excel.');return;}const l=XLSX.utils.book_new(),h=XLSX.utils.json_to_sheet(filas);XLSX.utils.book_append_sheet(l,h,'DATOS');XLSX.writeFile(l,nombre);}
-$('plantillaCandados').onclick=()=>descargarExcel([{NUMERO_GRABADO:'00125',UBICACION:'Almacén',OBSERVACIONES:''}],'Plantilla_Candados.xlsx');
+$('plantillaCandados').onclick=()=>descargarExcel([{NUMERO_GRABADO:'00125'}],'Plantilla_Candados.xlsx');
 $('plantillaTrabajadores').onclick=()=>descargarExcel([{DNI:'12345678',APELLIDOS_NOMBRES:'APELLIDOS NOMBRES',CARGO:'ANDAMIERO',OBSERVACIONES:''}],'Plantilla_Trabajadores.xlsx');
 async function leerExcel(a){if(!a)throw Error('Selecciona un archivo.');if(typeof XLSX==='undefined')throw Error('No se pudo cargar la biblioteca de Excel.');const l=XLSX.read(await a.arrayBuffer(),{type:'array',cellText:true}),h=l.Sheets[l.SheetNames[0]];return XLSX.utils.sheet_to_json(h,{defval:'',raw:false}).map(f=>Object.fromEntries(Object.entries(f).map(([k,v])=>[mayus(k),limpiar(v)])));}
-$('excelCandados').onchange=async e=>{previaCandados=[];$('importarCandados').disabled=true;try{const filas=await leerExcel(e.target.files[0]);if(filas.length&&!('NUMERO_GRABADO' in filas[0]))throw Error('Falta la columna NUMERO_GRABADO.');const vistos=new Set();previaCandados=filas.map(f=>{const numero=limpiar(f.NUMERO_GRABADO),dup=vistos.has(numero);vistos.add(numero);return{numero,ubicacion:f.UBICACION||'',observacion:f.OBSERVACIONES||'',error:!numero?'Número vacío':dup?'Duplicado en archivo':''};});$('previaCandados').innerHTML=previaCandados.map(f=>`<tr><td>${escapar(f.numero)}</td><td>${escapar(f.ubicacion)}</td><td>${escapar(f.error||'Válido')}</td></tr>`).join('')||vacio(3);$('importarCandados').disabled=!previaCandados.some(f=>!f.error);mensaje('mensajeExcelCandados',previaCandados.length+' filas previsualizadas.');}catch(x){mensaje('mensajeExcelCandados',x.message,'error');}};
-$('importarCandados').onclick=async()=>{const c=servicioObligatorio();if(!c)return;const filas=previaCandados.filter(f=>!f.error).map(f=>({numero:f.numero,ubicacion:f.ubicacion,observaciones:f.observacion}));try{const r=await apiPost('importarCandados',{filas,idUnidad:c.unidad,idServicio:c.servicio});mensaje('mensajeExcelCandados',r.registrados+' candados registrados. '+r.omitidos+' omitidos.');previaCandados=[];$('importarCandados').disabled=true;await cargarDatos();}catch(x){mensaje('mensajeExcelCandados',x.message,'error');}};
+$('excelCandados').onchange=async e=>{previaCandados=[];$('importarCandados').disabled=true;try{const filas=await leerExcel(e.target.files[0]);if(filas.length&&!('NUMERO_GRABADO' in filas[0]))throw Error('Falta la columna NUMERO_GRABADO.');const vistos=new Set();previaCandados=filas.map(f=>{const numero=limpiar(f.NUMERO_GRABADO),dup=vistos.has(numero);vistos.add(numero);return{numero,error:!numero?'Número vacío':dup?'Duplicado en archivo':''};});$('previaCandados').innerHTML=previaCandados.map(f=>`<tr><td>${escapar(f.numero)}</td><td>${escapar(f.error||'Válido')}</td></tr>`).join('')||vacio(2);$('importarCandados').disabled=!previaCandados.some(f=>!f.error);mensaje('mensajeExcelCandados',previaCandados.length+' filas previsualizadas.');}catch(x){mensaje('mensajeExcelCandados',x.message,'error');}};
+$('importarCandados').onclick=async()=>{const c=servicioObligatorio();if(!c)return;const ubicacion=limpiar($('ubicacionImportacion').value),observaciones=limpiar($('observacionImportacion').value);if(!ubicacion){mensaje('mensajeExcelCandados','Indica la ubicación / almacén que se aplicará a todos los candados.','error');$('ubicacionImportacion').focus();return;}const filas=previaCandados.filter(f=>!f.error).map(f=>({numero:f.numero,ubicacion,observaciones}));try{const r=await apiPost('importarCandados',{filas,idUnidad:c.unidad,idServicio:c.servicio});mensaje('mensajeExcelCandados',r.registrados+' candados registrados. '+r.omitidos+' omitidos.');previaCandados=[];$('previaCandados').innerHTML='';$('excelCandados').value='';$('importarCandados').disabled=true;await cargarDatos();}catch(x){mensaje('mensajeExcelCandados',x.message,'error');}};
 $('excelTrabajadores').onchange=async e=>{previaTrabajadores=[];$('importarTrabajadores').disabled=true;try{const filas=await leerExcel(e.target.files[0]);if(filas.length&&(!('DNI' in filas[0])||!('APELLIDOS_NOMBRES' in filas[0])))throw Error('Faltan las columnas DNI y/o APELLIDOS_NOMBRES.');const vistos=new Set();previaTrabajadores=filas.map(f=>{const dni=limpiar(f.DNI),dup=vistos.has(dni);vistos.add(dni);return{dni,nombre:f.APELLIDOS_NOMBRES||'',cargo:f.CARGO||'',observacion:f.OBSERVACIONES||'',error:!/^[0-9]{7,12}$/.test(dni)?'Documento inválido':!limpiar(f.APELLIDOS_NOMBRES)?'Falta nombre':dup?'DNI duplicado':''};});$('previaTrabajadores').innerHTML=previaTrabajadores.map(f=>`<tr><td>${escapar(f.dni)}</td><td>${escapar(f.nombre)}</td><td>${escapar(f.cargo)}</td><td>${escapar(f.error||'Válido')}</td></tr>`).join('')||vacio(4);$('importarTrabajadores').disabled=!previaTrabajadores.some(f=>!f.error);mensaje('mensajeExcelTrabajadores',previaTrabajadores.length+' filas previsualizadas.');}catch(x){mensaje('mensajeExcelTrabajadores',x.message,'error');}};
 $('importarTrabajadores').onclick=async()=>{const filas=previaTrabajadores.filter(f=>!f.error).map(f=>({dni:f.dni,nombre:f.nombre,cargo:f.cargo,observaciones:f.observacion}));try{const r=await apiPost('importarTrabajadores',{filas});mensaje('mensajeExcelTrabajadores',r.registrados+' registrados, '+r.actualizados+' actualizados y '+r.omitidos+' omitidos.');previaTrabajadores=[];$('importarTrabajadores').disabled=true;await cargarDatos();}catch(x){mensaje('mensajeExcelTrabajadores',x.message,'error');}};
 $('exportarInventario').onclick=()=>descargarExcel(inventarioFiltrado().map(c=>({NUMERO_GRABADO:c.numero,UNIDAD_MINERA:unidadNombre(c.unidad),SERVICIO:servicioNombre(c.servicio),ESTADO:c.estado,DNI:c.dni,TRABAJADOR:c.trabajador,UBICACION:c.ubicacion})),'Inventario_Candados.xlsx');
