@@ -2836,28 +2836,21 @@ const porcentajeHabilitacion =
                 </td>
 
 
-                <td>
-                  ${r.urlPdf
-                    ? `<a href="${escapar(r.urlPdf)}" target="_blank" rel="noopener noreferrer">Ver PDF</a>`
-                    : escapar(r.estadoPdf || 'Pendiente')}
-                </td>
 
-                <td>
+<td>
+  <span class="estado ${claseEstado}">
+    ${escapar(r.estado)}
+  </span>
+</td>
 
-                  <span
-                    class="
-                      estado
-                      ${claseEstado}
-                    "
-                  >
+<td>
+  ${r.urlPdf
+    ? `<a href="${escapar(r.urlPdf)}"
+          target="_blank"
+          rel="noopener noreferrer">Ver PDF</a>`
+    : escapar(r.estadoPdf || 'Pendiente')}
+</td>
 
-                    ${escapar(
-                      r.estado
-                    )}
-
-                  </span>
-
-                </td>
 
 
 <td>
