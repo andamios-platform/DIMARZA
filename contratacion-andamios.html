@@ -1602,6 +1602,29 @@ tbody tr:last-child td {
 
 
 
+          <!-- TIPO DE SERVICIO -->
+          <div class="campo">
+            <label for="tipoServicio">TIPO DE SERVICIO *</label>
+            <input id="tipoServicio" type="text" required
+              placeholder="Ej.: Parada de planta, mantenimiento...">
+          </div>
+
+          <!-- PERIODO DEL SERVICIO -->
+          <div class="campo">
+            <label for="fechaInicioServicio">FECHA INICIO DEL SERVICIO *</label>
+            <input id="fechaInicioServicio" type="date" required>
+          </div>
+
+          <div class="campo">
+            <label for="fechaFinServicio">FECHA FIN DEL SERVICIO *</label>
+            <input id="fechaFinServicio" type="date" required>
+          </div>
+
+          <div class="campo">
+            <label for="diasServicio">DÍAS DE SERVICIO</label>
+            <input id="diasServicio" type="number" readonly placeholder="Automático">
+          </div>
+
           <!-- FECHA OBJETIVO -->
 
           <div class="campo">
@@ -1910,6 +1933,7 @@ tbody tr:last-child td {
 
               <th>FECHA OBJETIVO</th>
               <th>ESTADO</th>
+              <th>PDF REQUERIMIENTO</th>
               <th>AVANCE CONTRATACIÓN</th>
               <th>AVANCE HABILITACIÓN</th>
 
@@ -1924,7 +1948,7 @@ tbody tr:last-child td {
             <tr>
 
               <td
-                colspan="11"
+                colspan="12"
                 class="vacio"
               >
                 Cargando requerimientos...
@@ -2115,6 +2139,21 @@ document
 
 
 
+// Calcular días de servicio incluyendo fecha de inicio y fin.
+function actualizarDiasServicio() {
+  const inicio = document.getElementById('fechaInicioServicio').value;
+  const fin = document.getElementById('fechaFinServicio').value;
+  const salida = document.getElementById('diasServicio');
+  salida.value = '';
+  if (!inicio || !fin || fin < inicio) return;
+  const a = Date.parse(inicio + 'T00:00:00Z');
+  const b = Date.parse(fin + 'T00:00:00Z');
+  salida.value = Math.round((b - a) / 86400000) + 1;
+}
+['fechaInicioServicio', 'fechaFinServicio'].forEach(id => {
+  document.getElementById(id).addEventListener('change', actualizarDiasServicio);
+});
+
 /* =====================================================
    DATA PERSONAL
 ===================================================== */
@@ -2278,6 +2317,12 @@ async function registrarRequerimiento(
   try {
 
 
+    const inicioServicio = document.getElementById('fechaInicioServicio').value;
+    const finServicio = document.getElementById('fechaFinServicio').value;
+    if (!inicioServicio || !finServicio || finServicio < inicioServicio) {
+      throw new Error('La fecha fin del servicio debe ser igual o posterior a la fecha de inicio.');
+    }
+
     const datos = {
 
 
@@ -2328,6 +2373,10 @@ async function registrarRequerimiento(
           )
           .value,
 
+
+      tipoServicio: document.getElementById('tipoServicio').value.trim(),
+      fechaInicioServicio: document.getElementById('fechaInicioServicio').value,
+      fechaFinServicio: document.getElementById('fechaFinServicio').value,
 
       solicitante:
         document
@@ -2403,7 +2452,7 @@ async function registrarRequerimiento(
 
       resultado.idRequerimiento +
 
-      ' registrado correctamente.',
+      ' registrado correctamente.' + (resultado.urlPdf ? ' PDF generado.' : ' PDF pendiente: ' + (resultado.estadoPdf || 'verificar registro.')),
 
       'ok'
 
@@ -2599,7 +2648,7 @@ async function cargarRequerimientos() {
         <tr>
 
           <td
-            colspan="11"
+            colspan="12"
             class="vacio"
           >
             No existen requerimientos registrados.
@@ -2788,6 +2837,12 @@ const porcentajeHabilitacion =
 
 
                 <td>
+                  ${r.urlPdf
+                    ? `<a href="${escapar(r.urlPdf)}" target="_blank" rel="noopener noreferrer">Ver PDF</a>`
+                    : escapar(r.estadoPdf || 'Pendiente')}
+                </td>
+
+                <td>
 
                   <span
                     class="
@@ -2863,7 +2918,7 @@ const porcentajeHabilitacion =
       <tr>
 
         <td
-          colspan="11"
+          colspan="12"
           class="vacio"
         >
 
