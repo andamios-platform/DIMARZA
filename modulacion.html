@@ -1656,7 +1656,7 @@ tbody tr:hover{
         <div class="campo completo">
           <label for="tagModulacion">TAG del servicio *</label>
           <input id="tagModulacion" type="text" placeholder="Ej.: TAG-C-001" autocomplete="off">
-          <small>Debe coincidir con el TAG registrado en Gestión de Andamios.</small>
+          <small>Para importar a Previos, el TAG deberá coincidir con el del servicio en Gestión de Andamios.</small>
         </div>
 
       </div>
@@ -3777,6 +3777,8 @@ async function guardarBorrador(){
 
         referencia,
 
+        tag: document.getElementById('tagModulacion').value.trim().toUpperCase(),
+
         estado:
           'BORRADOR',
 
@@ -4187,6 +4189,9 @@ async function abrirBorrador(
 
     const borrador =
       datos.borrador;
+    document.getElementById('tagModulacion').value = borrador.tag || '';
+    estadoModulacionActual = borrador.estado || 'BORRADOR';
+    actualizarEstadoEdicionModulacion();
 
 
     idBorradorActual =
