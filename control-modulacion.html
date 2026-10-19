@@ -2235,6 +2235,22 @@ function crearFilaDetalle(
         </h3>
 
 
+        ${(() => {
+          const m = modulacionesFiltradas.find(x => x.idBorrador === idBorrador);
+          if (!m) return '';
+          const estado = String(m.estado || '').toUpperCase();
+          return `<div style="margin:10px 0;padding:12px;border:1px solid #ddd;border-radius:8px">
+            <div><strong>TAG:</strong> ${escaparHTML(m.tag || 'Sin TAG')}</div>
+            <div><strong>Estado:</strong> ${escaparHTML(estado)}</div>
+            ${m.observacionRevision ? `<div><strong>Observación:</strong> ${escaparHTML(m.observacionRevision)}</div>` : ''}
+            ${m.aprobadoPor ? `<div><strong>Aprobado por:</strong> ${escaparHTML(m.aprobadoPor)}</div>` : ''}
+            ${estado === 'PENDIENTE' ? `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="btn btn-verde" onclick="resolverModulacionUI('${escaparAtributo(idBorrador)}','APROBADO')">Aprobar</button>
+              <button class="btn btn-naranja" onclick="resolverModulacionUI('${escaparAtributo(idBorrador)}','OBSERVADO')">Observar</button>
+            </div>` : ''}
+          </div>`;
+        })()}
+
         <div class="tabla-wrap">
 
           <table class="tabla-detalle">
@@ -3817,6 +3833,25 @@ function escaparAtributo(
 
 }
 
+</script>
+
+
+<script>
+async function resolverModulacionUI(idBorrador, decision) {
+  const observacion = decision === 'OBSERVADO' ? prompt('Indica el motivo de la observación:') : '';
+  if (decision === 'OBSERVADO' && (!observacion || !observacion.trim())) return;
+  if (decision === 'APROBADO' && !confirm('¿Aprobar la modulación ' + idBorrador + '?')) return;
+  try {
+    const respuesta = await fetch(WEB_APP_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({accion:decision === 'APROBADO' ? 'aprobarModulacion':'observarModulacion', idBorrador, observacion, tokenSesion:sessionStorage.getItem('dimarzaTokenVisualizacion') || ''})
+    });
+    const resultado = await respuesta.json();
+    if (!resultado.ok) throw new Error(resultado.error || resultado.mensaje || 'No se pudo registrar la revisión.');
+    alert(resultado.mensaje || 'Revisión registrada.');
+    await cargarControlModulacion();
+  } catch (error) { alert('Error: ' + error.message); }
+}
 </script>
 
 </body>
