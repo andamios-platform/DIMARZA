@@ -887,6 +887,8 @@ const WEB_APP_ACCESO =
   'https://script.google.com/macros/s/AKfycbwvueeUnXA1khv-qj-xxZnPi8jq_MzBygE__2TI3w7GMK3-4ev5pMNQ5KIam8mMMlQb/exec';
 
 
+const CLAVE_TOKEN = 'dimarzaTokenVisualizacion';
+
 const CLAVE_ROL =
   'dimarzaRolVisualizacion';
 
@@ -904,7 +906,7 @@ document.addEventListener(
     const rolGuardado =
       sessionStorage.getItem(CLAVE_ROL);
 
-    if(rolGuardado){
+    if(rolGuardado && sessionStorage.getItem(CLAVE_TOKEN)){
       aplicarSesion(rolGuardado);
     }else{
       mostrarLogin();
@@ -1083,10 +1085,11 @@ async function iniciarSesion(){
 
     }
 
-    sessionStorage.setItem(
-      CLAVE_ROL,
-      rol
-    );
+    if (!resultado.tokenSesion || !/^[0-9a-f-]{36}$/i.test(String(resultado.tokenSesion))) {
+      throw new Error('El servidor de acceso todavía no genera sesiones. Actualiza primero el Apps Script de acceso.');
+    }
+    sessionStorage.setItem(CLAVE_ROL, rol);
+    sessionStorage.setItem(CLAVE_TOKEN, resultado.tokenSesion);
 
     aplicarSesion(rol);
 
@@ -1097,6 +1100,7 @@ async function iniciarSesion(){
     console.error(error);
 
     sessionStorage.removeItem(CLAVE_ROL);
+    sessionStorage.removeItem(CLAVE_TOKEN);
 
     bloquearTodosLosModulos();
 
@@ -1187,6 +1191,7 @@ function aplicarSesion(rol){
 function cerrarSesion(){
 
   sessionStorage.removeItem(CLAVE_ROL);
+    sessionStorage.removeItem(CLAVE_TOKEN);
 
   bloquearTodosLosModulos();
 
