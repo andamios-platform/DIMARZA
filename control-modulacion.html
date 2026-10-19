@@ -2093,10 +2093,21 @@ function renderizarModulaciones(){
     >
       Excel
     </button>
-    ${['BORRADOR', 'OBSERVADO'].includes(String(item.estado || '').trim().toUpperCase()) ? `
-    <button type="button" class="btn" style="color:white;background:#dc2626"
-      onclick="eliminarModulacion('${escaparAtributo(item.idBorrador)}')">Eliminar</button>` : ''}
-
+    <button
+  type="button"
+  class="btn"
+  style="
+    color:white;
+    background:#dc2626;
+  "
+  onclick="eliminarModulacion(
+    '${escaparAtributo(
+      item.idBorrador
+    )}'
+  )"
+>
+  Eliminar
+</button>
 
   </div>
 
@@ -3827,11 +3838,19 @@ function escaparAtributo(
 
 <script>
 async function resolverModulacionUI(idBorrador, decision) {
-  // La sesión segura del residente se integrará al final, sin cambiar la contraseña.
-  // Mientras tanto no enviar aprobaciones sin autorización al servidor.
-  alert('La modulación ' + idBorrador + ' sigue PENDIENTE. La acción ' +
-    (decision === 'APROBADO' ? 'Aprobar' : 'Observar') +
-    ' aún no está habilitada. Primero verificaremos los estados en Apps Script.');
+  const observacion = decision === 'OBSERVADO' ? prompt('Indica el motivo de la observación:') : '';
+  if (decision === 'OBSERVADO' && (!observacion || !observacion.trim())) return;
+  if (decision === 'APROBADO' && !confirm('¿Aprobar la modulación ' + idBorrador + '?')) return;
+  try {
+    const respuesta = await fetch(WEB_APP_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({accion:decision === 'APROBADO' ? 'aprobarModulacion':'observarModulacion', idBorrador, observacion, tokenSesion:sessionStorage.getItem('dimarzaTokenVisualizacion') || ''})
+    });
+    const resultado = await respuesta.json();
+    if (!resultado.ok) throw new Error(resultado.error || resultado.mensaje || 'No se pudo registrar la revisión.');
+    alert(resultado.mensaje || 'Revisión registrada.');
+    await cargarControlModulacion();
+  } catch (error) { alert('Error: ' + error.message); }
 }
 </script>
 
