@@ -3802,6 +3802,8 @@ async function guardarBorrador(){
     idBorradorActual =
       datos.idBorrador ||
       idBorradorActual;
+    estadoModulacionActual = datos.estado || 'BORRADOR';
+    actualizarEstadoEdicionModulacion();
     await cargarArchivosModulacion();
 
     document
@@ -4197,6 +4199,7 @@ async function abrirBorrador(
     idBorradorActual =
       borrador.idBorrador ||
       '';
+    actualizarEstadoEdicionModulacion();
     await cargarArchivosModulacion();
     document
       .getElementById(
