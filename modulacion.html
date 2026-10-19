@@ -1889,6 +1889,13 @@ tbody tr:hover{
 
       </div>
 
+<div id="panelArchivosModulacion" class="panel oculto" style="margin-top:18px">
+<h2>📎 Plano y evidencia de armado</h2>
+<p class="panel-subtitulo">Un plano PDF y una evidencia JPG, PNG o PDF. Máximo 8 MB cada uno.</p>
+<div class="form-grid">
+<div class="campo"><label>Plano PDF</label><input id="archivoPlano" type="file" accept=".pdf"><button type="button" class="btn btn-primario" onclick="subirArchivoModulacion('PLANO')">Subir / reemplazar plano</button><div id="estadoPlano"></div></div>
+<div class="campo"><label>Evidencia de armado</label><input id="archivoEvidencia" type="file" accept=".pdf,.jpg,.jpeg,.png"><button type="button" class="btn btn-primario" onclick="subirArchivoModulacion('EVIDENCIA')">Subir / reemplazar evidencia</button><div id="estadoEvidencia"></div></div>
+</div></div>
     <div
       id="herramientasBorrador"
       class="panel oculto"
@@ -2823,6 +2830,7 @@ function nuevoBorrador(){
 
 
   idBorradorActual = '';
+  document.getElementById('panelArchivosModulacion').classList.add('oculto');
 
   fechaBorradorActual = '';
 
@@ -3757,6 +3765,7 @@ async function guardarBorrador(){
     idBorradorActual =
       datos.idBorrador ||
       idBorradorActual;
+    await cargarArchivosModulacion();
 
     document
       .getElementById(
@@ -4148,6 +4157,7 @@ async function abrirBorrador(
     idBorradorActual =
       borrador.idBorrador ||
       '';
+    await cargarArchivosModulacion();
     document
       .getElementById(
         'herramientasBorrador'
@@ -5172,6 +5182,42 @@ function escaparAtributo(
 
 }
 
+async function cargarArchivosModulacion(){
+ const panel=document.getElementById('panelArchivosModulacion');
+ if(!idBorradorActual){panel.classList.add('oculto');return}
+ panel.classList.remove('oculto');
+ try{
+  const d=await consultarAPI(`${API_URL}?accion=listarArchivosModulacion&idBorrador=${encodeURIComponent(idBorradorActual)}`);
+  if(!d.ok)throw new Error(d.error||'Error al consultar archivos');
+  for(const tipo of ['PLANO','EVIDENCIA']){
+   const destino=document.getElementById(tipo==='PLANO'?'estadoPlano':'estadoEvidencia');
+   destino.replaceChildren();const a=(d.archivos||[]).find(x=>x.tipo===tipo);
+   if(!a){destino.textContent='Sin archivo';continue}
+   const link=document.createElement('a');link.href=a.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Ver '+a.nombre;
+   const boton=document.createElement('button');boton.type='button';boton.className='btn btn-peligro';boton.textContent='Eliminar';boton.style.marginLeft='8px';boton.onclick=()=>eliminarArchivoAdjuntoModulacion(tipo);
+   destino.append(link,boton);
+  }
+ }catch(e){mostrarMensaje(e.message,'error')}
+}
+function leerArchivoBase64Modulacion(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(new Error('Error al leer archivo'));r.readAsDataURL(file)})}
+async function subirArchivoModulacion(tipo){
+ if(!validarBorradorGuardado())return;
+ const input=document.getElementById(tipo==='PLANO'?'archivoPlano':'archivoEvidencia'),file=input.files[0];
+ if(!file){mostrarMensaje('Selecciona un archivo','error');return}
+ if(file.size>8*1024*1024){mostrarMensaje('Máximo 8 MB','error');return}
+ const ext=file.name.split('.').pop().toLowerCase();
+ if(tipo==='PLANO'&&ext!=='pdf'||tipo==='EVIDENCIA'&&!['pdf','jpg','jpeg','png'].includes(ext)){mostrarMensaje('Formato no permitido','error');return}
+ const boton=input.parentElement.querySelector('button');boton.disabled=true;
+ try{
+  const base64=await leerArchivoBase64Modulacion(file);
+  const d=await enviarAPI({accion:'subirArchivoModulacion',idBorrador:idBorradorActual,tipo,nombre:file.name,base64,responsable:document.getElementById('responsable').value});
+  if(!d.ok)throw new Error(d.error||'Error al guardar');input.value='';await cargarArchivosModulacion();mostrarMensaje('Archivo guardado','exito');
+ }catch(e){mostrarMensaje(e.message,'error')}finally{boton.disabled=false}
+}
+async function eliminarArchivoAdjuntoModulacion(tipo){
+ if(!confirm('¿Eliminar '+tipo.toLowerCase()+'?'))return;
+ try{const d=await enviarAPI({accion:'eliminarArchivoModulacion',idBorrador:idBorradorActual,tipo});if(!d.ok)throw new Error(d.error||'Error al eliminar');await cargarArchivosModulacion();mostrarMensaje('Archivo eliminado','exito')}catch(e){mostrarMensaje(e.message,'error')}
+}
 </script>
 
 
