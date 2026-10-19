@@ -1256,29 +1256,6 @@ tbody tr:hover{
 
 
 
-// Flujo de revisión de Modulación
-function actualizarEstadoEdicionModulacion(){
-  const bloqueada = !['BORRADOR','OBSERVADO'].includes(estadoModulacionActual);
-  ['responsable','referencia','tagModulacion','buscarMaterial','filtroGrupo','archivoPlano','archivoEvidencia'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.disabled=bloqueada;
-  });
-  const guardar=document.getElementById('btnGuardar'); if(guardar) guardar.disabled=bloqueada;
-  const revision=document.getElementById('btnEnviarRevision');
-  if(revision){ revision.classList.toggle('oculto', !idBorradorActual || bloqueada); }
-  document.querySelectorAll('#tablaMateriales button,#tablaMateriales input,#tablaMateriales textarea,#resultadosMaterial button,#panelArchivosModulacion button').forEach(el=>el.disabled=bloqueada);
-}
-async function enviarRevisionModulacion(){
-  if(!idBorradorActual) return mostrarMensaje('Guarda primero la modulación.','error');
-  if(!confirm('¿Enviar esta modulación a revisión del residente? No podrás modificarla mientras esté pendiente.')) return;
-  try{
-    const respuesta=await enviarAPI({accion:'enviarRevisionModulacion',idBorrador:idBorradorActual});
-    if(!respuesta.ok) throw new Error(respuesta.error||respuesta.mensaje||'No se pudo enviar');
-    estadoModulacionActual='PENDIENTE';
-    actualizarEstadoEdicionModulacion();
-    mostrarMensaje('Modulación enviada a revisión.','exito');
-  }catch(e){ mostrarMensaje(e.message,'error'); }
-}
-
 /* =========================================================
    MENSAJES
 ========================================================= */
@@ -2110,6 +2087,30 @@ async function enviarRevisionModulacion(){
 
 const API_URL =
   'https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIHr9XP7SA81SoZZSxo4OoB5N7VaMLLklU9ym82vCwDQN/exec';
+
+
+// Flujo de revisión de Modulación
+function actualizarEstadoEdicionModulacion(){
+  const bloqueada = !['BORRADOR','OBSERVADO'].includes(estadoModulacionActual);
+  ['responsable','referencia','tagModulacion','buscarMaterial','filtroGrupo','archivoPlano','archivoEvidencia'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.disabled=bloqueada;
+  });
+  const guardar=document.getElementById('btnGuardar'); if(guardar) guardar.disabled=bloqueada;
+  const revision=document.getElementById('btnEnviarRevision');
+  if(revision){ revision.classList.toggle('oculto', !idBorradorActual || bloqueada); }
+  document.querySelectorAll('#tablaMateriales button,#tablaMateriales input,#tablaMateriales textarea,#resultadosMaterial button,#panelArchivosModulacion button').forEach(el=>el.disabled=bloqueada);
+}
+async function enviarRevisionModulacion(){
+  if(!idBorradorActual) return mostrarMensaje('Guarda primero la modulación.','error');
+  if(!confirm('¿Enviar esta modulación a revisión del residente? No podrás modificarla mientras esté pendiente.')) return;
+  try{
+    const respuesta=await enviarAPI({accion:'enviarRevisionModulacion',idBorrador:idBorradorActual});
+    if(!respuesta.ok) throw new Error(respuesta.error||respuesta.mensaje||'No se pudo enviar');
+    estadoModulacionActual='PENDIENTE';
+    actualizarEstadoEdicionModulacion();
+    mostrarMensaje('Modulación enviada a revisión.','exito');
+  }catch(e){ mostrarMensaje(e.message,'error'); }
+}
 
 
 /* =========================================================
