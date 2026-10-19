@@ -1255,6 +1255,30 @@ tbody tr:hover{
 }
 
 
+
+// Flujo de revisión de Modulación
+function actualizarEstadoEdicionModulacion(){
+  const bloqueada = !['BORRADOR','OBSERVADO'].includes(estadoModulacionActual);
+  ['responsable','referencia','tagModulacion','buscarMaterial','filtroGrupo','archivoPlano','archivoEvidencia'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.disabled=bloqueada;
+  });
+  const guardar=document.getElementById('btnGuardar'); if(guardar) guardar.disabled=bloqueada;
+  const revision=document.getElementById('btnEnviarRevision');
+  if(revision){ revision.classList.toggle('oculto', !idBorradorActual || bloqueada); }
+  document.querySelectorAll('#tablaMateriales button,#tablaMateriales input,#tablaMateriales textarea,#resultadosMaterial button,#panelArchivosModulacion button').forEach(el=>el.disabled=bloqueada);
+}
+async function enviarRevisionModulacion(){
+  if(!idBorradorActual) return mostrarMensaje('Guarda primero la modulación.','error');
+  if(!confirm('¿Enviar esta modulación a revisión del residente? No podrás modificarla mientras esté pendiente.')) return;
+  try{
+    const respuesta=await enviarAPI({accion:'enviarRevisionModulacion',idBorrador:idBorradorActual});
+    if(!respuesta.ok) throw new Error(respuesta.error||respuesta.mensaje||'No se pudo enviar');
+    estadoModulacionActual='PENDIENTE';
+    actualizarEstadoEdicionModulacion();
+    mostrarMensaje('Modulación enviada a revisión.','exito');
+  }catch(e){ mostrarMensaje(e.message,'error'); }
+}
+
 /* =========================================================
    MENSAJES
 ========================================================= */
@@ -1652,7 +1676,11 @@ tbody tr:hover{
           >
 
         </div>
-
+        <div class="campo completo">
+          <label for="tagModulacion">TAG del servicio *</label>
+          <input id="tagModulacion" type="text" placeholder="Ej.: TAG-C-001" autocomplete="off">
+          <small>Debe coincidir con el TAG registrado en Gestión de Andamios.</small>
+        </div>
 
       </div>
 
@@ -1976,6 +2004,8 @@ tbody tr:hover{
         </button>
 
 
+        <button id="btnEnviarRevision" type="button" class="btn btn-naranja oculto" onclick="enviarRevisionModulacion()">📨 Enviar a revisión</button>
+
         <button
           id="btnGuardar"
           type="button"
@@ -2091,6 +2121,7 @@ let catalogoMateriales = [];
 let materialesBorrador = [];
 
 let idBorradorActual = '';
+let estadoModulacionActual = 'BORRADOR';
 
 let fechaBorradorActual = '';
 
@@ -2830,6 +2861,9 @@ function nuevoBorrador(){
 
 
   idBorradorActual = '';
+  estadoModulacionActual = 'BORRADOR';
+  document.getElementById('tagModulacion').value = '';
+  actualizarEstadoEdicionModulacion();
   document.getElementById('panelArchivosModulacion').classList.add('oculto');
 
   fechaBorradorActual = '';
