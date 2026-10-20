@@ -1373,6 +1373,10 @@ let materialesFiltrados = [];
 
 let detalleAbierto = "";
 
+// Archivos de modulación consultados únicamente cuando se abre su detalle.
+const documentosPorModulacion = new Map();
+
+
 
 /* =========================================================
    INICIO
@@ -2159,6 +2163,58 @@ function alternarDetalle(
 
   renderizarModulaciones();
 
+  if (detalleAbierto === idBorrador) {
+    cargarDocumentosModulacion(idBorrador);
+  }
+
+}
+
+
+async function cargarDocumentosModulacion(idBorrador) {
+  const anterior = documentosPorModulacion.get(idBorrador);
+  if (anterior && (anterior.estado === 'cargando' || anterior.estado === 'listo')) return;
+  documentosPorModulacion.set(idBorrador, {estado:'cargando', archivos:[]});
+  if (detalleAbierto === idBorrador) renderizarModulaciones();
+  try {
+    const url = WEB_APP_URL + '?accion=listarArchivosModulacion&idBorrador=' +
+      encodeURIComponent(idBorrador) + '&t=' + Date.now();
+    const respuesta = await fetch(url, {cache:'no-store'});
+    if (!respuesta.ok) throw new Error('Error HTTP ' + respuesta.status);
+    const datos = await respuesta.json();
+    if (!datos.ok) throw new Error(datos.error || datos.mensaje || 'No se pudieron consultar los archivos.');
+    documentosPorModulacion.set(idBorrador, {
+      estado:'listo', archivos:Array.isArray(datos.archivos) ? datos.archivos : []
+    });
+  } catch(error) {
+    documentosPorModulacion.set(idBorrador, {estado:'error', mensaje:error.message || 'Error desconocido'});
+  }
+  if (detalleAbierto === idBorrador) renderizarModulaciones();
+}
+
+function renderizarDocumentacionModulacion(idBorrador) {
+  const datos = documentosPorModulacion.get(idBorrador);
+  if (!datos || datos.estado === 'cargando') {
+    return '<p style="margin:8px 0;color:#526579">Consultando archivos adjuntos...</p>';
+  }
+  if (datos.estado === 'error') {
+    return `<p style="color:#b42318">No se pudieron cargar los documentos: ${escaparHTML(datos.mensaje)}</p>
+      <button type="button" class="btn" onclick="reintentarDocumentosModulacion('${escaparAtributo(idBorrador)}')">Reintentar</button>`;
+  }
+  return ['PLANO','EVIDENCIA'].map(tipo => {
+    const archivo = datos.archivos.find(a => String(a.tipo || '').trim().toUpperCase() === tipo);
+    const etiqueta = tipo === 'PLANO' ? 'Plano de modulación' : 'Evidencia de armado';
+    const url = archivo ? String(archivo.url || '') : '';
+    const valido = /^https:\/\/(?:drive\.google\.com|docs\.google\.com)\//i.test(url);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 0;border-top:1px solid #e1e8ef">
+      <div><strong>${etiqueta}</strong><div style="font-size:12px;color:#526579;overflow-wrap:anywhere">${archivo ? escaparHTML(archivo.nombre || 'Archivo adjunto') : 'Sin archivo adjunto'}</div></div>
+      ${archivo && valido ? `<a class="btn btn-verde" href="${escaparHTML(url)}" target="_blank" rel="noopener noreferrer">Ver archivo</a>` : (archivo ? '<span>Enlace no disponible</span>' : '')}
+    </div>`;
+  }).join('');
+}
+
+function reintentarDocumentosModulacion(idBorrador) {
+  documentosPorModulacion.delete(idBorrador);
+  cargarDocumentosModulacion(idBorrador);
 }
 
 
@@ -2246,6 +2302,10 @@ function crearFilaDetalle(
             <div><strong>Estado:</strong> ${escaparHTML(estado)}</div>
             ${m.observacionRevision ? `<div><strong>Observación:</strong> ${escaparHTML(m.observacionRevision)}</div>` : ''}
             ${m.aprobadoPor ? `<div><strong>Aprobado por:</strong> ${escaparHTML(m.aprobadoPor)}</div>` : ''}
+            <div style="margin-top:12px;padding:10px;background:#f6f9fc;border-radius:8px">
+              <strong style="display:block;margin-bottom:8px">📎 Plano y evidencia de armado</strong>
+              ${renderizarDocumentacionModulacion(idBorrador)}
+            </div>
             ${estado === 'PENDIENTE' ? `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
               <button class="btn btn-verde" onclick="resolverModulacionUI('${escaparAtributo(idBorrador)}','APROBADO')">Aprobar</button>
               <button class="btn btn-naranja" onclick="resolverModulacionUI('${escaparAtributo(idBorrador)}','OBSERVADO')">Observar</button>
