@@ -2093,6 +2093,7 @@ function renderizarModulaciones(){
     >
       Excel
     </button>
+    ${String(item.estado || "BORRADOR").trim().toUpperCase() === "BORRADOR" ? `
     <button
   type="button"
   class="btn"
@@ -2108,6 +2109,7 @@ function renderizarModulaciones(){
 >
   Eliminar
 </button>
+    ` : ""}
 
   </div>
 
@@ -2847,6 +2849,12 @@ async function eliminarModulacion(
       "No se encontró la modulación."
     );
 
+    return;
+  }
+
+  // Doble comprobación en el navegador; el servidor también debe validar el estado.
+  if (String(modulacion.estado || "").trim().toUpperCase() !== "BORRADOR") {
+    alert("Solo se pueden eliminar modulaciones en estado BORRADOR.");
     return;
   }
 
