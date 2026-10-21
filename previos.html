@@ -1141,6 +1141,8 @@
         únicamente para consulta.
       </div>
 
+      <section id="avisoModulacionIntegrada" class="panel oculto" style="margin-bottom:20px;border-left:5px solid var(--verde);" aria-live="polite"></section>
+
       <section id="panelHistorial" class="panel-historial oculto">
 
         <div class="panel-historial-cabecera">
@@ -1382,6 +1384,9 @@
     const API_URL =
       'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
 
+    const API_MODULACION_URL =
+      'https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIHr9XP7SA81SoZZSxo4OoB5N7VaMLLklU9ym82vCwDQN/exec';
+
     let idServicioActual = '';
     let servicioActual = null;
     let catalogoMateriales = [];
@@ -1490,6 +1495,7 @@
             : [];
 
         determinarModoEdicion();
+        await vincularModulacionAprobadaPorTag_();
         mostrarServicio();
         cargarGrupos();
         configurarBuscador();
@@ -1512,6 +1518,99 @@
       }
     }
 
+
+    // Modulaciones aprobadas por TAG: mostrar todas y elegir por referencia.
+    // No modifica datos ya guardados de Previos.
+    let modulacionesDisponiblesPrevios = [];
+    let materialesDisponiblesModulacion = [];
+
+    async function vincularModulacionAprobadaPorTag_() {
+      const aviso = document.getElementById('avisoModulacionIntegrada');
+      if (modoSoloLectura || materialesPrevios.length > 0) return;
+      const tag = normalizarTexto(servicioActual?.tag || '').trim();
+      if (!tag) return;
+
+      try {
+        const respuesta = await fetch(`${API_MODULACION_URL}?accion=controlModulacion&t=${Date.now()}`);
+        if (!respuesta.ok) throw new Error('No responde el servicio de Modulación.');
+        const resultado = await respuesta.json();
+        if (!resultado.ok || !Array.isArray(resultado.modulaciones) ||
+            !Array.isArray(resultado.materiales)) {
+          throw new Error(resultado.error || resultado.mensaje || 'Respuesta de Modulación inválida.');
+        }
+
+        modulacionesDisponiblesPrevios = resultado.modulaciones.filter(mod =>
+          normalizarTexto(mod.tag || '').trim() === tag &&
+          normalizarTexto(mod.estado || '').trim() === 'APROBADO'
+        ).sort((a, b) => String(b.idBorrador || '').localeCompare(
+          String(a.idBorrador || ''), 'es', { numeric: true }));
+        materialesDisponiblesModulacion = resultado.materiales;
+
+        if (!modulacionesDisponiblesPrevios.length) {
+          aviso.innerHTML = '<strong>Modulación:</strong> No hay modulaciones aprobadas para este TAG. Puedes preparar materiales manualmente.';
+          aviso.classList.remove('oculto');
+          return;
+        }
+
+        aviso.innerHTML = `<h2 style="margin:0 0 8px;">Modulaciones aprobadas del TAG ${escaparHTML(tag)}</h2>
+          <p style="margin:0 0 12px;color:var(--gris);font-size:13px;">${modulacionesDisponiblesPrevios.length} referencia(s) disponible(s). Elige la modulación que corresponde al trabajo. Los materiales se pueden ajustar en Previos.</p>
+          <div style="display:grid;gap:10px;">${modulacionesDisponiblesPrevios.map(mod => {
+            const id = String(mod.idBorrador || '').trim();
+            const n = materialesDisponiblesModulacion.filter(m => String(m.idBorrador || '').trim() === id).length;
+            const referencia = String(mod.referencia || mod.servicioReferencia || mod.ot || mod.descripcion || '').trim();
+            const responsable = String(mod.responsable || mod.supervisor || '').trim();
+            return `<div style="border:1px solid var(--borde);border-radius:10px;padding:12px;background:#f7f9fb;">
+              <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+                <div><strong>${escaparHTML(id)}</strong> <span style="color:var(--verde);font-size:12px;font-weight:bold;">APROBADO</span>
+                  <div style="font-size:13px;margin-top:5px;">Referencia: ${escaparHTML(referencia || id)}</div>
+                  ${responsable ? `<div style="font-size:12px;color:var(--gris);">Responsable: ${escaparHTML(responsable)}</div>` : ''}
+                  <div style="font-size:12px;color:var(--gris);">${n} material(es) registrados</div></div>
+                <button type="button" class="boton-copiar" style="width:auto;margin:0;" data-id-modulacion="${escaparHTML(id)}" onclick="cargarModulacionSeleccionada_(this.dataset.idModulacion)">Cargar esta modulación</button>
+              </div></div>`;
+          }).join('')}</div>
+          <div id="modulacionSeleccionadaPrevios" style="margin-top:10px;font-size:13px;"></div>`;
+        aviso.classList.remove('oculto');
+      } catch (error) {
+        console.warn('Integración Modulación → Previos:', error);
+        aviso.textContent = 'No se pudo consultar las modulaciones aprobadas: ' + error.message +
+          '. Previos sigue disponible para alistamiento manual.';
+        aviso.classList.remove('oculto');
+      }
+    }
+
+    function cargarModulacionSeleccionada_(idBorrador) {
+      if (modoSoloLectura) return;
+      const seleccionada = modulacionesDisponiblesPrevios.find(m =>
+        String(m.idBorrador || '').trim() === String(idBorrador || '').trim());
+      if (!seleccionada) return mostrarMensaje('No se encontró la modulación.', 'error');
+      const detalles = materialesDisponiblesModulacion.filter(m =>
+        String(m.idBorrador || '').trim() === String(idBorrador || '').trim());
+      const mapa = new Map();
+      for (const m of detalles) {
+        const cantidad = Number(m.cantidad);
+        if (!Number.isInteger(cantidad) || cantidad <= 0) continue;
+        const item = {
+          grupo: String(m.grupo || ''),
+          subgrupo: String(m.subgrupo || m.descripcion || ''),
+          codigo: String(m.codigo || ''),
+          cantidad,
+          observacion: String(m.observacion || '')
+        };
+        const clave = claveMaterial(item);
+        if (mapa.has(clave)) mapa.get(clave).cantidad += cantidad;
+        else mapa.set(clave, item);
+      }
+      if (!mapa.size) return mostrarMensaje('Esta modulación no tiene cantidades válidas.', 'error');
+      if (materialesPrevios.length && !window.confirm(
+          '¿Reemplazar la lista que estás preparando con los materiales de ' + idBorrador + '?')) return;
+
+      materialesPrevios = [...mapa.values()];
+      ordenarMateriales();
+      renderizarMateriales();
+      document.getElementById('modulacionSeleccionadaPrevios').textContent =
+        `✓ Referencia ${idBorrador} cargada: ${materialesPrevios.length} materiales. Ajusta las cantidades y finaliza Previos para guardar.`;
+      mostrarMensaje(`Materiales de ${idBorrador} cargados para preparación.`, 'exito');
+    }
 
     function determinarModoEdicion() {
       const estadosEditables = [
