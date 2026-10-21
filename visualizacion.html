@@ -906,7 +906,7 @@ document.addEventListener(
     const rolGuardado =
       sessionStorage.getItem(CLAVE_ROL);
 
-    if(rolGuardado && sessionStorage.getItem(CLAVE_TOKEN)){
+    if(rolGuardado && localStorage.getItem(CLAVE_TOKEN)){
       aplicarSesion(rolGuardado);
     }else{
       mostrarLogin();
@@ -1089,7 +1089,7 @@ async function iniciarSesion(){
       throw new Error('El servidor de acceso todavía no genera sesiones. Actualiza primero el Apps Script de acceso.');
     }
     sessionStorage.setItem(CLAVE_ROL, rol);
-    sessionStorage.setItem(CLAVE_TOKEN, resultado.tokenSesion);
+    localStorage.setItem(CLAVE_TOKEN, resultado.tokenSesion);
 
     aplicarSesion(rol);
 
@@ -1100,7 +1100,7 @@ async function iniciarSesion(){
     console.error(error);
 
     sessionStorage.removeItem(CLAVE_ROL);
-    sessionStorage.removeItem(CLAVE_TOKEN);
+    localStorage.removeItem(CLAVE_TOKEN);
 
     bloquearTodosLosModulos();
 
@@ -1191,7 +1191,7 @@ function aplicarSesion(rol){
 function cerrarSesion(){
 
   sessionStorage.removeItem(CLAVE_ROL);
-    sessionStorage.removeItem(CLAVE_TOKEN);
+    localStorage.removeItem(CLAVE_TOKEN);
 
   bloquearTodosLosModulos();
 
