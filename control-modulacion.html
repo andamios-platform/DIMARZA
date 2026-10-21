@@ -3912,7 +3912,7 @@ async function resolverModulacionUI(idBorrador, decision) {
   try {
     const respuesta = await fetch(WEB_APP_URL, {
       method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({accion:decision === 'APROBADO' ? 'aprobarModulacion':'observarModulacion', idBorrador, observacion, tokenSesion:sessionStorage.getItem('dimarzaTokenVisualizacion') || ''})
+      body:JSON.stringify({accion:decision === 'APROBADO' ? 'aprobarModulacion':'observarModulacion', idBorrador, observacion, tokenSesion:localStorage.getItem('dimarzaTokenVisualizacion') || ''})
     });
     const resultado = await respuesta.json();
     if (!resultado.ok) throw new Error(resultado.error || resultado.mensaje || 'No se pudo registrar la revisión.');
