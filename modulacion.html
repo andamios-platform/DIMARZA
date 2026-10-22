@@ -1657,10 +1657,10 @@ tbody tr:hover{
           >
 
         </div>
-        <div class="campo completo">
+        <div class="campo">
           <label for="tagModulacion">TAG del servicio *</label>
           <input id="tagModulacion" type="text" placeholder="Ej.: TAG-C-001" autocomplete="off">
-          <small>Para importar a Previos, el TAG deberá coincidir con el del servicio en Gestión de Andamios.</small>
+          <small>Debe coincidir con el TAG registrado en Gestión de Andamios para importar a Previos.</small>
         </div>
 
       </div>
@@ -2158,7 +2158,12 @@ async function iniciarPagina(){
 
     await Promise.all([
       cargarCatalogo(),
-      cargarResponsables()
+      cargarResponsables(),
+      cargarMinasGestion().catch(error => {
+        const selector = document.getElementById('minaModulacion');
+        selector.replaceChildren(new Option('Error al cargar minas', ''));
+        mostrarMensaje('No se pudieron cargar las minas: ' + error.message, 'error', 9000);
+      })
     ]);
 
   }catch(error){
