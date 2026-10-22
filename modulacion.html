@@ -1622,6 +1622,10 @@ tbody tr:hover{
 
       <div class="form-grid">
 
+      <div class="campo">
+        <label for="minaModulacion">Mina *</label>
+        <select id="minaModulacion"><option value="">Cargando minas...</option></select>
+      </div>
 
       <div class="campo">
       
@@ -2031,6 +2035,12 @@ tbody tr:hover{
       </div>
 
 
+      <div class="campo" style="margin-bottom:16px;max-width:360px">
+        <label for="filtroMinaBorradores">Filtrar por mina</label>
+        <select id="filtroMinaBorradores" onchange="filtrarBorradoresPorMina()">
+          <option value="">Todas las minas</option>
+        </select>
+      </div>
       <div
         id="cargandoBorradores"
         class="cargando"
@@ -2092,7 +2102,7 @@ const API_URL =
 // Flujo de revisión de Modulación
 function actualizarEstadoEdicionModulacion(){
   const bloqueada = !['BORRADOR','OBSERVADO'].includes(estadoModulacionActual);
-  ['responsable','referencia','tagModulacion','buscarMaterial','filtroGrupo','archivoPlano','archivoEvidencia'].forEach(id=>{
+  ['responsable','referencia','tagModulacion','minaModulacion','buscarMaterial','filtroGrupo','archivoPlano','archivoEvidencia'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.disabled=bloqueada;
   });
   const guardar=document.getElementById('btnGuardar'); if(guardar) guardar.disabled=bloqueada;
@@ -2128,6 +2138,8 @@ let fechaBorradorActual = '';
 
 let catalogoCargado = false;
 let responsablesModulacion = [];
+let borradoresMinaCache = [];
+let minasModulacion = [];
 
 
 /* =========================================================
@@ -2767,6 +2779,50 @@ async function cargarResponsables(){
    NAVEGACIÓN
 ========================================================= */
 
+// Minas activas: misma fuente de CONFIGURACION usada en Gestion de Andamios.
+const API_GESTION_MINAS =
+  'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
+async function cargarMinasGestion(){
+ const d=await consultarAPI(API_GESTION_MINAS+'?accion=configuracion');
+ if(!d.ok)throw new Error(d.mensaje||'No se pudieron consultar las minas de Gestión');
+ const c=d.configuracion||{};
+ const minas=Array.isArray(c.minas)?c.minas:[];
+ minasModulacion=[...new Set(minas.map(x=>String(x||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+ if(!minasModulacion.length)throw new Error('Gestión no devolvió minas activas.');
+ const sel=document.getElementById('minaModulacion');
+ sel.replaceChildren(new Option('Seleccione mina',''));
+ minasModulacion.forEach(m=>sel.add(new Option(m,m)));
+}
+function filtrarBorradoresPorMina(){
+ const filtro=document.getElementById('filtroMinaBorradores').value;
+ const filas=borradoresMinaCache.filter(b=>!filtro||((b.mina||'')===filtro)||(filtro==='__SIN_MINA__'&&!b.mina));
+ renderizarListaMinas(filas);
+}
+function renderizarListaMinas(borradores){
+ const lista=document.getElementById('listaBorradores');
+ const sin=document.getElementById('sinBorradores');
+ sin.classList.toggle('oculto',borradores.length>0);
+ if(!borradores.length){sin.textContent='No hay modulaciones para la mina seleccionada.';lista.innerHTML='';return;}
+ // Conserva el renderizado original, que ahora vive en este método.
+ lista.innerHTML=borradores.map(borrador=>`
+   <article class="borrador-card">
+    <div class="borrador-cabecera"><div>
+    <h3 class="borrador-id">${escaparHTML(borrador.idBorrador)}</h3>
+    <div class="borrador-referencia">${escaparHTML(borrador.referencia||'Sin referencia')}</div>
+    </div><span class="estado-borrador">${escaparHTML(borrador.estado||'BORRADOR')}</span></div>
+    <div class="borrador-datos">
+    ${datoBorrador('Mina',borrador.mina||'Sin mina asignada')}
+    ${datoBorrador('Responsable',borrador.responsable||'-')}
+    ${datoBorrador('Materiales',borrador.cantidadMateriales)}
+    ${datoBorrador('Piezas',formatearNumero(borrador.totalPiezas))}
+    ${datoBorrador('Peso',formatearNumero(borrador.pesoTotal)+' kg')}
+    ${datoBorrador('Fecha',borrador.fecha||'-')}
+    ${datoBorrador('Última modificación',borrador.ultimaModificacion||'-')}
+    </div><div class="borrador-acciones">
+    <button type="button" class="btn btn-primario" onclick="abrirBorrador('${escaparAtributo(borrador.idBorrador)}')">Abrir</button>
+    <button type="button" class="btn btn-peligro" ${!['BORRADOR','OBSERVADO'].includes(borrador.estado)?'disabled title="No se puede eliminar una modulación en revisión o aprobada"':''} onclick="eliminarBorrador('${escaparAtributo(borrador.idBorrador)}')">Eliminar</button>
+    </div></article>`).join('');
+}
 function volverMenuPrincipal(){
 
   window.location.href =
@@ -2864,6 +2920,7 @@ function nuevoBorrador(){
   idBorradorActual = '';
   estadoModulacionActual = 'BORRADOR';
   document.getElementById('tagModulacion').value = '';
+  document.getElementById('minaModulacion').value = '';
   actualizarEstadoEdicionModulacion();
   document.getElementById('panelArchivosModulacion').classList.add('oculto');
 
@@ -3703,6 +3760,8 @@ async function guardarBorrador(){
       .trim();
 
 
+  const mina=document.getElementById('minaModulacion').value.trim();
+  if(!mina){mostrarMensaje('Selecciona la mina del trabajo.','error');return;}
   if(!responsable){
 
     mostrarMensaje(
@@ -3776,6 +3835,8 @@ async function guardarBorrador(){
         responsable,
 
         referencia,
+
+        mina,
 
         tag: document.getElementById('tagModulacion').value.trim().toUpperCase(),
 
@@ -3958,142 +4019,15 @@ async function abrirListaBorradores(){
     }
 
 
-    lista.innerHTML =
-      borradores
-        .map(
-          borrador => `
-
-            <article class="borrador-card">
-
-
-              <div class="borrador-cabecera">
-
-                <div>
-
-                  <h3 class="borrador-id">
-
-                    ${
-                      escaparHTML(
-                        borrador.idBorrador
-                      )
-                    }
-
-                  </h3>
-
-
-                  <div class="borrador-referencia">
-
-                    ${
-                      escaparHTML(
-                        borrador.referencia ||
-                        'Sin referencia'
-                      )
-                    }
-
-                  </div>
-
-                </div>
-
-
-                <span class="estado-borrador">
-
-                  ${
-                    escaparHTML(
-                      borrador.estado ||
-                      'BORRADOR'
-                    )
-                  }
-
-                </span>
-
-              </div>
-
-
-              <div class="borrador-datos">
-
-
-                ${datoBorrador(
-                  'Responsable',
-                  borrador.responsable ||
-                  '-'
-                )}
-
-
-                ${datoBorrador(
-                  'Materiales',
-                  borrador.cantidadMateriales
-                )}
-
-
-                ${datoBorrador(
-                  'Piezas',
-                  formatearNumero(
-                    borrador.totalPiezas
-                  )
-                )}
-
-
-                ${datoBorrador(
-                  'Peso',
-                  `${formatearNumero(
-                    borrador.pesoTotal
-                  )} kg`
-                )}
-
-
-                ${datoBorrador(
-                  'Fecha',
-                  borrador.fecha ||
-                  '-'
-                )}
-
-
-                ${datoBorrador(
-                  'Última modificación',
-                  borrador.ultimaModificacion ||
-                  '-'
-                )}
-
-
-              </div>
-
-
-              <div class="borrador-acciones">
-
-                <button
-                  type="button"
-                  class="btn btn-primario"
-                  onclick="abrirBorrador(
-                    '${escaparAtributo(
-                      borrador.idBorrador
-                    )}'
-                  )"
-                >
-                  Abrir
-                </button>
-
-
-                <button
-                  type="button"
-                  class="btn btn-peligro"
-                  onclick="eliminarBorrador(
-                    '${escaparAtributo(
-                      borrador.idBorrador
-                    )}'
-                  )"
-                >
-                  Eliminar
-                </button>
-
-              </div>
-
-
-            </article>
-
-          `
-        )
-        .join('');
-
+    borradoresMinaCache=borradores;
+    const filtro=document.getElementById('filtroMinaBorradores');
+    const anterior=filtro.value;
+    const opciones=[...new Set(borradores.map(x=>x.mina).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+    filtro.replaceChildren(new Option('Todas las minas',''));
+    opciones.forEach(m=>filtro.add(new Option(m,m)));
+    if(borradores.some(x=>!x.mina))filtro.add(new Option('Sin mina asignada','__SIN_MINA__'));
+    filtro.value=Array.from(filtro.options).some(x=>x.value===anterior)?anterior:'';
+    filtrarBorradoresPorMina();
 
   }catch(error){
 
@@ -4192,6 +4126,9 @@ async function abrirBorrador(
     const borrador =
       datos.borrador;
     document.getElementById('tagModulacion').value = borrador.tag || '';
+    const selectMina=document.getElementById('minaModulacion');
+    if(borrador.mina && !Array.from(selectMina.options).some(o=>o.value===borrador.mina))selectMina.add(new Option(borrador.mina,borrador.mina));
+    selectMina.value=borrador.mina||'';
     estadoModulacionActual = borrador.estado || 'BORRADOR';
     actualizarEstadoEdicionModulacion();
 
