@@ -2784,19 +2784,54 @@ async function cargarResponsables(){
    NAVEGACIÓN
 ========================================================= */
 
-// Minas activas: misma fuente de CONFIGURACION usada en Gestion de Andamios.
-const API_GESTION_MINAS =
-  'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
-async function cargarMinasGestion(){
- const d=await consultarAPI(API_GESTION_MINAS+'?accion=configuracion');
- if(!d.ok)throw new Error(d.mensaje||'No se pudieron consultar las minas de Gestión');
- const c=d.configuracion||{};
- const minas=Array.isArray(c.minas)?c.minas:[];
- minasModulacion=[...new Set(minas.map(x=>String(x||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
- if(!minasModulacion.length)throw new Error('Gestión no devolvió minas activas.');
- const sel=document.getElementById('minaModulacion');
- sel.replaceChildren(new Option('Seleccione mina',''));
- minasModulacion.forEach(m=>sel.add(new Option(m,m)));
+// Mismo catálogo que contratacion-andamios.html, organizado por países.
+const MINAS_CONTRATACION = {
+  "Perú": [
+    "CERRO VERDE",
+    "QUELLAVECO",
+    "ANTAPACCAY",
+    "LAS BAMBAS",
+    "ANTAMINA",
+    "CHINALCO - TOROMOCHO",
+    "CONSTANCIA",
+    "MINA JUSTA",
+    "TOQUEPALA",
+    "CUAJONE",
+    "YANACOCHA",
+    "SAN RAFAEL",
+    "PUCAMARCA",
+    "SHOUGANG - MARCONA"
+  ],
+  "Chile": [
+    "CENTINELA",
+    "SIERRA GORDA",
+    "ESCONDIDA",
+    "COLLAHUASI",
+    "CHUQUICAMATA",
+    "RADOMIRO TOMIC",
+    "MINISTRO HALES",
+    "SPENCE",
+    "LOS PELAMBRES",
+    "LOS BRONCES",
+    "EL TENIENTE"
+  ]
+};
+function llenarSelectorMinas(select, primeraEtiqueta, incluirSinMina) {
+  const valorActual = select.value;
+  select.replaceChildren(new Option(primeraEtiqueta, ''));
+  Object.entries(MINAS_CONTRATACION).forEach(([pais, minas]) => {
+    const grupo = document.createElement('optgroup');
+    grupo.label = pais;
+    minas.forEach(mina => grupo.appendChild(new Option(mina, mina)));
+    select.appendChild(grupo);
+  });
+  select.add(new Option('OTRA', 'OTRA'));
+  if (incluirSinMina) select.add(new Option('Sin mina asignada', '__SIN_MINA__'));
+  if (Array.from(select.options).some(op => op.value === valorActual)) select.value = valorActual;
+}
+async function cargarMinasGestion() {
+  minasModulacion = [...Object.values(MINAS_CONTRATACION).flat(), 'OTRA'];
+  llenarSelectorMinas(document.getElementById('minaModulacion'), 'Seleccione mina', false);
 }
 function filtrarBorradoresPorMina(){
  const filtro=document.getElementById('filtroMinaBorradores').value;
@@ -4027,10 +4062,11 @@ async function abrirListaBorradores(){
     borradoresMinaCache=borradores;
     const filtro=document.getElementById('filtroMinaBorradores');
     const anterior=filtro.value;
-    const opciones=[...new Set(borradores.map(x=>x.mina).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
-    filtro.replaceChildren(new Option('Todas las minas',''));
-    opciones.forEach(m=>filtro.add(new Option(m,m)));
-    if(borradores.some(x=>!x.mina))filtro.add(new Option('Sin mina asignada','__SIN_MINA__'));
+    llenarSelectorMinas(filtro, 'Todas las minas', true);
+    // Conserva valores históricos que no coincidan con el catálogo actual.
+    [...new Set(borradores.map(x => x.mina).filter(Boolean))].forEach(mina => {
+      if (!Array.from(filtro.options).some(o => o.value === mina)) filtro.add(new Option(mina, mina));
+    });
     filtro.value=Array.from(filtro.options).some(x=>x.value===anterior)?anterior:'';
     filtrarBorradoresPorMina();
 
