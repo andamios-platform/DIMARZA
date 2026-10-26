@@ -929,6 +929,8 @@ tbody tr:hover{
       </div>
 
 
+      <div class="campo"><label for="filtroMina">Mina</label><select id="filtroMina" onchange="aplicarFiltros()"><option value="">Todas las minas</option></select></div>
+
       <div class="campo">
 
         <label>
@@ -1555,6 +1557,12 @@ function cargarFiltros(){
   );
 
 
+  const selectMina = document.getElementById("filtroMina");
+  const anteriorMina=selectMina.value;
+  selectMina.replaceChildren(new Option("Todas las minas", ""));
+  [...new Set(modulaciones.map(x=>String(x.mina||"").trim()).filter(Boolean))].sort().forEach(x=>selectMina.add(new Option(x,x)));
+  selectMina.add(new Option("Sin mina asignada","__SIN_MINA__"));
+  if([...selectMina.options].some(x=>x.value===anteriorMina))selectMina.value=anteriorMina;
   const selectEstado =
     document.getElementById(
       "filtroEstado"
@@ -1618,6 +1626,7 @@ function aplicarFiltros(){
     );
 
 
+  const minaFiltro=document.getElementById("filtroMina").value;
   const estado =
     normalizar(
       document
@@ -1676,6 +1685,8 @@ function aplicarFiltros(){
         }
 
 
+        const minaItem=String(item.mina||"").trim();
+        if(minaFiltro==="__SIN_MINA__" ? Boolean(minaItem) : (minaFiltro && minaFiltro!==minaItem))return false;
         if(
           estado &&
           normalizar(
@@ -1748,6 +1759,7 @@ function aplicarFiltros(){
 ========================================================= */
 
 function limpiarFiltros(){
+  document.getElementById("filtroMina").value="";
 
   document
     .getElementById(
@@ -2097,7 +2109,7 @@ function renderizarModulaciones(){
     >
       Excel
     </button>
-    ${String(item.estado || "BORRADOR").trim().toUpperCase() === "BORRADOR" ? `
+    ${`
     <button
   type="button"
   class="btn"
@@ -2113,7 +2125,7 @@ function renderizarModulaciones(){
 >
   Eliminar
 </button>
-    ` : ""}
+    `}
 
   </div>
 
@@ -2912,11 +2924,6 @@ async function eliminarModulacion(
     return;
   }
 
-  // Doble comprobación en el navegador; el servidor también debe validar el estado.
-  if (String(modulacion.estado || "").trim().toUpperCase() !== "BORRADOR") {
-    alert("Solo se pueden eliminar modulaciones en estado BORRADOR.");
-    return;
-  }
 
 
   const confirmar =
@@ -2962,10 +2969,11 @@ async function eliminarModulacion(
             JSON.stringify({
 
               accion:
-                "eliminarBorradorModulacion",
+                "eliminarModulacionControl",
 
               idBorrador:
-                idBorrador
+                idBorrador,
+              tokenSesion:localStorage.getItem("dimarzaTokenVisualizacion")||""
 
             })
         }
