@@ -1620,9 +1620,21 @@ tbody tr:hover{
       </p>
 
 
-      <div class="form-grid">
+       <div class="form-grid">
 
-      <div class="campo">
+       <div class="campo">
+         <label for="marcaModulacion">Marca del andamio *</label>
+         <select id="marcaModulacion" onchange="cambiarMarcaModulacion()">
+           <option value="ULMA">ULMA</option>
+           <option value="LAYHER">LAYHER</option>
+         </select>
+         <small>Solo se permite una marca por modulación.</small>
+       </div>
+       <div class="campo">
+         <label>Catálogo seleccionado</label>
+         <input id="catalogoMarcaDescripcion" value="ULMA" readonly>
+       </div>
+       <div class="campo">
         <label for="minaModulacion">Mina *</label>
         <select id="minaModulacion"><option value="">Cargando minas...</option></select>
       </div>
@@ -2102,9 +2114,10 @@ const API_URL =
 // Flujo de revisión de Modulación
 function actualizarEstadoEdicionModulacion(){
   const bloqueada = !['BORRADOR','OBSERVADO'].includes(estadoModulacionActual);
-  ['responsable','referencia','tagModulacion','minaModulacion','buscarMaterial','filtroGrupo','archivoPlano','archivoEvidencia'].forEach(id=>{
+  ['responsable','referencia','tagModulacion','minaModulacion','marcaModulacion','buscarMaterial','filtroGrupo','archivoPlano','archivoEvidencia'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.disabled=bloqueada;
   });
+  document.getElementById('marcaModulacion').disabled = bloqueada || !!idBorradorActual;
   const guardar=document.getElementById('btnGuardar'); if(guardar) guardar.disabled=bloqueada;
   const revision=document.getElementById('btnEnviarRevision');
   if(revision){ revision.classList.toggle('oculto', !idBorradorActual || bloqueada); }
@@ -2137,6 +2150,8 @@ let estadoModulacionActual = 'BORRADOR';
 let fechaBorradorActual = '';
 
 let catalogoCargado = false;
+let marcaModulacionActual = "ULMA";
+let secuenciaCargaMarca = 0;
 let responsablesModulacion = [];
 let borradoresMinaCache = [];
 let minasModulacion = [];
@@ -2386,11 +2401,31 @@ async function enviarAPI(
    CATÁLOGO
 ========================================================= */
 
+async function cambiarMarcaModulacion(){
+  const selector=document.getElementById('marcaModulacion');
+  const nuevaMarca=selector.value;
+  if(idBorradorActual){selector.value=marcaModulacionActual;return;}
+  if(nuevaMarca===marcaModulacionActual)return;
+  if(materialesBorrador.length && !confirm('Cambiar de marca eliminará los materiales agregados. ¿Continuar?')){
+    selector.value=marcaModulacionActual;return;
+  }
+  marcaModulacionActual=nuevaMarca;
+  materialesBorrador=[];
+  renderizarMateriales();
+  limpiarBusquedaMaterial();
+  document.getElementById('filtroGrupo').value='';
+  document.getElementById('catalogoMarcaDescripcion').value=nuevaMarca;
+  try {await cargarCatalogo(); mostrarMensaje('Catálogo '+nuevaMarca+' cargado.','exito');}
+  catch(e){mostrarMensaje(e.message,'error');}
+}
 async function cargarCatalogo(){
+  const marcaSolicitada=marcaModulacionActual;
+  const secuencia=++secuenciaCargaMarca;
+  catalogoCargado=false;
 
   const datos =
     await consultarAPI(
-      `${API_URL}?accion=catalogoModulacion`
+      `${API_URL}?accion=catalogoModulacion&marca=${encodeURIComponent(marcaModulacionActual)}`
     );
 
 
@@ -2405,6 +2440,7 @@ async function cargarCatalogo(){
   }
 
 
+  if(secuencia!==secuenciaCargaMarca || marcaSolicitada!==marcaModulacionActual)return;
   catalogoMateriales =
     Array.isArray(
       datos.materiales
@@ -2852,6 +2888,7 @@ function renderizarListaMinas(borradores){
     </div><span class="estado-borrador">${escaparHTML(borrador.estado||'BORRADOR')}</span></div>
     <div class="borrador-datos">
     ${datoBorrador('Mina',borrador.mina||'Sin mina asignada')}
+     ${datoBorrador('Marca',borrador.marca||'ULMA')}
     ${datoBorrador('Responsable',borrador.responsable||'-')}
     ${datoBorrador('Materiales',borrador.cantidadMateriales)}
     ${datoBorrador('Piezas',formatearNumero(borrador.totalPiezas))}
@@ -2959,8 +2996,13 @@ function nuevoBorrador(){
 
   idBorradorActual = '';
   estadoModulacionActual = 'BORRADOR';
+  document.getElementById('marcaModulacion').disabled=false;
   document.getElementById('tagModulacion').value = '';
   document.getElementById('minaModulacion').value = '';
+  marcaModulacionActual='ULMA';
+  document.getElementById('marcaModulacion').value='ULMA';
+  document.getElementById('catalogoMarcaDescripcion').value='ULMA';
+  cargarCatalogo().catch(e=>mostrarMensaje(e.message,'error'));
   actualizarEstadoEdicionModulacion();
   document.getElementById('panelArchivosModulacion').classList.add('oculto');
 
@@ -3800,6 +3842,7 @@ async function guardarBorrador(){
       .trim();
 
 
+  if(!catalogoCargado){mostrarMensaje("Espera a que termine de cargar el catálogo.","error");return;}
   const mina=document.getElementById('minaModulacion').value.trim();
   if(!mina){mostrarMensaje('Selecciona la mina del trabajo.','error');return;}
   if(!responsable){
@@ -3877,6 +3920,7 @@ async function guardarBorrador(){
         referencia,
 
         mina,
+        marca: marcaModulacionActual,
 
         tag: document.getElementById('tagModulacion').value.trim().toUpperCase(),
 
@@ -4165,7 +4209,11 @@ async function abrirBorrador(
 
 
     const borrador =
-      datos.borrador;
+       datos.borrador;
+    marcaModulacionActual=borrador.marca||'ULMA';
+    document.getElementById('marcaModulacion').value=marcaModulacionActual;
+    document.getElementById('catalogoMarcaDescripcion').value=marcaModulacionActual;
+    await cargarCatalogo();
     document.getElementById('tagModulacion').value = borrador.tag || '';
     const selectMina=document.getElementById('minaModulacion');
     if(borrador.mina && !Array.from(selectMina.options).some(o=>o.value===borrador.mina))selectMina.add(new Option(borrador.mina,borrador.mina));
@@ -4710,6 +4758,7 @@ async function compartirWhatsApp(){
         '',
         `ID: ${datos.idBorrador}`,
         `Referencia: ${datos.referencia}`,
+        `Marca: ${marcaModulacionActual}`,
         `Peso total: ${peso} kg`,
         '',
         '📄 PDF:',
@@ -4972,6 +5021,7 @@ function imprimirModulacion(){
 
       <div class="info">
 
+        <div><strong>Marca:</strong> ${escaparHTML(marcaModulacionActual)}</div>
         <div>
           <strong>Responsable:</strong>
           ${escaparHTML(responsable)}
