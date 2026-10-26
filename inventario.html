@@ -288,6 +288,13 @@
       <h3>Paso 1: Selecciona origen, destino y responsable</h3>
 
       <div class="grid">
+        <div class="full">
+          <label for="marcaPaso1">Marca del andamio *</label>
+          <select id="marcaPaso1" onchange="cambiarMarcaInventario()" required>
+            <option value="ULMA">ULMA</option>
+            <option value="LAYHER">LAYHER</option>
+          </select>
+        </div>
         <div>
           <label>Ubicación</label>
           <select id="origenPaso1">
@@ -343,6 +350,7 @@
       <h3>Paso 2: Completa los datos generales</h3>
 
       <div class="resumen">
+        <div><strong>Marca:</strong> <span id="resumenMarca"></span></div>
         <div><strong>Origen:</strong> <span id="resumenOrigen"></span></div>
         <div><strong>Destino:</strong> <span id="resumenDestino"></span></div>
         <div><strong>Responsable:</strong> <span id="resumenResponsable"></span></div>
@@ -391,6 +399,7 @@
       <h3>Paso 3: Ítems del movimiento</h3>
 
       <div class="resumen">
+        <div><strong>Marca:</strong> <span id="resumenMarca3"></span></div>
         <div><strong>Origen:</strong> <span id="resumenOrigen3"></span></div>
         <div><strong>Destino:</strong> <span id="resumenDestino3"></span></div>
         <div><strong>Responsable:</strong> <span id="resumenResponsable3"></span></div>
@@ -440,14 +449,42 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbzCpKxltI72KxV8A4igwkxeIHr9XP7SA81SoZZSxo4OoB5N7VaMLLklU9ym82vCwDQN/exec';
     let mapaGrupos = {};
     let mapaResponsables = {};
+    let gruposCargados = false;
+    let solicitudGrupos = 0;
+    let registrando = false;
 
     async function cargarMapaGrupos() {
+      const marca = document.getElementById('marcaPaso1').value;
+      const solicitud = ++solicitudGrupos;
+      gruposCargados = false;
+      mapaGrupos = {};
+      const mensaje = document.getElementById('mensaje');
+      mensaje.textContent = 'Cargando materiales de ' + marca + '...';
       try {
-        const respuesta = await fetch(API_URL + '?accion=grupos');
-        mapaGrupos = await respuesta.json();
+        const respuesta = await fetch(API_URL + '?accion=grupos&marca=' + encodeURIComponent(marca), {cache: 'no-store'});
+        if (!respuesta.ok) throw new Error('HTTP ' + respuesta.status);
+        const resultado = await respuesta.json();
+        if (solicitud !== solicitudGrupos) return;
+        if (resultado.ok === false) throw new Error(resultado.error || 'Error consultando catálogo');
+        if (!resultado || typeof resultado !== 'object' || !Object.keys(resultado).length) {
+          throw new Error('No se encontraron grupos para ' + marca + '. Comprueba las hojas AUX correspondientes.');
+        }
+        mapaGrupos = resultado;
+        gruposCargados = true;
+        mensaje.textContent = '';
       } catch (error) {
-        document.getElementById('mensaje').textContent = 'Error cargando grupos: ' + error.message;
+        if (solicitud !== solicitudGrupos) return;
+        gruposCargados = false;
+        mensaje.textContent = 'Error cargando grupos de ' + marca + ': ' + error.message;
       }
+    }
+
+    function cambiarMarcaInventario() {
+      // Impedir que se mezclen productos de marcas diferentes en el mismo movimiento.
+      document.getElementById('tbodyItems').innerHTML = '';
+      document.getElementById('resumenMarca').textContent = document.getElementById('marcaPaso1').value;
+      document.getElementById('resumenMarca3').textContent = document.getElementById('marcaPaso1').value;
+      cargarMapaGrupos();
     }
 
     async function cargarResponsablesInventario() {
@@ -571,6 +608,7 @@ function actualizarResponsables() {
         return;
       }
 
+      document.getElementById('resumenMarca').textContent = document.getElementById('marcaPaso1').value;
       document.getElementById('resumenOrigen').textContent = origen;
       document.getElementById('resumenDestino').textContent = destino;
       document.getElementById('resumenResponsable').textContent = responsable;
@@ -605,6 +643,8 @@ function actualizarResponsables() {
         return;
       }
 
+      if (!gruposCargados) { mensaje.textContent = 'El catálogo de materiales aún no está disponible.'; return; }
+      document.getElementById('resumenMarca3').textContent = document.getElementById('marcaPaso1').value;
       document.getElementById('resumenOrigen3').textContent = document.getElementById('origenPaso1').value;
       document.getElementById('resumenDestino3').textContent = document.getElementById('destinoPaso1').value;
       document.getElementById('resumenResponsable3').textContent = document.getElementById('responsablePaso1').value.trim();
@@ -653,6 +693,7 @@ function actualizarResponsables() {
     }
 
     function agregarFilaItem() {
+      if (!gruposCargados) { document.getElementById('mensaje').textContent = 'Primero carga el catálogo de materiales de la marca.'; return; }
       const tbody = document.getElementById('tbodyItems');
       const tr = document.createElement('tr');
 
@@ -730,9 +771,12 @@ function actualizarResponsables() {
     }
 
     async function registrar() {
+      if (registrando) return;
+      if (!gruposCargados) { document.getElementById('mensaje').textContent = 'El catálogo de materiales no está disponible.'; return; }
       const movimientos = obtenerMovimientos();
 
       const datos = {
+        marca: document.getElementById('marcaPaso1').value,
         fecha: document.getElementById('fecha').value,
         tipo: document.getElementById('tipo').value,
         origen: document.getElementById('origenPaso1').value,
@@ -756,6 +800,7 @@ function actualizarResponsables() {
       }
 
       mensaje.textContent = 'Registrando...';
+      registrando = true;
 
       try {
         const respuesta = await fetch(API_URL, {
@@ -789,10 +834,12 @@ function actualizarResponsables() {
         document.getElementById('responsablePaso1').innerHTML =
           '<option value="">Seleccione primero un puesto</option>';
 
+        document.getElementById('resumenMarca').textContent = '';
         document.getElementById('resumenOrigen').textContent = '';
         document.getElementById('resumenDestino').textContent = '';
         document.getElementById('resumenResponsable').textContent = '';
 
+        document.getElementById('resumenMarca3').textContent = '';
         document.getElementById('resumenOrigen3').textContent = '';
         document.getElementById('resumenDestino3').textContent = '';
         document.getElementById('resumenResponsable3').textContent = '';
@@ -809,6 +856,8 @@ function actualizarResponsables() {
 
       } catch (error) {
         mensaje.textContent = 'Error: ' + error.message;
+      } finally {
+        registrando = false;
       }
     }
 
