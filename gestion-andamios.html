@@ -1143,6 +1143,10 @@
     📥 Carga masiva Excel
   </button>
 
+  <button type="button" class="boton-secundario" onclick="abrirProgramacionGantt()">
+    📅 Actualizar programación Gantt
+  </button>
+
   <button
     class="boton-principal"
     type="button"
@@ -1610,6 +1614,24 @@
   </div>
 
 </div>
+
+<!-- PROGRAMACION GANTT: sin crear servicios adicionales -->
+<div id="modalProgramacionGantt" class="modal-fondo" onclick="if(event.target===this)cerrarProgramacionGantt()">
+  <div class="modal" style="width:min(1150px,100%);">
+    <div class="modal-cabecera">
+      <div><h3>📅 Actualizar programación Gantt</h3><p>Fechas y horas definitivas para TAGS existentes</p></div>
+      <button type="button" class="cerrar-modal" onclick="cerrarProgramacionGantt()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-contenido">
+      <p style="margin-top:0;color:var(--gris);font-size:13px;line-height:1.5">Selecciona los TAGS y asigna la fecha y hora de inicio programadas. El inicio real de ARMADO no se modifica. Los TAGS cuyo armado ya comenzó no admiten reprogramación. <strong>Zona horaria de programación: la configurada en Google Sheets (actualmente America/Bogota).</strong></p>
+      <div class="campo" style="margin-bottom:14px"><label for="busquedaGantt">Buscar TAG, OT o actividad</label><input id="busquedaGantt" type="search" placeholder="Filtrar actividades..." oninput="pintarProgramacionGantt()"></div>
+      <div class="tabla-masiva-contenedor" style="max-height:510px"><table class="tabla-masiva"><thead><tr><th>TAG</th><th>OT / Actividad</th><th>Fecha preliminar</th><th>Inicio Gantt confirmado</th><th>Estado</th></tr></thead><tbody id="cuerpoProgramacionGantt"></tbody></table></div>
+      <div id="mensajeProgramacionGantt" class="mensaje-carga-masiva" role="status"></div>
+      <div class="acciones-carga-masiva"><button type="button" class="boton-cancelar" onclick="cerrarProgramacionGantt()">Cerrar</button><button type="button" id="btnGuardarProgramacionGantt" class="boton-principal" onclick="guardarProgramacionGantt()">Guardar programación</button></div>
+    </div>
+  </div>
+</div>
+
   <!-- Librería para leer archivos Excel -->
 <script
   src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
@@ -5411,6 +5433,57 @@ document
   }
 }
 
+
+
+/* ==========================================================
+   PROGRAMACIÓN CONFIRMADA GANTT (TAGS existentes)
+   ========================================================== */
+let edicionesProgramacionGantt = {};
+function fechaIsoDesdeGantt(valor) {
+  if(!valor) return '';
+  const texto=String(valor).trim();
+  const m=texto.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m)return `${m[3]}-${m[2]}-${m[1]}${texto.length>10?'T'+texto.slice(11,16):''}`;
+  return texto.slice(0,10);
+}
+function abrirProgramacionGantt(){
+  edicionesProgramacionGantt={};
+  document.getElementById('busquedaGantt').value='';
+  document.getElementById('mensajeProgramacionGantt').className='mensaje-carga-masiva';
+  document.getElementById('modalProgramacionGantt').classList.add('activo');
+  pintarProgramacionGantt();
+}
+function cerrarProgramacionGantt(){
+  document.getElementById('modalProgramacionGantt').classList.remove('activo');
+}
+function pintarProgramacionGantt(){
+  const q=normalizarTexto(document.getElementById('busquedaGantt').value);
+  const lista=serviciosActivos.filter(s=>!q||normalizarTexto([s.tag,s.ot,s.descripcion,s.faena,s.servicioMina].join(' ')).includes(q));
+  const cuerpo=document.getElementById('cuerpoProgramacionGantt');
+  if(!lista.length){cuerpo.innerHTML='<tr><td colspan="5">Sin TAGS que coincidan.</td></tr>';return;}
+  cuerpo.innerHTML=lista.map(s=>{
+    const bloqueado=Boolean(s.fechaInicioArmado)||['EN ARMADO','ANDAMIO OPERATIVO','CERRADO'].includes(normalizarTexto(s.estado));
+    const inicial=fechaIsoDesdeGantt(s.inicioProgramadoGantt);
+    const valor=Object.prototype.hasOwnProperty.call(edicionesProgramacionGantt,s.idServicio)?edicionesProgramacionGantt[s.idServicio]:(inicial?inicial.replace(' ','T').slice(0,16):'');
+    return `<tr><td><strong>${escaparHTML(s.tag||'-')}</strong><div style="font-size:10px;color:var(--gris)">${escaparHTML(s.idServicio)}</div></td><td>${escaparHTML(s.ot||'-')}<div style="max-width:300px">${escaparHTML(s.descripcion||'')}</div></td><td>${escaparHTML(s.fechaProgramada||'-')}</td><td><input type="datetime-local" style="min-width:192px;padding:7px" ${bloqueado?'disabled':''} value="${escaparHTML(valor)}" onchange="edicionesProgramacionGantt['${escaparAtributo(s.idServicio)}']=this.value"></td><td>${bloqueado?'ARMADO INICIADO · BLOQUEADO':escaparHTML(s.estado||'-')}</td></tr>`;
+  }).join('');
+}
+async function guardarProgramacionGantt(){
+  const mensaje=document.getElementById('mensajeProgramacionGantt');
+  const cambios=Object.entries(edicionesProgramacionGantt).filter(([,v])=>v).map(([idServicio,inicioProgramado])=>({idServicio,inicioProgramado}));
+  if(!cambios.length){mensaje.className='mensaje-carga-masiva error';mensaje.textContent='Selecciona al menos una fecha y hora que quieras actualizar.';return;}
+  const boton=document.getElementById('btnGuardarProgramacionGantt');boton.disabled=true;
+  mensaje.className='mensaje-carga-masiva';
+  try{
+    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({accion:'actualizarProgramacionGantt',cambios})});
+    if(!res.ok)throw new Error('Error HTTP '+res.status);
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.mensaje||'No fue posible guardar');
+    mensaje.className='mensaje-carga-masiva exito';mensaje.textContent=data.mensaje||'Programación actualizada';
+    await cargarServicios();edicionesProgramacionGantt={};pintarProgramacionGantt();
+  }catch(e){mensaje.className='mensaje-carga-masiva error';mensaje.textContent=e.message;}
+  finally{boton.disabled=false;}
+}
 
 function obtenerFechaActualISO() {
   const fecha = new Date();
