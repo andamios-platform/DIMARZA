@@ -3051,395 +3051,77 @@ async function eliminarModulacion(
    EXPORTAR UNA MODULACIÓN A EXCEL
 ========================================================= */
 
-function exportarExcelModulacion(
-  idBorrador
-){
-
-  const modulacion =
-    modulaciones.find(
-      item =>
-        item.idBorrador ===
-        idBorrador
-    );
-
-
-  if(!modulacion){
-
-    alert(
-      "No se encontró la modulación."
-    );
-
-    return;
-  }
-
-
-  const detalle =
-    materiales.filter(
-      item =>
-        item.idBorrador ===
-        idBorrador
-    );
-
-
-  const wb =
-    XLSX.utils.book_new();
-
-
-  const resumen = [
-
-    {
-      "ID":
-        modulacion.idBorrador,
-
-      "Fecha":
-        modulacion.fecha,
-
-      "Responsable":
-        modulacion.responsable,
-
-      "Referencia":
-        modulacion.referencia,
-
-      "Estado":
-        modulacion.estado,
-
-      "Tipos de material":
-        modulacion.cantidadMateriales,
-
-      "Piezas totales":
-        modulacion.totalPiezas,
-
-"Peso total kg":
-  modulacion.pesoTotal,
-
-"Toneladas":
-  Number(
-    (
-      (
-        Number(
-          modulacion.pesoTotal
-        ) || 0
-      ) / 1000
-    ).toFixed(3)
-  ),
-
-"Cuerpos":
-  Math.ceil(
-    (
-      Number(
-        modulacion.pesoTotal
-      ) || 0
-    ) / 240
-  ),
-
-"Última modificación":
-  modulacion.ultimaModificacion
-    }
-
-  ];
-
-
-  const materialesExcel =
-    detalle.map(
-      item => ({
-
-        "Código":
-          item.codigo,
-
-        "Material":
-          item.descripcion,
-
-        "Grupo":
-          item.grupo,
-
-        "Subgrupo":
-          item.subgrupo,
-
-        "Cantidad":
-          item.cantidad,
-
-        "Peso unitario kg":
-          item.pesoUnitario,
-
-        "Peso total kg":
-          item.pesoTotal,
-
-        "Observación":
-          item.observacion
-
-      })
-    );
-
-
-  XLSX.utils.book_append_sheet(
-    wb,
-    XLSX.utils.json_to_sheet(
-      resumen
-    ),
-    "Resumen"
-  );
-
-
-  XLSX.utils.book_append_sheet(
-    wb,
-    XLSX.utils.json_to_sheet(
-      materialesExcel
-    ),
-    "Materiales"
-  );
-
-
-  XLSX.writeFile(
-    wb,
-    idBorrador +
-    "_Modulacion.xlsx"
-  );
-
+// Formato homologado con el reporte de Modulación e Inventario.
+function datosReporteControl(id) {
+  const m = modulaciones.find(x => x.idBorrador === id);
+  if (!m) { alert('No se encontró la modulación.'); return null; }
+  const items = materiales.filter(x => x.idBorrador === id);
+  return {m,items,peso:Number(m.pesoTotal)||0,
+    adjuntos:(documentosPorModulacion.get(id)?.archivos || [])};
 }
-
-
-/* =========================================================
-   EXPORTAR UNA MODULACIÓN A PDF
-========================================================= */
-
-function exportarPDFModulacion(
-  idBorrador
-){
-
-  const modulacion =
-    modulaciones.find(
-      item =>
-        item.idBorrador ===
-        idBorrador
-    );
-
-
-  if(!modulacion){
-
-    alert(
-      "No se encontró la modulación."
-    );
-
-    return;
+function numeroReporte(n) { return (Number(n)||0).toFixed(2); }
+function encabezadoReporte(m) {
+ return [['DIMARZA - MODULACIÓN REGISTRADA'],
+ ['ID Modulación', m.idBorrador],['Fecha',m.fecha],['Mina',m.mina||'Sin asignar'],
+ ['TAG',m.tag||''],['Marca',m.marca||'ULMA'],['Responsable',m.responsable],
+ ['Referencia',m.referencia],['Estado',m.estado]];
+}
+async function exportarExcelModulacion(idBorrador) {
+  const r=datosReporteControl(idBorrador); if(!r)return;
+  if(!documentosPorModulacion.get(idBorrador)?.archivos){
+    await cargarDocumentosModulacion(idBorrador);
+    r.adjuntos=documentosPorModulacion.get(idBorrador)?.archivos||[];
   }
-
-
-  const detalle =
-    materiales.filter(
-      item =>
-        item.idBorrador ===
-        idBorrador
-    );
-
-
-  const {
-    jsPDF
-  } =
-    window.jspdf;
-
-
-  const doc =
-    new jsPDF({
-      orientation:"landscape",
-      unit:"mm",
-      format:"a4"
-    });
-
-
-  doc.setFontSize(
-    17
-  );
-
-
-  doc.text(
-    "DIMARZA - MODULACIÓN",
-    14,
-    15
-  );
-
-
-  doc.setFontSize(
-    10
-  );
-
-
-  doc.text(
-    "ID: " +
-    modulacion.idBorrador,
-    14,
-    23
-  );
-
-
-  doc.text(
-    "Fecha: " +
-    modulacion.fecha,
-    14,
-    29
-  );
-
-
-  doc.text(
-    "Responsable: " +
-    modulacion.responsable,
-    14,
-    35
-  );
-
-
-  doc.text(
-    "Referencia: " +
-    modulacion.referencia,
-    14,
-    41
-  );
-
-
-  doc.text(
-    "Estado: " +
-    modulacion.estado,
-    150,
-    23
-  );
-
-
-  doc.text(
-    "Piezas: " +
-    formatearNumero(
-      modulacion.totalPiezas
-    ),
-    150,
-    29
-  );
-
-
-const pesoTotal =
-  Number(
-    modulacion.pesoTotal
-  ) || 0;
-
-
-const toneladas =
-  pesoTotal / 1000;
-
-
-const cuerpos =
-  Math.ceil(
-    pesoTotal / 240
-  );
-
-
-doc.text(
-  "Peso total: " +
-  formatearNumero(
-    pesoTotal
-  ) +
-  " kg",
-  150,
-  35
-);
-
-
-doc.text(
-  "Toneladas: " +
-  toneladas.toLocaleString(
-    "es-PE",
-    {
-      minimumFractionDigits:3,
-      maximumFractionDigits:3
-    }
-  ) +
-  " t",
-  150,
-  41
-);
-
-
-doc.text(
-  "Cuerpos: " +
-  formatearNumero(
-    cuerpos
-  ),
-  150,
-  47
-);
-
-
-doc.text(
-  "Tipos de material: " +
-  formatearNumero(
-    modulacion.cantidadMateriales
-  ),
-  150,
-  53
-);
-
-
-  const filas =
-    detalle.map(
-      item => [
-
-        item.codigo || "S/C",
-
-        item.descripcion,
-
-        item.grupo,
-
-        item.cantidad,
-
-        formatearNumero(
-          item.pesoUnitario
-        ) +
-        " kg",
-
-        formatearNumero(
-          item.pesoTotal
-        ) +
-        " kg",
-
-        item.observacion || ""
-
-      ]
-    );
-
-
-  doc.autoTable({
-
-    startY:60,
-    head:[[
-      "Código",
-      "Material",
-      "Grupo",
-      "Cantidad",
-      "P. Unit.",
-      "Peso total",
-      "Observación"
-    ]],
-
-    body:
-      filas,
-
-    styles:{
-      fontSize:8,
-      cellPadding:2
-    },
-
-    headStyles:{
-      fillColor:[
-        22,
-        63,
-        99
-      ]
-    }
-
-  });
-
-
-  doc.save(
-    idBorrador +
-    "_Modulacion.pdf"
-  );
-
+  const wb=XLSX.utils.book_new();
+  const datos=[...encabezadoReporte(r.m),[],
+    ['N.°','Ítem','Código','Cantidad','Peso Unit. (kg)','Peso Total (kg)'],
+    ...r.items.map((x,i)=>[i+1,x.descripcion,x.codigo||'S/C',Number(x.cantidad)||0,Number(x.pesoUnitario)||0,Number(x.pesoTotal)||0]),
+    [],['','PESO TOTAL GENERAL','','','',r.peso],
+    ['','TONELADAS','','','',Number((r.peso/1000).toFixed(3))],
+    ['','CUERPOS','','','',Math.ceil(r.peso/240)],[],
+    ['ANEXOS','Archivo','Enlace']];
+  for(const tipo of ['PLANO','EVIDENCIA']){
+    const a=r.adjuntos.find(a=>String(a.tipo||'').toUpperCase()===tipo);
+    datos.push([tipo,a?.nombre || 'No adjuntado',a?.url || '']);
+  }
+  const ws=XLSX.utils.aoa_to_sheet(datos);
+  ws['!cols']=[{wch:13},{wch:42},{wch:26},{wch:14},{wch:20},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws,'Modulación');
+  XLSX.writeFile(wb,idBorrador+'_Modulacion.xlsx');
+}
+async function exportarPDFModulacion(idBorrador) {
+  const r=datosReporteControl(idBorrador); if(!r)return;
+  // Carga los metadatos de los adjuntos solo cuando se solicita exportar.
+  if(!documentosPorModulacion.get(idBorrador)?.archivos){
+    await cargarDocumentosModulacion(idBorrador);
+    r.adjuntos=documentosPorModulacion.get(idBorrador)?.archivos||[];
+  }
+  const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  doc.setFontSize(17);doc.setTextColor(22,63,99);
+  doc.text('DIMARZA - MODULACIÓN REGISTRADA',14,16);
+  doc.setTextColor(30,41,59);doc.setFontSize(9);
+  const datos=encabezadoReporte(r.m).slice(1);
+  datos.forEach((par,i)=>doc.text(par[0]+': '+String(par[1]||''),14+(i>=4?140:0),25+(i%4)*6));
+  doc.autoTable({startY:57,
+    head:[['N.°','Ítem','Código','Cantidad','Peso Unit. (kg)','Peso Total (kg)']],
+    body:[...r.items.map((x,i)=>[i+1,x.descripcion,x.codigo||'S/C',x.cantidad,numeroReporte(x.pesoUnitario),numeroReporte(x.pesoTotal)]),
+      ['','PESO TOTAL GENERAL','','','',numeroReporte(r.peso)+' kg'],
+      ['','TONELADAS','','','',(r.peso/1000).toFixed(3)+' t'],
+      ['','CUERPOS','','','',String(Math.ceil(r.peso/240))]],
+    styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[37,99,235]}});
+  let y=doc.lastAutoTable.finalY+12;
+  if(y>175){doc.addPage();y=18}
+  doc.setFontSize(11);doc.setTextColor(22,63,99);doc.text('DOCUMENTACIÓN ADJUNTA',14,y);y+=8;
+  doc.setFontSize(9);doc.setTextColor(30,41,59);
+  for(const tipo of ['PLANO','EVIDENCIA']){
+    const a=r.adjuntos.find(x=>String(x.tipo||'').toUpperCase()===tipo);
+    if(y>190){doc.addPage();y=18}
+    const etiqueta=tipo==='PLANO'?'Plano':'Fotografía / evidencia';
+    doc.text(etiqueta+': '+(a?.nombre||'No adjuntado'),14,y);
+    if(a?.url){doc.setTextColor(0,82,190);doc.textWithLink('Abrir adjunto',215,y,{url:a.url});doc.setTextColor(30,41,59)}
+    y+=7;
+  }
+  doc.save(idBorrador+'_Modulacion.pdf');
 }
 /* =========================================================
    EXPORTAR EXCEL
@@ -3465,7 +3147,8 @@ function exportarExcel(){
 
   const hojaModulaciones =
     modulacionesFiltradas.map(
-      item => ({
+      (item, indice) => ({
+        "N.°": indice + 1,
 
         "ID":
           item.idBorrador,
@@ -3732,7 +3415,8 @@ function exportarPDF(){
 
   const filas =
     modulacionesFiltradas.map(
-      item => [
+      (item, indice) => [
+        indice + 1,
 
         item.idBorrador,
 
@@ -3768,6 +3452,7 @@ function exportarPDF(){
     startY:28,
 
     head:[[
+      "N.°",
       "ID",
       "Fecha",
       "Responsable",
