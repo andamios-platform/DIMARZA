@@ -3796,6 +3796,19 @@ function pintarServicios(){
                   servicio.supervisor ||
                   '-'
                 )}
+                ${crearDatoTag(
+                  'Inicio programado Gantt',
+                  servicio.inicioProgramadoGantt || 'Por confirmar'
+                )}
+
+                ${crearDatoTag(
+                  'Cumplimiento Gantt',
+                  servicio.inicioProgramadoGantt
+                    ? (servicio.cumplimientoGantt || 'Pendiente de inicio')
+                    : 'Sin programar'
+                )}
+
+
 
               </div>
 
@@ -6132,6 +6145,37 @@ ${
           servicioActual.fechaProgramada
         )}
 
+
+        ${crearInfo(
+          'Inicio programado Gantt',
+          servicioActual.inicioProgramadoGantt || 'POR CONFIRMAR'
+        )}
+
+        ${crearInfo(
+          'Inicio real de ARMADO',
+          servicioActual.fechaInicioArmado || 'PENDIENTE'
+        )}
+
+        ${crearInfo(
+          'Cumplimiento del Gantt',
+          servicioActual.inicioProgramadoGantt
+            ? (servicioActual.cumplimientoGantt || 'PENDIENTE DE INICIO')
+            : 'SIN PROGRAMAR'
+        )}
+
+        ${crearInfo(
+          'Diferencia respecto al Gantt',
+          servicioActual.inicioProgramadoGantt &&
+          servicioActual.fechaInicioArmado &&
+          servicioActual.desviacionMinutos !== '' &&
+          servicioActual.desviacionMinutos !== null &&
+          servicioActual.desviacionMinutos !== undefined
+            ? (Number(servicioActual.desviacionMinutos) > 0
+                ? '+' : '') +
+              String(servicioActual.desviacionMinutos) +
+              ' min'
+            : '—'
+        )}
 
         ${crearInfo(
           'Fecha registro',
