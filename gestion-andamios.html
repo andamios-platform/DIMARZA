@@ -2400,8 +2400,24 @@ function crearTarjetaServicio(servicio) {
           <span class="dato-valor">
             ${
               escaparHTML(
-                servicio.fechaProgramada ||
-                'Sin fecha'
+                servicio.inicioProgramadoGantt
+                  ? String(servicio.inicioProgramadoGantt).slice(0, 10)
+                  : (servicio.fechaProgramada || 'Sin fecha')
+              )
+            }
+          </span>
+        </div>
+
+        <div class="dato">
+          <span class="dato-label">
+            Hora programada
+          </span>
+          <span class="dato-valor">
+            ${
+              escaparHTML(
+                servicio.inicioProgramadoGantt
+                  ? String(servicio.inicioProgramadoGantt).slice(11, 16)
+                  : 'Por confirmar'
               )
             }
           </span>
