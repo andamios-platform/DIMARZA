@@ -1529,7 +1529,7 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
     <h2>Supervisión de herramientas — Antapaccay</h2>
     <p class="atp-nota">Revisa las entregas registradas, sus códigos y series. Usa tu misma clave de acceso DIMARZA (DATA ACCESOS), sin crear otra contraseña.</p>
     <div class="atp-filtros">
-      <div><label for="atpClave">Clave habitual DIMARZA</label><input id="atpClave" type="password" autocomplete="off" placeholder="La misma clave de Chile" /></div>
+      <div id="atpClaveGrupo"><label for="atpClave">Clave habitual DIMARZA</label><input id="atpClave" type="password" autocomplete="off" placeholder="Solo si tu sesión venció" /></div>
       <div><label for="atpFiltro">Estado</label><select id="atpFiltro" onchange="atpPintar()"><option value="ACTIVAS">Entregas activas</option><option value="PENDIENTE">Pendientes</option><option value="APROBADO">Aprobadas</option><option value="OBSERVADO">Observadas</option><option value="DEVUELTO">Historial de devoluciones</option><option value="TODOS">Todas</option></select></div>
       <div><label for="atpBuscar">Buscar</label><input id="atpBuscar" oninput="atpPintar()" placeholder="Responsable, caja, código, ID..." /></div>
       <button class="atp-btn" onclick="atpCargar()">Actualizar entregas</button>
@@ -3597,22 +3597,79 @@ let atpSupervisores = [];
 let atpActual = null;
 let atpSesion = '';
 const atpEsc = x => String(x == null ? '' : x).replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+// Comparte la sesión existente de visualizacion.html; no duplica contraseñas.
+const ATP_TOKEN_KEY = 'dimarzaTokenVisualizacion';
+const ATP_ROL_KEY = 'dimarzaRolVisualizacion';
+
+function atpMostrarAcceso(mostrar) {
+  const grupo = document.getElementById('atpClaveGrupo');
+  if (grupo) grupo.hidden = !mostrar;
+}
+
+function atpLimpiarSesionVencida() {
+  atpSesion = '';
+  localStorage.removeItem(ATP_TOKEN_KEY);
+  sessionStorage.removeItem(ATP_ROL_KEY);
+  atpMostrarAcceso(true);
+}
+
+async function atpValidarTokenGuardado() {
+  const token = localStorage.getItem(ATP_TOKEN_KEY) || '';
+  if (!/^[0-9a-f-]{36}$/i.test(token)) {
+    atpMostrarAcceso(true);
+    return '';
+  }
+  const url = `${ATP_ACCESO_API}?${new URLSearchParams({
+    action: 'validarSesion', token
+  })}`;
+  const resp = await fetch(url, {cache:'no-store'});
+  if (!resp.ok) throw new Error('No se pudo validar la sesión de DIMARZA.');
+  const data = await resp.json();
+  if (!data.ok || !data.autorizado) {
+    atpLimpiarSesionVencida();
+    return '';
+  }
+  const rol = String(data.rol || '').toUpperCase();
+  if (!['RESIDENTE','SUPERVISOR'].includes(rol)) {
+    throw new Error('Tu acceso DIMARZA no tiene permisos de supervisión.');
+  }
+  atpSesion = token;
+  atpMostrarAcceso(false);
+  return token;
+}
+
 async function atpIngresar() {
   if (atpSesion) return atpSesion;
+
+  // Primero reutilizamos la sesión que inició Visualización.
+  const sesionCompartida = await atpValidarTokenGuardado();
+  if (sesionCompartida) return sesionCompartida;
+
+  // Solo si no hay una sesión válida se solicita la clave habitual.
   const campo = document.getElementById('atpClave');
   const clave = campo.value.trim();
-  if (!clave) throw new Error('Ingrese la clave habitual de DIMARZA.');
-  const r = await fetch(`${ATP_ACCESO_API}?${new URLSearchParams({action:'validarClave',clave})}`, {cache:'no-store'});
+  if (!clave) throw new Error('Tu sesión venció. Vuelve a ingresar con tu clave habitual DIMARZA.');
+  const r = await fetch(`${ATP_ACCESO_API}?${new URLSearchParams({
+    action:'validarClave', clave
+  })}`, {cache:'no-store'});
   if (!r.ok) throw new Error('No se pudo consultar DATA ACCESOS.');
   const j = await r.json();
-  if (!j.ok || !j.autorizado || !j.tokenSesion) throw new Error(j.message || 'Clave inválida.');
-  if (!['RESIDENTE','SUPERVISOR'].includes(String(j.rol || '').toUpperCase()) || !j.permisos?.controlSupervisor) {
+  if (!j.ok || !j.autorizado || !j.tokenSesion) {
+    throw new Error(j.message || 'Clave inválida.');
+  }
+  const rol = String(j.rol || '').toUpperCase();
+  if (!['RESIDENTE','SUPERVISOR'].includes(rol) ||
+      !j.permisos || !j.permisos.controlSupervisor) {
     throw new Error('El rol no tiene permisos de supervisión.');
   }
   atpSesion = j.tokenSesion;
-  campo.value = ''; // No guardar la clave en el HTML ni en localStorage.
+  localStorage.setItem(ATP_TOKEN_KEY, j.tokenSesion);
+  sessionStorage.setItem(ATP_ROL_KEY, rol);
+  campo.value = '';
+  atpMostrarAcceso(false);
   return atpSesion;
 }
+
 async function atpConsulta(action, extra={}) {
   const token = await atpIngresar();
   const params = new URLSearchParams({action,token,...extra});
@@ -3620,7 +3677,7 @@ async function atpConsulta(action, extra={}) {
   if (!resp.ok) throw new Error('No se pudo contactar el servidor.');
   const data = await resp.json();
   if (!data.ok) {
-    if (/sesi[oó]n.*vencid|sesi[oó]n no v[aá]lida/i.test(data.message || '')) atpSesion = '';
+    if (/sesi[oó]n.*vencid|sesi[oó]n no v[aá]lida|sesi[oó]n.*expir/i.test(data.message || '')) atpLimpiarSesionVencida();
     throw new Error(data.message || 'No se pudo completar la operación.');
   }
   return data;
@@ -3630,7 +3687,7 @@ function atpCambiarVista() {
   document.body.classList.toggle('atp-modo', on);
   document.getElementById('atpVista').hidden = !on;
   document.getElementById('atpBtnCambio').textContent = on ? '🇨🇱 Volver a Chile' : '⛑️ Cambiar a Antapaccay';
-  if (on && atpSesion) atpCargar();
+  if (on) atpCargar();
   if (!on) atpCerrar();
 }
 async function atpCargar() {
@@ -3641,7 +3698,7 @@ async function atpCargar() {
     atpEntregas = d.entregas || [];
     atpSupervisores = d.supervisores || [];
     atpPintar();
-    msg.textContent = `${atpEntregas.length} entregas registradas. Última consulta completada.`;
+    msg.textContent = `${atpEntregas.length} entregas registradas. Sesión de DIMARZA reconocida.`;
     msg.className = 'atp-nota';
   } catch(e) { msg.textContent = e.message; msg.className = 'atp-error'; }
 }
