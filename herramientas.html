@@ -569,18 +569,13 @@
 }
 
   
-    /* DIMARZA: consulta de Antapaccay en rama de pruebas */
-    .aviso-pruebas { padding: 12px 14px; margin: 12px 0 20px; border: 1px solid #d4ad55; border-radius: 10px; background: #fff7e4; color:#6a4b08; font-size: 14px; font-weight:600; }
-    .antapaccay-controles { display:grid; grid-template-columns: minmax(180px,1fr) minmax(180px,2fr); gap: 12px; margin: 14px 0; }
-    .antapaccay-resumen { font-size:14px; font-weight:600; margin:10px 0; }
-    .antapaccay-tabla-scroll { width:100%; max-width:100%; overflow-x:auto; border:1px solid #d6dde5; border-radius:10px; }
-    .antapaccay-tabla { border-collapse: collapse; min-width: 970px; width:100%; font-size:13px; }
-    .antapaccay-tabla th, .antapaccay-tabla td { padding:10px; border-bottom:1px solid #e4e8ee; text-align:left; vertical-align:top; }
-    .antapaccay-tabla th { background:#edf2f7; color:#17304a; position:sticky; top:0; }
-    .antapaccay-tabla tr:nth-child(even) { background:#f8fafc; }
-    .antapaccay-nota { font-size:13px; color:#666; margin:13px 0; }
-    @media(max-width:680px) {.antapaccay-controles { grid-template-columns:1fr; }}
-</style>
+    /* Conserva intactas las imágenes y tarjetas originales del módulo */
+    .aviso-pruebas {margin:12px 0 18px;padding:12px 14px;background:#fff7e5;border:1px solid #e6bd63;border-radius:10px;color:#684600;font-size:14px;font-weight:600}
+    .antapaccay-selector {margin-bottom:20px;padding:14px;border:1px solid #dbe3ed;border-radius:12px;background:#f6f9ff}
+    .antapaccay-selector select {width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;background:white}
+    .resumen-antapaccay {margin-top:10px;color:#344154;font-size:13px;font-weight:600}
+    .antapaccay-sin-codigo {font-style:italic}
+    </style>
 </head>
 
 <body>
@@ -677,20 +672,13 @@
     <section class="screen" id="screen2">
       <div class="card">
         <h2>Equipos asignados</h2>
-        <div id="avisoModoPrueba" class="aviso-pruebas">MODO PRUEBAS · Solo consulta. No se registrarán entregas en ninguna operación.</div>
-        <div id="antapaccayPanel" style="display:none;">
-          <div class="antapaccay-controles">
-            <div class="field"><label>Caja original Antapaccay</label><select id="antapaccayCaja" onchange="filtrarAntapaccay()"><option value="">Todas las cajas</option></select></div>
-            <div class="field"><label>Buscar descripción, código, serie o ID</label><input type="search" id="antapaccayBusqueda" placeholder="Buscar herramienta..." oninput="filtrarAntapaccay()"></div>
+        <div id="avisoPruebas" class="aviso-pruebas">MODO PRUEBAS · Selecciona herramientas con las tarjetas originales. No se registran entregas.</div>
+        <div id="antapaccaySelector" class="antapaccay-selector" style="display:none;">
+          <div class="field">
+            <label for="cajaAntapaccay">Selecciona la caja original de Antapaccay</label>
+            <select id="cajaAntapaccay" onchange="seleccionarCajaAntapaccay()"><option value="">Selecciona una caja</option></select>
           </div>
-          <p id="antapaccayResumen" class="antapaccay-resumen"></p>
-          <div class="antapaccay-tabla-scroll">
-            <table class="antapaccay-tabla">
-              <thead><tr><th>Caja original</th><th>ID de referencia</th><th>Herramienta</th><th>Código</th><th>Serie</th><th>Marca</th><th>Verificación física</th></tr></thead>
-              <tbody id="antapaccayFilas"></tbody>
-            </table>
-          </div>
-          <p class="antapaccay-nota">Los registros son referenciales: la presencia física, condición y disponibilidad requieren validación. Este módulo NO registra entregas.</p>
+          <div id="resumenCajaAntapaccay" class="resumen-antapaccay"></div>
         </div>
         <div class="equipos-grid" id="equiposContainer"></div>
 
@@ -728,8 +716,6 @@
   </div>
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbz0xoHKYvxKOtT8EEOyeJTQKEcWfHK4M-ky5ZDdQ_tbxqqfQAOEQUm1vNQOQXZvg5pvDA/exec";
-    const MODO_PRUEBAS_SOLO_LECTURA = true;
-    let cambioUnidadConsecutivo = 0;
     
     let baseData = {
       responsables: [],
@@ -737,6 +723,13 @@
       unidadesMap: {},
       items: []
     };
+
+    // En esta etapa se consulta y se selecciona; NO se guarda en la base operativa.
+    const MODO_PRUEBAS_SOLO_LECTURA = true;
+    let inventarioChile = [];
+    let secuenciaConsultaUnidad = 0;
+    let consultandoUnidad = false;
+    let inventarioListo = false;
 
     const EQUIPOS = [
       { key:'arnes6', title:'Arnés Mecánico 6 argollas Talla: _______', itemBase:'Arnés Mecánico 6 argollas Talla: _______', hasMarca:true },
@@ -768,9 +761,11 @@
       loadInitialData();
     });
 
-async function apiCall(action, payload = null) {
-  verificarApiPruebas();
+async function apiCall(action, payload = null, parametros = {}) {
   let url = API_URL + '?action=' + encodeURIComponent(action);
+  Object.entries(parametros).forEach(([clave, valor]) => {
+    url += '&' + encodeURIComponent(clave) + '=' + encodeURIComponent(valor);
+  });
 
   if (payload) {
     url += '&payload=' + encodeURIComponent(JSON.stringify(payload));
@@ -785,12 +780,6 @@ async function apiCall(action, payload = null) {
 
   return data;
 }
-
-    function verificarApiPruebas() {
-      if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(API_URL)) {
-        throw new Error('La URL de Apps Script no es válida.');
-      }
-    }
 
     function showLoading(show) {
       document.getElementById('loading').classList.toggle('show', !!show);
@@ -824,6 +813,8 @@ async function loadInitialData() {
     }
 
     baseData = data;
+    inventarioChile = Array.isArray(data.items) ? data.items : [];
+    inventarioListo = false;
 
     fillResponsables();
     fillSupervisores();
@@ -908,91 +899,90 @@ async function loadInitialData() {
       const unidad = document.getElementById('unidad').value;
       const servicio = document.getElementById('servicio');
       servicio.innerHTML = '<option value="">Seleccione</option>';
-
-      (baseData.unidadesMap[unidad] || []).forEach(s => {
-        const op = document.createElement('option');
-        op.value = s;
-        op.textContent = s;
-        servicio.appendChild(op);
+      (baseData.unidadesMap[unidad] || []).forEach(nombre => {
+        const opcion = document.createElement('option');
+        opcion.value = nombre;
+        opcion.textContent = nombre;
+        servicio.appendChild(opcion);
       });
 
-      const numeroCambio = ++cambioUnidadConsecutivo;
+      const version = ++secuenciaConsultaUnidad;
+      inventarioListo = false;
+      consultandoUnidad = !!unidad;
+      document.getElementById('antapaccaySelector').style.display = 'none';
       document.getElementById('equiposContainer').style.display = 'none';
-      document.getElementById('antapaccayPanel').style.display = 'none';
-      if (!unidad) return;
-
+      if (!unidad) { consultandoUnidad = false; return; }
       showLoading(true);
       try {
-        // La respuesta de Apps Script usa la unidad solicitada para separar inventarios.
-        verificarApiPruebas();
-        const url = API_URL + '?action=getHerramientasInit&unidad=' + encodeURIComponent(unidad);
-        const respuesta = await fetch(url);
-        const data = await respuesta.json();
-        if (!respuesta.ok || data.ok === false) throw new Error(data.message || 'No se pudo consultar el inventario');
-        if (numeroCambio !== cambioUnidadConsecutivo) return;
-
-        baseData.items = Array.isArray(data.items) ? data.items : [];
-        if (esUnidadAntapaccay(unidad)) {
-          mostrarInventarioAntapaccay();
+        const datos = await apiCall('getHerramientasInit', null, {unidad});
+        if (version !== secuenciaConsultaUnidad) return;
+        if (!Array.isArray(datos.items)) throw new Error('El inventario no llegó correctamente.');
+        baseData.items = datos.items;
+        if (esAntapaccay(unidad)) {
+          configurarCajasAntapaccay(datos.items);
         } else {
-          // La interfaz histórica se mantiene para Chile, sin guardar en pruebas.
-          buildEquipos();
           document.getElementById('equiposContainer').style.display = '';
+          buildEquipos();
+          inventarioListo = true;
         }
-      } catch (err) {
-        if (numeroCambio === cambioUnidadConsecutivo) alert('Error al cambiar de unidad: ' + err.message);
+      } catch (error) {
+        if (version === secuenciaConsultaUnidad) {
+          alert('No se pudo cargar el inventario de ' + unidad + ': ' + error.message);
+        }
       } finally {
-        if (numeroCambio === cambioUnidadConsecutivo) showLoading(false);
+        if (version === secuenciaConsultaUnidad) {
+          consultandoUnidad = false;
+          showLoading(false);
+        }
       }
     }
 
-    function esUnidadAntapaccay(unidad) {
+    function esAntapaccay(unidad) {
       return String(unidad || '').trim().toUpperCase().includes('ANTAPACCAY');
     }
 
-    function mostrarInventarioAntapaccay() {
+    function configurarCajasAntapaccay(items) {
+      const selector = document.getElementById('cajaAntapaccay');
+      const cajas = [...new Set(items.map(x => String(x.cajaOriginal || '').trim()).filter(Boolean))].sort();
+      selector.innerHTML = '<option value="">Selecciona una caja</option>';
+      cajas.forEach(caja => {
+        const opcion = document.createElement('option');
+        opcion.value = caja;
+        opcion.textContent = 'Caja ' + caja;
+        selector.appendChild(opcion);
+      });
+      document.getElementById('antapaccaySelector').style.display = '';
+      document.getElementById('resumenCajaAntapaccay').textContent =
+        items.length + ' registros referenciales en ' + cajas.length + ' cajas. Pendientes de verificación física.';
       document.getElementById('equiposContainer').style.display = 'none';
-      document.getElementById('antapaccayPanel').style.display = 'block';
-      const selector = document.getElementById('antapaccayCaja');
-      const cajas = [...new Set(baseData.items.map(x => String(x.cajaOriginal || '').trim()).filter(Boolean))].sort();
-      selector.innerHTML = '<option value="">Todas las cajas</option>';
-      cajas.forEach(c => {
-        const op = document.createElement('option');
-        op.value = c;
-        op.textContent = 'Caja ' + c;
-        selector.appendChild(op);
-      });
-      document.getElementById('antapaccayBusqueda').value = '';
-      filtrarAntapaccay();
+      inventarioListo = true;
     }
 
-    function filtrarAntapaccay() {
-      const caja = document.getElementById('antapaccayCaja').value;
-      const busqueda = normalizarTextoBusqueda(document.getElementById('antapaccayBusqueda').value);
-      const registros = baseData.items.filter(x => {
-        if (caja && String(x.cajaOriginal || '').trim() !== caja) return false;
-        const texto = [x.cajaOriginal, x.id, x.item, x.codigo, x.serie, x.marca, x.verificacion].join(' ');
-        return normalizarTextoBusqueda(texto).includes(busqueda);
-      });
-      const cuerpo = document.getElementById('antapaccayFilas');
-      cuerpo.replaceChildren();
-      registros.forEach(x => {
-        const tr = document.createElement('tr');
-        [x.cajaOriginal, x.id, x.item, x.codigo, x.serie, x.marca, x.verificacion || 'Pendiente de verificar'].forEach(valor => {
-          const td = document.createElement('td');
-          td.textContent = String(valor ?? '');
-          tr.appendChild(td);
-        });
-        cuerpo.appendChild(tr);
-      });
-      document.getElementById('antapaccayResumen').textContent =
-        registros.length + ' registros mostrados de ' + baseData.items.length + ' registros de referencia. ' +
-        'No equivalen a herramientas físicamente verificadas.';
+    function seleccionarCajaAntapaccay() {
+      const caja = document.getElementById('cajaAntapaccay').value;
+      document.getElementById('equiposContainer').style.display = caja ? '' : 'none';
+      if (!caja) {
+        document.getElementById('resumenCajaAntapaccay').textContent =
+          'Selecciona una de las siete cajas para ver sus herramientas en tarjetas.';
+        return;
+      }
+      const cantidad = baseData.items.filter(x => String(x.cajaOriginal || '').trim() === caja).length;
+      document.getElementById('resumenCajaAntapaccay').textContent =
+        'Caja ' + caja + ': ' + cantidad + ' registros de referencia · No verificados físicamente.';
+      buildEquipos();
     }
 
-    function normalizarTextoBusqueda(valor) {
-      return String(valor || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+    function normalizarAntapaccay(texto) {
+      return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/[^a-zA-Z0-9]/g,'').toUpperCase();
     }
+
+    const EQUIVALENCIAS_ANTAPACCAY = {
+      bloque: ['Nano Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69',
+               'NanoBloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69'],
+      caboSin: ['Cabo en Y MSA sin amortiguador de impacto'],
+      polea: ['Polea/con Freno SECURPULLEY']
+    };
 
     function onResponsableChange() {
       const nombre = document.getElementById('responsable').value;
@@ -1008,8 +998,18 @@ async function loadInitialData() {
       window.telefonoSupervisor = found ? found.telefono : '';
     }
 
-    function getItemOptions(itemBase) {
-      return baseData.items.filter(it => normalize(it.item) === normalize(itemBase));
+    function getItemOptions(itemBase, claveEquipo) {
+      const unidad = document.getElementById('unidad').value;
+      if (!esAntapaccay(unidad)) {
+        return baseData.items.filter(it => normalize(it.item) === normalize(itemBase));
+      }
+      const caja = document.getElementById('cajaAntapaccay').value;
+      if (!caja) return [];
+      const nombres = [itemBase, ...(EQUIVALENCIAS_ANTAPACCAY[claveEquipo] || [])]
+        .map(normalizarAntapaccay);
+      return baseData.items
+        .filter(it => String(it.cajaOriginal || '').trim() === caja && nombres.includes(normalizarAntapaccay(it.item)))
+        .map(it => ({...it, caja, ocupado:false}));
     }
 
     function buildEquipos() {
@@ -1169,69 +1169,53 @@ async function loadInitialData() {
     }
 
     function loadEquipoOptions(eq) {
-        if (!eq.itemBase) return;
-      
-        const options = getItemOptions(eq.itemBase);
-      
-        if (eq.dual) {
-          [1, 2].forEach(n => {
-            const codigoSel = document.getElementById(`${eq.key}_${n}_codigo`);
-            const serieSel = document.getElementById(`${eq.key}_${n}_serie`);
-      
-            codigoSel.innerHTML = '<option value="">Seleccione</option>';
-            serieSel.innerHTML = '<option value="">Seleccione</option>';
-      
-            options.forEach(opt => {
-              if (!opt.codigo && !opt.serie) return;
-      
-              const val = JSON.stringify(opt);
-      
-              if (opt.codigo) {
-                const opC = document.createElement('option');
-                opC.value = val;
-                opC.textContent = (opt.ocupado ? '🔒 ' : '') + opt.codigo;
-                codigoSel.appendChild(opC);
-              }
-      
-              if (opt.serie) {
-                const opS = document.createElement('option');
-                opS.value = val;
-                opS.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
-                serieSel.appendChild(opS);
-              }
-            }); 
-            agregarOpcionSinCodigo(codigoSel, serieSel, eq);
-          });
-        } else {
-          const codigoSel = document.getElementById(`${eq.key}_codigo`);
-          const serieSel = document.getElementById(`${eq.key}_serie`);
-          if (!codigoSel || !serieSel) return;
-      
-          codigoSel.innerHTML = '<option value="">Seleccione</option>';
-          serieSel.innerHTML = '<option value="">Seleccione</option>';
-      
-          options.forEach(opt => {
+      if (!eq.itemBase) return;
+      const options = getItemOptions(eq.itemBase, eq.key);
+      const antapaccay = esAntapaccay(document.getElementById('unidad').value);
+      const destinos = eq.dual ? [1, 2] : [null];
+      destinos.forEach(n => {
+        const prefijo = n === null ? eq.key : eq.key + '_' + n;
+        const codigoSel = document.getElementById(prefijo + '_codigo');
+        const serieSel = document.getElementById(prefijo + '_serie');
+        if (!codigoSel || !serieSel) return;
+        codigoSel.innerHTML = '<option value="">Seleccione</option>';
+        serieSel.innerHTML = '<option value="">Seleccione</option>';
+        options.forEach(opt => {
+          const val = JSON.stringify(opt);
+          if (antapaccay) {
+            // Las herramientas sin código conservan su identidad por ID de referencia.
+            const etiquetaCodigo = opt.codigo && opt.codigo.toUpperCase() !== 'S/C'
+              ? opt.codigo : 'S/C';
+            const etiquetaSerie = opt.serie && opt.serie.toUpperCase() !== 'S/S'
+              ? opt.serie : 'S/S';
+            const sufijo = ' · ' + (opt.id || 'Sin ID') + (opt.verificacion ? ' · ' + opt.verificacion : '');
+            const oc = document.createElement('option');
+            oc.value = val;
+            oc.textContent = etiquetaCodigo + sufijo;
+            codigoSel.appendChild(oc);
+            const os = document.createElement('option');
+            os.value = val;
+            os.textContent = etiquetaSerie + sufijo;
+            serieSel.appendChild(os);
+          } else {
             if (!opt.codigo && !opt.serie) return;
-      
-            const val = JSON.stringify(opt);
-      
             if (opt.codigo) {
-              const opC = document.createElement('option');
-              opC.value = val;
-              opC.textContent = (opt.ocupado ? '🔒 ' : '') + opt.codigo;
-              codigoSel.appendChild(opC);
+              const oc = document.createElement('option');
+              oc.value = val;
+              oc.textContent = (opt.ocupado ? '🔒 ' : '') + opt.codigo;
+              codigoSel.appendChild(oc);
             }
-      
             if (opt.serie) {
-              const opS = document.createElement('option');
-              opS.value = val;
-              opS.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
-              serieSel.appendChild(opS);
+              const os = document.createElement('option');
+              os.value = val;
+              os.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
+              serieSel.appendChild(os);
             }
-          }); 
-          agregarOpcionSinCodigo(codigoSel, serieSel, eq);
-        }
-      }
+          }
+        });
+        if (!antapaccay) agregarOpcionSinCodigo(codigoSel, serieSel, eq);
+      });
+    }
 
 function agregarOpcionSinCodigo(codigoSel, serieSel, eq) {
 
@@ -1382,8 +1366,8 @@ function agregarOpcionSinCodigo(codigoSel, serieSel, eq) {
     }
 
 function goToStep2() {
-  if (!document.getElementById('unidad').value) {
-    alert('Selecciona una unidad minera primero.');
+  if (consultandoUnidad || !inventarioListo) {
+    alert('Selecciona una unidad y espera a que su inventario termine de cargar.');
     return;
   }
   const err = validarPaso1();
@@ -1610,7 +1594,7 @@ function goToStep2() {
 
     async function guardar() {
       if (MODO_PRUEBAS_SOLO_LECTURA) {
-        alert('Esta es una versión de pruebas de solo lectura. No se guardan entregas en Chile ni en Antapaccay.');
+        alert('Modo pruebas: puedes seleccionar herramientas, pero no se registran entregas ni se generan PDF.');
         return;
       }
       const err1 = validarPaso1();
@@ -1676,6 +1660,11 @@ function goToStep2() {
 
     function limpiarTodo() {
       setToday();
+      ++secuenciaConsultaUnidad;
+      inventarioListo = false;
+      consultandoUnidad = false;
+      document.getElementById('antapaccaySelector').style.display = 'none';
+      document.getElementById('equiposContainer').style.display = 'none';
       document.getElementById('unidad').value = '';
       document.getElementById('servicio').innerHTML = '<option value="">Seleccione</option>';
       document.getElementById('responsable').value = '';
