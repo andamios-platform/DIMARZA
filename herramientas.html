@@ -727,7 +727,7 @@
     let consultandoUnidad = false;
     let inventarioListo = false;
 
-    const EQUIPOS = [
+    const EQUIPOS_BASE = [
       { key:'arnes6', title:'Arnés Mecánico 6 argollas Talla: _______', itemBase:'Arnés Mecánico 6 argollas Talla: _______', hasMarca:true },
       { key:'arnes4', title:'Arnés Mecánico 4 argollas Talla: _______', itemBase:'Arnés Mecánico 4 argollas Talla: _______', hasMarca:true },
       { key:'bloque', title:'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69', itemBase:'Bloque Retráctil HALT MIKRON ONEBLOCK CI DE 2M MODELO MIC02_69', dual:true },
@@ -751,6 +751,38 @@
       { key:'llaveF12', title:'Llave Francesa 12"', itemBase:'Llave Francesa 12"', hasDriza:true },
       { key:'polea', title:'Polea con Freno SECURPULLEY', itemBase:'Polea con Freno SECURPULLEY' }
     ];
+
+    // Chile conserva exactamente el catálogo y la selección originales.
+    // Antapaccay usa el mismo diseño, pero con nombres y cantidades propias.
+    let EQUIPOS = EQUIPOS_BASE.map(equipo => ({...equipo}));
+
+    function configurarTarjetasPorUnidad(unidad) {
+      const antapaccay = esAntapaccay(unidad);
+      EQUIPOS = EQUIPOS_BASE.map(equipo => {
+        if (!antapaccay) return {...equipo};
+
+        if (equipo.key === 'bloque') {
+          return {
+            ...equipo,
+            title: 'Nano Bloque Retráctil HALT MIKRON ONEBLOCK CI de 2 m',
+            // Puede tener dos nanobloques, cada uno con código/serie propios.
+            dual: true,
+            dualPrefix: 'Nano Bloque'
+          };
+        }
+
+        if (equipo.key === 'kit') {
+          return {
+            ...equipo,
+            title: 'Kit Antitrauma MSA Model 10063431',
+            // En Antapaccay se elige un solo kit (una sola selección).
+            dual: false
+          };
+        }
+
+        return {...equipo};
+      });
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       setToday();
@@ -914,6 +946,7 @@ async function loadInitialData() {
         if (version !== secuenciaConsultaUnidad) return;
         if (!Array.isArray(datos.items)) throw new Error('El inventario no llegó correctamente.');
         baseData.items = datos.items;
+        configurarTarjetasPorUnidad(unidad);
         if (esAntapaccay(unidad)) {
           configurarInventarioAntapaccay(datos.items);
         } else {
@@ -1643,6 +1676,7 @@ function goToStep2() {
       document.getElementById('supervisor').value = '';
       document.getElementById('documentoSupervisor').value = '';
       limpiarEquipos();
+      configurarTarjetasPorUnidad('');
     }
 
     function cancelarFormulario() {
