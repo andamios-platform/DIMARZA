@@ -568,7 +568,19 @@
   font-size:12px;
 }
 
-  </style>
+  
+    /* DIMARZA: consulta de Antapaccay en rama de pruebas */
+    .aviso-pruebas { padding: 12px 14px; margin: 12px 0 20px; border: 1px solid #d4ad55; border-radius: 10px; background: #fff7e4; color:#6a4b08; font-size: 14px; font-weight:600; }
+    .antapaccay-controles { display:grid; grid-template-columns: minmax(180px,1fr) minmax(180px,2fr); gap: 12px; margin: 14px 0; }
+    .antapaccay-resumen { font-size:14px; font-weight:600; margin:10px 0; }
+    .antapaccay-tabla-scroll { width:100%; max-width:100%; overflow-x:auto; border:1px solid #d6dde5; border-radius:10px; }
+    .antapaccay-tabla { border-collapse: collapse; min-width: 970px; width:100%; font-size:13px; }
+    .antapaccay-tabla th, .antapaccay-tabla td { padding:10px; border-bottom:1px solid #e4e8ee; text-align:left; vertical-align:top; }
+    .antapaccay-tabla th { background:#edf2f7; color:#17304a; position:sticky; top:0; }
+    .antapaccay-tabla tr:nth-child(even) { background:#f8fafc; }
+    .antapaccay-nota { font-size:13px; color:#666; margin:13px 0; }
+    @media(max-width:680px) {.antapaccay-controles { grid-template-columns:1fr; }}
+</style>
 </head>
 
 <body>
@@ -665,6 +677,21 @@
     <section class="screen" id="screen2">
       <div class="card">
         <h2>Equipos asignados</h2>
+        <div id="avisoModoPrueba" class="aviso-pruebas">MODO PRUEBAS · Solo consulta. No se registrarán entregas en ninguna operación.</div>
+        <div id="antapaccayPanel" style="display:none;">
+          <div class="antapaccay-controles">
+            <div class="field"><label>Caja original Antapaccay</label><select id="antapaccayCaja" onchange="filtrarAntapaccay()"><option value="">Todas las cajas</option></select></div>
+            <div class="field"><label>Buscar descripción, código, serie o ID</label><input type="search" id="antapaccayBusqueda" placeholder="Buscar herramienta..." oninput="filtrarAntapaccay()"></div>
+          </div>
+          <p id="antapaccayResumen" class="antapaccay-resumen"></p>
+          <div class="antapaccay-tabla-scroll">
+            <table class="antapaccay-tabla">
+              <thead><tr><th>Caja original</th><th>ID de referencia</th><th>Herramienta</th><th>Código</th><th>Serie</th><th>Marca</th><th>Verificación física</th></tr></thead>
+              <tbody id="antapaccayFilas"></tbody>
+            </table>
+          </div>
+          <p class="antapaccay-nota">Los registros son referenciales: la presencia física, condición y disponibilidad requieren validación. Este módulo NO registra entregas.</p>
+        </div>
         <div class="equipos-grid" id="equiposContainer"></div>
 
         <div class="actions">
@@ -701,6 +728,8 @@
   </div>
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbz0xoHKYvxKOtT8EEOyeJTQKEcWfHK4M-ky5ZDdQ_tbxqqfQAOEQUm1vNQOQXZvg5pvDA/exec";
+    const MODO_PRUEBAS_SOLO_LECTURA = true;
+    let cambioUnidadConsecutivo = 0;
     
     let baseData = {
       responsables: [],
@@ -740,6 +769,7 @@
     });
 
 async function apiCall(action, payload = null) {
+  verificarApiPruebas();
   let url = API_URL + '?action=' + encodeURIComponent(action);
 
   if (payload) {
@@ -755,6 +785,12 @@ async function apiCall(action, payload = null) {
 
   return data;
 }
+
+    function verificarApiPruebas() {
+      if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(API_URL)) {
+        throw new Error('La URL de Apps Script no es válida.');
+      }
+    }
 
     function showLoading(show) {
       document.getElementById('loading').classList.toggle('show', !!show);
@@ -793,6 +829,7 @@ async function loadInitialData() {
     fillSupervisores();
     fillUnidades();
     buildEquipos();
+    document.getElementById('equiposContainer').style.display = 'none';
     bindEvents();
 
     const fin = performance.now();
@@ -867,19 +904,94 @@ async function loadInitialData() {
       document.getElementById('supervisor').addEventListener('change', onSupervisorChange);
     }
 
-    function onUnidadChange() {
+    async function onUnidadChange() {
       const unidad = document.getElementById('unidad').value;
       const servicio = document.getElementById('servicio');
       servicio.innerHTML = '<option value="">Seleccione</option>';
 
-      if (!unidad || !baseData.unidadesMap[unidad]) return;
-
-      baseData.unidadesMap[unidad].forEach(s => {
+      (baseData.unidadesMap[unidad] || []).forEach(s => {
         const op = document.createElement('option');
         op.value = s;
         op.textContent = s;
         servicio.appendChild(op);
       });
+
+      const numeroCambio = ++cambioUnidadConsecutivo;
+      document.getElementById('equiposContainer').style.display = 'none';
+      document.getElementById('antapaccayPanel').style.display = 'none';
+      if (!unidad) return;
+
+      showLoading(true);
+      try {
+        // La respuesta de Apps Script usa la unidad solicitada para separar inventarios.
+        verificarApiPruebas();
+        const url = API_URL + '?action=getHerramientasInit&unidad=' + encodeURIComponent(unidad);
+        const respuesta = await fetch(url);
+        const data = await respuesta.json();
+        if (!respuesta.ok || data.ok === false) throw new Error(data.message || 'No se pudo consultar el inventario');
+        if (numeroCambio !== cambioUnidadConsecutivo) return;
+
+        baseData.items = Array.isArray(data.items) ? data.items : [];
+        if (esUnidadAntapaccay(unidad)) {
+          mostrarInventarioAntapaccay();
+        } else {
+          // La interfaz histórica se mantiene para Chile, sin guardar en pruebas.
+          buildEquipos();
+          document.getElementById('equiposContainer').style.display = '';
+        }
+      } catch (err) {
+        if (numeroCambio === cambioUnidadConsecutivo) alert('Error al cambiar de unidad: ' + err.message);
+      } finally {
+        if (numeroCambio === cambioUnidadConsecutivo) showLoading(false);
+      }
+    }
+
+    function esUnidadAntapaccay(unidad) {
+      return String(unidad || '').trim().toUpperCase().includes('ANTAPACCAY');
+    }
+
+    function mostrarInventarioAntapaccay() {
+      document.getElementById('equiposContainer').style.display = 'none';
+      document.getElementById('antapaccayPanel').style.display = 'block';
+      const selector = document.getElementById('antapaccayCaja');
+      const cajas = [...new Set(baseData.items.map(x => String(x.cajaOriginal || '').trim()).filter(Boolean))].sort();
+      selector.innerHTML = '<option value="">Todas las cajas</option>';
+      cajas.forEach(c => {
+        const op = document.createElement('option');
+        op.value = c;
+        op.textContent = 'Caja ' + c;
+        selector.appendChild(op);
+      });
+      document.getElementById('antapaccayBusqueda').value = '';
+      filtrarAntapaccay();
+    }
+
+    function filtrarAntapaccay() {
+      const caja = document.getElementById('antapaccayCaja').value;
+      const busqueda = normalizarTextoBusqueda(document.getElementById('antapaccayBusqueda').value);
+      const registros = baseData.items.filter(x => {
+        if (caja && String(x.cajaOriginal || '').trim() !== caja) return false;
+        const texto = [x.cajaOriginal, x.id, x.item, x.codigo, x.serie, x.marca, x.verificacion].join(' ');
+        return normalizarTextoBusqueda(texto).includes(busqueda);
+      });
+      const cuerpo = document.getElementById('antapaccayFilas');
+      cuerpo.replaceChildren();
+      registros.forEach(x => {
+        const tr = document.createElement('tr');
+        [x.cajaOriginal, x.id, x.item, x.codigo, x.serie, x.marca, x.verificacion || 'Pendiente de verificar'].forEach(valor => {
+          const td = document.createElement('td');
+          td.textContent = String(valor ?? '');
+          tr.appendChild(td);
+        });
+        cuerpo.appendChild(tr);
+      });
+      document.getElementById('antapaccayResumen').textContent =
+        registros.length + ' registros mostrados de ' + baseData.items.length + ' registros de referencia. ' +
+        'No equivalen a herramientas físicamente verificadas.';
+    }
+
+    function normalizarTextoBusqueda(valor) {
+      return String(valor || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
     }
 
     function onResponsableChange() {
@@ -1270,6 +1382,10 @@ function agregarOpcionSinCodigo(codigoSel, serieSel, eq) {
     }
 
 function goToStep2() {
+  if (!document.getElementById('unidad').value) {
+    alert('Selecciona una unidad minera primero.');
+    return;
+  }
   const err = validarPaso1();
 
   if (err) {
@@ -1493,6 +1609,10 @@ function goToStep2() {
     }
 
     async function guardar() {
+      if (MODO_PRUEBAS_SOLO_LECTURA) {
+        alert('Esta es una versión de pruebas de solo lectura. No se guardan entregas en Chile ni en Antapaccay.');
+        return;
+      }
       const err1 = validarPaso1();
       if (err1) {
         alert(err1);
