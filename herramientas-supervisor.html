@@ -1455,7 +1455,9 @@
 body.atp-modo > .container {display:none !important}
 body.atp-modo #btnAbrirHistorial {display:none !important}
 #atpVista[hidden] {display:none !important}
-.atp-cambio{margin-left:auto;border:1px solid #dbe5ff;background:#fff;color:#1645a8;border-radius:10px;padding:11px 18px;font-weight:800;cursor:pointer}
+.atp-cambio{border:1px solid #dbe5ff;background:#fff;color:#1645a8;border-radius:10px;padding:11px 18px;font-weight:800;cursor:pointer;min-width:190px;box-shadow:0 2px 8px rgba(20,55,110,.09)}
+.atp-barra-cambio{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;background:#e9efff;padding:13px 18px;border-bottom:1px solid #cbd9f4}
+.atp-barra-cambio span{font-weight:700;color:#173a80;font-size:14px}
 .atp-cambio:hover{background:#eff5ff}
 #atpVista{max-width:1280px;margin:24px auto;padding:0 20px 60px}
 .atp-panel{background:white;border:1px solid #dbe1eb;border-radius:15px;padding:20px;margin-bottom:18px;box-shadow:0 5px 18px #1623410c}
@@ -1515,8 +1517,11 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
     onclick="mostrarHistorial()">
     Historial de devoluciones →
 </button>
-<button type="button" class="atp-cambio" id="atpBtnCambio" onclick="atpCambiarVista()">⛑️ Antapaccay</button>
 </header>
+<nav class="atp-barra-cambio" aria-label="Seleccionar unidad minera">
+  <span>Unidad minera:</span>
+  <button type="button" class="atp-cambio" id="atpBtnCambio" onclick="atpCambiarVista()">⛑️ Cambiar a Antapaccay</button>
+</nav>
 
 
 <section id="atpVista" hidden>
@@ -3624,7 +3629,7 @@ function atpCambiarVista() {
   const on = !document.body.classList.contains('atp-modo');
   document.body.classList.toggle('atp-modo', on);
   document.getElementById('atpVista').hidden = !on;
-  document.getElementById('atpBtnCambio').textContent = on ? '← Volver a Chile' : '⛑️ Antapaccay';
+  document.getElementById('atpBtnCambio').textContent = on ? '🇨🇱 Volver a Chile' : '⛑️ Cambiar a Antapaccay';
   if (on && atpSesion) atpCargar();
   if (!on) atpCerrar();
 }
