@@ -672,13 +672,9 @@
     <section class="screen" id="screen2">
       <div class="card">
         <h2>Equipos asignados</h2>
-        <div id="avisoPruebas" class="aviso-pruebas">MODO PRUEBAS · Selecciona herramientas con las tarjetas originales. No se registran entregas.</div>
+        <div id="avisoPruebas" class="aviso-pruebas">MODO PRUEBAS · Marca los equipos que tienes y elige su código o serie, como en Chile. No se registran entregas.</div>
         <div id="antapaccaySelector" class="antapaccay-selector" style="display:none;">
-          <div class="field">
-            <label for="cajaAntapaccay">Selecciona la caja original de Antapaccay</label>
-            <select id="cajaAntapaccay" onchange="seleccionarCajaAntapaccay()"><option value="">Selecciona una caja</option></select>
-          </div>
-          <div id="resumenCajaAntapaccay" class="resumen-antapaccay"></div>
+          <div class="resumen-antapaccay" id="resumenCajaAntapaccay"></div>
         </div>
         <div class="equipos-grid" id="equiposContainer"></div>
 
@@ -919,7 +915,7 @@ async function loadInitialData() {
         if (!Array.isArray(datos.items)) throw new Error('El inventario no llegó correctamente.');
         baseData.items = datos.items;
         if (esAntapaccay(unidad)) {
-          configurarCajasAntapaccay(datos.items);
+          configurarInventarioAntapaccay(datos.items);
         } else {
           document.getElementById('equiposContainer').style.display = '';
           buildEquipos();
@@ -941,35 +937,16 @@ async function loadInitialData() {
       return String(unidad || '').trim().toUpperCase().includes('ANTAPACCAY');
     }
 
-    function configurarCajasAntapaccay(items) {
-      const selector = document.getElementById('cajaAntapaccay');
+    function configurarInventarioAntapaccay(items) {
       const cajas = [...new Set(items.map(x => String(x.cajaOriginal || '').trim()).filter(Boolean))].sort();
-      selector.innerHTML = '<option value="">Selecciona una caja</option>';
-      cajas.forEach(caja => {
-        const opcion = document.createElement('option');
-        opcion.value = caja;
-        opcion.textContent = 'Caja ' + caja;
-        selector.appendChild(opcion);
-      });
       document.getElementById('antapaccaySelector').style.display = '';
       document.getElementById('resumenCajaAntapaccay').textContent =
-        items.length + ' registros referenciales en ' + cajas.length + ' cajas. Pendientes de verificación física.';
-      document.getElementById('equiposContainer').style.display = 'none';
-      inventarioListo = true;
-    }
-
-    function seleccionarCajaAntapaccay() {
-      const caja = document.getElementById('cajaAntapaccay').value;
-      document.getElementById('equiposContainer').style.display = caja ? '' : 'none';
-      if (!caja) {
-        document.getElementById('resumenCajaAntapaccay').textContent =
-          'Selecciona una de las siete cajas para ver sus herramientas en tarjetas.';
-        return;
-      }
-      const cantidad = baseData.items.filter(x => String(x.cajaOriginal || '').trim() === caja).length;
-      document.getElementById('resumenCajaAntapaccay').textContent =
-        'Caja ' + caja + ': ' + cantidad + ' registros de referencia · No verificados físicamente.';
+        'ANTAPACCAY · ' + items.length + ' registros en ' + cajas.length +
+        ' cajas de referencia. Marca las herramientas que tienes y selecciona libremente su código o serie. ' +
+        'Si no tiene identificación, usa S/C o S/S. Inventario pendiente de verificación física.';
+      document.getElementById('equiposContainer').style.display = '';
       buildEquipos();
+      inventarioListo = true;
     }
 
     function normalizarAntapaccay(texto) {
@@ -1003,13 +980,12 @@ async function loadInitialData() {
       if (!esAntapaccay(unidad)) {
         return baseData.items.filter(it => normalize(it.item) === normalize(itemBase));
       }
-      const caja = document.getElementById('cajaAntapaccay').value;
-      if (!caja) return [];
+      // Igual que Chile: presentar todas las opciones del tipo de herramienta
+      // sin imponer la caja original del inventario de referencia.
       const nombres = [itemBase, ...(EQUIVALENCIAS_ANTAPACCAY[claveEquipo] || [])]
         .map(normalizarAntapaccay);
-      return baseData.items
-        .filter(it => String(it.cajaOriginal || '').trim() === caja && nombres.includes(normalizarAntapaccay(it.item)))
-        .map(it => ({...it, caja, ocupado:false}));
+      return baseData.items.filter(it => nombres.includes(normalizarAntapaccay(it.item)))
+        .map(it => ({...it, ocupado:false}));
     }
 
     function buildEquipos() {
@@ -1180,47 +1156,41 @@ async function loadInitialData() {
         if (!codigoSel || !serieSel) return;
         codigoSel.innerHTML = '<option value="">Seleccione</option>';
         serieSel.innerHTML = '<option value="">Seleccione</option>';
+        const vistosCodigo = new Set();
+        const vistosSerie = new Set();
         options.forEach(opt => {
+          const codigo = String(opt.codigo || '').trim();
+          const serie = String(opt.serie || '').trim();
+          // S/C y S/S son marcadores de ausencia, nunca códigos inventados.
+          const codigoValido = codigo && codigo.toUpperCase() !== 'S/C';
+          const serieValida = serie && serie.toUpperCase() !== 'S/S';
+          if (!codigoValido && !serieValida) return;
           const val = JSON.stringify(opt);
-          if (antapaccay) {
-            // Las herramientas sin código conservan su identidad por ID de referencia.
-            const etiquetaCodigo = opt.codigo && opt.codigo.toUpperCase() !== 'S/C'
-              ? opt.codigo : 'S/C';
-            const etiquetaSerie = opt.serie && opt.serie.toUpperCase() !== 'S/S'
-              ? opt.serie : 'S/S';
-            const sufijo = ' · ' + (opt.id || 'Sin ID') + (opt.verificacion ? ' · ' + opt.verificacion : '');
+          if (codigoValido && !vistosCodigo.has(codigo + '|' + serie)) {
             const oc = document.createElement('option');
             oc.value = val;
-            oc.textContent = etiquetaCodigo + sufijo;
+            oc.textContent = (opt.ocupado ? '🔒 ' : '') + codigo;
             codigoSel.appendChild(oc);
+            vistosCodigo.add(codigo + '|' + serie);
+          }
+          if (serieValida && !vistosSerie.has(codigo + '|' + serie)) {
             const os = document.createElement('option');
             os.value = val;
-            os.textContent = etiquetaSerie + sufijo;
+            os.textContent = (opt.ocupado ? '🔒 ' : '') + serie;
             serieSel.appendChild(os);
-          } else {
-            if (!opt.codigo && !opt.serie) return;
-            if (opt.codigo) {
-              const oc = document.createElement('option');
-              oc.value = val;
-              oc.textContent = (opt.ocupado ? '🔒 ' : '') + opt.codigo;
-              codigoSel.appendChild(oc);
-            }
-            if (opt.serie) {
-              const os = document.createElement('option');
-              os.value = val;
-              os.textContent = (opt.ocupado ? '🔒 ' : '') + opt.serie;
-              serieSel.appendChild(os);
-            }
+            vistosSerie.add(codigo + '|' + serie);
           }
         });
-        if (!antapaccay) agregarOpcionSinCodigo(codigoSel, serieSel, eq);
+        // Tal como en Chile, el usuario puede indicar una herramienta sin
+        // identificación; jamás le colocamos el ID de inventario como código.
+        agregarOpcionSinCodigo(codigoSel, serieSel, eq);
       });
     }
 
 function agregarOpcionSinCodigo(codigoSel, serieSel, eq) {
 
   const obj = {
-    id: "SCSS_" + eq.key,
+    id: "",
     item: eq.itemBase,
     codigo: "S/C",
     serie: "S/S",
