@@ -4094,6 +4094,8 @@ async function atpAbrir(id) {
         ${campo('📅 Fecha',e.fecha)} ${campo('🏭 Unidad',e.unidad)}
         ${campo('🔧 Servicio',e.servicio)} ${campo('🕒 Turno',e.turno)}
         ${campo('👷 Responsable',e.responsable)}</div>
+        <button type="button" class="atp-btn atp-btn-sec" style="margin-top:10px" onclick="atpVerVersiones()">🕘 Ver versiones anteriores</button>
+        <div id="atpVersiones" class="atp-nota" style="margin-top:8px" hidden></div>
       </section>
       <section class="atp-panel"><h3>Comparativo de herramientas</h3>
         <div class="atp-progreso">
@@ -4120,6 +4122,52 @@ async function atpAbrir(id) {
     document.getElementById('atpDevolver').disabled=e.estado!=='APROBADO';
     document.getElementById('atpModal').hidden=false;
   }catch(err){alert('No se pudo abrir la entrega: '+err.message);}
+}
+async function atpVerVersiones() {
+  if (!atpActual || !atpActual.idRegistro) return;
+  const destino=document.getElementById('atpVersiones');
+  destino.hidden=false;
+  destino.replaceChildren(document.createTextNode('Consultando versiones anteriores...'));
+  try {
+    const r=await atpConsulta('atpSupervisorVersiones',{idRegistro:atpActual.idRegistro});
+    const versiones=r.versiones||[];
+    destino.replaceChildren();
+    if (!versiones.length) {
+      destino.textContent='No hay versiones anteriores registradas desde que se activó la auditoría.';
+      return;
+    }
+    const titulo=document.createElement('strong');
+    titulo.textContent=versiones.length+' versión(es) anterior(es) guardada(s)';
+    destino.appendChild(titulo);
+    versiones.forEach(v=>{
+      const fila=document.createElement('div');
+      fila.style.marginTop='8px';
+      fila.style.padding='9px';
+      fila.style.border='1px solid #cbd5e1';
+      fila.style.borderRadius='8px';
+      const resumen=document.createElement('div');
+      resumen.textContent=`Versión ${v.versionAnterior} · ${v.fecha} · ${v.estadoAuditoria} · ${v.cantidadAnterior} herramienta(s) · ${v.estadoAnterior}`;
+      fila.appendChild(resumen);
+      const boton=document.createElement('button');
+      boton.type='button';
+      boton.className='atp-btn atp-btn-sec';
+      boton.style.marginTop='6px';
+      boton.textContent='Ver detalle guardado';
+      boton.addEventListener('click',()=>{
+        const pre=fila.querySelector('pre');
+        if(pre){pre.remove();return;}
+        const bloque=document.createElement('pre');
+        bloque.style.cssText='white-space:pre-wrap;word-break:break-word;max-height:250px;overflow:auto';
+        try {
+          const detalle=JSON.parse(v.detalleAnterior||'[]');
+          bloque.textContent=detalle.map(x=>`${x[3]} | Código ${x[6]||'S/C'} | Serie ${x[7]||'S/S'} | Driza ${x[11]} | Porta carraca ${x[12]} | Porta martillo ${x[13]}`).join('\n');
+        }catch(_){bloque.textContent='No fue posible interpretar el detalle almacenado.';}
+        fila.appendChild(bloque);
+      });
+      fila.appendChild(boton);
+      destino.appendChild(fila);
+    });
+  }catch(error){destino.textContent='No se pudo consultar el historial: '+error.message;}
 }
 function atpCerrar(){document.getElementById('atpModal').hidden=true;atpActual=null;}
 async function atpActuar(operacion) {
@@ -4241,22 +4289,11 @@ async function atpCargarTrazabilidad() {
   if (atpHistorialCargando) return;
   atpHistorialCargando=true;
   const resumen=document.getElementById('atpResumenTrazabilidad');
-  resumen.textContent='Consultando herramientas devueltas...';
-  const tabla=[];
+  resumen.textContent='Consultando herramientas y accesorios devueltos...';
   try {
-    // Lectura autenticada de los detalles por entrega: nunca combina KARDEX Chile.
-    for (const x of dev) {
-      const respuesta=await atpConsulta('atpSupervisorDetalle',{idRegistro:x.idRegistro});
-      for (const h of (respuesta.herramientas||[])) {
-        const nombre=String(h.item||'');
-        // Igual que Chile: la caja física no se cuenta como herramienta en trazabilidad.
-        if (/caja.*herramient/i.test(nombre.normalize('NFD').replace(/[\u0300-\u036f]/g,''))) continue;
-        tabla.push({...h, nombre, responsable:x.responsable, supervisor:x.supervisor,
-          fechaEntrega:x.fecha, fechaDevolucion:x.fechaDevolucion,
-          idRegistro:x.idRegistro, cajaRegistrada:x.cajaRegistrada||'', pdfUrl:x.pdfUrl||''});
-      }
-    }
-    atpTrazaHistorial=tabla;
+    // Una sola consulta al servidor, en vez de una petición por entrega.
+    const respuesta=await atpConsulta('atpSupervisorHistorialLote');
+    atpTrazaHistorial=respuesta.movimientos||[];
     atpTrazaIdsCargados=ids;
     atpPoblarFiltrosTrazabilidad();
     atpPintarTrazabilidad();
@@ -4293,7 +4330,7 @@ function atpPintarTrazabilidad() {
   document.getElementById('atpTbodyTrazabilidad').innerHTML=data.length?data.map(x=>{
     const pdf=x.pdfUrl?`<a class="atp-historial-pdf" href="${atpEsc(x.pdfUrl)}" target="_blank" rel="noopener noreferrer">📄 PDF</a>`
       : '<span class="atp-historial-pdf inactivo">Sin PDF</span>';
-    return `<tr><td><div class="atp-historial-mini"><img src="${atpEsc(imagenHerramienta(x.nombre))}" alt="Herramienta" onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'"><strong>${atpEsc(x.nombre)}</strong></div></td>
+    return `<tr><td><div class="atp-historial-mini"><img src="${atpEsc(imagenHerramienta(x.nombre))}" alt="Herramienta" onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'"><strong>${atpEsc(x.nombre)}</strong>${x.tipoMovimiento==='ACCESORIO'?`<small style="display:block;color:#64748b">Asociada a: ${atpEsc(x.herramientaAsociada||'-')}</small>`:''}</div></td>
       <td>${atpEsc(x.codigo||'S/C')}</td><td>${atpEsc(x.serie||'S/S')}</td>
       <td>CAJA ${atpEsc(x.cajaRegistrada||'NO INDICADA')}</td><td>${atpEsc(x.responsable)}</td>
       <td>${atpEsc(x.supervisor)}</td><td>${atpEsc(x.fechaEntrega)}</td><td>${atpEsc(x.fechaDevolucion)}</td>
