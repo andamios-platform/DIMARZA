@@ -1572,6 +1572,23 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 #atpModal #atpDevolver{background:#374151;color:#fff}
 #atpModal #atpDevolver:disabled{opacity:.55}
 @media(max-width:700px){#atpModal .atp-revision-kpis{grid-template-columns:1fr}#atpModal .atp-modal-acciones{grid-template-columns:1fr}}
+
+/* Filtros e indicadores de Antapaccay con la presentación de Chile */
+#atpVista .atp-panel:first-child {padding:20px}
+#atpVista .atp-filtros {display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:14px;align-items:end}
+#atpVista .atp-filtros > div {min-width:0}
+#atpVista .atp-filtros select,#atpVista .atp-filtros input {width:100%;min-width:0;height:43px;border-radius:10px}
+#atpVista .atp-filtros > button {height:43px;white-space:nowrap}
+#atpVista #atpClaveGrupo:not([hidden]) {grid-column:1/-1;max-width:350px}
+#atpVista #atpClaveGrupo[hidden] {display:none !important}
+#atpVista .atp-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
+#atpVista .atp-stat {text-align:left;border:0;border-left:6px solid #f59e0b;border-radius:16px;background:#fef3c7;padding:16px 18px;box-shadow:0 6px 18px #0000000a}
+#atpVista .atp-stat strong {font-size:26px;color:#111827}
+#atpVista .atp-stat span {font-size:14px;color:#4b5563}
+#atpVista .atp-stat.aprobado {border-left-color:#16a34a;background:#dcfce7}
+#atpVista .atp-stat.observado {border-left-color:#dc2626;background:#fee2e2}
+@media(max-width:900px){#atpVista .atp-filtros{grid-template-columns:1fr 1fr}#atpVista .atp-filtros > button{width:100%}}
+@media(max-width:600px){#atpVista .atp-filtros{grid-template-columns:1fr}#atpVista .atp-stats{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -1609,9 +1626,10 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
     <p class="atp-nota">Revisa las entregas registradas, sus códigos y series. Usa tu misma clave de acceso DIMARZA (DATA ACCESOS), sin crear otra contraseña.</p>
     <div class="atp-filtros">
       <div id="atpClaveGrupo"><label for="atpClave">Clave habitual DIMARZA</label><input id="atpClave" type="password" autocomplete="off" placeholder="Solo si tu sesión venció" /></div>
-      <div><label for="atpFiltro">Estado</label><select id="atpFiltro" onchange="atpPintar()"><option value="ACTIVAS">Entregas activas</option><option value="PENDIENTE">Pendientes</option><option value="APROBADO">Aprobadas</option><option value="OBSERVADO">Observadas</option><option value="DEVUELTO">Historial de devoluciones</option><option value="TODOS">Todas</option></select></div>
-      <div><label for="atpBuscar">Buscar</label><input id="atpBuscar" oninput="atpPintar()" placeholder="Responsable, caja, código, ID..." /></div>
-      <button class="atp-btn" onclick="atpCargar()">Actualizar entregas</button>
+      <div><label for="atpSupervisorFiltro">Filtrar por supervisor</label><select id="atpSupervisorFiltro" onchange="atpPintar()"><option value="">Todos los supervisores</option></select></div>
+      <div><label for="atpFiltro">Filtrar por estado</label><select id="atpFiltro" onchange="atpPintar()"><option value="ACTIVAS">Todos los estados</option><option value="PENDIENTE">Pendiente</option><option value="APROBADO">Aprobado</option><option value="OBSERVADO">Observado</option><option value="DEVUELTO">Devuelto (historial)</option><option value="TODOS">Todas las entregas</option></select></div>
+      <div><label for="atpBuscar">Buscar</label><input id="atpBuscar" oninput="atpPintar()" placeholder="Caja, responsable, supervisor, herramienta, código, serie o ID" /></div>
+      <button class="atp-btn" onclick="atpCargar()">Actualizar</button>
     </div>
     <p class="atp-nota" id="atpMensaje">Inicia sesión con la misma clave de Chile para consultar entregas.</p>
   </div>
@@ -3776,28 +3794,57 @@ async function atpCargar() {
     const d = await atpConsulta('atpSupervisorLista');
     atpEntregas = d.entregas || [];
     atpSupervisores = d.supervisores || [];
+    atpPoblarFiltroSupervisores();
     atpPintar();
     msg.textContent = `${atpEntregas.length} entregas registradas. Sesión de DIMARZA reconocida.`;
     msg.className = 'atp-nota';
   } catch(e) { msg.textContent = e.message; msg.className = 'atp-error'; }
 }
+function atpPoblarFiltroSupervisores() {
+  const filtro = document.getElementById('atpSupervisorFiltro');
+  const anterior = filtro.value;
+  // Tomamos los supervisores de las entregas, tal como en Chile.
+  const nombres = [...new Set(atpEntregas.map(x => String(x.supervisor || '').trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'es'));
+  filtro.replaceChildren(new Option('Todos los supervisores', ''));
+  nombres.forEach(n => filtro.add(new Option(n, n)));
+  filtro.value = nombres.includes(anterior) ? anterior : '';
+}
+
 function atpPintar() {
-  const filtro=document.getElementById('atpFiltro').value;
-  const buscar=document.getElementById('atpBuscar').value.trim().toLowerCase();
-  const visibles=atpEntregas.filter(x=>{
-    const estado=String(x.estado||'').toUpperCase();
-    if(filtro==='ACTIVAS'&&estado==='DEVUELTO')return false;
-    if(filtro!=='ACTIVAS'&&filtro!=='TODOS'&&estado!==filtro)return false;
-    return [x.idRegistro,x.responsable,x.supervisor,x.servicio,...(x.cajas||[])].join(' ').toLowerCase().includes(buscar);
+  const filtro = document.getElementById('atpFiltro').value;
+  const supervisor = document.getElementById('atpSupervisorFiltro').value;
+  const buscar = document.getElementById('atpBuscar').value.trim().toLowerCase();
+
+  // Igual que Chile, el resumen indica los registros visibles con los filtros elegidos.
+  const visibles = atpEntregas.filter(x => {
+    const estado = String(x.estado || '').toUpperCase();
+    if (filtro === 'ACTIVAS' && estado === 'DEVUELTO') return false;
+    if (filtro !== 'ACTIVAS' && filtro !== 'TODOS' && estado !== filtro) return false;
+    if (supervisor && String(x.supervisor || '') !== supervisor) return false;
+    if (!buscar) return true;
+    const texto = [x.idRegistro,x.cajaRegistrada,x.responsable,x.supervisor,
+      x.unidad,x.servicio,x.fecha,...(x.cajas || [])].join(' ').toLowerCase();
+    return texto.includes(buscar);
   });
-  const nums={PENDIENTE:0,APROBADO:0,OBSERVADO:0,DEVUELTO:0};
-  atpEntregas.forEach(x=>{const e=String(x.estado||'').toUpperCase();if(e in nums)nums[e]++;});
-  document.getElementById('atpResumen').innerHTML=Object.entries(nums).map(([k,v])=>`<div class="atp-stat"><strong>${v}</strong><span>${atpEsc(k)}</span></div>`).join('');
-  document.getElementById('atpLista').innerHTML=visibles.length?visibles.map(x=>{
-    const cajas=Array.isArray(x.cajas)?x.cajas:[];
-    const cajaPrincipal=x.cajaRegistrada || (cajas.length===1 ? cajas[0] : 'NO INDICADA');
-    const info=(nombre,valor)=>`<div class="atp-card-campo"><strong>${nombre}</strong>${atpEsc(valor||'-')}</div>`;
-    return `<article class="atp-tarjeta" data-estado="${atpEsc(String(x.estado||'').toUpperCase())}">
+
+  // Tres indicadores en las entregas activas; las devueltas se encuentran en el filtro de estado.
+  const indicadores = [
+    {estado:'PENDIENTE', titulo:'Pendientes', css:'pendiente', marca:'🟡'},
+    {estado:'APROBADO', titulo:'Aprobadas', css:'aprobado', marca:'🟢'},
+    {estado:'OBSERVADO', titulo:'Observadas', css:'observado', marca:'🔴'}
+  ];
+  document.getElementById('atpResumen').innerHTML = indicadores.map(k => `
+    <div class="atp-stat ${k.css}">
+      <strong>${visibles.filter(x => String(x.estado || '').toUpperCase() === k.estado).length}</strong>
+      <span>${k.marca} ${k.titulo}</span>
+    </div>`).join('');
+
+  document.getElementById('atpLista').innerHTML = visibles.length ? visibles.map(x => {
+    const cajas = Array.isArray(x.cajas) ? x.cajas : [];
+    const cajaPrincipal = x.cajaRegistrada || (cajas.length === 1 ? cajas[0] : 'NO INDICADA');
+    const info = (nombre,valor) => `<div class="atp-card-campo"><strong>${nombre}</strong>${atpEsc(valor || '-')}</div>`;
+    return `<article class="atp-tarjeta" data-estado="${atpEsc(String(x.estado || '').toUpperCase())}">
       <div class="atp-card-head">
         <div class="atp-card-foto"><img src="img/CajaHerramientasdeplácticoTRUPPER.JPG" alt="Caja de herramientas" onerror="this.style.display='none'"></div>
         <div><div class="atp-card-caja">CAJA ${atpEsc(cajaPrincipal)}</div><div class="atp-card-id">${atpEsc(x.idRegistro)}</div></div>
@@ -3806,15 +3853,15 @@ function atpPintar() {
       <div class="atp-card-campos">
         ${info('👷 Responsable',x.responsable)}
         ${info('👨‍💼 Supervisor',x.supervisor)}
-        ${info('🏭 Unidad',x.unidad||'ANTAPACCAY')}
+        ${info('🏭 Unidad',x.unidad || 'ANTAPACCAY')}
         ${info('🔧 Servicio',x.servicio)}
         ${info('📅 Fecha',x.fecha)}
-        ${info('🧰 Herramientas',String(Number(x.totalHerramientas)||0))}
+        ${info('🧰 Herramientas',String(Number(x.totalHerramientas) || 0))}
       </div>
-      <div class="atp-card-origen">Cajas de origen de los equipos: ${atpEsc(cajas.join(', ')||'No identificadas')}</div>
+      <div class="atp-card-origen">Cajas de origen de los equipos: ${atpEsc(cajas.join(', ') || 'No identificadas')}</div>
       <button class="atp-card-revisar" onclick="atpAbrir('${atpEsc(x.idRegistro)}')">🔍 Revisar herramientas</button>
     </article>`;
-  }).join(''):'<div class="atp-panel">No hay entregas que coincidan con el filtro.</div>';
+  }).join('') : '<div class="atp-panel">No hay entregas que coincidan con el filtro.</div>';
 }
 let atpComparativoActual = [];
 let atpFiltroComparativoActual = 'TODOS';
