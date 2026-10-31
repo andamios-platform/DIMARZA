@@ -1663,7 +1663,7 @@ body.atp-modo #atpBtnHistorial:not([hidden]){display:flex}
       <div id="atpClaveGrupo" hidden><label for="atpClave">Clave habitual DIMARZA</label><input id="atpClave" type="password" autocomplete="off" placeholder="Solo si tu sesión venció" /></div>
       <div><label for="atpSupervisorFiltro">Filtrar por supervisor</label><select id="atpSupervisorFiltro" onchange="atpPintar()"><option value="">Todos los supervisores</option></select></div>
       <div><label for="atpFiltro">Filtrar por estado</label><select id="atpFiltro" onchange="atpPintar()"><option value="ACTIVAS">Todos los estados</option><option value="PENDIENTE">Pendiente</option><option value="APROBADO">Aprobado</option><option value="OBSERVADO">Observado</option><option value="DEVUELTO">Devuelto (historial)</option><option value="TODOS">Todas las entregas</option></select></div>
-      <div><label for="atpBuscar">Buscar</label><input id="atpBuscar" oninput="atpPintar()" placeholder="Caja, responsable, supervisor, herramienta, código, serie o ID" /></div>
+      <div><label for="atpBuscar">Buscar</label><input id="atpBuscar" oninput="atpBuscarConDetalle()" placeholder="Caja, responsable, supervisor, herramienta, código, serie o ID" /></div>
       <button class="atp-btn" onclick="atpCargar()">Actualizar</button>
     </div>
     <p class="atp-nota" id="atpMensaje" role="status" aria-live="polite"></p>
@@ -2082,6 +2082,20 @@ function cargarSupervisores(supervisores) {
 
   select.value = valorActual;
 }
+// Cantidad solo si la respuesta original de Chile proporciona un valor verificable.
+// Evita contar caracteres o suponer que un texto es una lista.
+function contarHerramientasChile(item) {
+  for (const nombre of ['totalHerramientas', 'cantidadHerramientas']) {
+    const v = item[nombre];
+    if (v !== undefined && v !== null && String(v).trim() !== '' && Number.isFinite(Number(v))) {
+      return String(Number(v));
+    }
+  }
+  if (Array.isArray(item.herramientas)) return String(item.herramientas.length);
+  if (Array.isArray(item.herramientasDetalle)) return String(item.herramientasDetalle.length);
+  return '—';
+}
+
 function pintarTabla() {
   const contenedor = document.getElementById('contenedorCajas');
   const supervisor = document.getElementById('filtroSupervisor').value;
@@ -2134,7 +2148,9 @@ if (texto) {
       x.servicio,
       x.fecha,
       x.estado,
-      x.herramientas
+      x.turno,
+      Array.isArray(x.herramientas) ? JSON.stringify(x.herramientas) : x.herramientas,
+      Array.isArray(x.herramientasDetalle) ? JSON.stringify(x.herramientasDetalle) : ''
     ]
       .filter(Boolean)
       .join(' ')
@@ -2197,6 +2213,10 @@ if (texto) {
           <div class="card-info">
             <strong>🕒 Turno</strong>
             ${item.turno || '-'}
+          </div>
+          <div class="card-info">
+            <strong>🧰 Herramientas</strong>
+            ${contarHerramientasChile(item)}
           </div>
         </div>
 
@@ -3766,6 +3786,80 @@ let atpEntregas = [];
 let atpSupervisores = [];
 let atpActual = null;
 let atpSesion = '';
+// Índice de búsqueda de códigos, series y nombres de herramientas de Antapaccay.
+// Solo se consulta al escribir, con caché y tres solicitudes simultáneas como máximo.
+// No altera KARDEX ni las acciones de supervisión.
+const atpIndiceHerramientas = new Map();
+let atpBusquedaTemporizador = null;
+let atpBusquedaGeneracion = 0;
+let atpBusquedaEnCurso = false;
+
+function atpTextoBusquedaHerramientas(resp) {
+  const registrados = Array.isArray(resp.herramientas) ? resp.herramientas : [];
+  const comparativo = Array.isArray(resp.comparativo) ? resp.comparativo : [];
+  const fragmentos = [];
+  for (const h of registrados) {
+    fragmentos.push(h.item, h.herramienta, h.codigo, h.serie, h.caja, h.idReferencia);
+  }
+  for (const h of comparativo) {
+    // Solo el lado registrado; no indexamos como 'entregado' algo esperado pero faltante.
+    if (h.estado === 'NO_REGISTRADO') continue;
+    fragmentos.push(h.item, h.registrado?.codigo, h.registrado?.serie);
+  }
+  return fragmentos.filter(v => v !== null && v !== undefined).join(' ').toLowerCase();
+}
+
+function atpBuscarConDetalle() {
+  clearTimeout(atpBusquedaTemporizador);
+  const generacion = ++atpBusquedaGeneracion;
+  atpPintar();
+  const termino = document.getElementById('atpBuscar').value.trim();
+  if (!termino) return;
+  atpBusquedaTemporizador = setTimeout(() => atpCompletarIndiceBusqueda(generacion), 350);
+}
+
+async function atpCompletarIndiceBusqueda(generacion) {
+  if (atpBusquedaEnCurso) return;
+  const entradas = atpEntregas.filter(e => String(e.estado || '').toUpperCase() !== 'DEVUELTO');
+  const pendientes = entradas.filter(e => e.idRegistro && !atpIndiceHerramientas.has(e.idRegistro));
+  if (!pendientes.length) { if (generacion === atpBusquedaGeneracion) atpPintar(); return; }
+  atpBusquedaEnCurso = true;
+  const mensaje = document.getElementById('atpMensaje');
+  let pos = 0;
+  let errores = 0;
+  const total = pendientes.length;
+  const trabajador = async () => {
+    while (pos < pendientes.length) {
+      const registro = pendientes[pos++];
+      try {
+        const resp = await atpConsulta('atpSupervisorDetalle', {idRegistro: registro.idRegistro});
+        atpIndiceHerramientas.set(registro.idRegistro, atpTextoBusquedaHerramientas(resp));
+      } catch (e) {
+        errores++;
+        // No cachear errores: permitirá reintentar con Actualizar.
+      }
+      if (generacion === atpBusquedaGeneracion) {
+        const cantidad = total - pendientes.filter(e => !atpIndiceHerramientas.has(e.idRegistro)).length;
+        mensaje.textContent = `Buscando herramientas: ${cantidad}/${total} entregas consultadas…`;
+        atpPintar();
+      }
+    }
+  };
+  try {
+    await Promise.all(Array.from({length:Math.min(3,total)}, trabajador));
+  } finally {
+    atpBusquedaEnCurso = false;
+    if (generacion === atpBusquedaGeneracion) {
+      mensaje.textContent = errores ? `Búsqueda parcial: ${errores} detalle(s) no se pudieron consultar. Puedes pulsar Actualizar.` : '';
+      atpPintar();
+    }
+    // Si cambió la búsqueda mientras se indexaba, procesar el último término.
+    if (generacion !== atpBusquedaGeneracion && document.getElementById('atpBuscar').value.trim()) {
+      atpCompletarIndiceBusqueda(atpBusquedaGeneracion);
+    }
+  }
+}
+
 const atpEsc = x => String(x == null ? '' : x).replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 // Comparte la sesión existente de visualizacion.html; no duplica contraseñas.
 const ATP_TOKEN_KEY = 'dimarzaTokenVisualizacion';
@@ -3868,6 +3962,7 @@ async function atpCargar() {
   try {
     const d = await atpConsulta('atpSupervisorLista');
     atpEntregas = d.entregas || [];
+    atpIndiceHerramientas.clear();
     atpSupervisores = d.supervisores || [];
     atpPoblarFiltroSupervisores();
     atpPintar();
@@ -3902,7 +3997,8 @@ function atpPintar() {
     if (supervisor && String(x.supervisor || '') !== supervisor) return false;
     if (!buscar) return true;
     const texto = [x.idRegistro,x.cajaRegistrada,x.responsable,x.supervisor,
-      x.unidad,x.servicio,x.fecha,...(x.cajas || [])].join(' ').toLowerCase();
+      x.unidad,x.servicio,x.fecha,x.turno,...(x.cajas || []),
+      atpIndiceHerramientas.get(x.idRegistro) || ''].join(' ').toLowerCase();
     return texto.includes(buscar);
   });
 
@@ -3934,7 +4030,8 @@ function atpPintar() {
         ${info('🏭 Unidad',x.unidad || 'ANTAPACCAY')}
         ${info('🔧 Servicio',x.servicio)}
         ${info('📅 Fecha',x.fecha)}
-        ${info('🧰 Herramientas',String(Number(x.totalHerramientas) || 0))}
+        ${info('🕒 Turno',x.turno)}
+        ${info('🧰 Herramientas',x.totalHerramientas == null ? '—' : String(x.totalHerramientas))}
       </div>
       <div class="atp-card-origen">Cajas de origen de los equipos: ${atpEsc(cajas.join(', ') || 'No identificadas')}</div>
       <button class="atp-card-revisar" onclick="atpAbrir('${atpEsc(x.idRegistro)}')">🔍 Revisar herramientas</button>
