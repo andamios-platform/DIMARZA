@@ -953,7 +953,6 @@ async function loadInitialData() {
       const version = ++secuenciaConsultaUnidad;
       inventarioListo = false;
       consultandoUnidad = !!unidad;
-      document.getElementById('antapaccaySelector').style.display = 'none';
       document.getElementById('equiposContainer').style.display = 'none';
       if (!unidad) { consultandoUnidad = false; return; }
       showLoading(true);
@@ -1713,7 +1712,6 @@ async function goToStep2() {
       ++secuenciaConsultaUnidad;
       inventarioListo = false;
       consultandoUnidad = false;
-      document.getElementById('antapaccaySelector').style.display = 'none';
       document.getElementById('equiposContainer').style.display = 'none';
       document.getElementById('unidad').value = '';
       document.getElementById('servicio').innerHTML = '<option value="">Seleccione</option>';
