@@ -1556,7 +1556,7 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 .atp-comparativo-dato{display:inline-grid;grid-template-columns:49px auto;gap:4px 8px;padding:9px;border:1px solid #e2e8f0;border-radius:9px;background:#f8fafc;text-align:left;min-width:130px}
 .atp-comparativo-dato strong{font-weight:700;color:#475569}
 .atp-comparativo-estado{font-weight:700;text-align:center;font-size:11px;min-width:120px}
-.atp-comp-COINCIDE{color:#15803d}.atp-comp-DIFERENCIA{color:#c2410c}.atp-comp-NO_REGISTRADO,.atp-comp-SIN_REFERENCIA{color:#475569}.atp-comp-PENDIENTE_VERIFICACION{color:#a16207}
+.atp-comp-COINCIDE{color:#15803d}.atp-comp-DIFERENCIA,.atp-comp-EXTRA{color:#c2410c}.atp-comp-NO_REGISTRADO,.atp-comp-SIN_REFERENCIA{color:#475569}.atp-comp-PENDIENTE_VERIFICACION{color:#a16207}
 #atpModal .atp-modal-acciones{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 #atpModal .atp-modal-acciones button{width:100%;min-width:0}
 @media(max-width:800px){.atp-revision-datos{grid-template-columns:repeat(2,minmax(0,1fr))}.atp-revision-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.atp-revision-cabecera{padding:13px}.atp-revision-cabecera h2{font-size:18px}}
@@ -3948,14 +3948,14 @@ function atpComparativoFilas(datos) {
   if (!datos.length) return '<tr><td colspan="5" style="text-align:center;padding:23px">No existen herramientas para este filtro.</td></tr>';
   return datos.map(x => {
     const estado=String(x.estado||'SIN_REFERENCIA');
-    const simbolos={COINCIDE:'✅',DIFERENCIA:'❌',NO_REGISTRADO:'⚪',PENDIENTE_VERIFICACION:'🟡',SIN_REFERENCIA:'⚠️'};
+    const simbolos={COINCIDE:'✅',DIFERENCIA:'❌',NO_REGISTRADO:'⚪',EXTRA:'⚠️'};
     const nom=x.item||'';
     const foto=imagenHerramienta(nom);
     return `<tr>
       <td><img class="atp-comparativo-foto" src="${atpEsc(foto)}" alt="Herramienta" onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'"></td>
       <td>${atpEsc(nom)}<div style="color:#64748b;font-size:11px;margin-top:5px">Caja ${atpEsc(x.caja)} · Ref. ${atpEsc(x.idReferencia)}</div></td>
-      <td style="text-align:center">${atpCampoComp(x.registrado?.codigo,x.registrado?.serie)}</td>
-      <td style="text-align:center">${atpCampoComp(x.esperado?.codigo,x.esperado?.serie)}</td>
+      <td style="text-align:center">${estado==='NO_REGISTRADO'?'No registrado':atpCampoComp(x.registrado?.codigo,x.registrado?.serie)}</td>
+      <td style="text-align:center">${estado==='EXTRA'?'No corresponde a esta caja':atpCampoComp(x.esperado?.codigo,x.esperado?.serie)}</td>
       <td class="atp-comparativo-estado atp-comp-${atpEsc(estado)}">${simbolos[estado]||'⚠️'} ${atpEsc(x.descripcion||estado)}</td>
     </tr>`;
   }).join('');
@@ -3963,8 +3963,8 @@ function atpComparativoFilas(datos) {
 function atpFiltrarComparativo(filtro) {
   atpFiltroComparativoActual=filtro;
   const filas = filtro === 'TODOS' ? atpComparativoActual
-    : atpComparativoActual.filter(x => filtro === 'NO_REGISTRADO'
-      ? ['NO_REGISTRADO','SIN_REFERENCIA'].includes(x.estado)
+    : atpComparativoActual.filter(x => filtro === 'DIFERENCIA'
+      ? ['DIFERENCIA','EXTRA'].includes(x.estado)
       : x.estado===filtro);
   const destino=document.getElementById('atpTbodyComparativo');
   if(destino) destino.innerHTML=atpComparativoFilas(filas);
@@ -3983,8 +3983,8 @@ async function atpAbrir(id) {
     document.getElementById('atpSubtitulo').textContent=`${e.idRegistro} | ${e.estado}`;
     const total=Number(resumen.total)||0;
     const coinciden=Number(resumen.COINCIDE)||0;
-    const diferencias=Number(resumen.DIFERENCIA)||0;
-    const faltan=(Number(resumen.NO_REGISTRADO)||0)+(Number(resumen.SIN_REFERENCIA)||0);
+    const diferencias=(Number(resumen.DIFERENCIA)||0)+(Number(resumen.EXTRA)||0);
+    const faltan=Number(resumen.NO_REGISTRADO)||0;
     const pendientes=Number(resumen.PENDIENTE_VERIFICACION)||0;
     const porcentaje=Number(resumen.porcentaje)||0;
     const indicador=(filtro,numero,titulo)=>`<button type="button" class="atp-revision-kpi" data-filtro="${filtro}" onclick="atpFiltrarComparativo('${filtro}')"><strong>${numero}</strong>${titulo}<small>Ver herramientas</small></button>`;
@@ -4006,9 +4006,9 @@ async function atpAbrir(id) {
         <div class="atp-revision-kpis" id="atpIndicadores">
           ${indicador('COINCIDE',coinciden,'✅ Coinciden')}
           ${indicador('DIFERENCIA',diferencias,'⚠️ Diferencias')}
-          ${indicador('NO_REGISTRADO',faltan,'⚪ No registradas / sin referencia')}
+          ${indicador('NO_REGISTRADO',faltan,'⚪ No registradas')}
         </div>
-        <div class="atp-revision-aviso">Las herramientas seleccionadas en el formulario de entrega se consideran presentes. S/C significa «sin código», no herramienta faltante. El comparativo contrasta sus identificadores contra el inventario.</div>
+        <div class="atp-revision-aviso">Comparativo con la dotación de la caja registrada. S/C significa «sin código»: si la caja tiene un código esperado, se muestra como diferencia. Las referencias no seleccionadas aparecen como no registradas.</div>
         <p id="atpAvisoFiltro" class="atp-nota">Mostrando todas las herramientas.</p>
         <div style="overflow-x:auto"><table class="atp-comparativo-tabla"><thead><tr>
           <th>Foto</th><th>Herramienta</th><th>Registrado</th><th>Esperado</th><th>Estado</th>
