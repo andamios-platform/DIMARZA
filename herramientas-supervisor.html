@@ -1493,6 +1493,34 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 .atp-nota{font-size:13px;color:#5f6d82}
 .atp-error{color:#ae3030;font-weight:700}
 @media(max-width:700px){#atpVista{padding:0 10px}.atp-filtros>*{width:100%}.atp-filtros input{width:100%}.atp-dialogo{padding:12px}}
+
+/* Antapaccay: tarjetas con la misma estructura visual de Chile */
+#atpLista.atp-lista{grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:22px}
+#atpLista .atp-tarjeta{position:relative;overflow:hidden;border:0;border-left:8px solid #f59e0b;border-radius:22px;padding:24px;box-shadow:0 10px 28px rgba(0,0,0,.09);transition:transform .2s,box-shadow .2s}
+#atpLista .atp-tarjeta::before{content:'';height:6px;position:absolute;top:0;left:0;right:0;background:#f59e0b}
+#atpLista .atp-tarjeta:hover{transform:translateY(-3px);box-shadow:0 14px 35px rgba(0,0,0,.12)}
+#atpLista .atp-tarjeta[data-estado="APROBADO"]{border-left-color:#16a34a}
+#atpLista .atp-tarjeta[data-estado="APROBADO"]::before{background:#16a34a}
+#atpLista .atp-tarjeta[data-estado="OBSERVADO"]{border-left-color:#dc2626}
+#atpLista .atp-tarjeta[data-estado="OBSERVADO"]::before{background:#dc2626}
+#atpLista .atp-tarjeta[data-estado="DEVUELTO"]{border-left-color:#64748b}
+#atpLista .atp-tarjeta[data-estado="DEVUELTO"]::before{background:#64748b}
+.atp-card-head{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.atp-card-foto{height:82px;width:82px;flex:none;display:flex;justify-content:center;align-items:center;border:1px solid #e5e7eb;border-radius:18px;background:#f9fafb;overflow:hidden}
+.atp-card-foto img{height:90%;width:90%;object-fit:contain}
+.atp-card-caja{font-size:24px;font-weight:800;color:#92400e;line-height:1.15}
+.atp-card-id{font-size:12px;color:#6b7280;margin-top:5px;overflow-wrap:anywhere}
+#atpLista .atp-estado{background:#fef3c7;color:#92400e;margin:0 0 14px}
+#atpLista .atp-estado.APROBADO{background:#dcfce7;color:#166534}
+#atpLista .atp-estado.OBSERVADO{background:#fee2e2;color:#991b1b}
+#atpLista .atp-estado.DEVUELTO{background:#e2e8f0;color:#334155}
+.atp-card-campos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.atp-card-campo{background:#f9fafb;border-radius:12px;padding:10px;min-width:0;overflow-wrap:anywhere;font-size:13px;line-height:1.35;color:#374151}
+.atp-card-campo strong{display:block;color:#111827;font-size:12px;margin-bottom:4px}
+.atp-card-origen{font-size:12px;color:#64748b;margin-top:12px;overflow-wrap:anywhere}
+#atpLista .atp-card-revisar{display:block;width:100%;background:#f97316;border:0;border-radius:12px;padding:13px;margin-top:18px;font-size:14px;font-weight:700;color:white;cursor:pointer}
+#atpLista .atp-card-revisar:hover{background:#ea580c}
+@media(max-width:700px){#atpLista.atp-lista{grid-template-columns:1fr}.atp-card-campos{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 
@@ -3714,18 +3742,28 @@ function atpPintar() {
   const nums={PENDIENTE:0,APROBADO:0,OBSERVADO:0,DEVUELTO:0};
   atpEntregas.forEach(x=>{const e=String(x.estado||'').toUpperCase();if(e in nums)nums[e]++;});
   document.getElementById('atpResumen').innerHTML=Object.entries(nums).map(([k,v])=>`<div class="atp-stat"><strong>${v}</strong><span>${atpEsc(k)}</span></div>`).join('');
-  document.getElementById('atpLista').innerHTML=visibles.length?visibles.map(x=>`
-    <article class="atp-tarjeta">
+  document.getElementById('atpLista').innerHTML=visibles.length?visibles.map(x=>{
+    const cajas=Array.isArray(x.cajas)?x.cajas:[];
+    const cajaPrincipal=cajas.length===1?cajas[0]:(cajas.length>1?'VARIAS':'SIN CAJA');
+    const info=(nombre,valor)=>`<div class="atp-card-campo"><strong>${nombre}</strong>${atpEsc(valor||'-')}</div>`;
+    return `<article class="atp-tarjeta" data-estado="${atpEsc(String(x.estado||'').toUpperCase())}">
+      <div class="atp-card-head">
+        <div class="atp-card-foto"><img src="img/CajaHerramientasdeplácticoTRUPPER.JPG" alt="Caja de herramientas" onerror="this.style.display='none'"></div>
+        <div><div class="atp-card-caja">CAJA ${atpEsc(cajaPrincipal)}</div><div class="atp-card-id">${atpEsc(x.idRegistro)}</div></div>
+      </div>
       <span class="atp-estado ${atpEsc(x.estado)}">${atpEsc(x.estado)}</span>
-      <h3>${atpEsc(x.responsable)}</h3>
-      <p><b>ID:</b> ${atpEsc(x.idRegistro)}</p>
-      <p><b>Caja(s):</b> ${atpEsc((x.cajas||[]).join(', ')||'Sin caja identificada')}</p>
-      <p><b>Servicio:</b> ${atpEsc(x.servicio)}</p>
-      <p><b>Supervisor:</b> ${atpEsc(x.supervisor)}</p>
-      <p><b>Fecha:</b> ${atpEsc(x.fecha)}</p>
-      <p><b>Herramientas:</b> ${Number(x.totalHerramientas)||0}</p>
-      <button class="atp-btn" onclick="atpAbrir('${atpEsc(x.idRegistro)}')">Ver detalle y revisar</button>
-    </article>`).join(''):'<div class="atp-panel">No hay entregas que coincidan con el filtro.</div>';
+      <div class="atp-card-campos">
+        ${info('👷 Responsable',x.responsable)}
+        ${info('👨‍💼 Supervisor',x.supervisor)}
+        ${info('🏭 Unidad',x.unidad||'ANTAPACCAY')}
+        ${info('🔧 Servicio',x.servicio)}
+        ${info('📅 Fecha',x.fecha)}
+        ${info('🧰 Herramientas',String(Number(x.totalHerramientas)||0))}
+      </div>
+      <div class="atp-card-origen">Cajas de origen: ${atpEsc(cajas.join(', ')||'No identificadas')}</div>
+      <button class="atp-card-revisar" onclick="atpAbrir('${atpEsc(x.idRegistro)}')">🔍 Revisar herramientas</button>
+    </article>`;
+  }).join(''):'<div class="atp-panel">No hay entregas que coincidan con el filtro.</div>';
 }
 async function atpAbrir(id) {
   try {
