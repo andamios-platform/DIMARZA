@@ -4094,7 +4094,6 @@ async function atpAbrir(id) {
         ${campo('📅 Fecha',e.fecha)} ${campo('🏭 Unidad',e.unidad)}
         ${campo('🔧 Servicio',e.servicio)} ${campo('🕒 Turno',e.turno)}
         ${campo('👷 Responsable',e.responsable)}</div>
-        ${e.pdfUrl?`<p><a href="${atpEsc(e.pdfUrl)}" target="_blank" rel="noopener noreferrer">📄 Abrir PDF de entrega</a></p>`:''}
       </section>
       <section class="atp-panel"><h3>Comparativo de herramientas</h3>
         <div class="atp-progreso">
