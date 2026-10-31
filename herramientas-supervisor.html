@@ -1590,6 +1590,37 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 #atpVista .atp-stat.observado {border-left-color:#dc2626;background:#fee2e2}
 @media(max-width:900px){#atpVista .atp-filtros{grid-template-columns:1fr 1fr}#atpVista .atp-filtros > button{width:100%}}
 @media(max-width:600px){#atpVista .atp-filtros{grid-template-columns:1fr}#atpVista .atp-stats{grid-template-columns:1fr}}
+
+/* Antapaccay: historial independiente; Chile no se modifica */
+#atpBtnHistorial[hidden]{display:none !important}
+body.atp-modo #atpBtnHistorial:not([hidden]){display:flex}
+#atpActivas[hidden],#atpHistorial[hidden]{display:none !important}
+#atpHistorial .atp-historial-titulo{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:18px}
+#atpHistorial .atp-historial-titulo h2{margin:0 0 5px;font-size:24px}
+#atpHistorial .atp-historial-titulo p{margin:0;color:#6b7280;font-size:13px}
+#atpHistorial .atp-historial-botones{display:flex;gap:10px;flex-wrap:wrap}
+#atpHistorial .atp-historial-botones button{min-width:145px}
+#atpHistorial .atp-historial-modos{display:flex;gap:10px;padding:6px;background:#f1f5f9;border-radius:14px;width:max-content;max-width:100%;margin-bottom:18px}
+#atpHistorial .atp-historial-modos button{background:transparent;color:#475569;border:1px solid transparent;padding:10px 16px}
+#atpHistorial .atp-historial-modos button.activo{background:#111827;color:#fff}
+#atpHistorial .atp-historial-filtros{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:18px}
+#atpHistorial .atp-historial-filtros>div{flex:1;min-width:160px}
+#atpHistorial .atp-historial-filtros label{display:block;margin:0 0 6px;font-size:13px}
+#atpHistorial .atp-historial-filtros input,#atpHistorial .atp-historial-filtros select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+#atpHistorial .atp-historial-tabla-scroll{overflow-x:auto;border:1px solid #e5e7eb;border-radius:14px}
+#atpHistorial .atp-historial-tabla{width:100%;border-collapse:collapse;min-width:1080px;font-size:13px}
+#atpHistorial .atp-historial-tabla th{background:#111827;color:#fff;padding:13px 10px;text-align:left;white-space:nowrap}
+#atpHistorial .atp-historial-tabla td{padding:12px 10px;border-bottom:1px solid #e5e7eb;vertical-align:middle}
+#atpHistorial .atp-historial-tabla tr:hover td{background:#f8fafc}
+#atpHistorial .atp-historial-estado{display:inline-block;background:#e0f2fe;color:#075985;padding:6px 10px;border-radius:99px;font-weight:700;font-size:12px}
+#atpHistorial .atp-historial-acciones{display:flex;gap:7px;align-items:center}
+#atpHistorial .atp-historial-pdf{display:inline-block;background:#dc2626;color:#fff;text-decoration:none;font-weight:700;border-radius:9px;padding:8px 11px}
+#atpHistorial .atp-historial-pdf.inactivo{background:#e5e7eb;color:#6b7280}
+#atpHistorial .atp-historial-mini{display:flex;align-items:center;gap:8px;min-width:220px}
+#atpHistorial .atp-historial-mini img{width:48px;height:48px;object-fit:contain;border:1px solid #e5e7eb;border-radius:8px;padding:4px}
+#atpHistorial .atp-historial-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:11px;padding:12px 15px;color:#1e40af;font-weight:700;margin-bottom:15px}
+@media(max-width:700px){#atpHistorial .atp-historial-modos{width:100%;flex-direction:column}#atpHistorial .atp-historial-filtros>div{min-width:100%}#atpHistorial .atp-historial-botones{width:100%}}
+
 </style>
 </head>
 
@@ -1608,6 +1639,7 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
       <h1>Control Supervisor</h1>
       <p>Sistema de gestión de herramientas</p>
   </div>
+ <button type="button" id="atpBtnHistorial" class="btn-historial-header" onclick="atpMostrarHistorial()" hidden>Historial de devoluciones →</button>
  <button
     id="btnAbrirHistorial"
     class="btn-historial-header"
@@ -1622,6 +1654,7 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 
 
 <section id="atpVista" hidden>
+<div id="atpActivas">
   <div class="atp-panel">
     <h2>Supervisión de herramientas — Antapaccay</h2>
     <div class="atp-filtros">
@@ -1635,6 +1668,44 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
   </div>
   <div class="atp-stats" id="atpResumen"></div>
   <div class="atp-lista" id="atpLista"></div>
+</div>
+<section id="atpHistorial" hidden>
+  <div class="atp-panel">
+    <div class="atp-historial-titulo">
+      <div><h2>Historial de devoluciones →</h2><p>Entregas devueltas, responsables, fechas y documentos registrados en Antapaccay.</p></div>
+      <div class="atp-historial-botones">
+        <button type="button" class="atp-btn atp-btn-ok" id="atpExportarHistorial" onclick="atpExportarHistorial()">📊 Exportar historial (Excel CSV)</button>
+        <button type="button" class="atp-btn" onclick="atpMostrarActivas()">← Volver a cajas activas</button>
+      </div>
+    </div>
+    <div class="atp-historial-modos">
+      <button type="button" id="atpModoCajas" class="activo" onclick="atpCambiarModoHistorial('CAJAS')">📦 Historial por cajas</button>
+      <button type="button" id="atpModoHerramientas" onclick="atpCambiarModoHistorial('HERRAMIENTAS')">🔧 Trazabilidad por herramientas</button>
+    </div>
+    <div id="atpHistorialCajas">
+      <div class="atp-historial-filtros"><div><label for="atpBuscarHistorial">Buscar en historial</label><input id="atpBuscarHistorial" oninput="atpPintarHistorial()" placeholder="Caja, responsable, supervisor, servicio, código, serie o ID"></div></div>
+      <div class="atp-historial-info" id="atpResumenHistorial">Cargando historial...</div>
+      <div class="atp-historial-tabla-scroll"><table class="atp-historial-tabla">
+        <thead><tr><th>Caja</th><th>ID registro</th><th>Responsable</th><th>Supervisor</th><th>Entrega</th><th>Devolución</th><th>Recibido por</th><th>Observación</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="atpTbodyHistorial"></tbody>
+      </table></div>
+    </div>
+    <div id="atpHistorialHerramientas" hidden>
+      <div class="atp-historial-filtros">
+        <div><label for="atpHistHerramienta">Herramienta</label><select id="atpHistHerramienta" onchange="atpPintarTrazabilidad()"><option value="">Todas las herramientas</option></select></div>
+        <div><label for="atpHistCodigo">Código</label><input id="atpHistCodigo" oninput="atpPintarTrazabilidad()" placeholder="Buscar código"></div>
+        <div><label for="atpHistSerie">Serie</label><input id="atpHistSerie" oninput="atpPintarTrazabilidad()" placeholder="Buscar serie"></div>
+        <div><label for="atpHistResponsable">Responsable</label><select id="atpHistResponsable" onchange="atpPintarTrazabilidad()"><option value="">Todos los responsables</option></select></div>
+        <button type="button" class="atp-btn atp-btn-sec" onclick="atpLimpiarTrazabilidad()">Limpiar</button>
+      </div>
+      <div class="atp-historial-info" id="atpResumenTrazabilidad">Preparando trazabilidad...</div>
+      <div class="atp-historial-tabla-scroll"><table class="atp-historial-tabla">
+        <thead><tr><th>Herramienta</th><th>Código</th><th>Serie</th><th>Caja</th><th>Responsable</th><th>Supervisor</th><th>Entrega</th><th>Devolución</th><th>ID registro</th><th>PDF</th></tr></thead>
+        <tbody id="atpTbodyTrazabilidad"></tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
 </section>
 <div id="atpModal" hidden>
   <div class="atp-dialogo" role="dialog" aria-modal="true" aria-labelledby="atpTitulo">
@@ -3784,8 +3855,9 @@ function atpCambiarVista() {
   document.body.classList.toggle('atp-modo', on);
   document.getElementById('atpVista').hidden = !on;
   document.getElementById('atpBtnCambio').textContent = on ? '🇨🇱 Volver a Chile' : '⛑️ Cambiar a Antapaccay';
-  if (on) atpCargar();
-  if (!on) atpCerrar();
+  document.getElementById('atpBtnHistorial').hidden = !on;
+  if (on) { atpMostrarActivas(); atpCargar(); }
+  if (!on) { atpCerrar(); document.getElementById('atpHistorial').hidden=true; }
 }
 async function atpCargar() {
   const msg = document.getElementById('atpMensaje');
@@ -3797,6 +3869,9 @@ async function atpCargar() {
     atpSupervisores = d.supervisores || [];
     atpPoblarFiltroSupervisores();
     atpPintar();
+    if (!document.getElementById('atpHistorial').hidden) {
+      atpPintarHistorial();
+    }
     msg.textContent = '';
     msg.className = 'atp-nota';
   } catch(e) { msg.textContent = e.message; msg.className = 'atp-error'; }
@@ -3964,6 +4039,159 @@ async function atpActuar(operacion) {
     atpCerrar();await atpCargar();alert(d.message||'Operación completada.');
   }catch(err){alert('Error: '+err.message);botones.forEach(b=>b.disabled=false);}
 }
+function atpMostrarActivas() {
+  document.getElementById('atpActivas').hidden = false;
+  document.getElementById('atpHistorial').hidden = true;
+  document.getElementById('atpBtnHistorial').hidden = false;
+}
+let atpModoHistorialActual = 'CAJAS';
+let atpTrazaHistorial = [];
+let atpTrazaIdsCargados = '';
+let atpHistorialCargando = false;
+
+async function atpMostrarHistorial() {
+  if (!document.body.classList.contains('atp-modo')) return;
+  document.getElementById('atpActivas').hidden = true;
+  document.getElementById('atpHistorial').hidden = false;
+  document.getElementById('atpBtnHistorial').hidden = true;
+  await atpCargar();
+  atpCambiarModoHistorial(atpModoHistorialActual);
+}
+function atpDevueltas() {
+  return atpEntregas.filter(x => String(x.estado || '').toUpperCase() === 'DEVUELTO');
+}
+function atpHistorialCajasFiltradas() {
+  const q = document.getElementById('atpBuscarHistorial').value.trim().toLowerCase();
+  return atpDevueltas().filter(x => [x.cajaRegistrada,x.idRegistro,x.responsable,x.supervisor,x.servicio,
+    x.unidad,x.fecha,x.fechaDevolucion,x.recibidoPor,x.observacionDevolucion,...(x.cajas||[])]
+    .join(' ').toLowerCase().includes(q));
+}
+function atpPintarHistorial() {
+  const data = atpHistorialCajasFiltradas();
+  document.getElementById('atpResumenHistorial').textContent =
+    `${data.length} devolución${data.length===1?'':'es'} encontrada${data.length===1?'':'s'}`;
+  document.getElementById('atpTbodyHistorial').innerHTML = data.length ? data.map(x => {
+    const caja=x.cajaRegistrada || 'NO INDICADA';
+    const pdf=x.pdfUrl ? `<a class="atp-historial-pdf" target="_blank" rel="noopener noreferrer" href="${atpEsc(x.pdfUrl)}">📄 PDF</a>`
+      : '<span class="atp-historial-pdf inactivo">Sin PDF</span>';
+    return `<tr><td><strong>CAJA ${atpEsc(caja)}</strong></td>
+      <td>${atpEsc(x.idRegistro)}</td><td>${atpEsc(x.responsable)}</td><td>${atpEsc(x.supervisor)}</td>
+      <td>${atpEsc(x.fecha)}</td><td>${atpEsc(x.fechaDevolucion)}</td><td>${atpEsc(x.recibidoPor)}</td>
+      <td>${atpEsc(x.observacionDevolucion||'Sin observación')}</td>
+      <td><span class="atp-historial-estado">↩ DEVUELTO</span></td>
+      <td><div class="atp-historial-acciones"><button type="button" class="atp-btn atp-btn-sec" onclick="atpAbrir('${atpEsc(x.idRegistro)}')">🔍 Detalle</button>${pdf}</div></td></tr>`;
+  }).join('') : '<tr><td colspan="10" style="text-align:center">No hay devoluciones con esos filtros.</td></tr>';
+}
+async function atpCambiarModoHistorial(modo) {
+  atpModoHistorialActual = modo;
+  const cajas = modo==='CAJAS';
+  document.getElementById('atpHistorialCajas').hidden=!cajas;
+  document.getElementById('atpHistorialHerramientas').hidden=cajas;
+  document.getElementById('atpModoCajas').classList.toggle('activo',cajas);
+  document.getElementById('atpModoHerramientas').classList.toggle('activo',!cajas);
+  document.getElementById('atpExportarHistorial').textContent=cajas?'📊 Exportar historial (Excel CSV)':'📊 Exportar trazabilidad (Excel CSV)';
+  if (cajas) atpPintarHistorial();
+  else await atpCargarTrazabilidad();
+}
+async function atpCargarTrazabilidad() {
+  const dev = atpDevueltas();
+  const ids = dev.map(x=>x.idRegistro).sort().join('|');
+  if (ids===atpTrazaIdsCargados) {atpPintarTrazabilidad(); return;}
+  if (atpHistorialCargando) return;
+  atpHistorialCargando=true;
+  const resumen=document.getElementById('atpResumenTrazabilidad');
+  resumen.textContent='Consultando herramientas devueltas...';
+  const tabla=[];
+  try {
+    // Lectura autenticada de los detalles por entrega: nunca combina KARDEX Chile.
+    for (const x of dev) {
+      const respuesta=await atpConsulta('atpSupervisorDetalle',{idRegistro:x.idRegistro});
+      for (const h of (respuesta.herramientas||[])) {
+        const nombre=String(h.item||'');
+        // Igual que Chile: la caja física no se cuenta como herramienta en trazabilidad.
+        if (/caja.*herramient/i.test(nombre.normalize('NFD').replace(/[\u0300-\u036f]/g,''))) continue;
+        tabla.push({...h, nombre, responsable:x.responsable, supervisor:x.supervisor,
+          fechaEntrega:x.fecha, fechaDevolucion:x.fechaDevolucion,
+          idRegistro:x.idRegistro, cajaRegistrada:x.cajaRegistrada||'', pdfUrl:x.pdfUrl||''});
+      }
+    }
+    atpTrazaHistorial=tabla;
+    atpTrazaIdsCargados=ids;
+    atpPoblarFiltrosTrazabilidad();
+    atpPintarTrazabilidad();
+  } catch(error){resumen.textContent='Error al consultar herramientas: '+error.message;}
+  finally {atpHistorialCargando=false;}
+}
+function atpPoblarFiltrosTrazabilidad() {
+  for (const [id,clave,etiqueta] of [
+    ['atpHistHerramienta','nombre','Todas las herramientas'],
+    ['atpHistResponsable','responsable','Todos los responsables']]) {
+    const sel=document.getElementById(id);
+    const actual=sel.value;
+    const opciones=[...new Set(atpTrazaHistorial.map(x=>String(x[clave]||'').trim()).filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,'es'));
+    sel.replaceChildren(new Option(etiqueta,''));
+    opciones.forEach(s=>sel.add(new Option(s,s)));
+    sel.value=opciones.includes(actual)?actual:'';
+  }
+}
+function atpTrazabilidadFiltrada() {
+  const nombre=document.getElementById('atpHistHerramienta').value;
+  const codigo=document.getElementById('atpHistCodigo').value.trim().toLowerCase();
+  const serie=document.getElementById('atpHistSerie').value.trim().toLowerCase();
+  const responsable=document.getElementById('atpHistResponsable').value;
+  return atpTrazaHistorial.filter(x=>(!nombre||x.nombre===nombre)
+    &&(!codigo||String(x.codigo||'').toLowerCase().includes(codigo))
+    &&(!serie||String(x.serie||'').toLowerCase().includes(serie))
+    &&(!responsable||x.responsable===responsable));
+}
+function atpPintarTrazabilidad() {
+  const data=atpTrazabilidadFiltrada();
+  document.getElementById('atpResumenTrazabilidad').textContent =
+    `${data.length} movimiento${data.length===1?'':'s'} de herramienta${data.length===1?'':'s'} encontrado${data.length===1?'':'s'}`;
+  document.getElementById('atpTbodyTrazabilidad').innerHTML=data.length?data.map(x=>{
+    const pdf=x.pdfUrl?`<a class="atp-historial-pdf" href="${atpEsc(x.pdfUrl)}" target="_blank" rel="noopener noreferrer">📄 PDF</a>`
+      : '<span class="atp-historial-pdf inactivo">Sin PDF</span>';
+    return `<tr><td><div class="atp-historial-mini"><img src="${atpEsc(imagenHerramienta(x.nombre))}" alt="Herramienta" onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'"><strong>${atpEsc(x.nombre)}</strong></div></td>
+      <td>${atpEsc(x.codigo||'S/C')}</td><td>${atpEsc(x.serie||'S/S')}</td>
+      <td>CAJA ${atpEsc(x.cajaRegistrada||'NO INDICADA')}</td><td>${atpEsc(x.responsable)}</td>
+      <td>${atpEsc(x.supervisor)}</td><td>${atpEsc(x.fechaEntrega)}</td><td>${atpEsc(x.fechaDevolucion)}</td>
+      <td>${atpEsc(x.idRegistro)}</td><td>${pdf}</td></tr>`;
+  }).join(''):'<tr><td colspan="10" style="text-align:center">No hay herramientas con esos filtros.</td></tr>';
+}
+function atpLimpiarTrazabilidad() {
+  ['atpHistHerramienta','atpHistCodigo','atpHistSerie','atpHistResponsable'].forEach(id=>document.getElementById(id).value='');
+  atpPintarTrazabilidad();
+}
+function atpDescargarCSV(nombre, encabezados, filas) {
+  // Protege valores de texto ante fórmulas maliciosas en Excel y conserva ceros iniciales.
+  const celda = v => {
+    const s=String(v??'');
+    if (/^[0-9]+$/.test(s) && s.startsWith('0') && s.length>1) return `"=""${s}"""`;
+    const seguro=/^[=+@\-\t\r]/.test(s)?"'"+s:s;
+    return '"'+seguro.replace(/"/g,'""')+'"';
+  };
+  const datos=[encabezados,...filas].map(f=>f.map(celda).join(';')).join('\r\n');
+  const archivo=new Blob(['\ufeff'+datos],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(archivo);a.download=nombre;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function atpExportarHistorial() {
+  if(atpModoHistorialActual==='CAJAS') {
+    const data=atpHistorialCajasFiltradas();
+    if(!data.length){alert('No hay devoluciones para exportar.');return;}
+    atpDescargarCSV('Antapaccay_Historial_Devoluciones.csv',
+      ['CAJA','ID REGISTRO','ESTADO','RESPONSABLE','SUPERVISOR','UNIDAD','SERVICIO','TURNO','FECHA ENTREGA','FECHA DEVOLUCION','RECIBIDO POR','REVISADO POR','OBSERVACION SUPERVISOR','OBSERVACION DEVOLUCION','PDF'],
+      data.map(x=>[x.cajaRegistrada,x.idRegistro,x.estado,x.responsable,x.supervisor,x.unidad,x.servicio,x.turno,x.fecha,x.fechaDevolucion,x.recibidoPor,x.revisadoPor,x.observacionSupervisor,x.observacionDevolucion,x.pdfUrl]));
+  } else {
+    const data=atpTrazabilidadFiltrada();
+    if(!data.length){alert('No hay herramientas para exportar.');return;}
+    atpDescargarCSV('Antapaccay_Trazabilidad_Herramientas.csv',
+      ['HERRAMIENTA','CODIGO','SERIE','CAJA','CAJA ORIGEN','RESPONSABLE','SUPERVISOR','FECHA ENTREGA','FECHA DEVOLUCION','ID REGISTRO','PDF'],
+      data.map(x=>[x.nombre,x.codigo||'S/C',x.serie||'S/S',x.cajaRegistrada,x.caja,x.responsable,x.supervisor,x.fechaEntrega,x.fechaDevolucion,x.idRegistro,x.pdfUrl]));
+  }
+}
+
 </script>
 </body>
 </html>
