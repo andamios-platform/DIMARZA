@@ -1491,6 +1491,7 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 .atp-modal-acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .atp-modal-acciones button{flex:1;min-width:150px}
 .atp-nota{font-size:13px;color:#5f6d82}
+#atpMensaje:empty {display:none}
 .atp-error{color:#ae3030;font-weight:700}
 @media(max-width:700px){#atpVista{padding:0 10px}.atp-filtros>*{width:100%}.atp-filtros input{width:100%}.atp-dialogo{padding:12px}}
 
@@ -1623,7 +1624,6 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 <section id="atpVista" hidden>
   <div class="atp-panel">
     <h2>Supervisión de herramientas — Antapaccay</h2>
-    <p class="atp-nota">Revisa las entregas registradas, sus códigos y series. Usa tu misma clave de acceso DIMARZA (DATA ACCESOS), sin crear otra contraseña.</p>
     <div class="atp-filtros">
       <div id="atpClaveGrupo"><label for="atpClave">Clave habitual DIMARZA</label><input id="atpClave" type="password" autocomplete="off" placeholder="Solo si tu sesión venció" /></div>
       <div><label for="atpSupervisorFiltro">Filtrar por supervisor</label><select id="atpSupervisorFiltro" onchange="atpPintar()"><option value="">Todos los supervisores</option></select></div>
@@ -1631,7 +1631,7 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
       <div><label for="atpBuscar">Buscar</label><input id="atpBuscar" oninput="atpPintar()" placeholder="Caja, responsable, supervisor, herramienta, código, serie o ID" /></div>
       <button class="atp-btn" onclick="atpCargar()">Actualizar</button>
     </div>
-    <p class="atp-nota" id="atpMensaje">Inicia sesión con la misma clave de Chile para consultar entregas.</p>
+    <p class="atp-nota" id="atpMensaje" role="status" aria-live="polite"></p>
   </div>
   <div class="atp-stats" id="atpResumen"></div>
   <div class="atp-lista" id="atpLista"></div>
@@ -3796,7 +3796,7 @@ async function atpCargar() {
     atpSupervisores = d.supervisores || [];
     atpPoblarFiltroSupervisores();
     atpPintar();
-    msg.textContent = `${atpEntregas.length} entregas registradas. Sesión de DIMARZA reconocida.`;
+    msg.textContent = '';
     msg.className = 'atp-nota';
   } catch(e) { msg.textContent = e.message; msg.className = 'atp-error'; }
 }
