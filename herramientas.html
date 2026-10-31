@@ -1659,13 +1659,21 @@ async function goToStep2() {
       showLoading(true);
       try {
         const res = await apiCall('saveKardex', payload);
-        if (!res || res.ok !== true || !res.idRegistro) {
-          throw new Error('No se confirmó el ID del registro. Revisa el KARDEX antes de reintentar.');
+        // Chile devuelve ok:true y pdfUrl, pero NO incluye idRegistro.
+        // Antapaccay sí devuelve idRegistro: validarlo solo en esa unidad.
+        if (!res || res.ok !== true) {
+          throw new Error('El servidor no confirmó el resultado. Revisa el KARDEX antes de reintentar.');
+        }
+        if (esAntapaccay(unidad) && !res.idRegistro) {
+          throw new Error('No se confirmó el ID de Antapaccay. Revisa el KARDEX antes de reintentar.');
         }
         window.ultimoPdfUrl = res.pdfUrl || null;
-        const mensaje = (res.message || 'Entrega registrada.') +
-          (res.pdfPendiente ? '\nPDF pendiente: conserva el ID ' + res.idRegistro + ' y no vuelvas a registrar.' : '') +
-          '\nID de entrega: ' + res.idRegistro;
+        let mensaje = res.message || 'Entrega registrada correctamente.';
+        if (res.pdfPendiente) {
+          mensaje += '\nPDF pendiente: conserva el ID ' + res.idRegistro + ' y no vuelvas a registrar.';
+        }
+        // Nunca mostrar «undefined» para una entrega de Chile.
+        if (res.idRegistro) mensaje += '\nID de entrega: ' + res.idRegistro;
         goToStep3(mensaje);
       } catch (err) {
         alert('No se pudo confirmar el guardado: ' + err.message +
