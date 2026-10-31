@@ -1625,7 +1625,7 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
   <div class="atp-panel">
     <h2>Supervisión de herramientas — Antapaccay</h2>
     <div class="atp-filtros">
-      <div id="atpClaveGrupo"><label for="atpClave">Clave habitual DIMARZA</label><input id="atpClave" type="password" autocomplete="off" placeholder="Solo si tu sesión venció" /></div>
+      <div id="atpClaveGrupo" hidden><label for="atpClave">Clave habitual DIMARZA</label><input id="atpClave" type="password" autocomplete="off" placeholder="Solo si tu sesión venció" /></div>
       <div><label for="atpSupervisorFiltro">Filtrar por supervisor</label><select id="atpSupervisorFiltro" onchange="atpPintar()"><option value="">Todos los supervisores</option></select></div>
       <div><label for="atpFiltro">Filtrar por estado</label><select id="atpFiltro" onchange="atpPintar()"><option value="ACTIVAS">Todos los estados</option><option value="PENDIENTE">Pendiente</option><option value="APROBADO">Aprobado</option><option value="OBSERVADO">Observado</option><option value="DEVUELTO">Devuelto (historial)</option><option value="TODOS">Todas las entregas</option></select></div>
       <div><label for="atpBuscar">Buscar</label><input id="atpBuscar" oninput="atpPintar()" placeholder="Caja, responsable, supervisor, herramienta, código, serie o ID" /></div>
@@ -3789,7 +3789,8 @@ function atpCambiarVista() {
 }
 async function atpCargar() {
   const msg = document.getElementById('atpMensaje');
-  msg.textContent = 'Consultando entregas...';
+  // Mantener el panel estable mientras llega la respuesta.
+  msg.textContent = '';
   try {
     const d = await atpConsulta('atpSupervisorLista');
     atpEntregas = d.entregas || [];
