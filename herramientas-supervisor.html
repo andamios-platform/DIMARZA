@@ -1560,6 +1560,18 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 #atpModal .atp-modal-acciones button{width:100%;min-width:0}
 @media(max-width:800px){.atp-revision-datos{grid-template-columns:repeat(2,minmax(0,1fr))}.atp-revision-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.atp-revision-cabecera{padding:13px}.atp-revision-cabecera h2{font-size:18px}}
 
+
+/* Antapaccay: mismos colores, disposición y proporciones que Chile */
+#atpModal .atp-revision-kpis{grid-template-columns:repeat(3,minmax(0,1fr));}
+#atpModal .atp-revision-kpi[data-filtro="COINCIDE"]{border-top:5px solid #16a34a;background:#ecfdf5;color:#15803d}
+#atpModal .atp-revision-kpi[data-filtro="DIFERENCIA"]{border-top:5px solid #ea580c;background:#fff7ed;color:#c2410c}
+#atpModal .atp-revision-kpi[data-filtro="NO_REGISTRADO"]{border-top:5px solid #64748b;background:#f1f5f9;color:#475569}
+#atpModal #atpRevisor,#atpModal #atpObservacion{width:100%;font-size:14px;border-radius:11px;border:1px solid #d1d5db;padding:12px}
+#atpModal #atpAprobar{background:#16a34a;color:#fff}
+#atpModal #atpObservar{background:#dc2626;color:#fff}
+#atpModal #atpDevolver{background:#374151;color:#fff}
+#atpModal #atpDevolver:disabled{opacity:.55}
+@media(max-width:700px){#atpModal .atp-revision-kpis{grid-template-columns:1fr}#atpModal .atp-modal-acciones{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -1615,10 +1627,10 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
     <div id="atpContenido"></div>
     <div class="atp-panel" style="margin-top:12px">
       <h3>Revisión del supervisor</h3>
-      <div class="atp-filtros">
-        <div><label for="atpRevisor">Supervisor que revisa / recibe</label><select id="atpRevisor"></select></div>
-        <div style="flex:1"><label for="atpObservacion">Observación</label><textarea id="atpObservacion" rows="2" style="width:100%" placeholder="Obligatoria al observar"></textarea></div>
-      </div>
+      <label for="atpRevisor" style="display:block;margin:12px 0 7px">Supervisor que revisa / recibe</label>
+      <select id="atpRevisor" style="display:block;width:100%;margin-bottom:12px"></select>
+      <label for="atpObservacion" style="display:block;margin:12px 0 7px">Observación</label>
+      <textarea id="atpObservacion" rows="4" style="display:block;width:100%;margin-bottom:12px" placeholder="Escribe una observación si corresponde"></textarea>
       <div class="atp-modal-acciones">
         <button id="atpAprobar" class="atp-btn atp-btn-ok" onclick="atpActuar('aprobar')">✓ Aprobar entrega</button>
         <button id="atpObservar" class="atp-btn atp-btn-warn" onclick="atpActuar('observar')">⚠ Observar entrega</button>
@@ -3783,7 +3795,7 @@ function atpPintar() {
   document.getElementById('atpResumen').innerHTML=Object.entries(nums).map(([k,v])=>`<div class="atp-stat"><strong>${v}</strong><span>${atpEsc(k)}</span></div>`).join('');
   document.getElementById('atpLista').innerHTML=visibles.length?visibles.map(x=>{
     const cajas=Array.isArray(x.cajas)?x.cajas:[];
-    const cajaPrincipal=cajas.length===1?cajas[0]:(cajas.length>1?'VARIAS':'SIN CAJA');
+    const cajaPrincipal=x.cajaRegistrada || (cajas.length===1 ? cajas[0] : 'NO INDICADA');
     const info=(nombre,valor)=>`<div class="atp-card-campo"><strong>${nombre}</strong>${atpEsc(valor||'-')}</div>`;
     return `<article class="atp-tarjeta" data-estado="${atpEsc(String(x.estado||'').toUpperCase())}">
       <div class="atp-card-head">
@@ -3799,7 +3811,7 @@ function atpPintar() {
         ${info('📅 Fecha',x.fecha)}
         ${info('🧰 Herramientas',String(Number(x.totalHerramientas)||0))}
       </div>
-      <div class="atp-card-origen">Cajas de origen: ${atpEsc(cajas.join(', ')||'No identificadas')}</div>
+      <div class="atp-card-origen">Cajas de origen de los equipos: ${atpEsc(cajas.join(', ')||'No identificadas')}</div>
       <button class="atp-card-revisar" onclick="atpAbrir('${atpEsc(x.idRegistro)}')">🔍 Revisar herramientas</button>
     </article>`;
   }).join(''):'<div class="atp-panel">No hay entregas que coincidan con el filtro.</div>';
@@ -3844,7 +3856,7 @@ async function atpAbrir(id) {
     const e=d.entrega, resumen=d.resumen||{}, cmp=d.comparativo||[];
     atpComparativoActual=cmp;
     const campo=(etiqueta,valor)=>`<div class="atp-revision-dato"><strong>${atpEsc(etiqueta)}</strong>${atpEsc(valor||'-')}</div>`;
-    document.getElementById('atpTitulo').textContent=`Revisión de entrega ${e.idRegistro}`;
+    document.getElementById('atpTitulo').textContent=`Revisión de caja ${e.cajaRegistrada || 'sin número registrado'}`;
     document.getElementById('atpSubtitulo').textContent=`${e.idRegistro} | ${e.estado}`;
     const total=Number(resumen.total)||0;
     const coinciden=Number(resumen.COINCIDE)||0;
@@ -3864,17 +3876,16 @@ async function atpAbrir(id) {
       </section>
       <section class="atp-panel"><h3>Comparativo de herramientas</h3>
         <div class="atp-progreso">
-          <div class="atp-progreso-top"><div>${coinciden} / ${total} herramientas con coincidencia confirmada<br><button type="button" class="atp-btn" style="margin-top:7px;font-size:11px;background:#111827" onclick="atpFiltrarComparativo('TODOS')">Ver todas las herramientas</button></div>
-          <div><strong>${porcentaje}%</strong> <span style="font-size:12px">Coincidencia verificada</span></div></div>
+          <div class="atp-progreso-top"><div>${coinciden} / ${total} herramientas coinciden<br><button type="button" class="atp-btn" style="margin-top:7px;font-size:11px;background:#111827" onclick="atpFiltrarComparativo('TODOS')">Ver todas las herramientas</button></div>
+          <div><strong>${porcentaje}%</strong> <span style="font-size:12px">Coincidencia de la caja</span></div></div>
           <div class="atp-progreso-track"><div class="atp-progreso-bar" style="width:${porcentaje}%"></div></div>
         </div>
         <div class="atp-revision-kpis" id="atpIndicadores">
           ${indicador('COINCIDE',coinciden,'✅ Coinciden')}
           ${indicador('DIFERENCIA',diferencias,'⚠️ Diferencias')}
-          ${indicador('NO_REGISTRADO',faltan,'⚪ Sin registrar / referencia')}
-          ${indicador('PENDIENTE_VERIFICACION',pendientes,'🟡 Por verificar')}
+          ${indicador('NO_REGISTRADO',faltan,'⚪ No registradas / sin referencia')}
         </div>
-        <div class="atp-revision-aviso">El porcentaje solo cuenta coincidencias con verificación física confirmada en ANTAPACCAY_DETALLE. Las herramientas pendientes de inventario físico se muestran como «Por verificar», aunque sus códigos coincidan.</div>
+        <div class="atp-revision-aviso">Las herramientas seleccionadas en el formulario de entrega se consideran presentes. S/C significa «sin código», no herramienta faltante. El comparativo contrasta sus identificadores contra el inventario.</div>
         <p id="atpAvisoFiltro" class="atp-nota">Mostrando todas las herramientas.</p>
         <div style="overflow-x:auto"><table class="atp-comparativo-tabla"><thead><tr>
           <th>Foto</th><th>Herramienta</th><th>Registrado</th><th>Esperado</th><th>Estado</th>
