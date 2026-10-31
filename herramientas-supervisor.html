@@ -1482,6 +1482,8 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 .atp-estado.OBSERVADO{background:#fff0db;color:#9b5a00}
 .atp-estado.APROBADO{background:#dbf5e5;color:#176c39}
 .atp-estado.DEVUELTO{background:#e9ebef;color:#59616d}
+/* Confirmacion compartida: encima de la revision Antapaccay. */
+body.atp-modo .confirm-overlay{z-index:6100}
 #atpModal[hidden]{display:none !important}
 #atpModal{position:fixed;inset:0;z-index:5000;background:#09152ebd;display:flex;align-items:center;justify-content:center;padding:12px}
 .atp-dialogo{width:min(920px,100%);max-height:94vh;overflow-y:auto;background:#fff;border-radius:15px;padding:21px;color:#1c2942}
@@ -4025,19 +4027,62 @@ async function atpAbrir(id) {
 }
 function atpCerrar(){document.getElementById('atpModal').hidden=true;atpActual=null;}
 async function atpActuar(operacion) {
-  if(!atpActual)return;
-  const revisadoPor=document.getElementById('atpRevisor').value;
-  const observacion=document.getElementById('atpObservacion').value.trim();
-  if(!revisadoPor){alert('Seleccione un supervisor.');return;}
-  if(operacion==='observar'&&!observacion){alert('Escribe la observación.');return;}
-  const texto={aprobar:'APROBAR',observar:'OBSERVAR',devolver:'REGISTRAR LA DEVOLUCIÓN COMPLETA'}[operacion];
-  if(!confirm(`¿Confirmas ${texto} de ${atpActual.idRegistro}?`))return;
-  const botones=['atpAprobar','atpObservar','atpDevolver'].map(id=>document.getElementById(id));
-  botones.forEach(b=>b.disabled=true);
-  try {
-    const d=await atpConsulta('atpSupervisorAccion',{idRegistro:atpActual.idRegistro,operacion,revisadoPor,observacion});
-    atpCerrar();await atpCargar();alert(d.message||'Operación completada.');
-  }catch(err){alert('Error: '+err.message);botones.forEach(b=>b.disabled=false);}
+  if (!atpActual) return;
+  const revisadoPor = document.getElementById('atpRevisor').value;
+  const observacion = document.getElementById('atpObservacion').value.trim();
+  if (!revisadoPor) { mostrarToast('Seleccione el supervisor que revisa o recibe.', 'error'); return; }
+  if (operacion === 'observar' && !observacion) {
+    mostrarToast('Para observar debes ingresar una observación.', 'error');
+    return;
+  }
+
+  // Mismo modal de confirmacion que Chile, sin confirm() del navegador.
+  const opciones = {
+    aprobar: {
+      titulo: 'Aprobar entrega',
+      mensaje: 'La caja pasará al estado APROBADO.',
+      textoBoton: 'Aprobar'
+    },
+    observar: {
+      titulo: 'Observar entrega',
+      mensaje: 'La caja pasará al estado OBSERVADO.',
+      textoBoton: 'Observar'
+    },
+    devolver: {
+      titulo: 'Registrar devolución',
+      mensaje: 'Se registrará la devolución de la caja y dejará de aparecer en la lista de revisiones.',
+      textoBoton: 'Registrar'
+    }
+  };
+  const config = opciones[operacion];
+  if (!config) return;
+  const idRegistro = atpActual.idRegistro;
+  abrirConfirmacion(config, async () => {
+    const btnConfirmar = document.getElementById('btnConfirmarAccion');
+    const btnCancelar = document.querySelector('#confirmOverlay .btn-cancelar');
+    const botones = ['atpAprobar','atpObservar','atpDevolver'].map(id => document.getElementById(id));
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Procesando...';
+    if (btnCancelar) btnCancelar.disabled = true;
+    botones.forEach(b => b.disabled = true);
+    try {
+      const resultado = await atpConsulta('atpSupervisorAccion', {
+        idRegistro, operacion, revisadoPor, observacion
+      });
+      cerrarConfirmacion();
+      atpCerrar();
+      mostrarToast(resultado.message || 'Operación completada.', 'ok');
+      await atpCargar();
+    } catch (error) {
+      mostrarToast('No se completó la operación: ' + error.message, 'error');
+      // Mantener abierto el modal si hay error, para corregir o reintentar.
+      botones.forEach(b => b.disabled = false);
+    } finally {
+      btnConfirmar.disabled = false;
+      btnConfirmar.textContent = config.textoBoton;
+      if (btnCancelar) btnCancelar.disabled = false;
+    }
+  });
 }
 function atpMostrarActivas() {
   document.getElementById('atpActivas').hidden = false;
