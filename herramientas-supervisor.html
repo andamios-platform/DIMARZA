@@ -1521,6 +1521,45 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 #atpLista .atp-card-revisar{display:block;width:100%;background:#f97316;border:0;border-radius:12px;padding:13px;margin-top:18px;font-size:14px;font-weight:700;color:white;cursor:pointer}
 #atpLista .atp-card-revisar:hover{background:#ea580c}
 @media(max-width:700px){#atpLista.atp-lista{grid-template-columns:1fr}.atp-card-campos{grid-template-columns:1fr 1fr}}
+
+/* ============ Comparativo Antapaccay: estilo Supervisor Chile ============ */
+#atpModal .atp-dialogo{width:min(1120px,96vw);background:#f8fafc;border-radius:23px;padding:19px;box-shadow:0 26px 80px #0006}
+.atp-revision-cabecera{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#111827;color:white;border-radius:17px;padding:18px 20px;margin-bottom:18px}
+.atp-revision-cabecera h2{font-size:23px;margin:0 0 5px}
+.atp-revision-cabecera p{margin:0;color:#d1d5db;font-size:13px}
+.atp-revision-cabecera .atp-btn-sec{background:#dc2626;color:white}
+.atp-revision-datos{display:grid;grid-template-columns:1.5fr .8fr .9fr .9fr .9fr .7fr 1.5fr;gap:9px}
+.atp-revision-dato{border:1px solid #e1e6ef;background:#f8fafc;border-radius:10px;padding:9px 6px;text-align:center;overflow-wrap:anywhere;font-size:12px;font-weight:650}
+.atp-revision-dato strong{display:block;color:#687589;font-size:10px;margin-bottom:7px}
+.atp-revision-aviso{margin:11px 0;padding:11px 14px;border:1px solid #f5d99f;background:#fff9e9;color:#825010;border-radius:10px;font-size:12px}
+.atp-progreso{border:1px solid #dfe4eb;background:#f8fafc;border-radius:12px;padding:13px;margin-bottom:12px}
+.atp-progreso-top{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:bold;font-size:14px}
+.atp-progreso-top strong{font-size:25px;color:#b45309}
+.atp-progreso-track{height:13px;border-radius:999px;background:#e3e7ed;overflow:hidden;margin-top:10px}
+.atp-progreso-bar{height:100%;border-radius:999px;background:#16a34a;transition:width .25s}
+.atp-revision-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:15px}
+.atp-revision-kpi{border:1px solid #e2e8f0;border-top:4px solid #64748b;border-radius:11px;background:#f8fafc;padding:13px 5px;color:#31415a;text-align:center;cursor:pointer;font-size:12px}
+.atp-revision-kpi strong{display:block;font-size:27px}
+.atp-revision-kpi small{display:block;font-size:11px;margin-top:4px}
+.atp-revision-kpi[data-filtro="COINCIDE"]{border-top-color:#16a34a;color:#15803d}
+.atp-revision-kpi[data-filtro="DIFERENCIA"]{border-top-color:#ea580c;color:#c2410c}
+.atp-revision-kpi[data-filtro="NO_REGISTRADO"]{border-top-color:#64748b}
+.atp-revision-kpi[data-filtro="PENDIENTE_VERIFICACION"]{border-top-color:#eab308;color:#a16207}
+.atp-revision-kpi.activo{box-shadow:0 0 0 2px #2563eb5c;background:#eff6ff}
+.atp-comparativo-tabla{width:100%;border-collapse:collapse;font-size:12px}
+.atp-comparativo-tabla th{background:#111827;color:white;padding:11px 8px;text-align:center}
+.atp-comparativo-tabla td{border:1px solid #e3e8ef;padding:9px;vertical-align:middle}
+.atp-comparativo-tabla td:first-child{text-align:center}
+.atp-comparativo-tabla td:nth-child(2){min-width:245px;font-weight:bold}
+.atp-comparativo-foto{width:70px;height:70px;object-fit:contain;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:5px}
+.atp-comparativo-dato{display:inline-grid;grid-template-columns:49px auto;gap:4px 8px;padding:9px;border:1px solid #e2e8f0;border-radius:9px;background:#f8fafc;text-align:left;min-width:130px}
+.atp-comparativo-dato strong{font-weight:700;color:#475569}
+.atp-comparativo-estado{font-weight:700;text-align:center;font-size:11px;min-width:120px}
+.atp-comp-COINCIDE{color:#15803d}.atp-comp-DIFERENCIA{color:#c2410c}.atp-comp-NO_REGISTRADO,.atp-comp-SIN_REFERENCIA{color:#475569}.atp-comp-PENDIENTE_VERIFICACION{color:#a16207}
+#atpModal .atp-modal-acciones{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#atpModal .atp-modal-acciones button{width:100%;min-width:0}
+@media(max-width:800px){.atp-revision-datos{grid-template-columns:repeat(2,minmax(0,1fr))}.atp-revision-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.atp-revision-cabecera{padding:13px}.atp-revision-cabecera h2{font-size:18px}}
+
 </style>
 </head>
 
@@ -1569,8 +1608,8 @@ body.atp-modo #btnAbrirHistorial {display:none !important}
 </section>
 <div id="atpModal" hidden>
   <div class="atp-dialogo" role="dialog" aria-modal="true" aria-labelledby="atpTitulo">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-      <h2 id="atpTitulo">Detalle de entrega</h2>
+    <div class="atp-revision-cabecera">
+      <div><h2 id="atpTitulo">Detalle de entrega</h2><p id="atpSubtitulo">Revisión del registro seleccionado</p></div>
       <button class="atp-btn atp-btn-sec" onclick="atpCerrar()">Cerrar ✕</button>
     </div>
     <div id="atpContenido"></div>
@@ -3765,24 +3804,83 @@ function atpPintar() {
     </article>`;
   }).join(''):'<div class="atp-panel">No hay entregas que coincidan con el filtro.</div>';
 }
+let atpComparativoActual = [];
+let atpFiltroComparativoActual = 'TODOS';
+function atpCampoComp(codigo, serie) {
+  return `<div class="atp-comparativo-dato"><strong>Código</strong><span>${atpEsc(codigo||'S/C')}</span><strong>Serie</strong><span>${atpEsc(serie||'S/S')}</span></div>`;
+}
+function atpComparativoFilas(datos) {
+  if (!datos.length) return '<tr><td colspan="5" style="text-align:center;padding:23px">No existen herramientas para este filtro.</td></tr>';
+  return datos.map(x => {
+    const estado=String(x.estado||'SIN_REFERENCIA');
+    const simbolos={COINCIDE:'✅',DIFERENCIA:'❌',NO_REGISTRADO:'⚪',PENDIENTE_VERIFICACION:'🟡',SIN_REFERENCIA:'⚠️'};
+    const nom=x.item||'';
+    const foto=imagenHerramienta(nom);
+    return `<tr>
+      <td><img class="atp-comparativo-foto" src="${atpEsc(foto)}" alt="Herramienta" onerror="this.src='img/CajaHerramientasdeplácticoTRUPPER.JPG'"></td>
+      <td>${atpEsc(nom)}<div style="color:#64748b;font-size:11px;margin-top:5px">Caja ${atpEsc(x.caja)} · Ref. ${atpEsc(x.idReferencia)}</div></td>
+      <td style="text-align:center">${atpCampoComp(x.registrado?.codigo,x.registrado?.serie)}</td>
+      <td style="text-align:center">${atpCampoComp(x.esperado?.codigo,x.esperado?.serie)}</td>
+      <td class="atp-comparativo-estado atp-comp-${atpEsc(estado)}">${simbolos[estado]||'⚠️'} ${atpEsc(x.descripcion||estado)}</td>
+    </tr>`;
+  }).join('');
+}
+function atpFiltrarComparativo(filtro) {
+  atpFiltroComparativoActual=filtro;
+  const filas = filtro === 'TODOS' ? atpComparativoActual
+    : atpComparativoActual.filter(x => filtro === 'NO_REGISTRADO'
+      ? ['NO_REGISTRADO','SIN_REFERENCIA'].includes(x.estado)
+      : x.estado===filtro);
+  const destino=document.getElementById('atpTbodyComparativo');
+  if(destino) destino.innerHTML=atpComparativoFilas(filas);
+  document.querySelectorAll('#atpIndicadores .atp-revision-kpi').forEach(x=>x.classList.toggle('activo',x.dataset.filtro===filtro));
+  const aviso=document.getElementById('atpAvisoFiltro');
+  if (aviso) aviso.textContent=filtro==='TODOS'?'Mostrando todas las herramientas.':`Mostrando ${filas.length} herramienta(s) del filtro seleccionado.`;
+}
 async function atpAbrir(id) {
   try {
     const d=await atpConsulta('atpSupervisorDetalle',{idRegistro:id});
     atpActual=d.entrega;
-    const e=d.entrega, h=d.herramientas||[];
-    const dato=(label,value)=>`<div style="margin:5px 0"><b>${atpEsc(label)}:</b> ${atpEsc(value||'-')}</div>`;
-    document.getElementById('atpTitulo').textContent=`Entrega ${e.idRegistro}`;
+    const e=d.entrega, resumen=d.resumen||{}, cmp=d.comparativo||[];
+    atpComparativoActual=cmp;
+    const campo=(etiqueta,valor)=>`<div class="atp-revision-dato"><strong>${atpEsc(etiqueta)}</strong>${atpEsc(valor||'-')}</div>`;
+    document.getElementById('atpTitulo').textContent=`Revisión de entrega ${e.idRegistro}`;
+    document.getElementById('atpSubtitulo').textContent=`${e.idRegistro} | ${e.estado}`;
+    const total=Number(resumen.total)||0;
+    const coinciden=Number(resumen.COINCIDE)||0;
+    const diferencias=Number(resumen.DIFERENCIA)||0;
+    const faltan=(Number(resumen.NO_REGISTRADO)||0)+(Number(resumen.SIN_REFERENCIA)||0);
+    const pendientes=Number(resumen.PENDIENTE_VERIFICACION)||0;
+    const porcentaje=Number(resumen.porcentaje)||0;
+    const indicador=(filtro,numero,titulo)=>`<button type="button" class="atp-revision-kpi" data-filtro="${filtro}" onclick="atpFiltrarComparativo('${filtro}')"><strong>${numero}</strong>${titulo}<small>Ver herramientas</small></button>`;
     document.getElementById('atpContenido').innerHTML=`
-      <div class="atp-panel">
-        ${dato('Responsable',e.responsable)} ${dato('Unidad',e.unidad)} ${dato('Servicio',e.servicio)}
-        ${dato('Supervisor asignado',e.supervisor)} ${dato('Fecha',e.fecha)}
-        ${dato('Estado',e.estado)} ${dato('Observación de revisión',e.observacionSupervisor)}
-        ${e.pdfUrl?`<a href="${atpEsc(e.pdfUrl)}" target="_blank" rel="noopener noreferrer">Ver PDF de entrega ↗</a>`:''}
-      </div>
-      <div style="overflow-x:auto"><table class="atp-detalle-tabla"><thead><tr>
-      <th>Herramienta</th><th>Caja original</th><th>Código</th><th>Serie</th><th>Estado</th></tr></thead><tbody>
-      ${h.map(x=>`<tr><td>${atpEsc(x.item)}</td><td>${atpEsc(x.caja)}</td><td>${atpEsc(x.codigo||'S/C')}</td><td>${atpEsc(x.serie||'S/S')}</td><td>${atpEsc(x.estado)}</td></tr>`).join('')}
-      </tbody></table></div>`;
+      <section class="atp-panel"><h3>Datos generales</h3>
+        <div class="atp-revision-datos">
+        ${campo('👨‍💼 Supervisor',e.supervisor)} ${campo('📋 Estado',e.estado)}
+        ${campo('📅 Fecha',e.fecha)} ${campo('🏭 Unidad',e.unidad)}
+        ${campo('🔧 Servicio',e.servicio)} ${campo('🕒 Turno',e.turno)}
+        ${campo('👷 Responsable',e.responsable)}</div>
+        ${e.pdfUrl?`<p><a href="${atpEsc(e.pdfUrl)}" target="_blank" rel="noopener noreferrer">📄 Abrir PDF de entrega</a></p>`:''}
+      </section>
+      <section class="atp-panel"><h3>Comparativo de herramientas</h3>
+        <div class="atp-progreso">
+          <div class="atp-progreso-top"><div>${coinciden} / ${total} herramientas con coincidencia confirmada<br><button type="button" class="atp-btn" style="margin-top:7px;font-size:11px;background:#111827" onclick="atpFiltrarComparativo('TODOS')">Ver todas las herramientas</button></div>
+          <div><strong>${porcentaje}%</strong> <span style="font-size:12px">Coincidencia verificada</span></div></div>
+          <div class="atp-progreso-track"><div class="atp-progreso-bar" style="width:${porcentaje}%"></div></div>
+        </div>
+        <div class="atp-revision-kpis" id="atpIndicadores">
+          ${indicador('COINCIDE',coinciden,'✅ Coinciden')}
+          ${indicador('DIFERENCIA',diferencias,'⚠️ Diferencias')}
+          ${indicador('NO_REGISTRADO',faltan,'⚪ Sin registrar / referencia')}
+          ${indicador('PENDIENTE_VERIFICACION',pendientes,'🟡 Por verificar')}
+        </div>
+        <div class="atp-revision-aviso">El porcentaje solo cuenta coincidencias con verificación física confirmada en ANTAPACCAY_DETALLE. Las herramientas pendientes de inventario físico se muestran como «Por verificar», aunque sus códigos coincidan.</div>
+        <p id="atpAvisoFiltro" class="atp-nota">Mostrando todas las herramientas.</p>
+        <div style="overflow-x:auto"><table class="atp-comparativo-tabla"><thead><tr>
+          <th>Foto</th><th>Herramienta</th><th>Registrado</th><th>Esperado</th><th>Estado</th>
+        </tr></thead><tbody id="atpTbodyComparativo"></tbody></table></div>
+      </section>`;
+    atpFiltrarComparativo('TODOS');
     document.getElementById('atpRevisor').innerHTML='<option value="">Seleccionar supervisor</option>'+atpSupervisores.map(s=>`<option value="${atpEsc(s)}">${atpEsc(s)}</option>`).join('');
     document.getElementById('atpObservacion').value=e.observacionSupervisor||'';
     document.getElementById('atpAprobar').disabled=e.estado==='DEVUELTO'||e.estado==='APROBADO';
