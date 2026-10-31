@@ -672,10 +672,7 @@
     <section class="screen" id="screen2">
       <div class="card">
         <h2>Equipos asignados</h2>
-        <div id="avisoPruebas" class="aviso-pruebas">ANTAPACCAY · El botón Guardar registrará una entrega real y generará su PDF. Verifica todos los datos antes de confirmar. Las demás unidades están bloqueadas en esta versión.</div>
-        <div id="antapaccaySelector" class="antapaccay-selector" style="display:none;">
-          <div class="resumen-antapaccay" id="resumenCajaAntapaccay"></div>
-        </div>
+
         <div class="equipos-grid" id="equiposContainer"></div>
 
         <div class="actions">
@@ -720,8 +717,6 @@
       items: []
     };
 
-    // Esta versión permite guardar únicamente en ANTAPACCAY. Chile sigue bloqueado aquí.
-    const GUARDADO_HABILITADO_SOLO_ANTAPACCAY = true;
     let envioEnCurso = false;
     let inventarioChile = [];
     let secuenciaConsultaUnidad = 0;
@@ -758,18 +753,10 @@
     let EQUIPOS = EQUIPOS_BASE.map(equipo => ({...equipo}));
 
     function actualizarAvisoGuardado() {
-      const unidad = document.getElementById('unidad').value;
-      const aviso = document.getElementById('avisoPruebas');
+      // Chile y Antapaccay tienen sus rutas de guardado en el mismo backend.
       const boton = document.getElementById('btnGuardar');
-      if (esAntapaccay(unidad)) {
-        aviso.textContent = 'ANTAPACCAY · Guardar registrará una entrega REAL en el KARDEX y generará su PDF. Revisa los datos antes de confirmar.';
-        boton.disabled = envioEnCurso;
-        boton.textContent = envioEnCurso ? 'Guardando...' : 'Guardar entrega';
-      } else {
-        aviso.textContent = 'MODO CONSULTA · Guardado deshabilitado para esta unidad en esta versión de pruebas.';
-        boton.disabled = true;
-        boton.textContent = 'Guardar (deshabilitado)';
-      }
+      boton.disabled = envioEnCurso || consultandoUnidad || !inventarioListo;
+      boton.textContent = envioEnCurso ? 'Guardando...' : 'Guardar entrega';
     }
 
     function configurarTarjetasPorUnidad(unidad) {
@@ -988,12 +975,7 @@ async function loadInitialData() {
     }
 
     function configurarInventarioAntapaccay(items) {
-      const cajas = [...new Set(items.map(x => String(x.cajaOriginal || '').trim()).filter(Boolean))].sort();
-      document.getElementById('antapaccaySelector').style.display = '';
-      document.getElementById('resumenCajaAntapaccay').textContent =
-        'ANTAPACCAY · ' + items.length + ' registros en ' + cajas.length +
-        ' cajas de referencia. Marca las herramientas que tienes y selecciona libremente su código o serie. ' +
-        'Si no tiene identificación, usa S/C o S/S. Inventario pendiente de verificación física.';
+      // El catálogo se muestra directamente, igual que para Chile.
       document.getElementById('equiposContainer').style.display = '';
       buildEquipos();
       inventarioListo = true;
@@ -1613,19 +1595,16 @@ function goToStep2() {
     }
 
     async function guardar() {
-      if (!GUARDADO_HABILITADO_SOLO_ANTAPACCAY ||
-          !esAntapaccay(document.getElementById('unidad').value)) {
-        alert('El guardado está habilitado solo para Antapaccay en esta versión.');
+      if (envioEnCurso || consultandoUnidad || !inventarioListo) {
+        if (!envioEnCurso) alert('Espera a que el inventario termine de cargar.');
         return;
       }
-      if (envioEnCurso) return;
       const err1 = validarPaso1();
       if (err1) {
         alert(err1);
         goToStep1();
         return;
       }
-
       const err2 = validarEquipos();
       if (err2) {
         alert(err2);
@@ -1638,12 +1617,14 @@ function goToStep2() {
         alert('Selecciona al menos una herramienta antes de guardar.');
         return;
       }
+      const unidad = payload.general.unidad || document.getElementById('unidad').value;
+      const nombreUnidad = esAntapaccay(unidad) ? 'Antapaccay' : unidad;
       const confirmado = confirm(
-        '¿Confirmas la entrega REAL de Antapaccay?\n\n' +
+        '¿Confirmas la entrega de herramientas de ' + nombreUnidad + '?\n\n' +
         'Andamiero: ' + payload.general.responsable + '\n' +
         'Servicio: ' + payload.general.servicio + '\n' +
         'Herramientas seleccionadas: ' + elegidos.length + '\n\n' +
-        'Se registrará en el KARDEX y se intentará generar el PDF.'
+        'Se registrará en el KARDEX y se generará el PDF correspondiente.'
       );
       if (!confirmado) return;
 
@@ -1662,7 +1643,7 @@ function goToStep2() {
         goToStep3(mensaje);
       } catch (err) {
         alert('No se pudo confirmar el guardado: ' + err.message +
-          '\nRevisa ANTAPACCAY_KARDEX antes de intentarlo nuevamente.');
+          '\nRevisa el KARDEX de ' + nombreUnidad + ' antes de intentarlo nuevamente.');
       } finally {
         envioEnCurso = false;
         actualizarAvisoGuardado();
