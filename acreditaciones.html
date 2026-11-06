@@ -1,0 +1,114 @@
+<!DOCTYPE html><html lang="es"><head><base target="_top"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIMARZA | Administración</title><style>
+:root{font-family:system-ui,Arial,sans-serif;color:#14243c;background:#f1f5fa}*{box-sizing:border-box}body{margin:0}header{background:#101929;color:white;padding:20px max(4vw,18px)}header h1{margin:0;font-size:25px}header p{color:#bac9e2;margin:8px 0 0}.wrap{max-width:1200px;margin:23px auto;padding:0 16px}.card{background:white;border:1px solid #dbe4f0;border-radius:15px;padding:20px;margin-bottom:17px;box-shadow:0 5px 22px #1d34450b}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.row>div{flex:1;min-width:175px}label{display:block;font-size:12px;font-weight:750;margin-bottom:6px}input,select,textarea{width:100%;border:1px solid #bdcbe0;border-radius:9px;padding:10px 12px;font:inherit;min-height:42px}input[type=file]{padding:8px}textarea{min-height:78px}button{background:#2559ca;color:white;border:none;border-radius:9px;padding:11px 16px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.soft{background:#e8effc;color:#1c478e}.green{background:#15955a}.muted{color:#63758b;font-size:13px}.alert{background:#fff0d1;border:1px solid #f4ce7e;border-radius:9px;padding:11px;color:#765114;font-size:13px}.err{color:#b42318}.hidden{display:none}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th{background:#101929;color:white;text-align:left;padding:11px;white-space:nowrap}td{padding:10px;border-bottom:1px solid #e6ecf4;vertical-align:top}td button{font-size:12px;padding:7px 9px}.tag{background:#e9f1fe;border-radius:12px;padding:3px 8px;font-size:12px}footer{text-align:center;color:#6b7c90;font-size:12px;margin:28px}</style></head><body>
+<header><h1>DIMARZA | Gestión de acreditaciones</h1><p>Administración de certificados · Acceso desde Visualización</p></header><div id="conexion" class="muted" style="text-align:center;margin:10px">Conectando con Apps Script…</div><main class="wrap">
+<section id="login" class="card"><h2>Acceso administrativo</h2><div class="alert">Versión inicial: se valida la misma clave de rol RESIDENTE registrada en DATA ACCESOS. Se solicitará nuevamente hasta integrar la sesión compartida de Visualización.</div><div class="row"><div><label for="clave">Clave DIMARZA (RESIDENTE)</label><input type="password" id="clave" autocomplete="current-password"></div><div style="flex:0"><button id="btnLogin" onclick="entrar()">Ingresar</button></div></div><p id="loginMsg" class="err"></p></section>
+<section id="panel" class="hidden"><div class="card"><div class="toolbar"><div><h2 style="margin:0">Certificados de personal</h2><p class="muted">Solo los documentos registrados; no implica habilitación oficial en Antapaccay.</p></div><div><button class="soft" onclick="cargar()">Actualizar</button> <button class="soft" onclick="salir()">Cerrar sesión</button></div></div><p id="dbInfo" class="muted"></p></div>
+<div class="card"><h3>1. Generar acceso para un trabajador</h3><p class="muted">La clave se mostrará una sola vez. Envíala por un canal privado al trabajador; no la publiques en grupos.</p><div class="row"><div><label>Trabajador actual</label><select id="usuarioPin"></select></div><div style="flex:0"><button onclick="generarPin()">Generar / restablecer clave</button></div></div><div id="pinResult" class="alert hidden"></div></div>
+<div class="card"><h3>2. Subir certificado PDF</h3><div class="alert">PDF máximo 4 MB. Los archivos se guardan en Drive privado. Se admiten documentos históricos, pero no habilitan automáticamente a trabajadores fuera de la plantilla actual.</div><div class="row"><div><label>DNI del titular</label><input id="dni" maxlength="8" inputmode="numeric" placeholder="8 dígitos"></div><div><label>Nombre (solo personal histórico)</label><input id="nombreHistorico" placeholder="Si no figura en DATA DE PERSONAL"></div><div><label>Curso o capacitación</label><input id="curso" placeholder="Ej. Supervisor de izajes"></div></div><div class="row" style="margin-top:12px"><div><label>Entidad emisora</label><input id="emisor" placeholder="Ej. MSA / CFC Group / Layher"></div><div><label>Fecha de emisión</label><input id="emision" type="date"></div><div><label>Fecha de vencimiento (si consta)</label><input id="vencimiento" type="date"></div></div><div class="row" style="margin-top:12px"><div><label>N.º de certificado (opcional)</label><input id="numero"></div><div><label>PDF original</label><input type="file" id="pdf" accept="application/pdf,.pdf"></div><div style="flex:0"><button id="btnGuardar" class="green" onclick="guardar()">Guardar certificado</button></div></div><p id="uploadMsg" class="muted"></p></div>
+<div class="card"><div class="toolbar"><h3>3. Biblioteca de certificados <span id="total" class="tag"></span></h3><div><input id="filtro" placeholder="Buscar DNI, trabajador o curso" oninput="render()" style="width:280px"></div></div><div class="table-wrap"><table><thead><tr><th>Titular</th><th>Curso</th><th>Emisor</th><th>Emisión</th><th>Vencimiento</th><th>Archivo</th></tr></thead><tbody id="tabla"></tbody></table></div><p id="panelMsg" class="muted"></p></div></section></main><footer>© DIMARZA · Documentos con control de acceso</footer>
+<script>
+
+// PEGA LA URL /exec DE TU IMPLEMENTACION DE APPS SCRIPT.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUL5LGdXro4fzbGkBHsvP1cGvtEQe7IYFH2k-l9LO_cx0kTcBDrBNtHlmc5sX1VINl/exec';
+const CANAL = 'dimarza-acr-v1';
+let puenteFrame, puenteListo = false, seq = 0;
+const pendientes = new Map();
+function iniciarPuente() {
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(APPS_SCRIPT_URL)) {
+    document.getElementById('conexion').textContent='Configura primero la URL /exec de Apps Script en este HTML.';
+    return;
+  }
+  puenteFrame = document.createElement('iframe');
+  puenteFrame.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none';
+  puenteFrame.title='Conexión con DIMARZA';
+  puenteFrame.src=APPS_SCRIPT_URL;
+  document.body.appendChild(puenteFrame);
+}
+window.addEventListener('message', e => {
+  if (!puenteFrame || e.source !== puenteFrame.contentWindow) return;
+  const m=e.data;
+  if(!m || m.channel!==CANAL) return;
+  if(m.kind==='ready') {
+    puenteListo=true;
+    document.getElementById('conexion').textContent='Conectado a DIMARZA';
+    return;
+  }
+  if(m.kind==='result') {
+    const task=pendientes.get(m.id);
+    if(!task) return;
+    pendientes.delete(m.id);
+    clearTimeout(task.timer);
+    m.ok ? task.resolve(m.payload) : task.reject(Error(m.payload?.message || 'Error de conexión'));
+  }
+});
+function api(method,...args) {
+  return new Promise((resolve,reject)=>{
+    if(!puenteListo) return reject(Error('Aún no se estableció la conexión con Apps Script. Revisa la URL y el origen de GitHub.'));
+    const id=String(++seq);
+    const timer=setTimeout(()=>{pendientes.delete(id);reject(Error('La operación tardó demasiado. Comprueba tu conexión.'));},90000);
+    pendientes.set(id,{resolve,reject,timer});
+    puenteFrame.contentWindow.postMessage({channel:CANAL,kind:'request',id,method,args},'*');
+  });
+}
+function bajarPdf(r,preview=false){
+  const bin=atob(r.base64), bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+  const a=document.createElement('a');a.href=url;a.download=r.filename||'certificado.pdf';
+  if(preview){const w=window.open(url,'_blank','noopener,noreferrer');if(!w){a.click()}}else{a.click()}
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
+}
+window.addEventListener('DOMContentLoaded',iniciarPuente);
+
+let TOKEN='',CERTS=[],PERSONAL=[];
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function msg(e){return e&&e.message?e.message:'Error inesperado.';}
+async function entrar(){
+ const b=$('btnLogin');b.disabled=true;$('loginMsg').textContent='Validando…';
+ try{
+   const res=await api('loginAdmin',$('clave').value);TOKEN=res.token;PERSONAL=res.personal;
+   $('clave').value='';$('login').classList.add('hidden');$('panel').classList.remove('hidden');
+   $('dbInfo').textContent='Base conectada: '+res.databaseId;
+   $('usuarioPin').innerHTML=PERSONAL.map(p=>`<option value="${esc(p.dni)}">${esc(p.nombre)} (${esc(p.dni)})</option>`).join('');
+   await cargar();
+ }catch(e){$('loginMsg').textContent=msg(e)}finally{b.disabled=false}
+}
+function salir(){TOKEN='';CERTS=[];PERSONAL=[];$('panel').classList.add('hidden');$('login').classList.remove('hidden');}
+async function cargar(){
+ $('panelMsg').textContent='Consultando…';
+ try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados;PERSONAL=r.personal;$('total').textContent=CERTS.length;$('panelMsg').textContent='';render()}
+ catch(e){$('panelMsg').textContent=msg(e)}
+}
+function render(){
+ const q=$('filtro').value.toUpperCase().trim();
+ const v=CERTS.filter(c=>[c.dni,c.nombre,c.curso,c.emisor,c.numero].join(' ').toUpperCase().includes(q));
+ $('tabla').innerHTML=v.map(c=>`<tr><td><strong>${esc(c.nombre)}</strong><br><small>${esc(c.dni)}</small></td><td>${esc(c.curso)}<br><small>${esc(c.numero||'')}</small></td><td>${esc(c.emisor)}</td><td>${esc(c.emision||'Por confirmar')}</td><td>${esc(c.vencimiento||'Por confirmar')}</td><td><button class="soft" data-cert="${esc(c.id)}">Descargar PDF</button></td></tr>`).join('')||'<tr><td colspan="6">Sin resultados</td></tr>';
+}
+$('tabla').addEventListener('click',async e=>{
+ const b=e.target.closest('button[data-cert]');if(!b)return;b.disabled=true;$('panelMsg').textContent='Preparando archivo…';
+ try{const pdf=await api('obtenerPdf',TOKEN,b.dataset.cert,true);bajarPdf(pdf);$('panelMsg').textContent='Descarga preparada.'}
+ catch(err){$('panelMsg').textContent=msg(err)}finally{b.disabled=false}
+});
+async function generarPin(){
+ const dni=$('usuarioPin').value;if(!dni)return;
+ $('pinResult').classList.remove('hidden');$('pinResult').textContent='Generando clave…';
+ try{const r=await api('generarClave',TOKEN,dni);$('pinResult').textContent='DNI '+r.dni+' · CLAVE: '+r.pin+' — entrégala privadamente; no aparecerá de nuevo.'}
+ catch(e){$('pinResult').textContent=msg(e)}
+}
+async function guardar(){
+ const f=$('pdf').files[0],b=$('btnGuardar');
+ if(!f){$('uploadMsg').textContent='Selecciona un PDF.';return}
+ if(f.size>4*1024*1024){$('uploadMsg').textContent='El PDF no debe superar 4 MB.';return}
+ if(!/\.pdf$/i.test(f.name)){$('uploadMsg').textContent='Solo PDF.';return}
+ b.disabled=true;$('uploadMsg').textContent='Leyendo archivo…';
+ try{
+   const base64=await new Promise((resolve,reject)=>{
+     const rd=new FileReader();rd.onload=()=>resolve(String(rd.result).split(',')[1]);rd.onerror=()=>reject(Error('Error al leer el PDF.'));rd.readAsDataURL(f);
+   });
+   const d={dni:$('dni').value,nombreHistorico:$('nombreHistorico').value,curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,filename:f.name,base64};
+   $('uploadMsg').textContent='Guardando PDF en Drive…';
+   const r=await api('guardarCertificado',TOKEN,d);$('uploadMsg').textContent='Certificado guardado: '+r.id;$('pdf').value='';await cargar();
+ }catch(e){$('uploadMsg').textContent=msg(e)}finally{b.disabled=false}
+}
+</script></body></html>
