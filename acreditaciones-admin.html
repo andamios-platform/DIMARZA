@@ -9,41 +9,40 @@
 <script>
 
 
-// API segura sin iframe: lectura mediante JSONP y escrituras POST text/plain.
+// API sin iframe: fetch GET/JSON como Herramientas y POST privado text/plain.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUL5LGdXro4fzbGkBHsvP1cGvtEQe7IYFH2k-l9LO_cx0kTcBDrBNtHlmc5sX1VINl/exec';
-function jsonp(params){
-  return new Promise((resolve,reject)=>{
-    const id='acrCb_'+crypto.randomUUID().replaceAll('-','');
-    const url=new URL(APPS_SCRIPT_URL);
-    Object.entries({...params,cb:id,_:id}).forEach(([k,v])=>url.searchParams.set(k,v));
-    const script=document.createElement('script');
-    script.referrerPolicy='no-referrer';
-    let timer;
-    function clean(){clearTimeout(timer);script.remove();delete window[id];}
-    window[id]=resp=>{clean();resolve(resp)};
-    timer=setTimeout(()=>{clean();reject(Error('No responde Apps Script. Revisa la implementación.'));},18000);
-    script.onerror=()=>{clean();reject(Error('No se pudo contactar Apps Script.'));};
-    document.head.appendChild(script); 
-  });
+/** Mismo patrón de Herramientas: fetch GET y respuesta JSON. */
+async function getJson(params) {
+  const url = new URL(APPS_SCRIPT_URL);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,String(v)));
+  const response = await fetch(url.toString(), {method:'GET',cache:'no-store',redirect:'follow'});
+  if (!response.ok) throw new Error('Apps Script devolvió HTTP '+response.status);
+  const data = await response.json();
+  if (data && data.ok === false) throw new Error(data.error || data.message || 'Error en Apps Script');
+  return data;
 }
-// A single queue prevents different concurrent JSONP requests mixing callbacks.
-let jsonpQueue=Promise.resolve();
-function qjsonp(params){const p=jsonpQueue.then(()=>jsonp(params));jsonpQueue=p.catch(()=>{});return p;}
+// Evita el sondeo simultáneo del resultado de diferentes solicitudes.
+let getQueue = Promise.resolve();
+function qget(params){
+  const job=getQueue.then(()=>getJson(params));
+  getQueue=job.catch(()=>{});
+  return job;
+}
 function newRequestId(){return Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');}
 async function api(method,...args){
   if(method==='consultaDni'){
-    const r=await qjsonp({op:'consulta',dni:args[0]});
+    const r=await qget({action:'consulta',dni:args[0]});
     if(!r.ok)throw Error(r.error||'Error de consulta');
     return r.data;
   }
   const id=newRequestId();
   // text/plain evita preflight CORS. La respuesta POST es opaca y
-  // se recoge usando un ID aleatorio de un único uso por JSONP.
+  // se recoge mediante GET JSON con ID aleatorio de un único uso.
   const body=JSON.stringify({id,method,args});
   const start=Date.now();
   await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body,redirect:'follow',referrerPolicy:'no-referrer'});
   while(Date.now()-start<90000){
-    const r=await qjsonp({op:'resultado',id});
+    const r=await qget({action:'resultado',id});
     if(r.pending){await new Promise(resolve=>setTimeout(resolve,850));continue;}
     if(!r.ok)throw Error(r.error||'Error de servidor');
     return r.data;
@@ -67,7 +66,7 @@ async function bajarCertificado(token,id,admin,onProgress){
 }
 async function probarConexion(){
   const el=document.getElementById('conexion');
-  try{const r=await qjsonp({op:'ping'});if(!r.ok)throw Error(r.error);el.textContent='Conectado a DIMARZA';el.style.color='#15803d';}
+  try{const r=await qget({action:'ping'});if(!r.ok)throw Error(r.error);el.textContent='Conectado a DIMARZA';el.style.color='#15803d';}
   catch(e){el.textContent='No se pudo conectar con Apps Script: '+e.message;el.style.color='#b42318';}
 }
 window.addEventListener('DOMContentLoaded',probarConexion);
