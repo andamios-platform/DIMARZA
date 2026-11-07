@@ -8,57 +8,69 @@
 <div class="card"><div class="toolbar"><h3>3. Biblioteca de certificados <span id="total" class="tag"></span></h3><div><input id="filtro" placeholder="Buscar DNI, trabajador o curso" oninput="render()" style="width:280px"></div></div><div class="table-wrap"><table><thead><tr><th>Titular</th><th>Curso</th><th>Emisor</th><th>Emisión</th><th>Vencimiento</th><th>Archivo</th></tr></thead><tbody id="tabla"></tbody></table></div><p id="panelMsg" class="muted"></p></div></section></main><footer>© DIMARZA · Documentos con control de acceso</footer>
 <script>
 
-// PEGA LA URL /exec DE TU IMPLEMENTACION DE APPS SCRIPT.
+
+// API segura sin iframe: lectura mediante JSONP y escrituras POST text/plain.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUL5LGdXro4fzbGkBHsvP1cGvtEQe7IYFH2k-l9LO_cx0kTcBDrBNtHlmc5sX1VINl/exec';
-const CANAL = 'dimarza-acr-v1';
-let puenteFrame, puenteListo = false, seq = 0;
-const pendientes = new Map();
-function iniciarPuente() {
-  if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(APPS_SCRIPT_URL)) {
-    document.getElementById('conexion').textContent='Configura primero la URL /exec de Apps Script en este HTML.';
-    return;
-  }
-  puenteFrame = document.createElement('iframe');
-  puenteFrame.style.cssText='position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none';
-  puenteFrame.title='Conexión con DIMARZA';
-  puenteFrame.src=APPS_SCRIPT_URL;
-  document.body.appendChild(puenteFrame);
-}
-window.addEventListener('message', e => {
-  if (!puenteFrame || e.source !== puenteFrame.contentWindow) return;
-  const m=e.data;
-  if(!m || m.channel!==CANAL) return;
-  if(m.kind==='ready') {
-    puenteListo=true;
-    document.getElementById('conexion').textContent='Conectado a DIMARZA';
-    return;
-  }
-  if(m.kind==='result') {
-    const task=pendientes.get(m.id);
-    if(!task) return;
-    pendientes.delete(m.id);
-    clearTimeout(task.timer);
-    m.ok ? task.resolve(m.payload) : task.reject(Error(m.payload?.message || 'Error de conexión'));
-  }
-});
-function api(method,...args) {
+function jsonp(params){
   return new Promise((resolve,reject)=>{
-    if(!puenteListo) return reject(Error('Aún no se estableció la conexión con Apps Script. Revisa la URL y el origen de GitHub.'));
-    const id=String(++seq);
-    const timer=setTimeout(()=>{pendientes.delete(id);reject(Error('La operación tardó demasiado. Comprueba tu conexión.'));},90000);
-    pendientes.set(id,{resolve,reject,timer});
-    puenteFrame.contentWindow.postMessage({channel:CANAL,kind:'request',id,method,args},'*');
+    const id='acrCb_'+crypto.randomUUID().replaceAll('-','');
+    const url=new URL(APPS_SCRIPT_URL);
+    Object.entries({...params,cb:id,_:id}).forEach(([k,v])=>url.searchParams.set(k,v));
+    const script=document.createElement('script');
+    script.referrerPolicy='no-referrer';
+    let timer;
+    function clean(){clearTimeout(timer);script.remove();delete window[id];}
+    window[id]=resp=>{clean();resolve(resp)};
+    timer=setTimeout(()=>{clean();reject(Error('No responde Apps Script. Revisa la implementación.'));},18000);
+    script.onerror=()=>{clean();reject(Error('No se pudo contactar Apps Script.'));};
+    document.head.appendChild(script); 
   });
 }
-function bajarPdf(r,preview=false){
-  const bin=atob(r.base64), bytes=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-  const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
-  const a=document.createElement('a');a.href=url;a.download=r.filename||'certificado.pdf';
-  if(preview){const w=window.open(url,'_blank','noopener,noreferrer');if(!w){a.click()}}else{a.click()}
-  setTimeout(()=>URL.revokeObjectURL(url),120000);
+// A single queue prevents different concurrent JSONP requests mixing callbacks.
+let jsonpQueue=Promise.resolve();
+function qjsonp(params){const p=jsonpQueue.then(()=>jsonp(params));jsonpQueue=p.catch(()=>{});return p;}
+function newRequestId(){return Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');}
+async function api(method,...args){
+  if(method==='consultaDni'){
+    const r=await qjsonp({op:'consulta',dni:args[0]});
+    if(!r.ok)throw Error(r.error||'Error de consulta');
+    return r.data;
+  }
+  const id=newRequestId();
+  // text/plain evita preflight CORS. La respuesta POST es opaca y
+  // se recoge usando un ID aleatorio de un único uso por JSONP.
+  const body=JSON.stringify({id,method,args});
+  const start=Date.now();
+  await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body,redirect:'follow',referrerPolicy:'no-referrer'});
+  while(Date.now()-start<90000){
+    const r=await qjsonp({op:'resultado',id});
+    if(r.pending){await new Promise(resolve=>setTimeout(resolve,850));continue;}
+    if(!r.ok)throw Error(r.error||'Error de servidor');
+    return r.data;
+  }
+  throw Error('Tiempo agotado. Comprueba los cambios en Sheets antes de repetir.');
 }
-window.addEventListener('DOMContentLoaded',iniciarPuente);
+async function bajarCertificado(token,id,admin,onProgress){
+  const info=await api('pdfInfo',token,id,admin);
+  const parts=[];let received=0;
+  for(let i=0;i<info.parts;i++){
+    const part=await api('pdfChunk',token,id,admin,i);
+    const binary=atob(part.base64),data=new Uint8Array(binary.length);
+    for(let j=0;j<binary.length;j++)data[j]=binary.charCodeAt(j);
+    parts.push(data);received+=data.length;
+    if(onProgress)onProgress(Math.round(received/info.size*100));
+  }
+  const blob=new Blob(parts,{type:'application/pdf'});
+  const objectUrl=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=objectUrl;a.download=info.filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+}
+async function probarConexion(){
+  const el=document.getElementById('conexion');
+  try{const r=await qjsonp({op:'ping'});if(!r.ok)throw Error(r.error);el.textContent='Conectado a DIMARZA';el.style.color='#15803d';}
+  catch(e){el.textContent='No se pudo conectar con Apps Script: '+e.message;el.style.color='#b42318';}
+}
+window.addEventListener('DOMContentLoaded',probarConexion);
 
 let TOKEN='',CERTS=[],PERSONAL=[];
 const $=id=>document.getElementById(id);
@@ -87,7 +99,7 @@ function render(){
 }
 $('tabla').addEventListener('click',async e=>{
  const b=e.target.closest('button[data-cert]');if(!b)return;b.disabled=true;$('panelMsg').textContent='Preparando archivo…';
- try{const pdf=await api('obtenerPdf',TOKEN,b.dataset.cert,true);bajarPdf(pdf);$('panelMsg').textContent='Descarga preparada.'}
+ try{await bajarCertificado(TOKEN,b.dataset.cert,true,p=>{$('panelMsg').textContent='Descargando PDF… '+p+'%';});$('panelMsg').textContent='Descarga preparada.'}
  catch(err){$('panelMsg').textContent=msg(err)}finally{b.disabled=false}
 });
 async function generarPin(){
