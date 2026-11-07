@@ -462,6 +462,15 @@ font-weight:bold;
 .control-evaluacion{
   background:linear-gradient(135deg,#7c3aed,#5b21b6);
 }
+.control-acreditaciones{
+  background:linear-gradient(135deg,#0f766e,#164e63);
+}
+.control-acreditaciones .icono-certificado{
+  width:90px;
+  height:90px;
+  margin-bottom:10px;
+  flex-shrink:0;
+}
 .control-contratacion{
   background:linear-gradient(135deg,#be123c,#881337);
 }
@@ -879,6 +888,25 @@ Centro de consultas y visualización
 
     <span>Eliminar Herramientas</span>
 
+  </a>
+
+
+  <!-- ADMINISTRACION DE ACREDITACIONES: SOLO RESIDENTE -->
+  <a
+    class="btn control-acreditaciones modulo-protegido"
+    data-permiso="RESIDENTE"
+    href="acreditaciones-admin.html"
+  >
+    <div class="etiqueta-bloqueo">
+      🔒 Solo residente
+    </div>
+    <svg class="icono-certificado" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="18" y="10" width="60" height="74" rx="9" fill="white" fill-opacity=".17" stroke="white" stroke-width="4"/>
+      <path d="M31 28H65M31 39H58" stroke="white" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="48" cy="61" r="15" fill="#D1FAE5" stroke="white" stroke-width="3"/>
+      <path d="M41 61L46 66L56 55" stroke="#047857" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Administración de Acreditaciones</span>
   </a>
 
 </div>
