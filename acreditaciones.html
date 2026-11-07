@@ -1,8 +1,8 @@
 <!DOCTYPE html><html lang="es"><head><base target="_top"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIMARZA | Mis certificados</title><style>
 :root{font-family:system-ui,Arial,sans-serif;color:#14233d;background:#f1f5fa}*{box-sizing:border-box}body{margin:0}header{background:linear-gradient(110deg,#101c30,#245bdc);color:white;padding:25px max(5vw,20px)}header h1{margin:0;font-size:26px}header p{margin:8px 0 0;color:#d9e8ff}.wrap{max-width:970px;margin:25px auto;padding:0 16px}.card{background:white;border:1px solid #d8e2ee;border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 6px 24px #1c326410}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}label{font-size:13px;font-weight:700;display:block;margin-bottom:7px}input{height:43px;padding:8px 12px;border:1px solid #bdcadc;border-radius:9px;font:inherit;min-width:180px}button{background:#2255c6;color:white;border:0;border-radius:9px;padding:12px 17px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.soft{background:#e9f0ff;color:#194196}.muted{color:#5c7089;font-size:13px}.alert{padding:12px;background:#fff2d4;border-radius:10px;color:#71501a;margin:12px 0}.cert{display:flex;align-items:center;gap:16px;border:1px solid #e1e7f0;padding:14px;border-radius:12px;margin-top:12px;flex-wrap:wrap}.cert>div{flex:1;min-width:220px}.cert strong{display:block}.cert small{color:#52677d}.hidden{display:none}.err{color:#b42318;min-height:20px}#msg{padding-top:10px}footer{text-align:center;color:#627289;font-size:12px;margin:25px}</style></head><body>
 <header><h1>DIMARZA | Mi acreditación</h1><p>Consulta y descarga segura de certificados · Antapaccay</p></header><div id="conexion" class="muted" style="text-align:center;margin:10px">Conectando con Apps Script…</div><main class="wrap">
-<section id="login" class="card"><h2>Acceso del trabajador</h2><p class="muted">Ingresa tu DNI y la clave individual entregada por el administrador. El DNI por sí solo no permite descargar documentos.</p><div class="row"><div><label for="dni">DNI</label><input id="dni" maxlength="8" inputmode="numeric" placeholder="8 dígitos" autocomplete="username"></div><div><label for="pin">Clave personal</label><input id="pin" type="password" placeholder="Clave individual" autocomplete="current-password"></div><button id="entrar" onclick="entrar()">Consultar</button></div><p id="loginMsg" class="err"></p></section>
-<section id="dashboard" class="hidden"><div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 id="nombre" style="margin:0"></h2><p id="cargo" class="muted"></p></div><button class="soft" onclick="salir()">Cerrar sesión</button></div><div class="alert">Los certificados que se muestran son documentos registrados. La habilitación oficial para trabajar en Antapaccay se validará por separado.</div><h3>Mis certificados <span id="total"></span></h3><div id="listado"></div><div id="msg" class="muted"></div></div></section></main><footer>© DIMARZA · Gestión de acreditaciones y certificados</footer>
+<section id="login" class="card"><h2>Consulta tu acreditación</h2><p class="muted">Ingresa tu DNI para consultar los certificados registrados. Para descargar PDFs privados se verificará tu acceso cuando lo solicites.</p><div class="row"><div><label for="dni">DNI</label><input id="dni" maxlength="8" inputmode="numeric" placeholder="8 dígitos" autocomplete="off"></div><button id="entrar" onclick="entrar()">Consultar</button></div><p id="loginMsg" class="err"></p></section>
+<section id="dashboard" class="hidden"><div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 id="nombre" style="margin:0">Resultado de la consulta</h2><p id="cargo" class="muted"></p></div><button class="soft" onclick="salir()">Cerrar sesión</button></div><div class="alert">Los certificados que se muestran son documentos registrados. La habilitación oficial para trabajar en Antapaccay se validará por separado.</div><h3>Mis certificados <span id="total"></span></h3><div id="listado"></div><div id="msg" class="muted"></div></div></section></main><footer>© DIMARZA · Gestión de acreditaciones y certificados</footer>
 <script>
 
 // PEGA LA URL /exec DE TU IMPLEMENTACION DE APPS SCRIPT.
@@ -57,33 +57,43 @@ function bajarPdf(r,preview=false){
 }
 window.addEventListener('DOMContentLoaded',iniciarPuente);
 
-let TOKEN=''; const $=id=>document.getElementById(id);
+let TOKEN=''; let DNI_CONSULTADO=''; const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function msg(e){return e&&e.message?e.message:'No se pudo completar la operación.';}
 async function entrar(){
-  const b=$('entrar'); b.disabled=true; $('loginMsg').textContent='Verificando…';
+  const b=$('entrar'); b.disabled=true; $('loginMsg').textContent='Consultando…';
   try{
-    const r=await api('loginTrabajador',$('dni').value,$('pin').value);
-    TOKEN=r.token; $('nombre').textContent=r.perfil.nombre;
-    $('cargo').textContent=r.perfil.cargo+' · DNI '+r.perfil.dniOculto;
-    $('login').classList.add('hidden'); $('dashboard').classList.remove('hidden'); $('pin').value='';
-    await cargar();
+    const dni=$('dni').value.trim();
+    if(!/^\d{8}$/.test(dni))throw Error('Ingresa un DNI de 8 dígitos.');
+    const r=await api('consultaDni',dni);
+    DNI_CONSULTADO=dni; TOKEN='';
+    $('cargo').textContent='Consulta para DNI terminado en '+dni.slice(-4);
+    $('login').classList.add('hidden'); $('dashboard').classList.remove('hidden');
+    pintar(r.certificados||[]);
   }catch(e){$('loginMsg').textContent=msg(e)}finally{b.disabled=false}
 }
-async function cargar(){
- $('msg').textContent='Cargando certificados…';
- try{
-   const r=await api('listaTrabajador',TOKEN); $('total').textContent='('+r.certificados.length+')';
-   $('listado').innerHTML=r.certificados.length?r.certificados.map(c=>
-   `<div class="cert"><div><strong>${esc(c.curso)}</strong><small>${esc(c.emisor)} · Emisión: ${esc(c.emision||'Por confirmar')} · Vencimiento: ${esc(c.vencimiento||'Por confirmar')}</small></div><button data-cert="${esc(c.id)}">Descargar PDF</button></div>`).join(''):'<p class="muted">No hay certificados registrados para tu DNI.</p>';
-   $('msg').textContent='';
- }catch(e){$('msg').textContent=msg(e)}
+function pintar(certificados){
+  $('total').textContent='('+certificados.length+')';
+  $('listado').innerHTML=certificados.length?certificados.map(c=>
+  `<div class="cert"><div><strong>${esc(c.curso)}</strong><small>${esc(c.emisor)} · Emisión: ${esc(c.emision||'Por confirmar')} · Vencimiento: ${esc(c.vencimiento||'Por confirmar')}</small></div>${c.tienePdf?`<button data-cert="${esc(c.id)}">Descargar PDF</button>`:''}</div>`).join(''):'<p class="muted">No se encontraron certificados registrados para este DNI.</p>';
+  $('msg').textContent='Los PDF privados requieren verificación al descargarlos. Tener un certificado no implica habilitación oficial de Antapaccay.';
 }
-$('listado').addEventListener('click', async e=>{
-  const b=e.target.closest('button[data-cert]'); if(!b)return;
+$('listado').addEventListener('click',async e=>{
+  const b=e.target.closest('button[data-cert]');if(!b)return;
+  // Un DNI es un dato público/conocible, por lo que no autoriza por sí solo a leer PDFs privados.
+  let token=TOKEN;
+  if(!token){
+    const clave=window.prompt('Para descargar este PDF privado, introduce tu clave individual:');
+    if(clave===null)return;
+    if(!clave.trim()){$('msg').textContent='Para descargar necesitas tu clave individual.';return;}
+    b.disabled=true;$('msg').textContent='Verificando acceso…';
+    try{const r=await api('loginTrabajador',DNI_CONSULTADO,clave.trim());token=r.token;TOKEN=token;}
+    catch(err){$('msg').textContent=msg(err);b.disabled=false;return;}
+  }
   b.disabled=true;$('msg').textContent='Preparando certificado…';
-  try{const pdf=await api('obtenerPdf',TOKEN,b.dataset.cert,false);bajarPdf(pdf);$('msg').textContent='Descarga preparada.'}
-  catch(err){$('msg').textContent=msg(err)}finally{b.disabled=false}
+  try{const pdf=await api('obtenerPdf',token,b.dataset.cert,false);bajarPdf(pdf);$('msg').textContent='Descarga preparada.';}
+  catch(err){TOKEN='';$('msg').textContent=msg(err)}finally{b.disabled=false}
 });
-function salir(){TOKEN='';$('dashboard').classList.add('hidden');$('login').classList.remove('hidden');$('loginMsg').textContent=''}
+function salir(){TOKEN='';DNI_CONSULTADO='';$('dashboard').classList.add('hidden');$('login').classList.remove('hidden');$('loginMsg').textContent=''}
+$('dni').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
 </script></body></html>
