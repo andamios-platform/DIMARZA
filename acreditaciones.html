@@ -172,6 +172,12 @@
       .aside-panel{padding:19px}.pdf-panel iframe{min-height:350px;height:65vh}
     }
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none !important}}
+    .summary-actions{display:flex;flex-direction:column;gap:9px;align-items:stretch;min-width:145px;z-index:1}
+    .primary-refresh{background:rgba(1,174,155,.20)!important;border-color:rgba(111,228,206,.43)!important;color:#eafffa!important}
+    .primary-refresh:hover{background:rgba(1,174,155,.36)!important}
+    .refresh-meta{font-size:11px!important;color:#a5d3d7!important;margin-top:9px!important;line-height:1.5!important}
+    @media(min-width:651px) and (max-width:950px){.result-summary .summary-actions{grid-column:1/-1;flex-direction:row;justify-content:flex-end}}
+    @media(max-width:650px){.summary-actions{width:100%;flex-direction:row;flex-wrap:wrap}.summary-actions button{flex:1;min-width:132px}}
   </style>
 </head>
 <body>
@@ -231,8 +237,8 @@
     <section id="dashboard" class="hidden" aria-label="Resultados">
       <div class="result-summary">
         <div class="result-orb"><div><div id="numeroPrincipal" class="big">0</div><small>certificados</small></div></div>
-        <div class="result-title"><div class="eyebrow">Consulta realizada</div><h2>Tu biblioteca documental</h2><p id="dniOculto">DNI terminado en ••••</p></div>
-        <button class="btn-new" id="nuevaConsulta" type="button"><svg class="icon"><use href="#i-refresh"/></svg>Nueva consulta</button>
+        <div class="result-title"><div class="eyebrow">Consulta realizada</div><h2>Tu biblioteca documental</h2><p id="dniOculto">DNI terminado en ••••</p><p class="refresh-meta" id="actualizacionEstado" role="status" aria-live="polite">Consultando registros…</p></div>
+        <div class="summary-actions"><button class="btn-new primary-refresh" id="actualizarDatos" type="button" title="Consultar nuevamente los registros sin salir"><svg class="icon"><use href="#i-refresh"/></svg>Actualizar datos</button><button class="btn-new" id="nuevaConsulta" type="button">Otro DNI</button></div>
       </div>
       <div class="result-grid">
         <section class="panel" aria-labelledby="tituloDocumentos">
@@ -251,12 +257,6 @@
           <p class="inline-feedback" id="msg" role="status"></p>
         </section>
         <aside class="aside-stack">
-          <section class="panel aside-panel">
-            <h3><svg class="icon"><use href="#i-file"/></svg>Resumen de documentos</h3>
-            <div class="stat-row"><span class="stat-label">Certificados registrados</span><span class="stat-number" id="statTotal">0</span></div>
-            <div class="stat-row"><span class="stat-label">PDF disponibles</span><span class="stat-number green" id="statPublicos">0</span></div>
-            <div class="stat-row"><span class="stat-label">Documentos restringidos</span><span class="stat-number" id="statPrivados">0</span></div>
-          </section>
           <section class="panel aside-panel" id="vigenciasPanel">
             <h3><svg class="icon"><use href="#i-calendar"/></svg>Mis vencimientos</h3>
             <p class="validity-intro">Fechas de documentos registradas por DIMARZA.</p>
@@ -297,6 +297,13 @@
     let minaActual = '';
     let urlVistaPdf = null;
     let getQueue = Promise.resolve();
+    // El DNI se conserva solo durante esta pestaña; el registro se consulta siempre a Apps Script.
+    const DNI_TAB_KEY = 'dimarzaAcreditacionesDniTab';
+    const CAMBIO_KEY = 'dimarza_acreditaciones_updated';
+    let refreshRunning = false;
+    let lastRefreshAt = 0;
+    const REFRESH_MS = 60000;
+    const REFRESH_MIN_GAP_MS = 5000;
 
     async function getJson(params) {
       const url = new URL(APPS_SCRIPT_URL);
@@ -322,13 +329,15 @@
     }
     function minaCertificado(c) {return c.mina||'SIN ASIGNAR';}
     function certificadosDeMina() {return certificadosActuales.filter(c=>!minaActual||minaCertificado(c)===minaActual);}
-    function prepararSelectorMinas() {
+    function prepararSelectorMinas(conservarSeleccion=false) {
+      const seleccionAnterior=conservarSeleccion?minaActual:'';
       const minas=[...new Set([
         ...certificadosActuales.map(minaCertificado),
         ...vigenciasActuales.emo.map(v=>v.mina).filter(Boolean)
       ])].sort((a,b)=>a.localeCompare(b,'es'));
       $('filtroMina').innerHTML='<option value="">Todas las unidades mineras</option>'+minas.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(nombreMina(m))}</option>`).join('');
-      minaActual='';$('filtroMina').value='';
+      minaActual=minas.includes(seleccionAnterior)?seleccionAnterior:'';
+      $('filtroMina').value=minaActual;
     }
     function fmtDate(raw) {
       const s=String(raw||'').trim();
@@ -361,6 +370,49 @@
         $('loginMsg').textContent='No se pudo conectar con DIMARZA. '+message(err);
       }
     }
+    function actualizarEtiquetaHora() {
+      const hora=new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+      $('actualizacionEstado').textContent='Datos actualizados a las '+hora+' · actualización automática al regresar y cada 60 s';
+    }
+    function aplicarDatosConsulta(data,conservarFiltros=false) {
+      certificadosActuales=Array.isArray(data.certificados)?data.certificados:[];
+      vigenciasActuales={
+        emo:Array.isArray(data.vigencias?.emo)?data.vigencias.emo:[],
+        chile:Array.isArray(data.vigencias?.chile)?data.vigencias.chile:[]
+      };
+      minasChileActuales=new Set(Array.isArray(data.minasChile)?data.minasChile:[]);
+      if(!conservarFiltros){
+        filtroActual='todos';$('busqueda').value='';
+        $('filtros').querySelectorAll('button').forEach(b=>{
+          const activo=b.dataset.filter==='todos';b.classList.toggle('active',activo);
+          b.setAttribute('aria-pressed',String(activo));
+        });
+        cerrarVistaPdf();
+      }
+      prepararSelectorMinas(conservarFiltros);
+      $('dniOculto').textContent='Consulta asociada al DNI ••••'+DNI_CONSULTADO.slice(-4);
+      renderCertificados();
+      lastRefreshAt=Date.now();
+      actualizarEtiquetaHora();
+    }
+    async function actualizarSinSalir(forzar=false) {
+      if(!DNI_CONSULTADO || refreshRunning || document.visibilityState==='hidden')return;
+      if(!forzar && Date.now()-lastRefreshAt<REFRESH_MIN_GAP_MS)return;
+      const dni=DNI_CONSULTADO;
+      const boton=$('actualizarDatos');
+      refreshRunning=true;boton.disabled=true;
+      $('actualizacionEstado').textContent='Buscando nuevos registros en DIMARZA…';
+      try{
+        const response=await qget({action:'consulta',dni,t:Date.now()});
+        if(!response.ok)throw Error(response.error||'No se pudo actualizar la información.');
+        if(dni!==DNI_CONSULTADO)return;
+        aplicarDatosConsulta(response.data||{},true);
+      }catch(err){
+        if(dni===DNI_CONSULTADO){
+          $('actualizacionEstado').textContent='No se pudo actualizar. Conservamos los últimos datos · '+message(err);
+        }
+      }finally{refreshRunning=false;boton.disabled=false;}
+    }
     async function entrar(event) {
       if(event)event.preventDefault();
       const dni=$('dni').value.trim();
@@ -371,22 +423,8 @@
         const data=response.data||{};
         if (!response.ok)throw Error(response.error||'No se pudo consultar la información.');
         DNI_CONSULTADO=dni;
-        certificadosActuales=Array.isArray(data.certificados)?data.certificados:[];
-        vigenciasActuales={
-          emo:Array.isArray(data.vigencias?.emo)?data.vigencias.emo:[],
-          chile:Array.isArray(data.vigencias?.chile)?data.vigencias.chile:[]
-        };
-        minasChileActuales=new Set(Array.isArray(data.minasChile)?data.minasChile:[]);
-        filtroActual='todos';$('busqueda').value='';prepararSelectorMinas();
-        $('dniOculto').textContent='Consulta asociada al DNI ••••'+dni.slice(-4);
-        $('numeroPrincipal').textContent=String(certificadosActuales.length);
-        $('statTotal').textContent=String(certificadosActuales.length);
-        const publicos=certificadosActuales.filter(c=>c.descargaPublica===true).length;
-        $('statPublicos').textContent=String(publicos);
-        $('statPrivados').textContent=String(certificadosActuales.length-publicos);
-        $('total').textContent=String(certificadosActuales.length);
-        $('filtros').querySelectorAll('button').forEach(b=>{b.classList.toggle('active',b.dataset.filter==='todos');b.setAttribute('aria-pressed',String(b.dataset.filter==='todos'));});
-        renderCertificados();cerrarVistaPdf();
+        aplicarDatosConsulta(data,false);
+        try{sessionStorage.setItem(DNI_TAB_KEY,dni);}catch(_){}
         document.body.classList.add('has-results');
         $('dashboard').classList.remove('hidden');$('featureCards').classList.add('hidden');$('landingNote').classList.add('hidden');
         $('loginMsg').textContent='';
@@ -456,11 +494,7 @@
     }
     function renderCertificados() {
       const subset=certificadosDeMina();
-      const publicos=subset.filter(c=>c.descargaPublica===true).length;
       $('numeroPrincipal').textContent=String(subset.length);
-      $('statTotal').textContent=String(subset.length);
-      $('statPublicos').textContent=String(publicos);
-      $('statPrivados').textContent=String(subset.length-publicos);
       $('total').textContent=String(subset.length);
       renderVigencias();
       renderExpiry();
@@ -533,6 +567,8 @@
     }
     function salir() {
       cerrarVistaPdf();certificadosActuales=[];vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
+      try{sessionStorage.removeItem(DNI_TAB_KEY);}catch(_){}
+      lastRefreshAt=0;
       document.body.classList.remove('has-results');$('dashboard').classList.add('hidden');
       $('featureCards').classList.remove('hidden');$('landingNote').classList.remove('hidden');
       $('dni').value='';$('loginMsg').textContent='';$('busqueda').value='';feedback('');
@@ -541,12 +577,34 @@
     $('formConsulta').addEventListener('submit',entrar);
     $('dni').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,8);});
     $('nuevaConsulta').addEventListener('click',salir);
+    $('actualizarDatos').addEventListener('click',()=>actualizarSinSalir(true));
     $('busqueda').addEventListener('input',renderCertificados);
     $('filtroMina').addEventListener('change',e=>{minaActual=e.target.value;cerrarVistaPdf();renderCertificados();});
     $('filtros').addEventListener('click',e=>{const btn=e.target.closest('button[data-filter]');if(!btn)return;filtroActual=btn.dataset.filter;$('filtros').querySelectorAll('button').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});renderCertificados();});
     $('listado').addEventListener('click',clickDocumento);
     $('cerrarPdf').addEventListener('click',cerrarVistaPdf);
-    window.addEventListener('DOMContentLoaded',probarConexion);
+    // En la misma pestaña, refrescar la página no obliga a escribir el DNI nuevamente.
+    window.addEventListener('DOMContentLoaded',async()=>{
+      await probarConexion();
+      let guardado='';try{guardado=sessionStorage.getItem(DNI_TAB_KEY)||'';}catch(_){}
+      if(/^\d{8}$/.test(guardado)){$('dni').value=guardado;await entrar();}
+    });
+    // Aviso entre pestañas: al guardar un certificado o vigencia en Administración.
+    window.addEventListener('storage',e=>{
+      if(e.key===CAMBIO_KEY && DNI_CONSULTADO){
+        setTimeout(()=>actualizarSinSalir(true),650);
+      }
+    });
+    // Al regresar desde Administración o cualquier otra pestaña, refrescar el DNI actual.
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible')actualizarSinSalir();
+    });
+    window.addEventListener('focus',()=>{
+      if(Date.now()-lastRefreshAt>REFRESH_MIN_GAP_MS)actualizarSinSalir();
+    });
+    setInterval(()=>{
+      if(document.visibilityState==='visible' && DNI_CONSULTADO)actualizarSinSalir();
+    },REFRESH_MS);
   </script>
 </body>
 </html>
