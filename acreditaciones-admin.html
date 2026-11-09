@@ -1,8 +1,18 @@
-<!DOCTYPE html><html lang="es"><head><base target="_top"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIMARZA | Mis certificados</title><style>
-:root{font-family:system-ui,Arial,sans-serif;color:#14233d;background:#f1f5fa}*{box-sizing:border-box}body{margin:0}header{background:linear-gradient(110deg,#101c30,#245bdc);color:white;padding:25px max(5vw,20px)}header h1{margin:0;font-size:26px}header p{margin:8px 0 0;color:#d9e8ff}.wrap{max-width:970px;margin:25px auto;padding:0 16px}.card{background:white;border:1px solid #d8e2ee;border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 6px 24px #1c326410}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}label{font-size:13px;font-weight:700;display:block;margin-bottom:7px}input{height:43px;padding:8px 12px;border:1px solid #bdcadc;border-radius:9px;font:inherit;min-width:180px}button{background:#2255c6;color:white;border:0;border-radius:9px;padding:12px 17px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.soft{background:#e9f0ff;color:#194196}.muted{color:#5c7089;font-size:13px}.alert{padding:12px;background:#fff2d4;border-radius:10px;color:#71501a;margin:12px 0}.cert{display:flex;align-items:center;gap:16px;border:1px solid #e1e7f0;padding:14px;border-radius:12px;margin-top:12px;flex-wrap:wrap}.cert>div{flex:1;min-width:220px}.cert strong{display:block}.cert small{color:#52677d}.hidden{display:none}.err{color:#b42318;min-height:20px}#msg{padding-top:10px}footer{text-align:center;color:#627289;font-size:12px;margin:25px}.cert-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.preview{margin-top:18px;border:1px solid #d8e2ee;border-radius:14px;overflow:hidden;background:#fff}.preview-head{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 15px;background:#edf3fb}.preview-head strong{overflow-wrap:anywhere}.preview iframe{display:block;width:100%;height:72vh;min-height:440px;border:0;background:#e8edf4}@media(max-width:600px){.preview iframe{height:68vh;min-height:360px}.cert-actions{width:100%}.cert-actions button{flex:1}}</style></head><body>
-<header><h1>DIMARZA | Mi acreditación</h1><p>Consulta y descarga segura de certificados · Antapaccay</p></header><div id="conexion" class="muted" style="text-align:center;margin:10px">Conectando con Apps Script…</div><main class="wrap">
-<section id="login" class="card"><h2>Consulta tu acreditación</h2><p class="muted">Ingresa tu DNI para consultar los certificados registrados. Puedes descargar con tu DNI los certificados de capacitación autorizados para consulta pública. Los documentos privados no están disponibles en esta pantalla.</p><div class="row"><div><label for="dni">DNI</label><input id="dni" maxlength="8" inputmode="numeric" placeholder="8 dígitos" autocomplete="off"></div><button id="entrar" onclick="entrar()">Consultar</button></div><p id="loginMsg" class="err"></p></section>
-<section id="dashboard" class="hidden"><div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 id="nombre" style="margin:0">Resultado de la consulta</h2><p id="cargo" class="muted"></p></div><button class="soft" onclick="salir()">Cerrar sesión</button></div><div class="alert">Los certificados que se muestran son documentos registrados. La habilitación oficial para trabajar en Antapaccay se validará por separado.</div><h3>Mis certificados <span id="total"></span></h3><div id="listado"></div><div id="msg" class="muted"></div><section id="visorPdf" class="preview hidden" aria-label="Vista previa del certificado"><div class="preview-head"><strong id="nombrePdf">Certificado PDF</strong><button class="soft" id="cerrarPdf" type="button">Cerrar vista</button></div><iframe id="marcoPdf" title="Vista previa del certificado PDF"></iframe><p class="muted" style="padding:0 15px 12px">Si tu navegador no puede mostrarlo aquí, utiliza «Descargar PDF».</p></section></div></section></main><footer>© DIMARZA · Gestión de acreditaciones y certificados</footer>
+<!DOCTYPE html><html lang="es"><head><base target="_top"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIMARZA | Administración</title><style>
+:root{font-family:system-ui,Arial,sans-serif;color:#14243c;background:#f1f5fa}*{box-sizing:border-box}body{margin:0}header{background:#101929;color:white;padding:20px max(4vw,18px)}header h1{margin:0;font-size:25px}header p{color:#bac9e2;margin:8px 0 0}.wrap{max-width:1200px;margin:23px auto;padding:0 16px}.card{background:white;border:1px solid #dbe4f0;border-radius:15px;padding:20px;margin-bottom:17px;box-shadow:0 5px 22px #1d34450b}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.row>div{flex:1;min-width:175px}label{display:block;font-size:12px;font-weight:750;margin-bottom:6px}input,select,textarea{width:100%;border:1px solid #bdcbe0;border-radius:9px;padding:10px 12px;font:inherit;min-height:42px}input[type=file]{padding:8px}textarea{min-height:78px}button{background:#2559ca;color:white;border:none;border-radius:9px;padding:11px 16px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.soft{background:#e8effc;color:#1c478e}.green{background:#15955a}.muted{color:#63758b;font-size:13px}.alert{background:#fff0d1;border:1px solid #f4ce7e;border-radius:9px;padding:11px;color:#765114;font-size:13px}.err{color:#b42318}.hidden{display:none}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th{background:#101929;color:white;text-align:left;padding:11px;white-space:nowrap}td{padding:10px;border-bottom:1px solid #e6ecf4;vertical-align:top}td button{font-size:12px;padding:7px 9px}.tag{background:#e9f1fe;border-radius:12px;padding:3px 8px;font-size:12px}footer{text-align:center;color:#6b7c90;font-size:12px;margin:28px}</style></head><body>
+<header><h1>DIMARZA | Gestión de acreditaciones</h1><p>Administración de certificados · Acceso desde Visualización</p></header><div id="conexion" class="muted" style="text-align:center;margin:10px">Conectando con Apps Script…</div><main class="wrap">
+<section id="login" class="card"><h2>Acceso desde Visualización</h2><div class="alert">Para administrar certificados, inicia sesión en Visualización con el rol RESIDENTE. Aquí se valida tu sesión existente, sin pedir otra contraseña.</div><p id="loginMsg" class="err"></p><div class="row"><a href="visualizacion.html" class="soft" style="padding:12px 16px;border-radius:9px;text-decoration:none;font-weight:700">Volver a Visualización</a><button id="btnLogin" onclick="entrar()">Verificar sesión</button></div></section>
+<section id="panel" class="hidden"><div class="card"><div class="toolbar"><div><h2 style="margin:0">Certificados de personal</h2><p class="muted">Solo los documentos registrados; no implica habilitación oficial en Antapaccay.</p></div><div><button class="soft" onclick="cargar()">Actualizar</button> <button class="soft" onclick="salir()">Salir del módulo</button></div></div><p id="dbInfo" class="muted"></p></div>
+<div class="card"><h3>1. Registrar certificado PDF</h3><div class="alert">PDF máximo 4 MB. Los archivos se guardan en Drive privado. Se admiten documentos históricos. Solo marca «Público autorizado» cuando DIMARZA permite divulgar el certificado de capacitación: cualquier persona que conozca el DNI podrá descargarlo. Nunca autorices documentos médicos o sensibles.</div><div class="row">
+<div><label for="minaRegistro">Unidad minera</label><select id="minaRegistro"><option value="">Selecciona la mina</option></select></div>
+<div><label for="filtroCargo">Puesto / cargo (para buscar personal)</label><select id="filtroCargo" onchange="filtrarPersonal()"><option value="">Todos los cargos</option></select></div>
+<div style="flex:1.5"><label for="trabajador">Trabajador</label><select id="trabajador" onchange="seleccionarTrabajador()"><option value="">Seleccionar trabajador</option></select></div>
+<div><label for="dni">DNI (automático)</label><input id="dni" readonly placeholder="Se completará automáticamente"></div>
+</div>
+<div class="row" style="margin-top:12px"><div><label><input type="checkbox" id="esHistorico" onchange="alternarHistorico()" style="width:auto;min-height:auto;margin-right:8px">Registrar personal histórico (fuera de DATA DE PERSONAL)</label></div></div>
+<div id="bloqueHistorico" class="row hidden" style="margin-top:12px"><div><label>DNI histórico</label><input id="dniHistorico" maxlength="8" inputmode="numeric" placeholder="8 dígitos"></div><div><label>Nombre histórico</label><input id="nombreHistorico" placeholder="Apellidos y nombres completos"></div></div>
+<div class="row" style="margin-top:12px"><div><label>Curso o capacitación</label><input id="curso" placeholder="Ej. Supervisor de izajes"></div><div><label>Tipo de descarga por DNI</label><select id="visibilidad"><option value="PRIVADO">Privado — sin descarga pública</option><option value="PUBLICO">Público autorizado — descargar solo con DNI</option></select></div></div><div class="row" style="margin-top:12px"><div><label>Entidad emisora</label><input id="emisor" placeholder="Ej. MSA / CFC Group / Layher"></div><div><label>Fecha de emisión</label><input id="emision" type="date"></div><div><label>Fecha de vencimiento (si consta)</label><input id="vencimiento" type="date"></div></div><div class="row" style="margin-top:12px"><div><label>N.º de certificado (opcional)</label><input id="numero"></div><div><label>PDF original</label><input type="file" id="pdf" accept="application/pdf,.pdf"></div><div style="flex:0"><button id="btnGuardar" class="green" onclick="guardar()">Guardar certificado</button></div></div><p id="uploadMsg" class="muted"></p></div>
+<div class="card"><div class="toolbar"><h3>2. Biblioteca de certificados <span id="total" class="tag"></span></h3><div class="row"><div><select id="filtroBibliotecaMina" onchange="render()"><option value="">Todas las minas</option></select></div><div><select id="filtroBibliotecaCargo" onchange="render()"><option value="">Todos los puestos</option></select></div><div><input id="filtro" placeholder="Buscar DNI, trabajador o curso" oninput="render()" style="width:280px"></div></div></div><div class="table-wrap"><table><thead><tr><th>Titular</th><th>Unidad minera</th><th>Curso</th><th>Emisor</th><th>Emisión</th><th>Vencimiento</th><th>Acceso</th><th>Archivo</th></tr></thead><tbody id="tabla"></tbody></table></div><p id="panelMsg" class="muted"></p></div></section></main><footer>© DIMARZA · Documentos con control de acceso</footer>
 <script>
 
 
@@ -66,81 +76,142 @@ async function probarConexion(){
   try{const r=await qget({action:'ping'});if(!r.ok)throw Error(r.error);el.textContent='Conectado a DIMARZA';el.style.color='#15803d';}
   catch(e){el.textContent='No se pudo conectar con Apps Script: '+e.message;el.style.color='#b42318';}
 }
-window.addEventListener('DOMContentLoaded',probarConexion);
+window.addEventListener('DOMContentLoaded',async()=>{await probarConexion();await entrar();});
 
-let DNI_CONSULTADO=''; const $=id=>document.getElementById(id);
+let TOKEN='',CERTS=[],PERSONAL=[],MINAS=[];
+const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function msg(e){return e&&e.message?e.message:'No se pudo completar la operación.';}
+function msg(e){return e&&e.message?e.message:'Error inesperado.';}
 async function entrar(){
-  const b=$('entrar'); b.disabled=true; $('loginMsg').textContent='Consultando…';
-  try{
-    const dni=$('dni').value.trim();
-    if(!/^\d{8}$/.test(dni))throw Error('Ingresa un DNI de 8 dígitos.');
-    const r=await api('consultaDni',dni);
-    DNI_CONSULTADO=dni;
-    $('cargo').textContent='Consulta para DNI terminado en '+dni.slice(-4);
-    $('login').classList.add('hidden'); $('dashboard').classList.remove('hidden');
-    pintar(r.certificados||[]);
-  }catch(e){$('loginMsg').textContent=msg(e)}finally{b.disabled=false}
+  const b=$('btnLogin'); b.disabled=true; $('loginMsg').textContent='Validando sesión de Visualización…';
+  try {
+    // El rol en el navegador NO es suficiente. Apps Script comprueba el hash,
+    // vencimiento y rol RESIDENTE en SESIONES_VISUALIZACION.
+    const token=localStorage.getItem('dimarzaTokenVisualizacion') || '';
+    if(!/^[0-9a-f-]{36}$/i.test(token)) throw Error('No hay una sesión de Visualización. Ingresa allí con tu clave RESIDENTE.');
+    const res=await api('sesionVisualizacion',token);
+    TOKEN=token; PERSONAL=res.personal || []; MINAS=res.minas || [];
+    $('login').classList.add('hidden'); $('panel').classList.remove('hidden');
+    $('dbInfo').textContent='Base conectada: '+res.databaseId+' · Rol validado: RESIDENTE';
+    prepararFiltrosPersonal();
+    prepararFiltrosMinas();
+    await cargar();
+  } catch(e) {
+    TOKEN=''; $('loginMsg').textContent=msg(e);
+  } finally {b.disabled=false}
 }
-function pintar(certificados){
- cerrarVistaPdf();
- $('total').textContent='('+certificados.length+')';
- $('listado').innerHTML=certificados.length?certificados.map(c=>
- `<div class="cert"><div><strong>${esc(c.curso)}</strong><small>${esc(c.emisor)} · Emisión: ${esc(c.emision||'Por confirmar')} · Vencimiento: ${esc(c.vencimiento||'Por confirmar')}</small></div>${c.descargaPublica?`<div class="cert-actions"><button class="soft" type="button" data-view="${esc(c.id)}">Ver PDF</button><button type="button" data-cert="${esc(c.id)}">Descargar PDF</button></div>`:'<span class="muted">PDF privado / no autorizado</span>'}</div>`).join(''):'<p class="muted">No se encontraron certificados registrados para este DNI.</p>';
- $('msg').textContent='Los certificados descargables han sido autorizados expresamente para consulta pública. Los demás permanecen privados.';
+function salir(){
+  // La sesión principal solo se cierra en Visualización.
+  TOKEN=''; CERTS=[]; PERSONAL=[]; MINAS=[];
+  $('panel').classList.add('hidden'); $('login').classList.remove('hidden');
+  $('loginMsg').textContent='Sesión de este módulo cerrada. Tu acceso general a Visualización sigue activo.';
 }
-let urlVistaPdf=null;
-function cerrarVistaPdf(){
- $('marcoPdf').src='about:blank';
- $('visorPdf').classList.add('hidden');
- if(urlVistaPdf){ URL.revokeObjectURL(urlVistaPdf); urlVistaPdf=null; }
+async function cargar(){
+ $('panelMsg').textContent='Consultando…';
+ try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;$('total').textContent=CERTS.length;prepararFiltrosPersonal(true);prepararFiltrosMinas(true);$('panelMsg').textContent='';render()}
+ catch(e){$('panelMsg').textContent=msg(e)}
 }
-$('cerrarPdf').addEventListener('click',cerrarVistaPdf);
-async function obtenerBlobPublico(dni,id,onProgress){
- const reply=await qget({action:'pdfPublicoInfo',dni,id});
- if(!reply.ok || !reply.data)throw Error(reply.error||'No se pudo abrir el certificado.');
- const info=reply.data;
- if(!Number.isInteger(Number(info.parts)) || Number(info.parts)<1 || Number(info.parts)>200)throw Error('Respuesta de PDF inválida.');
- const parts=[];let received=0;
- for(let i=0;i<info.parts;i++){
-   const r=await qget({action:'pdfPublicoChunk',dni,id,index:i});
-   if(!r.ok||!r.data?.base64)throw Error(r.error||'Error al recuperar el certificado.');
-   const binary=atob(r.data.base64),bytes=new Uint8Array(binary.length);
-   for(let j=0;j<bytes.length;j++)bytes[j]=binary.charCodeAt(j);
-   parts.push(bytes);received+=bytes.length;
-   if(onProgress)onProgress(info.size?Math.min(100,Math.round(received/info.size*100)):null);
+function render(){
+ const q=$('filtro').value.toUpperCase().trim();
+ const cargo=$('filtroBibliotecaCargo').value;
+ const mina=$('filtroBibliotecaMina').value;
+ const personalPorDni=new Map(PERSONAL.map(p=>[p.dni,String(p.cargo||'Sin cargo').trim()]));
+ const v=CERTS.filter(c=>(!cargo||personalPorDni.get(c.dni)===cargo) && (!mina||(c.mina||'SIN ASIGNAR')===mina) && [c.dni,c.nombre,c.curso,c.emisor,c.numero,c.mina].join(' ').toUpperCase().includes(q));
+ $('tabla').innerHTML=v.map(c=>`<tr><td><strong>${esc(c.nombre)}</strong><br><small>${esc(c.dni)}</small></td><td><select aria-label="Unidad minera del certificado" data-mina-id="${esc(c.id)}" style="min-width:140px;max-width:185px;font-size:12px;padding:6px"><option value="" ${!MINAS.includes(c.mina)?'selected':''}>Pendiente de asignación</option>${MINAS.map(m=>`<option value="${esc(m)}" ${c.mina===m?'selected':''}>${esc(nombreMina(m))}</option>`).join('')}</select><button class="soft" data-cambiar-mina="${esc(c.id)}" style="margin-top:5px">Guardar mina</button></td><td>${esc(c.curso)}<br><small>${esc(c.numero||'')}</small></td><td>${esc(c.emisor)}</td><td>${esc(c.emision||'Por confirmar')}</td><td>${esc(c.vencimiento||'Por confirmar')}</td><td><select aria-label="Visibilidad del PDF" data-visibilidad-id="${esc(c.id)}" style="min-width:125px;font-size:12px;padding:6px"><option value="PRIVADO" ${c.visibilidad!=='PUBLICO'?'selected':''}>Privado</option><option value="PUBLICO" ${c.visibilidad==='PUBLICO'?'selected':''}>Público</option></select><button class="soft" data-cambiar="${esc(c.id)}" style="margin-top:5px">Guardar acceso</button></td><td><button class="soft" data-cert="${esc(c.id)}">Descargar PDF</button></td></tr>`).join('')||'<tr><td colspan="8">Sin resultados</td></tr>';
+}
+$('tabla').addEventListener('click',async e=>{
+ const botonMina=e.target.closest('button[data-cambiar-mina]');
+ if(botonMina){
+   const id=botonMina.dataset.cambiarMina;
+   const sel=[...$('tabla').querySelectorAll('select[data-mina-id]')].find(s=>s.dataset.minaId===id);
+   if(!sel || !MINAS.includes(sel.value)){$('panelMsg').textContent='Selecciona una mina de la lista.';return;}
+   botonMina.disabled=true;$('panelMsg').textContent='Actualizando unidad minera…';
+   try{await api('cambiarMina',TOKEN,id,sel.value);await cargar();$('panelMsg').textContent='Unidad minera actualizada.';}
+   catch(err){$('panelMsg').textContent=msg(err)}finally{botonMina.disabled=false}
+   return;
  }
- return {blob:new Blob(parts,{type:'application/pdf'}), filename:info.filename||'certificado.pdf'};
-}
-$('listado').addEventListener('click',async e=>{
- const b=e.target.closest('button[data-cert],button[data-view]');if(!b)return;
- const ver=b.hasAttribute('data-view');
- const id=ver?b.dataset.view:b.dataset.cert;
- if(!id||!DNI_CONSULTADO)return;
- b.disabled=true;
- $('msg').textContent=ver?'Abriendo vista previa…':'Preparando descarga…';
- try{
-   const pdf=await obtenerBlobPublico(DNI_CONSULTADO,id,p=>{
-     $('msg').textContent=(ver?'Cargando vista previa… ':'Preparando descarga… ')+(p===null?'':p+'%');
-   });
-   const url=URL.createObjectURL(pdf.blob);
-   if(ver){
-     cerrarVistaPdf();
-     urlVistaPdf=url;
-     $('nombrePdf').textContent=pdf.filename;
-     $('marcoPdf').src=url+'#toolbar=1&navpanes=0';
-     $('visorPdf').classList.remove('hidden');
-     $('visorPdf').scrollIntoView({behavior:'smooth',block:'start'});
-     $('msg').textContent='Vista previa cargada.';
-   }else{
-     const a=document.createElement('a');a.href=url;a.download=pdf.filename;
-     document.body.appendChild(a);a.click();a.remove();
-     setTimeout(()=>URL.revokeObjectURL(url),60000);
-     $('msg').textContent='Descarga preparada.';
-   }
- }catch(err){$('msg').textContent=msg(err)}finally{b.disabled=false}
+ const cambiar=e.target.closest('button[data-cambiar]');
+ if(cambiar){
+   const id=cambiar.dataset.cambiar;
+   const select=[...$('tabla').querySelectorAll('select[data-visibilidad-id]')].find(s=>s.dataset.visibilidadId===id);
+   if(!select)return;
+   const valor=select.value;
+   if(valor==='PUBLICO'&&!confirm('¿Autorizar la descarga de este PDF a cualquier persona que conozca el DNI del titular? No autorices documentos médicos ni información sensible.'))return;
+   cambiar.disabled=true;$('panelMsg').textContent='Actualizando acceso del certificado…';
+   try{await api('cambiarVisibilidad',TOKEN,id,valor);await cargar();$('panelMsg').textContent='Visibilidad actualizada: '+valor;}
+   catch(err){$('panelMsg').textContent=msg(err)}finally{cambiar.disabled=false}
+   return;
+ }
+ const b=e.target.closest('button[data-cert]');if(!b)return;b.disabled=true;$('panelMsg').textContent='Preparando archivo…';
+ try{await bajarCertificado(TOKEN,b.dataset.cert,true,p=>{$('panelMsg').textContent='Descargando PDF… '+p+'%';});$('panelMsg').textContent='Descarga preparada.'}
+ catch(err){$('panelMsg').textContent=msg(err)}finally{b.disabled=false}
 });
-function salir(){cerrarVistaPdf();DNI_CONSULTADO='';$('dashboard').classList.add('hidden');$('login').classList.remove('hidden');$('loginMsg').textContent=''}
-$('dni').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
+function nombreMina(mina){
+  if(mina==='GENERAL')return 'Certificados generales';
+  if(mina==='SIN ASIGNAR')return 'Pendiente de asignación';
+  return String(mina||'').toLowerCase().replace(/(^|\s)\S/g,s=>s.toUpperCase());
+}
+function prepararFiltrosMinas(conservar=false){
+  const actualRegistro=conservar?$('minaRegistro').value:'';
+  const actualFiltro=conservar?$('filtroBibliotecaMina').value:'';
+  const disponibles=[...new Set([...MINAS,...CERTS.map(c=>c.mina||'SIN ASIGNAR')])];
+  $('minaRegistro').innerHTML='<option value="">Selecciona una unidad minera</option>'+MINAS.map(m=>`<option value="${esc(m)}">${esc(nombreMina(m))}</option>`).join('');
+  if(MINAS.includes(actualRegistro))$('minaRegistro').value=actualRegistro;
+  $('filtroBibliotecaMina').innerHTML='<option value="">Todas las minas</option>'+disponibles.map(m=>`<option value="${esc(m)}">${esc(nombreMina(m))}</option>`).join('');
+  if(disponibles.includes(actualFiltro))$('filtroBibliotecaMina').value=actualFiltro;
+}
+function prepararFiltrosPersonal(conservar=false){
+ const cargoActual=conservar?$('filtroCargo').value:'';
+ const dniActual=conservar?$('trabajador').value:'';
+ const cargos=[...new Set(PERSONAL.map(p=>String(p.cargo||'Sin cargo').trim()))].sort((a,b)=>a.localeCompare(b,'es'));
+ $('filtroCargo').innerHTML='<option value="">Todos los cargos</option>'+cargos.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+ const libActual=conservar?$('filtroBibliotecaCargo').value:'';
+ $('filtroBibliotecaCargo').innerHTML='<option value="">Todos los puestos</option>'+cargos.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+ if(cargos.includes(libActual)) $('filtroBibliotecaCargo').value=libActual;
+ if(cargos.includes(cargoActual)) $('filtroCargo').value=cargoActual;
+ filtrarPersonal();
+ if(dniActual && [...$('trabajador').options].some(o=>o.value===dniActual)) $('trabajador').value=dniActual;
+ seleccionarTrabajador();
+}
+function filtrarPersonal(){
+ const cargo=$('filtroCargo').value;
+ const current=$('trabajador').value;
+ const filtered=PERSONAL.filter(p=>!cargo || String(p.cargo||'Sin cargo').trim()===cargo)
+   .sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre),'es'));
+ $('trabajador').innerHTML='<option value="">Seleccionar trabajador</option>'+filtered.map(p=>
+  `<option value="${esc(p.dni)}">${esc(p.nombre)} (${esc(p.dni)})</option>`).join('');
+ if(filtered.some(p=>p.dni===current)) $('trabajador').value=current;
+ seleccionarTrabajador();
+}
+function seleccionarTrabajador(){
+ const p=PERSONAL.find(p=>p.dni===$('trabajador').value);
+ $('dni').value=p?p.dni:'';
+}
+function alternarHistorico(){
+ const historic=$('esHistorico').checked;
+ $('bloqueHistorico').classList.toggle('hidden',!historic);
+ ['filtroCargo','trabajador'].forEach(id=>$(id).disabled=historic);
+ $('dni').value=historic?'':(PERSONAL.find(p=>p.dni===$('trabajador').value)?.dni||'');
+}
+async function guardar(){
+ const f=$('pdf').files[0],b=$('btnGuardar');
+ if(!f){$('uploadMsg').textContent='Selecciona un PDF.';return}
+ if(f.size>4*1024*1024){$('uploadMsg').textContent='El PDF no debe superar 4 MB.';return}
+ if(!/\.pdf$/i.test(f.name)){$('uploadMsg').textContent='Solo PDF.';return}
+ b.disabled=true;$('uploadMsg').textContent='Leyendo archivo…';
+ try{
+   const base64=await new Promise((resolve,reject)=>{
+     const rd=new FileReader();rd.onload=()=>resolve(String(rd.result).split(',')[1]);rd.onerror=()=>reject(Error('Error al leer el PDF.'));rd.readAsDataURL(f);
+   });
+   const hist=$('esHistorico').checked;
+   const dni=hist?$('dniHistorico').value.trim():$('dni').value.trim();
+   if(!/^\d{8}$/.test(dni)) throw Error('Selecciona un trabajador o registra un DNI histórico válido.');
+   if(!hist && !PERSONAL.some(p=>p.dni===dni)) throw Error('Selecciona un trabajador de DATA DE PERSONAL.');
+   const unidadMinera=$('minaRegistro').value;
+   if(!MINAS.includes(unidadMinera))throw Error('Selecciona una unidad minera o Certificados generales.');
+   const d={dni,unidadMinera,nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
+   $('uploadMsg').textContent='Guardando PDF en Drive…';
+   const r=await api('guardarCertificado',TOKEN,d);$('uploadMsg').textContent='Certificado guardado: '+r.id;$('pdf').value='';await cargar();
+ }catch(e){$('uploadMsg').textContent=msg(e)}finally{b.disabled=false}
+}
 </script></body></html>
