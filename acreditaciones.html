@@ -124,6 +124,26 @@
     .stat-number.green{color:#0f936f}
     .next-expiry{background:#e8f6f3;border-radius:11px;padding:13px;color:#0f7068}
     .next-expiry strong{display:block;font-size:12px}.next-expiry span{display:block;font-size:12px;margin-top:3px;line-height:1.45}
+    /* VIGENCIAS DE EMO Y AUTORIZACIONES LABORALES */
+    .validity-intro{font-size:12px;color:var(--muted);margin:-6px 0 13px;line-height:1.55}
+    .validity-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;font-weight:820;color:#24445a;margin:15px 0 7px}
+    .validity-section-title:first-of-type{margin-top:9px}
+    .validity-section-title small{color:#7c90a0;font-size:10px;font-weight:650}
+    .validity-item{border:1px solid #e3ebef;border-radius:11px;padding:12px 12px 11px;background:#fafcfd;margin:8px 0}
+    .validity-top{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;flex-wrap:wrap}
+    .validity-name{font-size:12px;font-weight:800;color:#1b3346;min-width:0;overflow-wrap:anywhere}
+    .validity-date{font-size:11px;color:#6b8091;margin-top:6px}
+    .validity-count{font-size:11px;color:#5a7686;margin-top:3px}
+    .validity-badge{white-space:nowrap;display:inline-flex;align-items:center;border-radius:99px;padding:4px 9px;font-size:10px;font-weight:820}
+    .validity-badge.valid{background:#e4f7eb;color:#11794d}
+    .validity-badge.alert{background:#fff1cf;color:#805b0d}
+    .validity-badge.soon{background:#ffebd8;color:#a34e10}
+    .validity-badge.overdue{background:#ffe4e2;color:#ae3630}
+    .validity-badge.missing{background:#eef2f5;color:#627589}
+    .validity-empty{font-size:11px;padding:12px;border-radius:9px;background:#f1f5f7;color:#647c8b;line-height:1.5}
+    .validity-break{height:1px;background:#e5edf1;margin:18px 0 11px}
+    .next-expiry.is-overdue{background:#fff0ee;color:#a9352c}
+    .next-expiry.is-soon{background:#fff2d8;color:#825b10}
     .empty{padding:33px 15px;text-align:center;color:#73889b;font-size:13px}
     .empty .icon{width:30px;height:30px;margin-bottom:10px;color:#9aabba}
     .inline-feedback{margin:0 22px 15px;font-size:12px;min-height:1px;color:#2b7f78}
@@ -185,8 +205,8 @@
       <div class="hero-content" id="heroContent">
         <div>
           <div class="eyebrow">Tu información, al instante</div>
-          <h1>Consulta tus<br>certificados.</h1>
-          <p class="hero-sub">Todos tus documentos de capacitación registrados en DIMARZA, organizados en un solo lugar. Ingresa tu DNI para comenzar.</p>
+          <h1>Consulta tus<br>acreditaciones.</h1>
+          <p class="hero-sub">Certificados, vencimientos médicos ocupacionales y permisos de trabajo de Chile. Consulta tu información registrada ingresando tu DNI.</p>
           <form class="consult-form" id="formConsulta" novalidate>
             <div class="dni-wrap"><svg class="icon icon-lg"><use href="#i-search"/></svg><label class="sr-only" for="dni">DNI de ocho dígitos</label><input id="dni" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" placeholder="DNI de 8 dígitos" autocomplete="off" spellcheck="false"></div>
             <button class="btn-primary" id="entrar" type="submit">Consultar <svg class="icon"><use href="#i-arrow"/></svg></button>
@@ -237,9 +257,20 @@
             <div class="stat-row"><span class="stat-label">PDF disponibles</span><span class="stat-number green" id="statPublicos">0</span></div>
             <div class="stat-row"><span class="stat-label">Documentos restringidos</span><span class="stat-number" id="statPrivados">0</span></div>
           </section>
+          <section class="panel aside-panel" id="vigenciasPanel">
+            <h3><svg class="icon"><use href="#i-calendar"/></svg>Mis vencimientos</h3>
+            <p class="validity-intro">Fechas de documentos registradas por DIMARZA.</p>
+            <div class="validity-section-title">Examen médico ocupacional <small>EMO por mina</small></div>
+            <div id="listaEmo" aria-live="polite"></div>
+            <div id="bloqueChile">
+              <div class="validity-break"></div>
+              <div class="validity-section-title">Permiso de trabajo <small>Chile</small></div>
+              <div id="listaChile" aria-live="polite"></div>
+            </div>
+          </section>
           <section class="panel aside-panel">
             <h3><svg class="icon"><use href="#i-calendar"/></svg>Próximo vencimiento</h3>
-            <div class="next-expiry"><strong id="proximoTitulo">Sin fechas registradas</strong><span id="proximoDetalle">Los certificados sin vencimiento informado se muestran como “Sin fecha registrada”.</span></div>
+            <div class="next-expiry" id="proximoBox"><strong id="proximoTitulo">Sin fechas registradas</strong><span id="proximoDetalle">Se mostrarán vencimientos de certificados, EMO y permisos de Chile.</span></div>
           </section>
         </aside>
       </div>
@@ -260,6 +291,8 @@
     const $ = id => document.getElementById(id);
     let DNI_CONSULTADO = '';
     let certificadosActuales = [];
+    let vigenciasActuales = {emo:[],chile:[]};
+    let minasChileActuales = new Set();
     let filtroActual = 'todos';
     let minaActual = '';
     let urlVistaPdf = null;
@@ -290,7 +323,10 @@
     function minaCertificado(c) {return c.mina||'SIN ASIGNAR';}
     function certificadosDeMina() {return certificadosActuales.filter(c=>!minaActual||minaCertificado(c)===minaActual);}
     function prepararSelectorMinas() {
-      const minas=[...new Set(certificadosActuales.map(minaCertificado))].sort((a,b)=>a.localeCompare(b,'es'));
+      const minas=[...new Set([
+        ...certificadosActuales.map(minaCertificado),
+        ...vigenciasActuales.emo.map(v=>v.mina).filter(Boolean)
+      ])].sort((a,b)=>a.localeCompare(b,'es'));
       $('filtroMina').innerHTML='<option value="">Todas las unidades mineras</option>'+minas.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(nombreMina(m))}</option>`).join('');
       minaActual='';$('filtroMina').value='';
     }
@@ -329,13 +365,18 @@
       if(event)event.preventDefault();
       const dni=$('dni').value.trim();
       if(!/^\d{8}$/.test(dni)){$('loginMsg').textContent='Ingresa un DNI válido de ocho dígitos.';$('dni').focus();return;}
-      const btn=$('entrar');btn.disabled=true;$('loginMsg').textContent='Consultando certificados…';
+      const btn=$('entrar');btn.disabled=true;$('loginMsg').textContent='Consultando tu información…';
       try {
         const response=await qget({action:'consulta',dni});
         const data=response.data||{};
         if (!response.ok)throw Error(response.error||'No se pudo consultar la información.');
         DNI_CONSULTADO=dni;
         certificadosActuales=Array.isArray(data.certificados)?data.certificados:[];
+        vigenciasActuales={
+          emo:Array.isArray(data.vigencias?.emo)?data.vigencias.emo:[],
+          chile:Array.isArray(data.vigencias?.chile)?data.vigencias.chile:[]
+        };
+        minasChileActuales=new Set(Array.isArray(data.minasChile)?data.minasChile:[]);
         filtroActual='todos';$('busqueda').value='';prepararSelectorMinas();
         $('dniOculto').textContent='Consulta asociada al DNI ••••'+dni.slice(-4);
         $('numeroPrincipal').textContent=String(certificadosActuales.length);
@@ -352,18 +393,65 @@
         window.scrollTo({top:0,behavior:'smooth'});
       } catch(err){$('loginMsg').textContent=message(err);} finally{btn.disabled=false;}
     }
+    function emoDeMina() {
+      return vigenciasActuales.emo.filter(v=>!minaActual||v.mina===minaActual);
+    }
+    function mostrarChileEnFiltro() {
+      return !minaActual||minasChileActuales.has(minaActual);
+    }
+    function chileDeMina() {
+      return mostrarChileEnFiltro()?vigenciasActuales.chile:[];
+    }
+    function datosVencimiento(fecha) {
+      const d=daysToExpiry(fecha);
+      if(d===null)return {texto:'Sin fecha',clase:'missing',detalle:'Fecha pendiente de registro'};
+      if(d<0)return {texto:'Vencido',clase:'overdue',detalle:`Venció hace ${Math.abs(d)} día${Math.abs(d)===1?'':'s'}`};
+      if(d===0)return {texto:'Vence hoy',clase:'soon',detalle:'Vence hoy'};
+      if(d<=30)return {texto:'Próximo a vencer',clase:'soon',detalle:`Vence en ${d} día${d===1?'':'s'}`};
+      if(d<=60)return {texto:'Alerta preventiva',clase:'alert',detalle:`Vence en ${d} días`};
+      return {texto:'Vigente',clase:'valid',detalle:`Vence en ${d} días`};
+    }
+    function renderUnaVigencia(titulo,fecha,extra) {
+      const st=datosVencimiento(fecha);
+      return `<article class="validity-item"><div class="validity-top"><span class="validity-name">${escapeHtml(titulo)}</span><span class="validity-badge ${st.clase}">${escapeHtml(st.texto)}</span></div>`+
+        `<div class="validity-date">${fecha?'Vence: '+escapeHtml(fmtDate(fecha)):'Fecha no registrada'}</div>`+
+        `<div class="validity-count">${escapeHtml(st.detalle)}${extra?' · '+escapeHtml(extra):''}</div></article>`;
+    }
+    function renderVigencias() {
+      const emo=emoDeMina();
+      $('listaEmo').innerHTML=emo.length
+        ?emo.map(v=>renderUnaVigencia(nombreMina(v.mina||'SIN ASIGNAR'),v.fechaVencimiento,'EMO')).join('')
+        :'<div class="validity-empty">No hay un vencimiento de EMO registrado para esta selección.</div>';
+      const mostrarChile=mostrarChileEnFiltro();
+      $('bloqueChile').classList.toggle('hidden',!mostrarChile);
+      if(mostrarChile){
+        const chile=chileDeMina();
+        $('listaChile').innerHTML=chile.length
+          ?chile.map(v=>renderUnaVigencia(v.tipoPermiso||'Permiso laboral',v.fechaVencimiento,'Chile')).join('')
+          :'<div class="validity-empty">No hay permisos de trabajo de Chile registrados para este DNI.</div>';
+      }
+    }
     function renderExpiry() {
-      const withExpiry=certificadosDeMina().map(c=>({c,d:daysToExpiry(c.vencimiento)})).filter(x=>x.d!==null).sort((a,b)=>a.d-b.d);
-      const future=withExpiry.find(x=>x.d>=0);
-      if(future) {
-        $('proximoTitulo').textContent=future.c.curso||'Certificado';
-        $('proximoDetalle').textContent=(future.d===0?'Vence hoy':`Vence en ${future.d} día${future.d===1?'':'s'}`)+' · '+fmtDate(future.c.vencimiento);
-      } else if(withExpiry.length) {
-        $('proximoTitulo').textContent='No hay próximos vencimientos';
-        $('proximoDetalle').textContent='Los certificados con fecha registrada ya alcanzaron su vencimiento.';
+      const items=[
+        ...certificadosDeMina().map(c=>({titulo:c.curso||'Certificado',fecha:c.vencimiento,tipo:'Capacitación'})),
+        ...emoDeMina().map(v=>({titulo:'Examen médico · '+nombreMina(v.mina),fecha:v.fechaVencimiento,tipo:'EMO'})),
+        ...chileDeMina().map(v=>({titulo:'Permiso de Chile · '+(v.tipoPermiso||'Trabajo'),fecha:v.fechaVencimiento,tipo:'Permiso laboral'}))
+      ].map(x=>({...x,d:daysToExpiry(x.fecha)})).filter(x=>x.d!==null);
+      const vencidos=items.filter(x=>x.d<0).sort((a,b)=>a.d-b.d);
+      const proximos=items.filter(x=>x.d>=0).sort((a,b)=>a.d-b.d);
+      const box=$('proximoBox');box.classList.remove('is-overdue','is-soon');
+      // Primero las situaciones que requieren regularización; después el próximo vencimiento.
+      if(vencidos.length){
+        const v=vencidos[0];box.classList.add('is-overdue');
+        $('proximoTitulo').textContent='Documento vencido: '+v.titulo;
+        $('proximoDetalle').textContent=datosVencimiento(v.fecha).detalle+' · '+fmtDate(v.fecha)+(vencidos.length>1?` · ${vencidos.length} documentos vencidos`:'');
+      } else if(proximos.length){
+        const v=proximos[0];if(v.d<=60)box.classList.add('is-soon');
+        $('proximoTitulo').textContent=v.titulo;
+        $('proximoDetalle').textContent=datosVencimiento(v.fecha).detalle+' · '+fmtDate(v.fecha);
       } else {
         $('proximoTitulo').textContent='Sin fechas registradas';
-        $('proximoDetalle').textContent='No se han registrado fechas de vencimiento para estos documentos.';
+        $('proximoDetalle').textContent='No hay fechas de vencimiento registradas para los documentos de esta selección.';
       }
     }
     function renderCertificados() {
@@ -374,6 +462,7 @@
       $('statPublicos').textContent=String(publicos);
       $('statPrivados').textContent=String(subset.length-publicos);
       $('total').textContent=String(subset.length);
+      renderVigencias();
       renderExpiry();
       const term=$('busqueda').value.toLocaleLowerCase('es').trim();
       const listado=subset.filter(c=>{
@@ -443,7 +532,7 @@
       }catch(err){feedback(message(err),true);}finally{btn.disabled=false;}
     }
     function salir() {
-      cerrarVistaPdf();certificadosActuales=[];DNI_CONSULTADO='';filtroActual='todos';minaActual='';
+      cerrarVistaPdf();certificadosActuales=[];vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
       document.body.classList.remove('has-results');$('dashboard').classList.add('hidden');
       $('featureCards').classList.remove('hidden');$('landingNote').classList.remove('hidden');
       $('dni').value='';$('loginMsg').textContent='';$('busqueda').value='';feedback('');
