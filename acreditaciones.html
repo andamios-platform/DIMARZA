@@ -83,7 +83,12 @@
     .panel-title h3{font-size:19px;letter-spacing:-.025em;margin:0}
     .count-pill{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:25px;padding:0 7px;border-radius:8px;background:#eaf3f9;color:#195274;font-size:12px;font-weight:800}
     .panel-head p{margin:5px 0 0;font-size:12px;color:var(--muted)}
-    .searchline{margin-top:17px;position:relative}
+    .mine-filter{margin-top:17px;display:flex;flex-direction:column;gap:6px}
+    .mine-filter label{font-size:12px;font-weight:760;color:#526b7d}
+    .mine-filter select{width:100%;min-height:43px;border:1px solid #d9e3ed;border-radius:9px;padding:10px 12px;background:#fafdff;color:#163047;font:inherit;font-size:13px}
+    .mine-filter select:focus{outline:2px solid #00a69a;outline-offset:1px}
+    .mine-chip{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;background:#edf5fb;color:#1e5a7e;font-weight:740;font-size:10px;margin-top:6px}
+    .searchline{margin-top:14px;position:relative}
     .searchline .icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#74889b}
     .searchline input{width:100%;height:42px;padding:0 12px 0 40px;border:1px solid #d9e3ed;border-radius:9px;outline:none;color:#20374c;background:#fafdff}
     .searchline input:focus{border-color:#00a69a;box-shadow:0 0 0 3px #cef8ee}
@@ -170,7 +175,7 @@
       <nav class="topnav" aria-label="Navegación">
         <div class="brand">
           <div class="brand-icon"><svg class="icon"><use href="#i-shield"/></svg></div>
-          <div><strong>DIMARZA</strong><small>ANTAPACCAY · PORTAL DOCUMENTAL</small></div>
+          <div><strong>DIMARZA</strong><small>UNIDADES MINERAS · PORTAL DOCUMENTAL</small></div>
         </div>
         <div class="nav-right">
           <div class="connection" id="conexion" role="status"><span class="connection-dot"></span><span id="conexionText">Conectando…</span></div>
@@ -214,6 +219,7 @@
           <div class="panel-head">
             <div class="panel-title"><h3 id="tituloDocumentos">Mis certificados <span class="count-pill" id="total">0</span></h3></div>
             <p>Consulta tus capacitaciones y abre los documentos disponibles.</p>
+            <div class="mine-filter"><label for="filtroMina">Unidad minera</label><select id="filtroMina"><option value="">Todas las unidades mineras</option></select></div>
             <div class="searchline"><svg class="icon"><use href="#i-search"/></svg><label class="sr-only" for="busqueda">Buscar curso o institución</label><input id="busqueda" placeholder="Buscar curso o institución…" autocomplete="off"></div>
             <div class="tabs" id="filtros" aria-label="Filtrar certificados">
               <button class="tab-btn active" type="button" data-filter="todos" aria-pressed="true">Todos</button>
@@ -255,6 +261,7 @@
     let DNI_CONSULTADO = '';
     let certificadosActuales = [];
     let filtroActual = 'todos';
+    let minaActual = '';
     let urlVistaPdf = null;
     let getQueue = Promise.resolve();
 
@@ -275,6 +282,18 @@
     function message(err) {return err && err.message ? err.message : 'No se pudo completar la operación.';}
     function escapeHtml(text) {return String(text ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
     function icon(name,extra='') {return `<svg class="icon ${extra}" aria-hidden="true"><use href="#i-${name}"/></svg>`;}
+    function nombreMina(mina) {
+      if(mina==='GENERAL')return 'Certificados generales';
+      if(mina==='SIN ASIGNAR')return 'Pendiente de asignación';
+      return String(mina||'').toLowerCase().replace(/(^|\s)\S/g,s=>s.toUpperCase());
+    }
+    function minaCertificado(c) {return c.mina||'SIN ASIGNAR';}
+    function certificadosDeMina() {return certificadosActuales.filter(c=>!minaActual||minaCertificado(c)===minaActual);}
+    function prepararSelectorMinas() {
+      const minas=[...new Set(certificadosActuales.map(minaCertificado))].sort((a,b)=>a.localeCompare(b,'es'));
+      $('filtroMina').innerHTML='<option value="">Todas las unidades mineras</option>'+minas.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(nombreMina(m))}</option>`).join('');
+      minaActual='';$('filtroMina').value='';
+    }
     function fmtDate(raw) {
       const s=String(raw||'').trim();
       if (!s) return 'Sin fecha registrada';
@@ -317,7 +336,7 @@
         if (!response.ok)throw Error(response.error||'No se pudo consultar la información.');
         DNI_CONSULTADO=dni;
         certificadosActuales=Array.isArray(data.certificados)?data.certificados:[];
-        filtroActual='todos';$('busqueda').value='';
+        filtroActual='todos';$('busqueda').value='';prepararSelectorMinas();
         $('dniOculto').textContent='Consulta asociada al DNI ••••'+dni.slice(-4);
         $('numeroPrincipal').textContent=String(certificadosActuales.length);
         $('statTotal').textContent=String(certificadosActuales.length);
@@ -326,7 +345,7 @@
         $('statPrivados').textContent=String(certificadosActuales.length-publicos);
         $('total').textContent=String(certificadosActuales.length);
         $('filtros').querySelectorAll('button').forEach(b=>{b.classList.toggle('active',b.dataset.filter==='todos');b.setAttribute('aria-pressed',String(b.dataset.filter==='todos'));});
-        renderExpiry();renderCertificados();cerrarVistaPdf();
+        renderCertificados();cerrarVistaPdf();
         document.body.classList.add('has-results');
         $('dashboard').classList.remove('hidden');$('featureCards').classList.add('hidden');$('landingNote').classList.add('hidden');
         $('loginMsg').textContent='';
@@ -334,7 +353,7 @@
       } catch(err){$('loginMsg').textContent=message(err);} finally{btn.disabled=false;}
     }
     function renderExpiry() {
-      const withExpiry=certificadosActuales.map(c=>({c,d:daysToExpiry(c.vencimiento)})).filter(x=>x.d!==null).sort((a,b)=>a.d-b.d);
+      const withExpiry=certificadosDeMina().map(c=>({c,d:daysToExpiry(c.vencimiento)})).filter(x=>x.d!==null).sort((a,b)=>a.d-b.d);
       const future=withExpiry.find(x=>x.d>=0);
       if(future) {
         $('proximoTitulo').textContent=future.c.curso||'Certificado';
@@ -348,8 +367,16 @@
       }
     }
     function renderCertificados() {
+      const subset=certificadosDeMina();
+      const publicos=subset.filter(c=>c.descargaPublica===true).length;
+      $('numeroPrincipal').textContent=String(subset.length);
+      $('statTotal').textContent=String(subset.length);
+      $('statPublicos').textContent=String(publicos);
+      $('statPrivados').textContent=String(subset.length-publicos);
+      $('total').textContent=String(subset.length);
+      renderExpiry();
       const term=$('busqueda').value.toLocaleLowerCase('es').trim();
-      const listado=certificadosActuales.filter(c=>{
+      const listado=subset.filter(c=>{
         const available=c.descargaPublica===true;
         if(filtroActual==='disponibles'&&!available)return false;
         if(filtroActual==='restringidos'&&available)return false;
@@ -363,8 +390,8 @@
         if(exp!==null&&exp<0){statusText='Fecha vencida';statusClass='expired';}
         else if(exp!==null&&exp<=30){statusText='Próximo a vencer';statusClass='warning';}
         const buttons=available?`<div class="cert-actions"><button class="btn-secondary" type="button" data-view="${escapeHtml(c.id)}">${icon('eye')}Ver PDF</button><button class="btn-download" type="button" data-cert="${escapeHtml(c.id)}">${icon('download')}Descargar</button></div>`:'';
-        return `<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.curso||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`;
-      }).join(''):`<div class="empty">${icon('file')}<div>${certificadosActuales.length?'No hay certificados que coincidan con la búsqueda.':'Aún no hay certificados registrados para este DNI.'}</div></div>`;
+        return `<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.curso||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`;
+      }).join(''):`<div class="empty">${icon('file')}<div>${subset.length?'No hay certificados que coincidan con los filtros.':certificadosActuales.length?'No hay certificados asignados a esta unidad minera.':'Aún no hay certificados registrados para este DNI.'}</div></div>`;
     }
     function feedback(text,isError=false){$('msg').textContent=text;$('msg').classList.toggle('error',isError);}
     function cerrarVistaPdf() {
@@ -416,7 +443,7 @@
       }catch(err){feedback(message(err),true);}finally{btn.disabled=false;}
     }
     function salir() {
-      cerrarVistaPdf();certificadosActuales=[];DNI_CONSULTADO='';filtroActual='todos';
+      cerrarVistaPdf();certificadosActuales=[];DNI_CONSULTADO='';filtroActual='todos';minaActual='';
       document.body.classList.remove('has-results');$('dashboard').classList.add('hidden');
       $('featureCards').classList.remove('hidden');$('landingNote').classList.remove('hidden');
       $('dni').value='';$('loginMsg').textContent='';$('busqueda').value='';feedback('');
@@ -426,6 +453,7 @@
     $('dni').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,8);});
     $('nuevaConsulta').addEventListener('click',salir);
     $('busqueda').addEventListener('input',renderCertificados);
+    $('filtroMina').addEventListener('change',e=>{minaActual=e.target.value;cerrarVistaPdf();renderCertificados();});
     $('filtros').addEventListener('click',e=>{const btn=e.target.closest('button[data-filter]');if(!btn)return;filtroActual=btn.dataset.filter;$('filtros').querySelectorAll('button').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});renderCertificados();});
     $('listado').addEventListener('click',clickDocumento);
     $('cerrarPdf').addEventListener('click',cerrarVistaPdf);
