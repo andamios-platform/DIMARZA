@@ -40,7 +40,6 @@
 <main class="shell content">
 <section id="login" class="card"><div class="panel-head"><div class="card-title"><span class="card-title-icon">🔐</span><div><h2>Verificar acceso</h2><p>Accede con la sesión RESIDENTE que ya iniciaste en Visualización.</p></div></div></div><div class="content-area"><div class="tiny-note">La verificación es automática; no necesitas escribir nuevamente tu contraseña.</div><p id="loginMsg" class="err" role="alert"></p><div class="login-actions"><button id="btnLogin" class="btn" onclick="entrar()">Verificar sesión</button><a href="visualizacion.html" class="soft">Volver a Visualización</a></div></div></section>
 <section id="panel" class="hidden">
-<div class="kpis" aria-label="Resumen de certificados"><div class="kpi"><div><small>Certificados registrados</small><strong id="kpiTotal">0</strong></div><span class="kpi-icon">▤</span></div><div class="kpi"><div><small>PDF públicos</small><strong id="kpiPublicos">0</strong></div><span class="kpi-icon">✓</span></div><div class="kpi"><div><small>PDF restringidos</small><strong id="kpiPrivados">0</strong></div><span class="kpi-icon">♢</span></div><div class="kpi"><div><small>Unidades con registros</small><strong id="kpiMinas">0</strong></div><span class="kpi-icon">⌘</span></div></div>
 
 <section class="card" id="control-vigencias">
   <div class="panel-head">
@@ -48,13 +47,8 @@
     <span class="tag-neutral">🔐 Solo RESIDENTE</span>
   </div>
   <div class="content-area">
-    <div class="vig-grid">
-      <div class="vig-stat"><small>Controles actuales</small><strong id="vigTotal">0</strong></div>
-      <div class="vig-stat urgent"><small>Vencidos</small><strong id="vigVencidos">0</strong></div>
-      <div class="vig-stat alert"><small>Vencen en 30 días</small><strong id="vig30">0</strong></div>
-      <div class="vig-stat good"><small>Vencen en 31–60 días</small><strong id="vig60">0</strong></div>
-    </div>
-    <div class="vig-alert">🔒 <span>El estado del EMO y el permiso laboral es información de uso interno. No se publica en la consulta por DNI ni se almacenan diagnósticos médicos en este módulo.</span></div>
+
+    <div class="vig-alert">🔒 <span>El panel administrativo muestra el control completo. La consulta por DNI publica únicamente fechas de vencimiento y estados; no muestra diagnósticos médicos ni documentos migratorios.</span></div>
     <div class="vig-tabs" role="group" aria-label="Tipo de control">
       <button type="button" class="vig-tab active" data-vig-tab="EMO" onclick="cambiarTipoVigencia('EMO')">🩺 Examen médico (EMO)</button>
       <button type="button" class="vig-tab" data-vig-tab="CHILE" onclick="cambiarTipoVigencia('CHILE')">🛂 Permiso de trabajo · Chile</button>
@@ -196,15 +190,14 @@ function salir(){
 }
 async function cargar(){
  $('panelMsg').textContent='Consultando…';
- try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);actualizarKpisVigencia();renderVigencias();$('panelMsg').textContent='';render()}
+ try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render()}
  catch(e){$('panelMsg').textContent=msg(e)}
 }
+function anunciarCambioAcreditaciones(){
+  // El aviso no incluye DNI, datos personales ni información médica.
+  try{localStorage.setItem('dimarza_acreditaciones_updated',String(Date.now()));}catch(_){}
+}
 function actualizarKpis(){
-  const mineCount=new Set(CERTS.map(c=>c.mina||'SIN ASIGNAR').filter(m=>m!=='SIN ASIGNAR')).size;
-  $('kpiTotal').textContent=CERTS.length;
-  $('kpiPublicos').textContent=CERTS.filter(c=>c.visibilidad==='PUBLICO').length;
-  $('kpiPrivados').textContent=CERTS.filter(c=>c.visibilidad!=='PUBLICO').length;
-  $('kpiMinas').textContent=mineCount;
   $('catalogoCount').textContent=Math.max(0,MINAS.length-1)+' minas disponibles';
 }
 function render(){
@@ -236,7 +229,7 @@ $('tabla').addEventListener('click',async e=>{
    const sel=[...$('tabla').querySelectorAll('select[data-mina-id]')].find(s=>s.dataset.minaId===id);
    if(!sel || !MINAS.includes(sel.value)){$('panelMsg').textContent='Selecciona una mina de la lista.';return;}
    botonMina.disabled=true;$('panelMsg').textContent='Actualizando unidad minera…';
-   try{await api('cambiarMina',TOKEN,id,sel.value);await cargar();$('panelMsg').textContent='Unidad minera actualizada.';}
+   try{await api('cambiarMina',TOKEN,id,sel.value);anunciarCambioAcreditaciones();await cargar();$('panelMsg').textContent='Unidad minera actualizada.';}
    catch(err){$('panelMsg').textContent=msg(err)}finally{botonMina.disabled=false}
    return;
  }
@@ -248,7 +241,7 @@ $('tabla').addEventListener('click',async e=>{
    const valor=select.value;
    if(valor==='PUBLICO'&&!confirm('¿Autorizar la descarga de este PDF a cualquier persona que conozca el DNI del titular? No autorices documentos médicos ni información sensible.'))return;
    cambiar.disabled=true;$('panelMsg').textContent='Actualizando acceso del certificado…';
-   try{await api('cambiarVisibilidad',TOKEN,id,valor);await cargar();$('panelMsg').textContent='Visibilidad actualizada: '+valor;}
+   try{await api('cambiarVisibilidad',TOKEN,id,valor);anunciarCambioAcreditaciones();await cargar();$('panelMsg').textContent='Visibilidad actualizada: '+valor;}
    catch(err){$('panelMsg').textContent=msg(err)}finally{cambiar.disabled=false}
    return;
  }
@@ -350,7 +343,7 @@ async function guardar(){
    const d={dni,unidadMinera,nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
    if(d.visibilidad==='PUBLICO' && !confirm('¿Publicar este certificado? Cualquier persona que conozca el DNI podrá visualizarlo y descargarlo. No publiques documentos sensibles.')) {return;}
    $('uploadMsg').textContent='Guardando PDF en Drive…';
-   const r=await api('guardarCertificado',TOKEN,d);$('uploadMsg').textContent='Certificado guardado: '+r.id;$('pdf').value='';await cargar();
+   const r=await api('guardarCertificado',TOKEN,d);anunciarCambioAcreditaciones();$('uploadMsg').textContent='Certificado guardado: '+r.id;$('pdf').value='';await cargar();
  }catch(e){$('uploadMsg').textContent=msg(e)}finally{b.disabled=false}
 }
 
@@ -360,13 +353,7 @@ function vigStatus(estado,dias){
  const labels={VENCIDO:'Vencido',URGENTE:'Vence pronto',ALERTA:'Alerta 60 días',VIGENTE:'Vigente',SIN_FECHA:'Sin fecha'};
  return `<span class="vig-badge ${esc(estado||'SIN_FECHA')}">${labels[estado]||'Sin fecha'}</span>`;
 }
-function actualizarKpisVigencia(){
- const r=VIGENCIAS.resumen||{};
- $('vigTotal').textContent=r.total||0;
- $('vigVencidos').textContent=r.vencidos||0;
- $('vig30').textContent=r.proximos30||0;
- $('vig60').textContent=r.proximos60||0;
-}
+
 function prepararPersonalVigencia(conservar=false){
  const cargoActual=conservar?$('vigCargo').value:'';
  const personaActual=conservar?$('vigTrabajador').value:'';
@@ -456,6 +443,7 @@ async function guardarVigencia(){
  b.disabled=true;$('vigMensaje').textContent='Guardando control de vigencia…';
  try{
    const res=await api('guardarVigencia',TOKEN,datos);
+   anunciarCambioAcreditaciones();
    limpiarFormularioVigencia();await cargar();
    $('vigMensaje').textContent='Registro '+res.id+' guardado correctamente.';
  }catch(e){$('vigMensaje').textContent=msg(e)}finally{b.disabled=false}
