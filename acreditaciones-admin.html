@@ -114,9 +114,21 @@ function render(){
  const cargo=$('filtroBibliotecaCargo').value;
  const personalPorDni=new Map(PERSONAL.map(p=>[p.dni,String(p.cargo||'Sin cargo').trim()]));
  const v=CERTS.filter(c=>(!cargo||personalPorDni.get(c.dni)===cargo) && [c.dni,c.nombre,c.curso,c.emisor,c.numero].join(' ').toUpperCase().includes(q));
- $('tabla').innerHTML=v.map(c=>`<tr><td><strong>${esc(c.nombre)}</strong><br><small>${esc(c.dni)}</small></td><td>${esc(c.curso)}<br><small>${esc(c.numero||'')}</small></td><td>${esc(c.emisor)}</td><td>${esc(c.emision||'Por confirmar')}</td><td>${esc(c.vencimiento||'Por confirmar')}</td><td>${esc(c.visibilidad||'PRIVADO')}</td><td><button class="soft" data-cert="${esc(c.id)}">Descargar PDF</button></td></tr>`).join('')||'<tr><td colspan="7">Sin resultados</td></tr>';
+ $('tabla').innerHTML=v.map(c=>`<tr><td><strong>${esc(c.nombre)}</strong><br><small>${esc(c.dni)}</small></td><td>${esc(c.curso)}<br><small>${esc(c.numero||'')}</small></td><td>${esc(c.emisor)}</td><td>${esc(c.emision||'Por confirmar')}</td><td>${esc(c.vencimiento||'Por confirmar')}</td><td><select aria-label="Visibilidad del PDF" data-visibilidad-id="${esc(c.id)}" style="min-width:125px;font-size:12px;padding:6px"><option value="PRIVADO" ${c.visibilidad!=='PUBLICO'?'selected':''}>Privado</option><option value="PUBLICO" ${c.visibilidad==='PUBLICO'?'selected':''}>Público</option></select><button class="soft" data-cambiar="${esc(c.id)}" style="margin-top:5px">Guardar acceso</button></td><td><button class="soft" data-cert="${esc(c.id)}">Descargar PDF</button></td></tr>`).join('')||'<tr><td colspan="7">Sin resultados</td></tr>';
 }
 $('tabla').addEventListener('click',async e=>{
+ const cambiar=e.target.closest('button[data-cambiar]');
+ if(cambiar){
+   const id=cambiar.dataset.cambiar;
+   const select=[...$('tabla').querySelectorAll('select[data-visibilidad-id]')].find(s=>s.dataset.visibilidadId===id);
+   if(!select)return;
+   const valor=select.value;
+   if(valor==='PUBLICO'&&!confirm('¿Autorizar la descarga de este PDF a cualquier persona que conozca el DNI del titular? No autorices documentos médicos ni información sensible.'))return;
+   cambiar.disabled=true;$('panelMsg').textContent='Actualizando acceso del certificado…';
+   try{await api('cambiarVisibilidad',TOKEN,id,valor);await cargar();$('panelMsg').textContent='Visibilidad actualizada: '+valor;}
+   catch(err){$('panelMsg').textContent=msg(err)}finally{cambiar.disabled=false}
+   return;
+ }
  const b=e.target.closest('button[data-cert]');if(!b)return;b.disabled=true;$('panelMsg').textContent='Preparando archivo…';
  try{await bajarCertificado(TOKEN,b.dataset.cert,true,p=>{$('panelMsg').textContent='Descargando PDF… '+p+'%';});$('panelMsg').textContent='Descarga preparada.'}
  catch(err){$('panelMsg').textContent=msg(err)}finally{b.disabled=false}
