@@ -8,16 +8,82 @@
 
   <!-- Complemento visual: teléfono y CV en la pestaña Entrevistas. -->
   <style>
+    /* Tabla compacta: 11 columnas visibles en pantallas de escritorio. */
     #tabEntrevistas .tabla-responsive {
+      max-width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
     #tabEntrevistas .tabla-operaciones {
-      min-width: 1370px;
+      width: 100% !important;
+      min-width: 0 !important; /* Antes: 1370px, forzaba el desborde. */
+      max-width: 100%;
+      table-layout: fixed !important;
+      border-collapse: collapse;
+    }
+    #tabEntrevistas .tabla-operaciones th,
+    #tabEntrevistas .tabla-operaciones td {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      padding: 11px 6px;
+      vertical-align: middle;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      line-height: 1.35;
+    }
+    /* Posiciones: Candidato, DNI, Teléfono, Cargo, Unidad, Fecha,
+       Hora, Entrevistador, Estado, CV, Acción. Suman 100 %. */
+    #tabEntrevistas .tabla-operaciones th:nth-child(1) { width: 17%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(2) { width: 7%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(3) { width: 8%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(4) { width: 9%; } /* Cargo más corto. */
+    #tabEntrevistas .tabla-operaciones th:nth-child(5) { width: 7%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(6) { width: 8%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(7) { width: 5%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(8) { width: 14%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(9) { width: 9%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(10) { width: 7%; }
+    #tabEntrevistas .tabla-operaciones th:nth-child(11) { width: 9%; }
+    #tabEntrevistas .tabla-operaciones td:nth-child(2),
+    #tabEntrevistas .tabla-operaciones td:nth-child(3),
+    #tabEntrevistas .tabla-operaciones td:nth-child(6),
+    #tabEntrevistas .tabla-operaciones td:nth-child(7) {
+      white-space: nowrap;
+      overflow-wrap: normal;
+    }
+    #tabEntrevistas .tabla-operaciones td:nth-child(9) .estado-agenda {
+      max-width: 100%;
+      box-sizing: border-box;
+      font-size: 10px;
+      padding: 5px 6px;
+      white-space: normal;
+      text-align: center;
+    }
+    #tabEntrevistas .tabla-operaciones td:nth-child(4),
+    #tabEntrevistas .tabla-operaciones td:nth-child(8) {
+      overflow-wrap: break-word;
+    }
+    /* Los botones respetan su celda: no empujan la última columna. */
+    #tabEntrevistas .btn-iniciar-entrevista,
+    #tabEntrevistas .btn-ver-pdf,
+    #tabEntrevistas .btn-cv-operaciones {
+      box-sizing: border-box;
+      max-width: 100%;
+      min-width: 0 !important;
+      width: 100%;
+      white-space: normal;
+      text-align: center;
+      padding: 8px 4px;
+      line-height: 1.25;
     }
     #tabEntrevistas .columna-telefono-ops,
     #tabEntrevistas .columna-cv-ops {
-      white-space: nowrap;
+      text-align: left;
+    }
+    /* En pantallas pequeñas, mantener legibilidad con desplazamiento propio. */
+    @media (max-width: 1080px) {
+      #tabEntrevistas .tabla-operaciones { min-width: 1080px !important; }
     }
     #tabEntrevistas .btn-cv-operaciones {
       display: inline-flex;
