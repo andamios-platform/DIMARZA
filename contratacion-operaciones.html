@@ -1,110 +1,208 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DIMARZA | Operaciones</title>
+  <link rel="stylesheet" href="contratacion-etapas.css">
 
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
-
-<title>
-DIMARZA | Operaciones
-</title>
-
-<link
-  rel="stylesheet"
-  href="contratacion-etapas.css"
->
-
+  <!-- Complemento visual: teléfono y CV en la pestaña Entrevistas. -->
+  <style>
+    #tabEntrevistas .tabla-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #tabEntrevistas .tabla-operaciones {
+      min-width: 1370px;
+    }
+    #tabEntrevistas .columna-telefono-ops,
+    #tabEntrevistas .columna-cv-ops {
+      white-space: nowrap;
+    }
+    #tabEntrevistas .btn-cv-operaciones {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      background: #0c8179;
+      color: #fff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #0c8179;
+      transition: background-color 150ms ease;
+    }
+    #tabEntrevistas .btn-cv-operaciones:hover,
+    #tabEntrevistas .btn-cv-operaciones:focus-visible {
+      background: #07655f;
+      color: #fff;
+    }
+    #tabEntrevistas .telefono-ops {
+      color: #213547;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
 </head>
 
+<body data-area="OPERACIONES" data-permitidos="OPERACIONES">
+  <header class="header">
+    <div>
+      <h1>Operaciones - Entrevistas</h1>
+      <p>Programación y evaluación técnica de candidatos</p>
+    </div>
+    <a href="contratacion.html" class="btn-volver">← Volver</a>
+  </header>
 
-<body
-  data-area="OPERACIONES"
-  data-permitidos="OPERACIONES"
->
+  <main class="contenedor">
+    <div class="tabs-operaciones">
+      <button type="button" class="tab-operaciones activo" data-tab="agenda">
+        Agenda de entrevistas
+      </button>
+      <button type="button" class="tab-operaciones" data-tab="entrevistas">
+        Entrevistas
+      </button>
+    </div>
 
+    <section id="tabAgenda" class="contenido-tab activo">
+      <div id="contenidoAgenda"></div>
+    </section>
 
-<header class="header">
+    <section id="tabEntrevistas" class="contenido-tab">
+      <div id="contenidoEntrevistas"></div>
+    </section>
+  </main>
 
-  <div>
+  <!-- Archivos existentes: no se modifican. -->
+  <script src="contratacion-guard.js"></script>
+  <script src="contratacion-operaciones.js"></script>
 
-    <h1>
-      Operaciones - Entrevistas
-    </h1>
+  <!-- Complemento: agrega las columnas sin alterar el JS original. -->
+  <script>
+  (function () {
+    'use strict';
 
-    <p>
-      Programación y evaluación técnica de candidatos
-    </p>
+    const ID_TABLA = 'contenidoEntrevistas';
 
-  </div>
+    function crearCelda(texto, encabezado, clase) {
+      const celda = document.createElement(encabezado ? 'th' : 'td');
+      celda.className = clase;
+      if (texto) celda.textContent = texto;
+      return celda;
+    }
 
+    function urlCVValida(archivo) {
+      if (!archivo || typeof archivo !== 'string') return '';
+      try {
+        const url = new URL(archivo.trim());
+        const host = url.hostname.toLowerCase();
+        if (url.protocol !== 'https:') return '';
+        if (host !== 'drive.google.com' && host !== 'docs.google.com') return '';
+        return url.href;
+      } catch (_) {
+        return '';
+      }
+    }
 
-  <a
-    href="contratacion.html"
-    class="btn-volver"
-  >
-    ← Volver
-  </a>
+    function obtenerCandidatos() {
+      // La aplicación ya obtiene todos los candidatos con listarCandidatos.
+      // Ese resultado incluye telefono y cv del registro inicial de ATH.
+      try {
+        return Array.isArray(todosCandidatos) ? todosCandidatos : [];
+      } catch (_) {
+        return [];
+      }
+    }
 
-</header>
+    function extenderTablaEntrevistas() {
+      const contenedor = document.getElementById(ID_TABLA);
+      if (!contenedor) return;
+      const tabla = contenedor.querySelector('table.tabla-operaciones');
+      if (!tabla || tabla.dataset.telefonoCvAplicado === '1') return;
 
+      const encabezado = tabla.querySelector('thead tr');
+      if (!encabezado) return;
+      const columnasOriginales = Array.from(encabezado.cells);
+      const nombres = columnasOriginales.map(x => x.textContent.trim().toLowerCase());
+      const indiceDni = nombres.indexOf('dni');
+      const indiceAccion = nombres.indexOf('acción');
+      if (indiceDni < 0 || indiceAccion < 0 || indiceAccion <= indiceDni) return;
 
-<main class="contenedor">
+      // Marca antes de insertar nodos para evitar que MutationObserver duplique columnas.
+      tabla.dataset.telefonoCvAplicado = '1';
+      encabezado.insertBefore(
+        crearCelda('Teléfono', true, 'columna-telefono-ops'),
+        columnasOriginales[indiceDni + 1] || null
+      );
+      encabezado.insertBefore(
+        crearCelda('CV', true, 'columna-cv-ops'),
+        columnasOriginales[indiceAccion]
+      );
 
+      const candidatos = obtenerCandidatos();
+      const porId = new Map(candidatos.map(c => [String(c.idCandidato || '').trim(), c]));
+      const porDni = new Map(candidatos.map(c => [String(c.dni || '').trim(), c]));
 
-  <div class="tabs-operaciones">
+      tabla.querySelectorAll('tbody tr').forEach(fila => {
+        // La fila sin registros solo tiene un td con colspan.
+        const celdasOriginales = Array.from(fila.cells);
+        if (celdasOriginales.length <= 1) {
+          const vacia = celdasOriginales[0];
+          if (vacia && vacia.hasAttribute('colspan')) {
+            vacia.colSpan = columnasOriginales.length + 2;
+          }
+          return;
+        }
 
-    <button
-      type="button"
-      class="tab-operaciones activo"
-      data-tab="agenda"
-    >
-      Agenda de entrevistas
-    </button>
+        const id = fila.querySelector('.dato-secundario')?.textContent.trim() || '';
+        const dni = celdasOriginales[indiceDni]?.textContent.trim() || '';
+        const candidato = porId.get(id) || porDni.get(dni) || null;
 
+        const telefono = String(candidato?.telefono || '').trim();
+        const celdaTelefono = crearCelda('', false, 'columna-telefono-ops');
+        const textoTelefono = document.createElement('span');
+        textoTelefono.className = 'telefono-ops';
+        textoTelefono.textContent = telefono || '—';
+        celdaTelefono.appendChild(textoTelefono);
 
-    <button
-      type="button"
-      class="tab-operaciones"
-      data-tab="entrevistas"
-    >
-      Entrevistas
-    </button>
+        const celdaCV = crearCelda('', false, 'columna-cv-ops');
+        const enlaceCV = urlCVValida(candidato?.cv);
+        if (enlaceCV) {
+          const enlace = document.createElement('a');
+          enlace.href = enlaceCV;
+          enlace.target = '_blank';
+          enlace.rel = 'noopener noreferrer';
+          enlace.className = 'btn-cv-operaciones';
+          enlace.textContent = 'Ver CV';
+          enlace.title = 'Abrir el CV que ATH cargó al registrar al candidato';
+          celdaCV.appendChild(enlace);
+        } else {
+          const sinCV = document.createElement('span');
+          sinCV.className = 'dato-secundario';
+          sinCV.textContent = 'Sin CV';
+          celdaCV.appendChild(sinCV);
+        }
 
-  </div>
+        fila.insertBefore(celdaTelefono, celdasOriginales[indiceDni + 1] || null);
+        fila.insertBefore(celdaCV, celdasOriginales[indiceAccion] || null);
+      });
+    }
 
+    function iniciarComplemento() {
+      const contenedor = document.getElementById(ID_TABLA);
+      if (!contenedor) return;
+      const observador = new MutationObserver(extenderTablaEntrevistas);
+      observador.observe(contenedor, { childList: true, subtree: true });
+      extenderTablaEntrevistas();
+    }
 
-  <section
-    id="tabAgenda"
-    class="contenido-tab activo"
-  >
-
-    <div id="contenidoAgenda"></div>
-
-  </section>
-
-
-  <section
-    id="tabEntrevistas"
-    class="contenido-tab"
-  >
-
-    <div id="contenidoEntrevistas"></div>
-
-  </section>
-
-
-</main>
-
-
-<script src="contratacion-guard.js"></script>
-<script src="contratacion-operaciones.js"></script>
-
-
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', iniciarComplemento);
+    } else {
+      iniciarComplemento();
+    }
+  })();
+  </script>
 </body>
-
 </html>
