@@ -526,8 +526,29 @@
     function renderPerfil() {
       const el=$('perfilCapacitacion');
       const p=perfilActual;
-      if(!p?.aplica || (minaActual && minaActual!=='ANTAPACCAY')) {el.classList.add('hidden');return;}
+      // Antapaccay siempre debe mostrar su tarjeta: incluso con 0 cursos,
+      // o si el Apps Script publicado todavía no entrega el perfil.
+      const miraAntapaccay = minaActual === 'ANTAPACCAY' || (
+        !minaActual && (
+          p?.aplica || certificadosActuales.some(c => minaCertificado(c)==='ANTAPACCAY') ||
+          vigenciasActuales.emo.some(v => v.mina==='ANTAPACCAY')
+        )
+      );
+      if(!miraAntapaccay){el.classList.add('hidden');return;}
       el.classList.remove('hidden');
+      if(!p?.aplica){
+        $('perfilCargo').textContent='Perfil de capacitación · Antapaccay';
+        $('perfilPorcentaje').textContent='—';
+        $('perfilCantidad').textContent='Sin cálculo disponible';
+        $('perfilProgreso').setAttribute('aria-valuenow','0');
+        $('perfilBarra').style.width='0%';
+        const motivo=p?.motivo
+          ? String(p.motivo)
+          : 'La implementación de Apps Script no devolvió el perfil de capacitación.';
+        $('perfilMensaje').textContent=motivo+' Verifica que publicaste una NUEVA VERSIÓN del Código.gs de Acreditaciones y después pulsa «Actualizar datos». No mostramos 0 % sin un cálculo real.';
+        $('perfilLista').innerHTML='<div class="profile-course"><span class="profile-name">Los 10 cursos aparecerán aquí cuando la API envíe la matriz del trabajador.</span></div>';
+        return;
+      }
       const n=Math.max(0,Math.min(100,Number(p.porcentaje)||0));
       $('perfilCargo').textContent='Perfil: '+(p.cargoPerfil||'Andamiero')+' · Cargo registrado: '+(p.cargoReal||'—');
       $('perfilPorcentaje').textContent=n+'%';
