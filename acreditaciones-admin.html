@@ -88,11 +88,11 @@
 <div class="field span8"><div class="hint" style="padding-top:32px">El cargo solo ayuda a encontrar al trabajador. No modifica sus datos en DATA DE PERSONAL.</div></div></div></div>
 <label class="mini-check"><input type="checkbox" id="esHistorico" onchange="alternarHistorico()"> Registrar personal histórico (fuera de DATA DE PERSONAL)</label>
 <div id="bloqueHistorico" class="subsection hidden"><div class="subhead"><span>↳</span> Datos del trabajador histórico</div><div class="grid"><div class="field span4"><label for="dniHistorico">DNI histórico</label><input id="dniHistorico" maxlength="8" inputmode="numeric" placeholder="8 dígitos"></div><div class="field span8"><label for="nombreHistorico">Apellidos y nombres</label><input id="nombreHistorico" placeholder="Nombre completo"></div></div></div>
-<div class="subsection"><div class="subhead"><span>02</span> Información del certificado</div><div class="grid"><div class="field span8"><label for="curso">Curso o capacitación</label><input id="curso" placeholder="Ej. Persona competente para trabajos en altura"></div><div class="field span4"><label for="visibilidad">Acceso al PDF</label><select id="visibilidad"><option value="PRIVADO">Privado / restringido</option><option value="PUBLICO">Público autorizado · DNI</option></select></div><div class="field span4"><label for="emisor">Entidad emisora</label><input id="emisor" placeholder="Ej. CFC Group / MSA / Layher"></div><div class="field span4"><label for="emision">Fecha de emisión</label><input id="emision" type="date"></div><div class="field span4"><label for="vencimiento">Fecha de vencimiento (si consta)</label><input id="vencimiento" type="date"></div><div class="field span6"><label for="numero">N.º de certificado (opcional)</label><input id="numero" placeholder="Código del documento"></div><div class="field span6"><label for="pdf">Documento PDF original</label><input id="pdf" type="file" accept="application/pdf,.pdf"><div class="hint">Máximo 4 MB · Se guarda en Drive privado</div></div></div></div>
-<div class="upload-footer"><div class="tiny-note"><span>🔒</span><span>Los certificados son <strong>privados por defecto</strong>. Usa «Público autorizado» solo para capacitación divulgable: cualquier persona que conozca el DNI podrá verla y descargarla. No publiques información médica o sensible.</span></div><button id="btnGuardar" class="green" onclick="guardar()">＋ Guardar certificado</button></div><p id="uploadMsg" class="feedback" role="status"></p></div></section>
+<div class="subsection"><div class="subhead"><span>02</span> Información del certificado</div><div class="grid"><div class="field span8"><label for="curso">Curso o capacitación</label><input id="curso" placeholder="Ej. Persona competente para trabajos en altura"></div><div class="field span6 hidden" id="bloqueCursoMatriz"><label for="cursoMatriz">Curso de la matriz Antapaccay 2026 (opcional)</label><select id="cursoMatriz"><option value="">No vincular con la matriz</option></select><div class="hint">Relaciona el certificado con un requisito obligatorio validado por el RESIDENTE.</div></div><div class="field span4"><label for="visibilidad">Acceso al PDF</label><select id="visibilidad"><option value="PRIVADO">Privado / restringido</option><option value="PUBLICO">Público autorizado · DNI</option></select></div><div class="field span4"><label for="emisor">Entidad emisora</label><input id="emisor" placeholder="Ej. CFC Group / MSA / Layher"></div><div class="field span4"><label for="emision">Fecha de emisión</label><input id="emision" type="date"></div><div class="field span4"><label for="vencimiento">Fecha de vencimiento (si consta)</label><input id="vencimiento" type="date"></div><div class="field span6"><label for="numero">N.º de certificado (opcional)</label><input id="numero" placeholder="Código del documento"></div><div class="field span6"><label for="pdf">Documento PDF original</label><input id="pdf" type="file" accept="application/pdf,.pdf"><div class="hint">Máximo 4 MB · Se guarda en Drive privado</div></div></div></div>
+<div class="upload-footer"><div class="tiny-note"><span>🔒</span><span>Los certificados son <strong>privados por defecto</strong>. Usa «Público autorizado» solo para capacitación divulgable: el trabajador podrá verla por DNI. La visualización en navegador no impide guardar o copiar archivos. No publiques información médica o sensible.</span></div><button id="btnGuardar" class="green" onclick="guardar()">＋ Guardar certificado</button></div><p id="uploadMsg" class="feedback" role="status"></p></div></section>
 <section class="card" id="biblioteca"><div class="panel-head"><div class="card-title"><div class="card-title-icon">▤</div><div><div class="section-number">Control de registros · 02</div><h2>Biblioteca de certificados <span id="total" class="tag-neutral">0</span></h2><p>Consulta por mina, trabajador y capacitación. Cambia la asignación o los permisos sin volver a subir el archivo.</p></div></div><span id="catalogoCount" class="muted"></span></div>
 <div class="filters"><div><label for="filtroBibliotecaMina">UNIDAD MINERA</label><select id="filtroBibliotecaMina" onchange="render()"><option value="">Todas las minas</option></select></div><div><label for="filtroBibliotecaCargo">PUESTO / CARGO</label><select id="filtroBibliotecaCargo" onchange="render()"><option value="">Todos los puestos</option></select></div><div><label for="filtro">BUSCADOR</label><input id="filtro" placeholder="Buscar nombre, DNI, curso o emisor…" oninput="render()"></div></div>
-<div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Acceso al PDF</th><th>Archivo</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div><div style="padding:0 24px 19px"><p id="panelMsg" class="feedback" role="status"></p></div></section>
+<div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Matriz Antapaccay</th><th>Acceso al PDF</th><th>Archivo</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div><div style="padding:0 24px 19px"><p id="panelMsg" class="feedback" role="status"></p></div></section>
 </section></main><footer class="page-footer">© 2026 DIMARZA · Gestión documental y trazabilidad de certificados</footer>
 <script>
 
@@ -157,9 +157,9 @@ async function probarConexion(){
   try{const r=await qget({action:'ping'});if(!r.ok)throw Error(r.error);el.textContent='Conectado a DIMARZA';el.style.color='#15803d';}
   catch(e){el.textContent='No se pudo conectar con Apps Script: '+e.message;el.style.color='#b42318';}
 }
-window.addEventListener('DOMContentLoaded',async()=>{await probarConexion();await entrar();});
+window.addEventListener('DOMContentLoaded',async()=>{ $('minaRegistro').addEventListener('change',alternarCursoMatriz); await probarConexion();await entrar();});
 
-let TOKEN='',CERTS=[],PERSONAL=[],MINAS=[],MINAS_INFO=[];
+let TOKEN='',CERTS=[],PERSONAL=[],MINAS=[],MINAS_INFO=[],CURSOS_PERFIL=[];
 let VIGENCIAS={emo:[],chile:[],resumen:{}},VIG_TIPO='EMO',VIG_EDITANDO='';
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -190,7 +190,7 @@ function salir(){
 }
 async function cargar(){
  $('panelMsg').textContent='Consultando…';
- try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render()}
+ try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};CURSOS_PERFIL=r.cursosPerfil||[];prepararCursosPerfil();actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render()}
  catch(e){$('panelMsg').textContent=msg(e)}
 }
 function anunciarCambioAcreditaciones(){
@@ -199,6 +199,22 @@ function anunciarCambioAcreditaciones(){
 }
 function actualizarKpis(){
   $('catalogoCount').textContent=Math.max(0,MINAS.length-1)+' minas disponibles';
+}
+function opcionesCursosPerfil(selected=''){
+  return `<option value="">Sin vincular a requisito</option>`+CURSOS_PERFIL.map(c=>`<option value="${esc(c.id)}" ${c.id===selected?'selected':''}>${esc(c.nombre)}</option>`).join('');
+}
+function prepararCursosPerfil(){
+  const el=$('cursoMatriz');
+  const anterior=el.value;
+  el.innerHTML=opcionesCursosPerfil(anterior);
+  if(!CURSOS_PERFIL.some(c=>c.id===anterior))el.value='';
+  alternarCursoMatriz();
+}
+function alternarCursoMatriz(){
+  const ver=$('minaRegistro').value==='ANTAPACCAY';
+  $('bloqueCursoMatriz').classList.toggle('hidden',!ver);
+  $('cursoMatriz').disabled=!ver;
+  if(!ver)$('cursoMatriz').value='';
 }
 function render(){
  const q=$('filtro').value.toUpperCase().trim();
@@ -213,14 +229,16 @@ function render(){
    const libre=c.visibilidad==='PUBLICO';
    const opcionesMinas=crearOpcionesMinas(c.mina);
    const minaNombre=nombreMina(c.mina);
+   const cursoMatriz=c.mina==='ANTAPACCAY'?`<select aria-label="Vincular a curso de matriz Antapaccay" data-matriz-id="${esc(c.id)}" class="table-select">${opcionesCursosPerfil(c.idCurso||'')}</select><button class="small-action" data-cambiar-matriz="${esc(c.id)}">Guardar curso</button>`:'<span class="subline">No aplica</span>';
    return `<tr>
      <td data-label="Titular" class="td-person"><strong>${esc(c.nombre)}</strong><span class="subline">DNI · ${esc(c.dni)}</span></td>
      <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong><span class="subline">${esc(c.emisor)}</span><span class="subline">Emisión: ${esc(formatearFecha(c.emision))} · ${c.vencimiento?'Vence: '+esc(formatearFecha(c.vencimiento)):'Sin vencimiento registrado'}</span></td>
      <td data-label="Mina"><span class="tag-neutral">${esc(minaNombre)}</span><select aria-label="Unidad minera del certificado" data-mina-id="${esc(c.id)}" class="table-select">${opcionesMinas}</select><button class="small-action" data-cambiar-mina="${esc(c.id)}">Guardar mina</button></td>
+     <td data-label="Matriz">${cursoMatriz}</td>
      <td data-label="Permisos"><span class="status-badge ${libre?'public':'private'}">${libre?'Público autorizado':'Restringido'}</span><select aria-label="Visibilidad del PDF" data-visibilidad-id="${esc(c.id)}" class="table-select"><option value="PRIVADO" ${!libre?'selected':''}>Privado</option><option value="PUBLICO" ${libre?'selected':''}>Público autorizado</option></select><button class="small-action" data-cambiar="${esc(c.id)}">Guardar acceso</button></td>
      <td data-label="Archivo" class="td-file"><button class="btn-download" data-cert="${esc(c.id)}">↧ PDF</button></td>
    </tr>`;
- }).join('') || '<tr class="empty-row"><td colspan="5">No hay certificados con los filtros seleccionados.</td></tr>';
+ }).join('') || '<tr class="empty-row"><td colspan="6">No hay certificados con los filtros seleccionados.</td></tr>';
 }
 $('tabla').addEventListener('click',async e=>{
  const botonMina=e.target.closest('button[data-cambiar-mina]');
@@ -233,13 +251,23 @@ $('tabla').addEventListener('click',async e=>{
    catch(err){$('panelMsg').textContent=msg(err)}finally{botonMina.disabled=false}
    return;
  }
+ const vincular=e.target.closest('button[data-cambiar-matriz]');
+ if(vincular){
+   const id=vincular.dataset.cambiarMatriz;
+   const select=[...$('tabla').querySelectorAll('select[data-matriz-id]')].find(s=>s.dataset.matrizId===id);
+   if(!select)return;
+   vincular.disabled=true;$('panelMsg').textContent='Vinculando certificado con la matriz…';
+   try{await api('vincularCursoMatriz',TOKEN,id,select.value);anunciarCambioAcreditaciones();await cargar();$('panelMsg').textContent='Requisito actualizado. El porcentaje se recalcula en la consulta por DNI.';}
+   catch(err){$('panelMsg').textContent=msg(err)}finally{vincular.disabled=false}
+   return;
+ }
  const cambiar=e.target.closest('button[data-cambiar]');
  if(cambiar){
    const id=cambiar.dataset.cambiar;
    const select=[...$('tabla').querySelectorAll('select[data-visibilidad-id]')].find(s=>s.dataset.visibilidadId===id);
    if(!select)return;
    const valor=select.value;
-   if(valor==='PUBLICO'&&!confirm('¿Autorizar la descarga de este PDF a cualquier persona que conozca el DNI del titular? No autorices documentos médicos ni información sensible.'))return;
+   if(valor==='PUBLICO'&&!confirm('¿Autorizar la visualización por DNI? El navegador aún podría guardar una copia. No autorices documentos médicos ni información sensible.'))return;
    cambiar.disabled=true;$('panelMsg').textContent='Actualizando acceso del certificado…';
    try{await api('cambiarVisibilidad',TOKEN,id,valor);anunciarCambioAcreditaciones();await cargar();$('panelMsg').textContent='Visibilidad actualizada: '+valor;}
    catch(err){$('panelMsg').textContent=msg(err)}finally{cambiar.disabled=false}
@@ -340,8 +368,8 @@ async function guardar(){
    if(!hist && !PERSONAL.some(p=>p.dni===dni)) throw Error('Selecciona un trabajador de DATA DE PERSONAL.');
    const unidadMinera=$('minaRegistro').value;
    if(!MINAS.includes(unidadMinera))throw Error('Selecciona una unidad minera o Certificados generales.');
-   const d={dni,unidadMinera,nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
-   if(d.visibilidad==='PUBLICO' && !confirm('¿Publicar este certificado? Cualquier persona que conozca el DNI podrá visualizarlo y descargarlo. No publiques documentos sensibles.')) {return;}
+   const d={dni,unidadMinera,idCurso:unidadMinera==='ANTAPACCAY'?$('cursoMatriz').value:'',nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
+   if(d.visibilidad==='PUBLICO' && !confirm('¿Publicar este certificado? Cualquier persona que conozca el DNI podrá visualizarlo; la visualización no impide guardar una copia. No publiques documentos sensibles.')) {return;}
    $('uploadMsg').textContent='Guardando PDF en Drive…';
    const r=await api('guardarCertificado',TOKEN,d);anunciarCambioAcreditaciones();$('uploadMsg').textContent='Certificado guardado: '+r.id;$('pdf').value='';await cargar();
  }catch(e){$('uploadMsg').textContent=msg(e)}finally{b.disabled=false}
@@ -447,4 +475,5 @@ async function guardarVigencia(){
    limpiarFormularioVigencia();await cargar();
    $('vigMensaje').textContent='Registro '+res.id+' guardado correctamente.';
  }catch(e){$('vigMensaje').textContent=msg(e)}finally{b.disabled=false}
-}</script></body></html>
+}
+</script></body></html>
