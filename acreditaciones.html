@@ -198,8 +198,25 @@
     .profile-name{font-size:12px;font-weight:710;flex:1;min-width:0}.profile-name small{display:block;color:#8294a1;font-size:10px;font-weight:500}
     .profile-pill{font-size:10px;font-weight:780;border-radius:30px;padding:5px 8px;white-space:nowrap}
     .profile-pill.pass{background:#dff6e9;color:#0c784a}.profile-pill.review{background:#fff0d7;color:#976016}.profile-pill.fail{background:#ffe6e6;color:#a92e2e}.profile-pill.wait{background:#e8eff3;color:#637785}
-    @media(max-width:800px){.profile-courses{grid-template-columns:1fr}}
-    @media(max-width:650px){.profile-panel{padding:20px 17px}.profile-head h3{font-size:19px}.profile-score{text-align:left}.profile-score strong{font-size:29px}.profile-course{flex-wrap:wrap}.profile-pill{margin-left:33px}}
+    /* Pendientes siempre visibles. Todo se calcula con la matriz real enviada por Apps Script. */
+    .profile-to-do{border:1px solid #dce9e9;background:#f8fcfc;border-radius:14px;padding:16px 17px;margin:16px 0}
+    .profile-to-do-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+    .profile-to-do h4{font-size:15px;line-height:1.35;color:#123c4b;margin:0;font-weight:820}
+    .profile-to-do-count{background:#e6f2f1;color:#087a72;font-size:11px;font-weight:820;border-radius:999px;padding:7px 11px;white-space:nowrap}
+    .profile-to-do-desc{font-size:11px;color:#6a8290;line-height:1.55;margin:0 0 12px}
+    .profile-to-do-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .profile-to-do-item{display:flex;align-items:center;gap:10px;min-width:0;background:#fff;border:1px solid #e0eaed;border-radius:11px;padding:12px}
+    .profile-to-do-item.expired{border-color:#f1d6d3;background:#fffaf9}
+    .profile-to-do-index{display:grid;place-items:center;flex:none;width:27px;height:27px;border-radius:9px;background:#edf3f6;color:#557083;font-size:11px;font-weight:850}
+    .profile-to-do-item.expired .profile-to-do-index{background:#fde8e6;color:#ab4036}
+    .profile-to-do-name{flex:1;min-width:0;font-size:12px;line-height:1.45;font-weight:760;color:#203d4c;overflow-wrap:anywhere}
+    .profile-to-do-name small{font-size:10px;color:#8294a1;font-weight:520;display:block;margin-top:3px}
+    .profile-to-do-empty{background:#e4f6ed;color:#12694a;border-radius:11px;padding:13px 15px;font-size:12px;font-weight:760;line-height:1.6}
+    .profile-to-do-alerts{font-size:11px;color:#8a5d23;line-height:1.6;margin-top:11px}
+    .profile-to-do-alerts span{display:block;margin-top:3px}
+    .profile-details{margin-top:2px}
+    @media(max-width:800px){.profile-courses,.profile-to-do-list{grid-template-columns:1fr}}
+    @media(max-width:650px){.profile-panel{padding:20px 17px}.profile-head h3{font-size:19px}.profile-score{text-align:left}.profile-score strong{font-size:29px}.profile-course{flex-wrap:wrap}.profile-pill{margin-left:33px}.profile-to-do{padding:14px 12px}.profile-to-do-item{align-items:flex-start;flex-wrap:wrap}.profile-to-do-item .profile-pill{margin-left:37px}}
   </style>
 </head>
 <body>
@@ -266,7 +283,13 @@
         <div class="profile-head"><div><div class="eyebrow">MATRIZ DE CAPACITACIÓN · ANTAPACCAY 2026</div><h3>Cumplimiento del perfil de capacitación</h3><p id="perfilCargo" class="profile-sub"></p></div><div class="profile-score"><strong id="perfilPorcentaje">0%</strong><span id="perfilCantidad">0 de 10 cursos</span></div></div>
         <div class="profile-track" role="progressbar" aria-label="Cumplimiento documental del perfil" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="perfilProgreso"><div id="perfilBarra"></div></div>
         <p class="profile-message" id="perfilMensaje"></p>
-        <details class="profile-details"><summary>Ver detalle de los cursos obligatorios</summary><div class="profile-courses" id="perfilLista"></div></details>
+        <section class="profile-to-do" id="perfilPendientes" aria-labelledby="perfilPendientesTitulo">
+          <div class="profile-to-do-head"><h4 id="perfilPendientesTitulo">Cursos pendientes de acreditar</h4><span class="profile-to-do-count" id="perfilPendientesCantidad">Consultando…</span></div>
+          <p class="profile-to-do-desc">Si ya llevaste alguno, solicita que registren o vinculen su certificado. Los cursos vencidos requieren renovación.</p>
+          <div class="profile-to-do-list" id="perfilPendientesLista"></div>
+          <div class="profile-to-do-alerts" id="perfilAlertas" aria-label="Alertas de capacitación"></div>
+        </section>
+        <details class="profile-details"><summary>Ver los 10 cursos obligatorios y su estado</summary><div class="profile-courses" id="perfilLista"></div></details>
       </section>
       <div class="result-grid">
         <section class="panel" aria-labelledby="tituloDocumentos">
@@ -546,6 +569,9 @@
           ? String(p.motivo)
           : 'La implementación de Apps Script no devolvió el perfil de capacitación.';
         $('perfilMensaje').textContent=motivo+' Verifica que publicaste una NUEVA VERSIÓN del Código.gs de Acreditaciones y después pulsa «Actualizar datos». No mostramos 0 % sin un cálculo real.';
+        $('perfilPendientesCantidad').textContent='Sin datos';
+        $('perfilPendientesLista').innerHTML='<div class="profile-to-do-empty">La lista de cursos aparecerá cuando el servidor entregue los requisitos de capacitación.</div>';
+        $('perfilAlertas').textContent='';
         $('perfilLista').innerHTML='<div class="profile-course"><span class="profile-name">Los 10 cursos aparecerán aquí cuando la API envíe la matriz del trabajador.</span></div>';
         return;
       }
@@ -559,7 +585,31 @@
         ?(p.sinFecha>0?'Los diez cursos tienen evidencia, pero '+p.sinFecha+' necesitan confirmar su vigencia. No equivale a acreditación oficial.':'Perfil documental de capacitación completo. No equivale a acreditación oficial de la mina.')
         :`Faltan ${p.pendientes||0} cursos con evidencia vigente o sin vencimiento declarado. El porcentaje refleja los documentos registrados, no una aprobación oficial.`;
       $('perfilMensaje').textContent=mensaje;
-      $('perfilLista').innerHTML=(p.cursos||[]).map((curso,i)=>{
+      // Mostrar los faltantes sin abrir el desplegable. No se infiere que el curso
+      // no fue llevado: PENDIENTE significa que no hay evidencia vinculada.
+      const perfilCursos=Array.isArray(p.cursos)?p.cursos:[];
+      const faltantes=perfilCursos.map((curso,i)=>({curso,i}))
+        .filter(({curso})=>curso.estado==='PENDIENTE'||curso.estado==='VENCIDO');
+      $('perfilPendientesCantidad').textContent=`${faltantes.length} de ${p.total||perfilCursos.length} por acreditar`;
+      $('perfilPendientesLista').innerHTML=faltantes.length
+        ? faltantes.map(({curso,i})=>{
+            const vencido=curso.estado==='VENCIDO';
+            const detalle=vencido
+              ? (curso.fechaVencimiento?'Venció: '+fmtDate(curso.fechaVencimiento):'Certificado vencido')
+              : 'Sin evidencia válida vinculada';
+            return `<div class="profile-to-do-item ${vencido?'expired':''}"><span class="profile-to-do-index">${i+1}</span><span class="profile-to-do-name">${escapeHtml(curso.nombre||'Curso obligatorio')}<small>${escapeHtml(detalle)}</small></span><span class="profile-pill ${vencido?'fail':'wait'}">${vencido?'Renovar':'Pendiente'}</span></div>`;
+          }).join('')
+        : '<div class="profile-to-do-empty">✓ No hay cursos pendientes de acreditar. Revisa las vigencias de los certificados registrados.</div>';
+      // Las evidencias sin fecha y las próximas a vencer requieren atención,
+      // pero permanecen en el cálculo documental que entrega Apps Script.
+      const sinFecha=perfilCursos.filter(c=>c.estado==='SIN_FECHA');
+      const porVencer=perfilCursos.filter(c=>c.estado==='VIGENTE'&&
+        daysToExpiry(c.fechaVencimiento)!==null&&daysToExpiry(c.fechaVencimiento)>=0&&daysToExpiry(c.fechaVencimiento)<=60);
+      const avisos=[];
+      if(porVencer.length)avisos.push('⚠ '+porVencer.length+' curso(s) registrado(s) vence(n) en 60 días o menos: '+porVencer.map(c=>c.nombre).join(', ')+'.');
+      if(sinFecha.length)avisos.push('ℹ '+sinFecha.length+' certificado(s) registrado(s) no tienen fecha de vencimiento confirmada: '+sinFecha.map(c=>c.nombre).join(', ')+'.');
+      $('perfilAlertas').innerHTML=avisos.map(texto=>`<span>${escapeHtml(texto)}</span>`).join('');
+      $('perfilLista').innerHTML=perfilCursos.map((curso,i)=>{
         const estado=curso.estado||'PENDIENTE';
         const cfg={VIGENTE:['Cumplido','pass'],SIN_FECHA:['Registrado · vigencia por confirmar','review'],VENCIDO:['Vencido','fail'],PENDIENTE:['Pendiente','wait']}[estado]||['Pendiente','wait'];
         return `<div class="profile-course"><span class="profile-num">${i+1}</span><span class="profile-name">${escapeHtml(curso.nombre||'Curso')}<small>${curso.fechaVencimiento?'Vence: '+escapeHtml(fmtDate(curso.fechaVencimiento)):''}</small></span><span class="profile-pill ${cfg[1]}">${cfg[0]}</span></div>`;
