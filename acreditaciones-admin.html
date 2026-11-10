@@ -34,12 +34,74 @@
 .vig-alert{display:flex;align-items:center;gap:9px;border:1px solid #dcebe8;border-radius:11px;background:#f0f9f7;padding:13px;color:#526d74;font-size:12px;margin-bottom:18px}
 @media(max-width:950px){.vig-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vig-filters{grid-template-columns:1fr}}
 @media(max-width:680px){.vig-table thead{display:none}.vig-table,.vig-table tbody,.vig-table tr,.vig-table td{display:block;width:100%}.vig-table tr{border:1px solid #dce7ec;border-radius:12px;margin:9px 0;padding:9px}.vig-table td{border:none;padding:6px}.vig-table td:before{content:attr(data-col);font-size:10px;color:#738996;display:block;font-weight:750;text-transform:uppercase}}
+
+/* Consolidado: tabla legible, sin indicadores decorativos */
+.cons-intro{padding:19px 27px 7px}.cons-assignment{background:#f9fcfd;border:1px solid #e1ebf0;border-radius:12px;padding:17px;margin:15px 0 5px}
+.cons-assign-form{display:grid;grid-template-columns:minmax(200px,1.3fr) minmax(170px,1fr) auto;gap:12px;align-items:end}.cons-assign-form .field{grid-column:auto}
+.cons-toolbar{display:grid;grid-template-columns:minmax(190px,1.5fr) repeat(3,minmax(130px,1fr));gap:12px;padding:19px 27px;background:#fbfdfd;border-block:1px solid var(--line)}
+.cons-toolbar label{display:block;color:#637c89;font-size:10px;font-weight:850;letter-spacing:.06em;margin-bottom:6px}
+.cons-toolbar input,.cons-toolbar select,.cons-assign-form select{width:100%;min-height:42px;border-radius:9px;border:1px solid #cfdfe6;background:#fff;padding:9px 11px;color:#173047;outline:0}
+.cons-toolbar input:focus,.cons-toolbar select:focus,.cons-assign-form select:focus{border-color:#0aa594;box-shadow:0 0 0 3px #d1f1e9}
+.cons-table-wrap{overflow-x:auto;padding:3px 19px 8px}.cons-table{border-collapse:collapse;width:100%;min-width:1050px;font-size:12px}
+.cons-table th{text-align:left;color:#6b8292;background:#f5f9fa;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:14px 11px;white-space:nowrap}
+.cons-table td{padding:15px 11px;border-bottom:1px solid #e7edf1;vertical-align:top}.cons-table td:first-child{min-width:185px}
+.cons-table td strong{display:block;color:#16334b;line-height:1.4}.cons-table td small{display:block;color:#8297a4;margin-top:4px;font-size:11px}
+.cons-table .mini-label{display:inline-block;font-size:10px;font-weight:750;color:#487086;background:#edf4f8;padding:3px 7px;border-radius:6px;margin-top:7px}
+.cons-pct{font-weight:850;font-size:18px;color:#007e70}.cons-progress{height:6px;background:#e8eef1;border-radius:999px;overflow:hidden;margin-top:7px;width:120px;max-width:100%}.cons-progress>span{display:block;height:100%;background:linear-gradient(90deg,#10b4a3,#087c74)}
+.cons-chip{display:inline-block;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:800;white-space:nowrap}
+.cons-chip.VIGENTE,.cons-chip.PERFIL_COMPLETO{background:#e2f6ec;color:#147449}
+.cons-chip.URGENTE,.cons-chip.ALERTA,.cons-chip.REVISAR{background:#fff2d9;color:#935c12}
+.cons-chip.VENCIDO,.cons-chip.VENCIDOS{background:#ffe9e5;color:#b12d31}
+.cons-chip.PENDIENTES{background:#fff4e4;color:#986418}
+.cons-chip.NO_APLICA,.cons-chip.SIN_REGISTRO,.cons-chip.SIN_MATRIZ,.cons-chip.SIN_UNIDAD,.cons-chip.SIN_FECHA{background:#edf2f5;color:#647b8c}
+.cons-micro{color:#8295a3;font-size:10px;display:block;margin-top:6px}.cons-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.cons-details{margin-top:10px;background:#f5fafb;border:1px solid #e0eef0;border-radius:9px;padding:10px 12px;min-width:180px}
+.cons-details summary{cursor:pointer;color:#087d74;font-size:11px;font-weight:800}.cons-details ul{padding-left:17px;margin:8px 0 0}.cons-details li{font-size:11px;color:#39586c;margin:3px 0}
+.cons-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:18px 27px;color:#718995;font-size:12px}.cons-empty{padding:35px!important;color:#6b8092;text-align:center}
+@media(max-width:1050px){.cons-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.cons-assign-form{grid-template-columns:1fr 1fr}.cons-assign-form>div:last-child{grid-column:1/-1}}
+@media(max-width:650px){.cons-toolbar{grid-template-columns:1fr;padding:15px}.cons-intro{padding:15px}.cons-assign-form{grid-template-columns:1fr}.cons-assign-form>div:last-child{grid-column:auto}.cons-footer{padding:15px}.cons-table{min-width:0}.cons-table thead{display:none}.cons-table,.cons-table tbody,.cons-table tr,.cons-table td{display:block;width:100%}.cons-table tr{border:1px solid #e3ecf0;border-radius:12px;margin:10px 0;padding:10px}.cons-table td{border:0;padding:6px 3px}.cons-table td:before{content:attr(data-col);display:block;color:#718a99;font-size:10px;text-transform:uppercase;font-weight:800}.cons-progress{width:100%}}
 </style></head><body>
 <header class="hero"><div class="shell"><nav class="topnav" aria-label="Navegación principal"><a href="visualizacion.html" class="brand"><span class="brand-symbol">◈</span><span><strong>DIMARZA</strong><small>Gestión de acreditaciones</small></span></a><a class="nav-link" href="visualizacion.html">← Volver a Visualización</a></nav>
 <div class="hero-grid"><div><p class="eyebrow">Centro de control documental</p><h1>Acreditaciones y certificados</h1><p class="sub">Administra certificados, exámenes médicos y permisos de trabajo. Controla fechas críticas y documentación por trabajador y operación.</p></div><div class="hero-status"><div id="conexion" class="conn" role="status">Conectando con DIMARZA…</div><div class="role-pill">🔐 ACCESO RESIDENTE</div><small id="dbInfo"></small></div></div></div></header>
 <main class="shell content">
 <section id="login" class="card"><div class="panel-head"><div class="card-title"><span class="card-title-icon">🔐</span><div><h2>Verificar acceso</h2><p>Accede con la sesión RESIDENTE que ya iniciaste en Visualización.</p></div></div></div><div class="content-area"><div class="tiny-note">La verificación es automática; no necesitas escribir nuevamente tu contraseña.</div><p id="loginMsg" class="err" role="alert"></p><div class="login-actions"><button id="btnLogin" class="btn" onclick="entrar()">Verificar sesión</button><a href="visualizacion.html" class="soft">Volver a Visualización</a></div></div></section>
 <section id="panel" class="hidden">
+
+<section class="card" id="consolidado-general">
+  <div class="panel-head">
+    <div class="card-title"><div class="card-title-icon">▦</div><div>
+      <div class="section-number">Administración · Control general</div>
+      <h2>Consolidado general de acreditaciones</h2>
+      <p>Todo el personal, capacitación por mina, EMO y permisos de Chile. No equivale a una acreditación oficial aprobada.</p>
+    </div></div>
+    <div class="panel-actions"><button type="button" class="soft" onclick="cargarConsolidado()">↻ Actualizar</button>
+      <button type="button" class="btn" onclick="exportarConsolidado()">↓ Exportar a Excel (CSV)</button></div>
+  </div>
+  <div class="content-area cons-intro">
+    <div class="tiny-note">ℹ️ <span><strong>Asignación real vs. documentos:</strong> la mina de un certificado no demuestra dónde trabaja actualmente la persona. Confirma su unidad minera aquí. El <b>100 %</b> representa el perfil de capacitación documentado, nunca una aprobación oficial de la minera.</span></div>
+    <div class="cons-assignment">
+      <div class="subhead" style="margin-bottom:12px"><span>＋</span> Asignar un trabajador a una unidad minera</div>
+      <div class="cons-assign-form">
+        <div class="field"><label for="consPersona">Trabajador</label><select id="consPersona"><option value="">Seleccionar trabajador</option></select></div>
+        <div class="field"><label for="consAsignarMina">Unidad minera</label><select id="consAsignarMina"><option value="">Seleccionar mina</option></select></div>
+        <div><button type="button" class="green" id="consGuardarAsignacion" onclick="guardarAsignacion()">Guardar asignación</button></div>
+      </div>
+      <p class="muted" id="consAsignacionMsg" role="status"></p>
+    </div>
+  </div>
+  <div class="cons-toolbar">
+    <div><label for="consBuscar">BUSCAR TRABAJADOR</label><input id="consBuscar" type="search" placeholder="Nombre o DNI…" oninput="renderConsolidado()"></div>
+    <div><label for="consMina">UNIDAD MINERA</label><select id="consMina" onchange="renderConsolidado()"><option value="">Todas las unidades</option></select></div>
+    <div><label for="consCargo">CARGO</label><select id="consCargo" onchange="renderConsolidado()"><option value="">Todos los cargos</option></select></div>
+    <div><label for="consEstado">SITUACIÓN</label><select id="consEstado" onchange="renderConsolidado()"><option value="">Todas</option><option value="VENCIDOS">Documentos vencidos</option><option value="PENDIENTES">Requisitos pendientes</option><option value="REVISAR">Vigencias por revisar</option><option value="PERFIL_COMPLETO">Perfil completo</option><option value="SIN_MATRIZ">Sin matriz configurada</option><option value="SIN_UNIDAD">Sin unidad registrada</option></select></div>
+  </div>
+  <div class="cons-table-wrap"><table class="cons-table"><thead><tr><th>Trabajador</th><th>Unidad / vínculo</th><th>Capacitación</th><th>EMO</th><th>Permiso Chile</th><th>Situación</th><th>Detalle</th></tr></thead>
+    <tbody id="consTabla"><tr><td colspan="7" class="cons-empty">Cargando personal…</td></tr></tbody></table></div>
+  <div class="cons-footer"><span id="consConteo">—</span><div class="panel-actions"><button type="button" class="soft" id="consAnterior" onclick="paginarConsolidado(-1)">← Anterior</button><span id="consPagina" class="muted">Página 1</span><button type="button" class="soft" id="consSiguiente" onclick="paginarConsolidado(1)">Siguiente →</button></div></div>
+  <p id="consMensaje" class="feedback" style="margin:0 22px 22px" role="status"></p>
+</section>
+
+
 
 <section class="card" id="control-vigencias">
   <div class="panel-head">
@@ -161,6 +223,7 @@ window.addEventListener('DOMContentLoaded',async()=>{ $('minaRegistro').addEvent
 
 let TOKEN='',CERTS=[],PERSONAL=[],MINAS=[],MINAS_INFO=[],CURSOS_PERFIL=[];
 let VIGENCIAS={emo:[],chile:[],resumen:{}},VIG_TIPO='EMO',VIG_EDITANDO='';
+let CONSOLIDADO=[],CONS_FILTRADOS=[],CONS_PAGINA=0;const CONS_POR_PAGINA=20;
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function msg(e){return e&&e.message?e.message:'Error inesperado.';}
@@ -184,13 +247,13 @@ async function entrar(){
 }
 function salir(){
   // La sesión principal solo se cierra en Visualización.
-  TOKEN=''; CERTS=[]; PERSONAL=[]; MINAS=[]; MINAS_INFO=[];
+  TOKEN=''; CERTS=[]; PERSONAL=[]; MINAS=[]; MINAS_INFO=[]; CONSOLIDADO=[]; CONS_FILTRADOS=[];
   $('panel').classList.add('hidden'); $('login').classList.remove('hidden');
   $('loginMsg').textContent='Sesión de este módulo cerrada. Tu acceso general a Visualización sigue activo.';
 }
 async function cargar(){
  $('panelMsg').textContent='Consultando…';
- try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};CURSOS_PERFIL=r.cursosPerfil||[];prepararCursosPerfil();actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render()}
+ try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};CURSOS_PERFIL=r.cursosPerfil||[];prepararCursosPerfil();actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render();await cargarConsolidado()}
  catch(e){$('panelMsg').textContent=msg(e)}
 }
 function anunciarCambioAcreditaciones(){
@@ -375,6 +438,106 @@ async function guardar(){
  }catch(e){$('uploadMsg').textContent=msg(e)}finally{b.disabled=false}
 }
 
+
+
+// === CONSOLIDADO GENERAL (solo RESIDENTE) ===
+function consChip(estado,contexto=''){
+ const names={VIGENTE:'Vigente',URGENTE:'Vence en 30 días',ALERTA:'Vence en 31–60 días',VENCIDO:'Vencido',SIN_FECHA:'Sin fecha',SIN_REGISTRO:'Sin registro',NO_APLICA:'No aplica',VENCIDOS:'Vencimientos',PENDIENTES:'Pendientes',REVISAR:'Por revisar',PERFIL_COMPLETO:'Perfil completo',SIN_MATRIZ:'Sin matriz',SIN_UNIDAD:'Sin unidad'};
+ return `<span class="cons-chip ${esc(estado||'SIN_REGISTRO')}">${esc(names[estado]||contexto||'Por confirmar')}</span>`;
+}
+function consEsChile(mina){return MINAS_INFO.some(x=>x.valor===mina && x.pais==='CHILE');}
+function prepararFiltrosConsolidado(){
+ const current={mina:$('consMina').value,cargo:$('consCargo').value,persona:$('consPersona').value,unidad:$('consAsignarMina').value};
+ const cargoList=[...new Set(CONSOLIDADO.map(x=>x.cargo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+ $('consCargo').innerHTML='<option value="">Todos los cargos</option>'+cargoList.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+ if(cargoList.includes(current.cargo))$('consCargo').value=current.cargo;
+ const minasLista=[...new Set(CONSOLIDADO.map(x=>x.mina))];
+ const minaSelect=MINAS.filter(x=>x!=='GENERAL');
+ $('consMina').innerHTML='<option value="">Todas las unidades</option>'+minaOptionsGroup(minaSelect,current.mina)+
+   (minasLista.includes('SIN ASIGNAR')?'<option value="SIN ASIGNAR">Sin unidad</option>':'');
+ if(minasLista.includes(current.mina))$('consMina').value=current.mina;
+ $('consAsignarMina').innerHTML='<option value="">Seleccionar mina</option>'+minaOptionsGroup(minaSelect,current.unidad);
+ if(minaSelect.includes(current.unidad))$('consAsignarMina').value=current.unidad;
+ const asignables=PERSONAL.slice().sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre),'es'));
+ $('consPersona').innerHTML='<option value="">Seleccionar trabajador</option>'+asignables.map(p=>`<option value="${esc(p.dni)}">${esc(p.nombre)} · ${esc(p.cargo||'Sin cargo')}</option>`).join('');
+ if(asignables.some(p=>p.dni===current.persona))$('consPersona').value=current.persona;
+}
+async function cargarConsolidado(){
+ if(!TOKEN)return;
+ $('consMensaje').textContent='Actualizando consolidado de trabajadores…';
+ try{
+   const r=await api('consolidadoAdmin',TOKEN);
+   CONSOLIDADO=r.registros||[];
+   prepararFiltrosConsolidado();
+   CONS_PAGINA=0;renderConsolidado();
+   $('consMensaje').textContent='Consolidado actualizado · '+(r.actualizado||'')+'. No representa acreditación oficial.';
+ }catch(e){$('consMensaje').textContent='No se pudo cargar el consolidado: '+msg(e)}
+}
+function renderConsolidado(){
+ const q=($('consBuscar').value||'').trim().toUpperCase();
+ const mina=$('consMina').value,cargo=$('consCargo').value,estado=$('consEstado').value;
+ CONS_FILTRADOS=CONSOLIDADO.filter(r=>(!mina||r.mina===mina)&&(!cargo||r.cargo===cargo)&&(!estado||r.situacion===estado)&&
+   (!q||[r.nombre,r.dni,r.cargo,r.mina].join(' ').toUpperCase().includes(q)));
+ const paginas=Math.max(1,Math.ceil(CONS_FILTRADOS.length/CONS_POR_PAGINA));
+ CONS_PAGINA=Math.max(0,Math.min(CONS_PAGINA,paginas-1));
+ const vista=CONS_FILTRADOS.slice(CONS_PAGINA*CONS_POR_PAGINA,(CONS_PAGINA+1)*CONS_POR_PAGINA);
+ $('consTabla').innerHTML=vista.map(r=>{
+  const pf=r.perfil;
+  const pct=pf?`<span class="cons-pct">${pf.porcentaje}%</span><div class="cons-progress"><span style="width:${pf.porcentaje}%"></span></div><span class="cons-micro">${pf.completos} de ${pf.total} cursos · ${pf.pendientes} faltan</span>`:'<span class="cons-micro">Matriz no cargada</span>';
+  const mines=r.mina==='SIN ASIGNAR'?'Sin unidad':nombreMina(r.mina);
+  const emos=r.emo.estado==='NO_APLICA'?'—':consChip(r.emo.estado)+(r.emo.fecha?`<small>${esc(formatearFecha(r.emo.fecha))}</small>`:'');
+  const permiso=r.permiso.estado==='NO_APLICA'?'—':consChip(r.permiso.estado)+(r.permiso.fecha?`<small>${esc(formatearFecha(r.permiso.fecha))}</small>`:'');
+  const pendientes=pf?pf.cursos.filter(c=>c.estado!=='VIGENTE'&&c.estado!=='SIN_FECHA'):[];
+  const sinFecha=pf?pf.cursos.filter(c=>c.estado==='SIN_FECHA'):[];
+  let det=pf?`<div style="margin-top:8px;font-size:11px;color:#587184">${pf.pendientes} pendientes · ${pf.vencidos} vencidos · ${pf.sinFecha} sin vencimiento declarado</div>`:'';
+  det+=pendientes.length?`<b style="display:block;margin-top:8px;font-size:11px">Faltantes / vencidos</b><ul>${pendientes.map(c=>`<li>${esc(c.nombre)} · ${esc(c.estado==='VENCIDO'?'Vencido':'Pendiente')}</li>`).join('')}</ul>`:'';
+  det+=sinFecha.length?`<b style="display:block;margin-top:8px;font-size:11px">Vigencia por confirmar</b><ul>${sinFecha.map(c=>`<li>${esc(c.nombre)}</li>`).join('')}</ul>`:'';
+  if(!pf)det='<p class="muted">Para esta mina no existe todavía una matriz de cursos o el cargo no tiene perfil definido.</p>';
+  const details=`<details class="cons-details"><summary>Ver detalle</summary>${det}</details>`;
+  const asignacion=r.asignado?'<span class="mini-label">Asignación confirmada</span>':r.mina==='SIN ASIGNAR'?'<span class="mini-label">Pendiente de asignar</span>':'<span class="mini-label">Solo documentos asociados</span>';
+  const desactivar=r.asignado?`<button type="button" class="small-action" data-quitar-mina="${esc(r.dni)}" data-mina="${esc(r.mina)}" title="Desactivar asignación (los certificados se conservan)">Quitar asignación</button>`:'';
+  return `<tr><td data-col="Trabajador"><strong>${esc(r.nombre)}</strong><small>DNI ${esc(r.dni)} · ${esc(r.cargo||'Sin cargo')}</small>${r.historico?'<span class="mini-label">Histórico</span>':''}</td>
+   <td data-col="Unidad minera"><strong>${esc(mines)}</strong>${asignacion}<small>${r.certificados} certificado${r.certificados===1?'':'s'} asociados</small></td>
+   <td data-col="Capacitación">${pct}</td>
+   <td data-col="EMO">${emos}</td><td data-col="Permiso Chile">${permiso}</td>
+   <td data-col="Situación">${consChip(r.situacion)}</td>
+   <td data-col="Detalle"><div class="cons-actions">${details}${desactivar}</div></td></tr>`;
+ }).join('')||'<tr><td colspan="7" class="cons-empty">No se encontraron trabajadores con esos filtros.</td></tr>';
+ const unicos=new Set(CONS_FILTRADOS.map(r=>r.dni)).size;
+ $('consConteo').textContent=`${unicos} trabajador${unicos===1?'':'es'} · ${CONS_FILTRADOS.length} registro${CONS_FILTRADOS.length===1?'':'s'} por unidad minera`;
+ $('consPagina').textContent=`Página ${CONS_PAGINA+1} de ${paginas}`;
+ $('consAnterior').disabled=CONS_PAGINA===0;$('consSiguiente').disabled=CONS_PAGINA>=paginas-1;
+}
+function paginarConsolidado(n){CONS_PAGINA+=n;renderConsolidado();$('consolidado-general').scrollIntoView({behavior:'smooth'});}
+async function guardarAsignacion(){
+ const dni=$('consPersona').value,mina=$('consAsignarMina').value,b=$('consGuardarAsignacion');
+ if(!/^\d{8}$/.test(dni)||!mina){$('consAsignacionMsg').textContent='Selecciona un trabajador y una mina.';return;}
+ b.disabled=true;$('consAsignacionMsg').textContent='Guardando asignación de unidad minera…';
+ try{await api('guardarAsignacion',TOKEN,{dni,mina});anunciarCambioAcreditaciones();await cargarConsolidado();$('consAsignacionMsg').textContent='Asignación guardada. Los certificados y vigencias no se modificaron.';}
+ catch(e){$('consAsignacionMsg').textContent=msg(e)}finally{b.disabled=false}
+}
+$('consTabla').addEventListener('click',async e=>{
+ const b=e.target.closest('button[data-quitar-mina]');if(!b)return;
+ const dni=b.dataset.quitarMina,mina=b.dataset.mina;
+ if(!confirm('¿Quitar la asignación del trabajador a '+mina+'? Los documentos asociados NO se eliminarán.'))return;
+ b.disabled=true;$('consMensaje').textContent='Desactivando asignación…';
+ try{await api('desactivarAsignacion',TOKEN,dni,mina);anunciarCambioAcreditaciones();await cargarConsolidado();}
+ catch(err){$('consMensaje').textContent=msg(err);b.disabled=false}
+});
+function exportarConsolidado(){
+ if(!CONS_FILTRADOS.length){$('consMensaje').textContent='No hay registros para exportar.';return}
+ const h=['DNI','APELLIDOS Y NOMBRES','CARGO','UNIDAD MINERA','ASIGNACION CONFIRMADA','CERTIFICADOS','CUMPLIMIENTO %','CURSOS CUMPLIDOS','CURSOS OBLIGATORIOS','CURSOS PENDIENTES','CURSOS SIN FECHA','CURSOS VENCIDOS','ESTADO EMO','VENCIMIENTO EMO','PERMISO CHILE','VENCIMIENTO PERMISO','SITUACION','CURSOS FALTANTES'];
+ const rows=CONS_FILTRADOS.map(r=>[r.dni,r.nombre,r.cargo,r.mina,r.asignado?'SI':'NO',r.certificados,
+  r.perfil?.porcentaje??'',r.perfil?.completos??'',r.perfil?.total??'',r.perfil?.pendientes??'',r.perfil?.sinFecha??'',r.perfil?.vencidos??'',
+  r.emo.estado,r.emo.fecha||'',r.permiso.estado,r.permiso.fecha||'',r.situacion,
+  (r.perfil?.cursos||[]).filter(c=>c.estado==='PENDIENTE'||c.estado==='VENCIDO').map(c=>c.nombre).join(' | ')]);
+ // CSV separado por punto y coma, BOM UTF-8 y escape de fórmula para Excel.
+ const safe=v=>{let s=String(v??'');if(/^[=+@\-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};
+ const csv='\ufeff'+[h,...rows].map(r=>r.map(safe).join(';')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='DIMARZA_Consolidado_Acreditaciones_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+ $('consMensaje').textContent='Exportación generada. Excel puede abrir el archivo CSV UTF-8.';
+}
 
 // === CONTROL DE VIGENCIAS: SOLO PARA SESION RESIDENTE ===
 function vigStatus(estado,dias){
