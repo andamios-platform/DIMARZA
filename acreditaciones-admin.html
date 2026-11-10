@@ -60,14 +60,47 @@
 .cons-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:18px 27px;color:#718995;font-size:12px}.cons-empty{padding:35px!important;color:#6b8092;text-align:center}
 @media(max-width:1050px){.cons-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.cons-assign-form{grid-template-columns:1fr 1fr}.cons-assign-form>div:last-child{grid-column:1/-1}}
 @media(max-width:650px){.cons-toolbar{grid-template-columns:1fr;padding:15px}.cons-intro{padding:15px}.cons-assign-form{grid-template-columns:1fr}.cons-assign-form>div:last-child{grid-column:auto}.cons-footer{padding:15px}.cons-table{min-width:0}.cons-table thead{display:none}.cons-table,.cons-table tbody,.cons-table tr,.cons-table td{display:block;width:100%}.cons-table tr{border:1px solid #e3ecf0;border-radius:12px;margin:10px 0;padding:10px}.cons-table td{border:0;padding:6px 3px}.cons-table td:before{content:attr(data-col);display:block;color:#718a99;font-size:10px;text-transform:uppercase;font-weight:800}.cons-progress{width:100%}}
+
+/* ==========================================================
+   NAVEGACION POR PESTAÑAS · ADMINISTRACION DIMARZA
+   Vista unificada sin cambiar las APIs ni los identificadores
+   ========================================================== */
+.ac-tabs-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px;padding:0 3px}
+.ac-tabs-intro strong{display:block;font-size:14px;color:#173047;font-weight:850}
+.ac-tabs-intro span{font-size:12px;color:#748898}
+.ac-tabs{position:sticky;top:8px;z-index:15;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;border:1px solid #dce8ed;border-radius:17px;padding:8px;background:#fff;box-shadow:0 8px 30px rgba(12,31,48,.055);margin:0 0 21px}
+.ac-tab{min-width:0;border:1px solid transparent;background:transparent;color:#506b7d;border-radius:12px;display:flex;align-items:center;gap:12px;padding:13px 12px;text-align:left;transition:background .15s,border-color .15s,box-shadow .15s;cursor:pointer}
+.ac-tab:hover{background:#f0f7f8;color:#116c72}
+.ac-tab[aria-selected="true"]{color:#075c57;border-color:#bee7df;background:#eaf8f5;box-shadow:inset 0 0 0 1px rgba(8,160,143,.05)}
+.ac-tab:focus-visible{outline:3px solid #18ad9b;outline-offset:2px}
+.ac-tab-symbol{width:38px;height:38px;border-radius:11px;background:#f0f5f7;color:#537b8a;display:grid;place-items:center;flex:none;font-size:21px;font-weight:700}
+.ac-tab[aria-selected="true"] .ac-tab-symbol{background:#c9f1e8;color:#00796c}
+.ac-tab-text{min-width:0;display:flex;flex-direction:column;gap:2px}
+.ac-tab-text strong{font-size:13px;font-weight:850;line-height:1.25}
+.ac-tab-text small{font-size:11px;font-weight:520;color:#80929c;line-height:1.3}
+.ac-tab[aria-selected="true"] .ac-tab-text small{color:#418b81}
+.ac-tabpanel[hidden]{display:none!important}
+@media(max-width:1030px){.ac-tab{gap:8px;padding:12px 9px}.ac-tab-symbol{width:34px;height:34px}.ac-tab-text strong{font-size:12px}}
+@media(max-width:760px){.ac-tabs{position:static;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ac-tabs-intro{flex-direction:column;align-items:flex-start;gap:2px}.ac-tab{padding:11px 9px}}
+@media(max-width:390px){.ac-tab-symbol{width:30px;height:30px;font-size:17px}.ac-tab-text strong{font-size:11px}.ac-tab-text small{font-size:10px}}
+
 </style></head><body>
 <header class="hero"><div class="shell"><nav class="topnav" aria-label="Navegación principal"><a href="visualizacion.html" class="brand"><span class="brand-symbol">◈</span><span><strong>DIMARZA</strong><small>Gestión de acreditaciones</small></span></a><a class="nav-link" href="visualizacion.html">← Volver a Visualización</a></nav>
 <div class="hero-grid"><div><p class="eyebrow">Centro de control documental</p><h1>Acreditaciones y certificados</h1><p class="sub">Administra certificados, exámenes médicos y permisos de trabajo. Controla fechas críticas y documentación por trabajador y operación.</p></div><div class="hero-status"><div id="conexion" class="conn" role="status">Conectando con DIMARZA…</div><div class="role-pill">🔐 ACCESO RESIDENTE</div><small id="dbInfo"></small></div></div></div></header>
 <main class="shell content">
 <section id="login" class="card"><div class="panel-head"><div class="card-title"><span class="card-title-icon">🔐</span><div><h2>Verificar acceso</h2><p>Accede con la sesión RESIDENTE que ya iniciaste en Visualización.</p></div></div></div><div class="content-area"><div class="tiny-note">La verificación es automática; no necesitas escribir nuevamente tu contraseña.</div><p id="loginMsg" class="err" role="alert"></p><div class="login-actions"><button id="btnLogin" class="btn" onclick="entrar()">Verificar sesión</button><a href="visualizacion.html" class="soft">Volver a Visualización</a></div></div></section>
 <section id="panel" class="hidden">
+  <div class="ac-tabs-intro" aria-hidden="true"><strong>Panel de gestión</strong><span>Selecciona una sección para administrar sus registros.</span></div>
+  <div id="acTabsInicio" aria-hidden="true"></div>
+  <nav class="ac-tabs" id="acPestanas" role="tablist" aria-label="Secciones de Administración de Acreditaciones">
+    <button type="button" class="ac-tab" id="ac-tab-consolidado" role="tab" aria-selected="true" tabindex="0" aria-controls="consolidado-general" data-ac-tab="consolidado-general"><span class="ac-tab-symbol" aria-hidden="true">▦</span><span class="ac-tab-text"><strong>Consolidado</strong><small>Personal y cumplimiento</small></span></button>
+    <button type="button" class="ac-tab" id="ac-tab-vigencias" role="tab" aria-selected="false" tabindex="-1" aria-controls="control-vigencias" data-ac-tab="control-vigencias"><span class="ac-tab-symbol" aria-hidden="true">◷</span><span class="ac-tab-text"><strong>Vencimientos</strong><small>EMO y permisos de Chile</small></span></button>
+    <button type="button" class="ac-tab" id="ac-tab-registro" role="tab" aria-selected="false" tabindex="-1" aria-controls="registro" data-ac-tab="registro"><span class="ac-tab-symbol" aria-hidden="true">＋</span><span class="ac-tab-text"><strong>Registrar certificado</strong><small>Nuevo documento</small></span></button>
+    <button type="button" class="ac-tab" id="ac-tab-biblioteca" role="tab" aria-selected="false" tabindex="-1" aria-controls="biblioteca" data-ac-tab="biblioteca"><span class="ac-tab-symbol" aria-hidden="true">▤</span><span class="ac-tab-text"><strong>Biblioteca</strong><small>Certificados y cursos</small></span></button>
+  </nav>
 
-<section class="card" id="consolidado-general">
+
+<section class="card ac-tabpanel" id="consolidado-general" role="tabpanel" aria-labelledby="ac-tab-consolidado">
   <div class="panel-head">
     <div class="card-title"><div class="card-title-icon">▦</div><div>
       <div class="section-number">Administración · Control general</div>
@@ -103,7 +136,7 @@
 
 
 
-<section class="card" id="control-vigencias">
+<section class="card ac-tabpanel" id="control-vigencias" role="tabpanel" aria-labelledby="ac-tab-vigencias" hidden>
   <div class="panel-head">
     <div class="card-title"><div class="card-title-icon">◷</div><div><div class="section-number">Seguimiento de vencimientos · Prioritario</div><h2>Exámenes médicos y permisos de trabajo</h2><p>Fechas documentales reales, alertas automáticas y seguimiento privado por trabajador.</p></div></div>
     <span class="tag-neutral">🔐 Solo RESIDENTE</span>
@@ -141,7 +174,7 @@
     </div>
   </div>
 </section>
-<section class="card" id="registro"><div class="panel-head"><div class="card-title"><div class="card-title-icon">＋</div><div><div class="section-number">Registro documental · 01</div><h2>Registrar un certificado</h2><p>Selecciona la unidad minera y el trabajador. Sus datos se completarán automáticamente.</p></div></div><div class="panel-actions"><button class="soft" onclick="cargar()">↻ Actualizar datos</button><button class="soft" onclick="salir()">Salir del módulo</button></div></div>
+<section class="card ac-tabpanel" id="registro" role="tabpanel" aria-labelledby="ac-tab-registro" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">＋</div><div><div class="section-number">Registro documental · 01</div><h2>Registrar un certificado</h2><p>Selecciona la unidad minera y el trabajador. Sus datos se completarán automáticamente.</p></div></div><div class="panel-actions"><button class="soft" onclick="cargar()">↻ Actualizar datos</button><button class="soft" onclick="salir()">Salir del módulo</button></div></div>
 <div class="content-area"><div class="subsection highlight"><div class="subhead"><span>01</span> Asignación del certificado</div><div class="grid">
 <div class="field span4"><label for="minaRegistro">Unidad minera</label><select id="minaRegistro"><option value="">Seleccionar mina</option></select></div>
 <div class="field span4"><label for="filtroCargo">Puesto / cargo <small style="font-weight:400;color:#91a0ad">(solo filtro)</small></label><select id="filtroCargo" onchange="filtrarPersonal()"><option value="">Todos los cargos</option></select></div>
@@ -152,12 +185,64 @@
 <div id="bloqueHistorico" class="subsection hidden"><div class="subhead"><span>↳</span> Datos del trabajador histórico</div><div class="grid"><div class="field span4"><label for="dniHistorico">DNI histórico</label><input id="dniHistorico" maxlength="8" inputmode="numeric" placeholder="8 dígitos"></div><div class="field span8"><label for="nombreHistorico">Apellidos y nombres</label><input id="nombreHistorico" placeholder="Nombre completo"></div></div></div>
 <div class="subsection"><div class="subhead"><span>02</span> Información del certificado</div><div class="grid"><div class="field span8"><label for="curso">Curso o capacitación</label><input id="curso" placeholder="Ej. Persona competente para trabajos en altura"></div><div class="field span6 hidden" id="bloqueCursoMatriz"><label for="cursoMatriz">Curso de la matriz Antapaccay 2026 (opcional)</label><select id="cursoMatriz"><option value="">No vincular con la matriz</option></select><div class="hint">Relaciona el certificado con un requisito obligatorio validado por el RESIDENTE.</div></div><div class="field span4"><label for="visibilidad">Acceso al PDF</label><select id="visibilidad"><option value="PRIVADO">Privado / restringido</option><option value="PUBLICO">Público autorizado · DNI</option></select></div><div class="field span4"><label for="emisor">Entidad emisora</label><input id="emisor" placeholder="Ej. CFC Group / MSA / Layher"></div><div class="field span4"><label for="emision">Fecha de emisión</label><input id="emision" type="date"></div><div class="field span4"><label for="vencimiento">Fecha de vencimiento (si consta)</label><input id="vencimiento" type="date"></div><div class="field span6"><label for="numero">N.º de certificado (opcional)</label><input id="numero" placeholder="Código del documento"></div><div class="field span6"><label for="pdf">Documento PDF original</label><input id="pdf" type="file" accept="application/pdf,.pdf"><div class="hint">Máximo 4 MB · Se guarda en Drive privado</div></div></div></div>
 <div class="upload-footer"><div class="tiny-note"><span>🔒</span><span>Los certificados son <strong>privados por defecto</strong>. Usa «Público autorizado» solo para capacitación divulgable: el trabajador podrá verla por DNI. La visualización en navegador no impide guardar o copiar archivos. No publiques información médica o sensible.</span></div><button id="btnGuardar" class="green" onclick="guardar()">＋ Guardar certificado</button></div><p id="uploadMsg" class="feedback" role="status"></p></div></section>
-<section class="card" id="biblioteca"><div class="panel-head"><div class="card-title"><div class="card-title-icon">▤</div><div><div class="section-number">Control de registros · 02</div><h2>Biblioteca de certificados <span id="total" class="tag-neutral">0</span></h2><p>Consulta por mina, trabajador y capacitación. Cambia la asignación o los permisos sin volver a subir el archivo.</p></div></div><span id="catalogoCount" class="muted"></span></div>
+<section class="card ac-tabpanel" id="biblioteca" role="tabpanel" aria-labelledby="ac-tab-biblioteca" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">▤</div><div><div class="section-number">Control de registros · 02</div><h2>Biblioteca de certificados <span id="total" class="tag-neutral">0</span></h2><p>Consulta por mina, trabajador y capacitación. Cambia la asignación o los permisos sin volver a subir el archivo.</p></div></div><span id="catalogoCount" class="muted"></span></div>
 <div class="filters"><div><label for="filtroBibliotecaMina">UNIDAD MINERA</label><select id="filtroBibliotecaMina" onchange="render()"><option value="">Todas las minas</option></select></div><div><label for="filtroBibliotecaCargo">PUESTO / CARGO</label><select id="filtroBibliotecaCargo" onchange="render()"><option value="">Todos los puestos</option></select></div><div><label for="filtro">BUSCADOR</label><input id="filtro" placeholder="Buscar nombre, DNI, curso o emisor…" oninput="render()"></div></div>
 <div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Matriz Antapaccay</th><th>Acceso al PDF</th><th>Archivo</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div><div style="padding:0 24px 19px"><p id="panelMsg" class="feedback" role="status"></p></div></section>
 </section></main><footer class="page-footer">© 2026 DIMARZA · Gestión documental y trazabilidad de certificados</footer>
 <script>
 
+
+
+/* ============================================================
+   PESTAÑAS ADMINISTRATIVAS · NO ALTERA LA LOGICA DE NEGOCIO
+   ============================================================ */
+const AC_PESTANAS=['consolidado-general','control-vigencias','registro','biblioteca'];
+const AC_PESTANA_KEY='dimarza_acreditaciones_admin_pestana';
+function seleccionarPestanaAcreditaciones(id,{desplazar=true,guardar=true}={}){
+  if(!AC_PESTANAS.includes(id))id='consolidado-general';
+  const actual=document.querySelector('.ac-tab[aria-selected="true"]');
+  const cambiando=!!actual&&actual.dataset.acTab!==id;
+  AC_PESTANAS.forEach(clave=>{
+    const panel=document.getElementById(clave);
+    const boton=document.querySelector(`.ac-tab[data-ac-tab="${clave}"]`);
+    if(!panel||!boton)return;
+    const activo=clave===id;
+    panel.hidden=!activo;
+    boton.setAttribute('aria-selected',String(activo));
+    boton.tabIndex=activo?0:-1;
+  });
+  if(guardar){try{sessionStorage.setItem(AC_PESTANA_KEY,id);}catch(_){}}
+  // No se reconstruye el DOM: conserva el formulario que estaba rellenando.
+  // El desplazamiento solo aplica al cambiar de pestaña, no al cargar datos.
+  if(desplazar&&cambiando){
+    const tabs=document.getElementById('acTabsInicio');
+    if(tabs){
+      const top=tabs.getBoundingClientRect().top+window.scrollY-14;
+      window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+    }
+  }
+}
+function iniciarPestanasAcreditaciones(){
+  const tabs=document.querySelectorAll('.ac-tab[data-ac-tab]');
+  tabs.forEach((boton,i)=>{
+    boton.addEventListener('click',()=>seleccionarPestanaAcreditaciones(boton.dataset.acTab));
+    boton.addEventListener('keydown',e=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+      e.preventDefault();
+      let index=i;
+      if(e.key==='ArrowLeft')index=(i-1+tabs.length)%tabs.length;
+      if(e.key==='ArrowRight')index=(i+1)%tabs.length;
+      if(e.key==='Home')index=0;
+      if(e.key==='End')index=tabs.length-1;
+      const destino=tabs[index];
+      seleccionarPestanaAcreditaciones(destino.dataset.acTab);
+      destino.focus();
+    });
+  });
+  let previa='consolidado-general';
+  try{previa=sessionStorage.getItem(AC_PESTANA_KEY)||previa;}catch(_){ }
+  seleccionarPestanaAcreditaciones(previa,{desplazar:false,guardar:false});
+}
 
 // API sin iframe: fetch GET/JSON como Herramientas y POST privado text/plain.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzUL5LGdXro4fzbGkBHsvP1cGvtEQe7IYFH2k-l9LO_cx0kTcBDrBNtHlmc5sX1VINl/exec';
@@ -237,6 +322,7 @@ async function entrar(){
     const res=await api('sesionVisualizacion',token);
     TOKEN=token; PERSONAL=res.personal || []; MINAS=res.minas || []; MINAS_INFO=res.minasInfo || [];
     $('login').classList.add('hidden'); $('panel').classList.remove('hidden');
+    if(!window.__dimarzaTabsIniciadas){iniciarPestanasAcreditaciones();window.__dimarzaTabsIniciadas=true;}
     $('dbInfo').textContent='Sesión segura validada · RESIDENTE';
     prepararFiltrosPersonal();
     prepararFiltrosMinas();
