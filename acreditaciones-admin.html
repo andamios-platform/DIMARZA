@@ -178,7 +178,7 @@
 
     <div class="vig-alert">🔒 <span>El panel administrativo muestra el control completo. La consulta por DNI publica únicamente fechas de vencimiento y estados; no muestra diagnósticos médicos ni documentos migratorios.</span></div>
     <div class="alerts-card"><strong>✉ Alertas automáticas por correo</strong>
-      <p>Destinatarios: <b>ruben.romero@ucsp.edu.pe</b> y <b>churafigueroawf@gmail.com</b>. Avisos: 60, 30 y 7 días antes y al vencerse. También revisa certificados.</p>
+      <p>Destinatarios: <b>ruben.romero@ucsp.edu.pe</b> y <b>churafigueroawf@gmail.com</b>. Avisos para <b>certificados y EMO</b>: 60, 30 y 7 días antes. Para <b>permisos de Chile</b>: 30, 15 y 7 días antes. Ambos incluyen aviso al vencimiento.</p>
       <p id="alertasEstado">Comprobando configuración de alertas…</p>
       <p>Para habilitar el envío diario, ejecuta una sola vez <code>activarAlertasDiarias()</code> desde Apps Script. No se envían correos durante la instalación.</p>
     </div>
@@ -199,7 +199,7 @@
         <div class="field span4"><label for="vigFechaVencimiento">Fecha de vencimiento</label><input id="vigFechaVencimiento" type="date" required></div>
       </div>
       <div class="upload-footer" style="margin-top:20px">
-        <span class="muted">Las alertas se calculan con los vencimientos reales registrados: 60, 30 y 7 días antes.</span>
+        <span class="muted">Correos de alerta: EMO y certificados a los 60, 30 y 7 días; permisos chilenos a los 30, 15 y 7 días. Todos al vencimiento.</span>
         <div class="panel-actions"><button type="button" class="soft" onclick="limpiarFormularioVigencia()">Nuevo registro</button><button type="button" id="vigBtnGuardar" class="green" onclick="guardarVigencia()">Guardar vigencia</button></div>
       </div>
       <p class="feedback" id="vigMensaje" role="status"></p>
