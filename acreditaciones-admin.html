@@ -103,6 +103,20 @@
 .resident-pdf-dialog .pdf-dialog-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:25px;text-align:center;color:#315368;font-weight:700;background:#f0f6f8;z-index:2}
 .resident-pdf-dialog .pdf-dialog-status[hidden]{display:none!important}
 @media(max-width:780px){.pdf-actions{gap:7px}.resident-pdf-dialog{width:97vw;height:94vh}.resident-pdf-dialog .pdf-dialog-body{height:calc(100% - 94px)}}
+/* Renovaciones / historial */
+.ren-banner{border:1px solid #9edfd3;border-radius:13px;background:#ebfaf5;color:#155d58;padding:13px 16px;margin-bottom:18px;display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+.ren-banner strong{display:block;font-size:13px}.ren-banner small{display:block;font-size:11px;margin-top:4px}
+.ren-badge{display:inline-flex;gap:4px;align-items:center;border-radius:7px;padding:4px 8px;font-size:10px;font-weight:800;margin-top:6px;background:#e5f6ee;color:#16734f}
+.ren-badge.historico{background:#f1f1f4;color:#738290}
+.ren-btn{border:1px solid #d7e5ed;border-radius:8px;background:#fff;padding:8px 11px;font-size:11px;font-weight:750;color:#0b7468}
+.ren-btn:hover{background:#e9f7f3}
+.library tr.ren-row-old{opacity:.82;background:#fafbfd}
+.ren-history-filter{margin:14px 27px 0;align-items:center;gap:9px;display:flex;font-size:12px;color:#435d6b;font-weight:670}
+.ren-history-filter input{accent-color:#078e83;width:16px;height:16px}
+.alerts-card{border:1px solid #ddebe9;border-radius:13px;background:#f7fbfb;padding:15px 18px;margin-bottom:18px}
+.alerts-card strong{display:block;color:#1c4852;font-size:13px;margin-bottom:6px}
+.alerts-card p{margin:4px 0;font-size:12px;color:#5e7580;line-height:1.55}
+@media(max-width:680px){.ren-history-filter{margin:10px 16px}.ren-banner{align-items:flex-start}}
 </style></head><body>
 <header class="hero"><div class="shell"><nav class="topnav" aria-label="Navegación principal"><a href="visualizacion.html" class="brand"><span class="brand-symbol">◈</span><span><strong>DIMARZA</strong><small>Gestión de acreditaciones</small></span></a><a class="nav-link" href="visualizacion.html">← Volver a Visualización</a></nav>
 <div class="hero-grid"><div><p class="eyebrow">Centro de control documental</p><h1>Acreditaciones y certificados</h1><p class="sub">Administra certificados, exámenes médicos y permisos de trabajo. Controla fechas críticas y documentación por trabajador y operación.</p></div><div class="hero-status"><div id="conexion" class="conn" role="status">Conectando con DIMARZA…</div><div class="role-pill">🔐 ACCESO RESIDENTE</div><small id="dbInfo"></small></div></div></div></header>
@@ -163,6 +177,11 @@
   <div class="content-area">
 
     <div class="vig-alert">🔒 <span>El panel administrativo muestra el control completo. La consulta por DNI publica únicamente fechas de vencimiento y estados; no muestra diagnósticos médicos ni documentos migratorios.</span></div>
+    <div class="alerts-card"><strong>✉ Alertas automáticas por correo</strong>
+      <p>Destinatarios: <b>ruben.romero@ucsp.edu.pe</b> y <b>churafigueroawf@gmail.com</b>. Avisos: 60, 30 y 7 días antes y al vencerse. También revisa certificados.</p>
+      <p id="alertasEstado">Comprobando configuración de alertas…</p>
+      <p>Para habilitar el envío diario, ejecuta una sola vez <code>activarAlertasDiarias()</code> desde Apps Script. No se envían correos durante la instalación.</p>
+    </div>
     <div class="vig-tabs" role="group" aria-label="Tipo de control">
       <button type="button" class="vig-tab active" data-vig-tab="EMO" onclick="cambiarTipoVigencia('EMO')">🩺 Examen médico (EMO)</button>
       <button type="button" class="vig-tab" data-vig-tab="CHILE" onclick="cambiarTipoVigencia('CHILE')">🛂 Permiso de trabajo · Chile</button>
@@ -180,7 +199,7 @@
         <div class="field span4"><label for="vigFechaVencimiento">Fecha de vencimiento</label><input id="vigFechaVencimiento" type="date" required></div>
       </div>
       <div class="upload-footer" style="margin-top:20px">
-        <span class="muted">Las alertas se calculan sobre la fecha de vencimiento registrada: 60 y 30 días antes.</span>
+        <span class="muted">Las alertas se calculan con los vencimientos reales registrados: 60, 30 y 7 días antes.</span>
         <div class="panel-actions"><button type="button" class="soft" onclick="limpiarFormularioVigencia()">Nuevo registro</button><button type="button" id="vigBtnGuardar" class="green" onclick="guardarVigencia()">Guardar vigencia</button></div>
       </div>
       <p class="feedback" id="vigMensaje" role="status"></p>
@@ -193,8 +212,11 @@
     </div>
   </div>
 </section>
-<section class="card ac-tabpanel" id="registro" role="tabpanel" aria-labelledby="ac-tab-registro" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">＋</div><div><div class="section-number">Registro documental · 01</div><h2>Registrar un certificado</h2><p>Selecciona la unidad minera y el trabajador. Sus datos se completarán automáticamente.</p></div></div><div class="panel-actions"><button class="soft" onclick="cargar()">↻ Actualizar datos</button><button class="soft" onclick="salir()">Salir del módulo</button></div></div>
-<div class="content-area"><div class="subsection highlight"><div class="subhead"><span>01</span> Asignación del certificado</div><div class="grid">
+<section class="card ac-tabpanel" id="registro" role="tabpanel" aria-labelledby="ac-tab-registro" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">＋</div><div><div class="section-number">Registro documental · 01</div><h2>Registrar un certificado</h2><p>Selecciona un trabajador y registra un documento nuevo o una renovación desde Biblioteca.</p></div></div><div class="panel-actions"><button class="soft" onclick="cargar()">↻ Actualizar datos</button><button class="soft" onclick="salir()">Salir del módulo</button></div></div>
+<div class="content-area">
+<input type="hidden" id="renuevaId" value="">
+<div id="renovacionBanner" class="ren-banner hidden" role="status"><div><strong>↻ Renovación de certificado</strong><small id="renovacionInfo">El documento anterior pasará a histórico cuando registres el nuevo PDF.</small></div><button type="button" class="ren-btn" onclick="cancelarRenovacion()">Cancelar renovación</button></div>
+<div class="subsection highlight"><div class="subhead"><span>01</span> Asignación del certificado</div><div class="grid">
 <div class="field span4"><label for="minaRegistro">Unidad minera</label><select id="minaRegistro"><option value="">Seleccionar mina</option></select></div>
 <div class="field span4"><label for="filtroCargo">Puesto / cargo <small style="font-weight:400;color:#91a0ad">(solo filtro)</small></label><select id="filtroCargo" onchange="filtrarPersonal()"><option value="">Todos los cargos</option></select></div>
 <div class="field span4"><label for="trabajador">Trabajador</label><select id="trabajador" onchange="seleccionarTrabajador()"><option value="">Seleccionar trabajador</option></select></div>
@@ -206,6 +228,7 @@
 <div class="upload-footer"><div class="tiny-note"><span>🔒</span><span>Los certificados son <strong>privados por defecto</strong>. Usa «Público autorizado» solo para capacitación divulgable: el trabajador podrá verla por DNI. La visualización en navegador no impide guardar o copiar archivos. No publiques información médica o sensible.</span></div><button id="btnGuardar" class="green" onclick="guardar()">＋ Guardar certificado</button></div><p id="uploadMsg" class="feedback" role="status"></p></div></section>
 <section class="card ac-tabpanel" id="biblioteca" role="tabpanel" aria-labelledby="ac-tab-biblioteca" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">▤</div><div><div class="section-number">Control de registros · 02</div><h2>Biblioteca de certificados <span id="total" class="tag-neutral">0</span></h2><p>Consulta, visualiza y descarga certificados. Cambia la asignación o los permisos sin volver a subir el archivo.</p></div></div><span id="catalogoCount" class="muted"></span></div>
 <div class="filters"><div><label for="filtroBibliotecaMina">UNIDAD MINERA</label><select id="filtroBibliotecaMina" onchange="render()"><option value="">Todas las minas</option></select></div><div><label for="filtroBibliotecaCargo">PUESTO / CARGO</label><select id="filtroBibliotecaCargo" onchange="render()"><option value="">Todos los puestos</option></select></div><div><label for="filtro">BUSCADOR</label><input id="filtro" placeholder="Buscar nombre, DNI, curso o emisor…" oninput="render()"></div></div>
+<label class="ren-history-filter"><input type="checkbox" id="mostrarHistoricos" onchange="render()"> Mostrar también certificados históricos renovados</label>
 <div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Matriz Antapaccay</th><th>Acceso al PDF</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div><div style="padding:0 24px 19px"><p id="panelMsg" class="feedback" role="status"></p></div></section>
 </section></main>
 <dialog id="residentPdfDialog" class="resident-pdf-dialog" aria-labelledby="residentPdfTitle" aria-modal="true">
@@ -402,9 +425,17 @@ function salir(){
   $('panel').classList.add('hidden'); $('login').classList.remove('hidden');
   $('loginMsg').textContent='Sesión de este módulo cerrada. Tu acceso general a Visualización sigue activo.';
 }
+async function consultarEstadoAlertas(){
+ try {
+  const r=await api('estadoAlertasAdmin',TOKEN);
+  $('alertasEstado').textContent=r.activo
+   ? ('● Alertas activas: ejecución diaria ~8 a. m. (Lima). Notificaciones registradas: '+r.enviosRegistrados)
+   : '○ Alertas preparadas, pero todavía no activadas. Ejecuta activarAlertasDiarias() una sola vez.';
+ } catch(err){ $('alertasEstado').textContent='No se pudo consultar la configuración: '+msg(err); }
+}
 async function cargar(){
  $('panelMsg').textContent='Consultando…';
- try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};CURSOS_PERFIL=r.cursosPerfil||[];prepararCursosPerfil();actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render();await cargarConsolidado()}
+ try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.filter(c=>!c.historico).length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};CURSOS_PERFIL=r.cursosPerfil||[];prepararCursosPerfil();actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render();await cargarConsolidado();await consultarEstadoAlertas()}
  catch(e){$('panelMsg').textContent=msg(e)}
 }
 function anunciarCambioAcreditaciones(){
@@ -435,25 +466,58 @@ function render(){
  const cargo=$('filtroBibliotecaCargo').value;
  const mina=$('filtroBibliotecaMina').value;
  const personalPorDni=new Map(PERSONAL.map(p=>[p.dni,String(p.cargo||'Sin cargo').trim()]));
- const visibles=CERTS.filter(c=>(!cargo||personalPorDni.get(c.dni)===cargo) &&
+ const visibles=CERTS.filter(c=>(!!$('mostrarHistoricos').checked||!c.historico) && (!cargo||personalPorDni.get(c.dni)===cargo) &&
    (!mina||(c.mina||'SIN ASIGNAR')===mina) &&
    [c.dni,c.nombre,c.curso,c.emisor,c.numero,c.mina].join(' ').toUpperCase().includes(q));
- $('conteoFiltrado').textContent=visibles.length+' de '+CERTS.length+' registros';
+ $('conteoFiltrado').textContent=visibles.length+' de '+CERTS.filter(c=>!!$('mostrarHistoricos').checked||!c.historico).length+' certificados '+($('mostrarHistoricos').checked?'incluyendo histórico':'actuales');
  $('tabla').innerHTML=visibles.map(c=>{
    const libre=c.visibilidad==='PUBLICO';
    const opcionesMinas=crearOpcionesMinas(c.mina);
    const minaNombre=nombreMina(c.mina);
    const cursoMatriz=c.mina==='ANTAPACCAY'?`<select aria-label="Vincular a curso de matriz Antapaccay" data-matriz-id="${esc(c.id)}" class="table-select">${opcionesCursosPerfil(c.idCurso||'')}</select><button class="small-action" data-cambiar-matriz="${esc(c.id)}">Guardar curso</button>`:'<span class="subline">No aplica</span>';
-   return `<tr>
+   return `<tr class="${c.historico?'ren-row-old':''}">
      <td data-label="Titular" class="td-person"><strong>${esc(c.nombre)}</strong><span class="subline">DNI · ${esc(c.dni)}</span></td>
-     <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong><span class="subline">${esc(c.emisor)}</span><span class="subline">Emisión: ${esc(formatearFecha(c.emision))} · ${c.vencimiento?'Vence: '+esc(formatearFecha(c.vencimiento)):'Sin vencimiento registrado'}</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(c.id)}" aria-label="Ver certificado PDF de ${esc(c.curso)}">◉ Ver PDF</button><button type="button" class="btn-download" data-cert="${esc(c.id)}" aria-label="Descargar certificado PDF de ${esc(c.curso)}">↧ Descargar</button></div></td>
+     <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong>
+       ${c.historico?`<span class="ren-badge historico">Histórico · reemplazado</span><span class="subline">Renovado por: ${esc(c.renovadoPor||'—')}</span>`:c.renovacionDe?`<span class="ren-badge">✓ Renovación actual</span>`:''}
+       <span class="subline">${esc(c.emisor)}</span><span class="subline">Emisión: ${esc(formatearFecha(c.emision))} · ${c.vencimiento?'Vence: '+esc(formatearFecha(c.vencimiento)):'Sin vencimiento registrado'}</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(c.id)}" aria-label="Ver certificado PDF de ${esc(c.curso)}">◉ Ver PDF</button><button type="button" class="btn-download" data-cert="${esc(c.id)}" aria-label="Descargar certificado PDF de ${esc(c.curso)}">↧ Descargar</button>${!c.historico?`<button type="button" class="ren-btn" data-renovar-cert="${esc(c.id)}" aria-label="Renovar certificado de ${esc(c.curso)}">↻ Renovar</button>`:''}</div></td>
      <td data-label="Mina"><span class="tag-neutral">${esc(minaNombre)}</span><select aria-label="Unidad minera del certificado" data-mina-id="${esc(c.id)}" class="table-select">${opcionesMinas}</select><button class="small-action" data-cambiar-mina="${esc(c.id)}">Guardar mina</button></td>
      <td data-label="Matriz">${cursoMatriz}</td>
      <td data-label="Permisos"><span class="status-badge ${libre?'public':'private'}">${libre?'Público autorizado':'Restringido'}</span><select aria-label="Visibilidad del PDF" data-visibilidad-id="${esc(c.id)}" class="table-select"><option value="PRIVADO" ${!libre?'selected':''}>Privado</option><option value="PUBLICO" ${libre?'selected':''}>Público autorizado</option></select><button class="small-action" data-cambiar="${esc(c.id)}">Guardar acceso</button></td>
    </tr>`;
  }).join('') || '<tr class="empty-row"><td colspan="5">No hay certificados con los filtros seleccionados.</td></tr>';
 }
+function cancelarRenovacion(){
+ $('renuevaId').value='';
+ $('renovacionBanner').classList.add('hidden');
+ $('btnGuardar').textContent='＋ Guardar certificado';
+}
+function iniciarRenovacionCertificado(id){
+ const c=CERTS.find(x=>x.id===id);
+ if(!c||c.historico){$('panelMsg').textContent='Selecciona el certificado actual para renovarlo.';return;}
+ $('renuevaId').value=c.id;
+ $('minaRegistro').value=c.mina;
+ $('filtroCargo').value='';
+ filtrarPersonal();
+ const existe=PERSONAL.some(p=>p.dni===c.dni);
+ $('esHistorico').checked=!existe;alternarHistorico();
+ if(existe){ $('trabajador').value=c.dni;seleccionarTrabajador(); }
+ else { $('dniHistorico').value=c.dni;$('nombreHistorico').value=c.nombre; }
+ $('curso').value=c.curso;
+ $('emisor').value=c.emisor;
+ $('numero').value='';
+ $('emision').value=''; $('vencimiento').value=''; $('pdf').value='';
+ $('visibilidad').value=c.visibilidad;
+ alternarCursoMatriz();
+ if(c.mina==='ANTAPACCAY')$('cursoMatriz').value=c.idCurso||'';
+ $('renovacionInfo').textContent=c.nombre+' · '+c.curso+' · '+nombreMina(c.mina)+' · ID '+c.id+'. El anterior se conservará en el historial.';
+ $('renovacionBanner').classList.remove('hidden');
+ $('btnGuardar').textContent='↻ Guardar renovación';
+ $('uploadMsg').textContent='Completa las nuevas fechas y adjunta el nuevo certificado PDF.';
+ seleccionarPestanaAcreditaciones('registro');
+}
 $('tabla').addEventListener('click',async e=>{
+ const renovar=e.target.closest('button[data-renovar-cert]');
+ if(renovar){iniciarRenovacionCertificado(renovar.dataset.renovarCert);return;}
  const botonMina=e.target.closest('button[data-cambiar-mina]');
  if(botonMina){
    const id=botonMina.dataset.cambiarMina;
@@ -587,10 +651,11 @@ async function guardar(){
    if(!hist && !PERSONAL.some(p=>p.dni===dni)) throw Error('Selecciona un trabajador de DATA DE PERSONAL.');
    const unidadMinera=$('minaRegistro').value;
    if(!MINAS.includes(unidadMinera))throw Error('Selecciona una unidad minera o Certificados generales.');
-   const d={dni,unidadMinera,idCurso:unidadMinera==='ANTAPACCAY'?$('cursoMatriz').value:'',nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
+   const d={dni,renuevaId:$('renuevaId').value,unidadMinera,idCurso:unidadMinera==='ANTAPACCAY'?$('cursoMatriz').value:'',nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
    if(d.visibilidad==='PUBLICO' && !confirm('¿Publicar este certificado? Cualquier persona que conozca el DNI podrá visualizarlo; la visualización no impide guardar una copia. No publiques documentos sensibles.')) {return;}
+   if(d.renuevaId && !confirm('¿Guardar esta renovación? El certificado anterior permanecerá en el historial y el nuevo será el principal.'))return;
    $('uploadMsg').textContent='Guardando PDF en Drive…';
-   const r=await api('guardarCertificado',TOKEN,d);anunciarCambioAcreditaciones();$('uploadMsg').textContent='Certificado guardado: '+r.id;$('pdf').value='';await cargar();
+   const r=await api('guardarCertificado',TOKEN,d);anunciarCambioAcreditaciones();$('uploadMsg').textContent=(r.renovacion?'Renovación registrada. Certificado anterior conservado como histórico: ':'Certificado guardado: ')+r.id; $('pdf').value='';cancelarRenovacion();await cargar();
  }catch(e){$('uploadMsg').textContent=msg(e)}finally{b.disabled=false}
 }
 
