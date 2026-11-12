@@ -117,6 +117,23 @@
 .alerts-card strong{display:block;color:#1c4852;font-size:13px;margin-bottom:6px}
 .alerts-card p{margin:4px 0;font-size:12px;color:#5e7580;line-height:1.55}
 @media(max-width:680px){.ren-history-filter{margin:10px 16px}.ren-banner{align-items:flex-start}}
+
+/* DATOS DE MATRIZ ANTAPACCAY · Consultas RESIDENTE */
+.mat-admin{border:1px solid #dce9ed;background:#fbfdfd;border-radius:15px;margin:18px 26px 27px;overflow:hidden}
+.mat-admin-head{padding:19px 21px;border-bottom:1px solid #e3ecf0}
+.mat-admin-head h3{margin:0 0 5px;font-size:16px;color:#1b4053}
+.mat-admin-head p{margin:0;font-size:12px;color:#69808d;line-height:1.6}
+.mat-admin-search{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:17px 21px}
+.mat-admin-search input{padding:10px 12px;border-radius:9px;border:1px solid #cadce4;min-width:195px;font-size:13px}
+.mat-admin-result{padding:0 21px 20px}
+.mat-admin-scroll{overflow:auto;max-height:530px;border:1px solid #e2e9ed;border-radius:10px}
+.mat-admin-table{border-collapse:collapse;width:100%;font-size:12px}
+.mat-admin-table th{position:sticky;top:0;background:#f2f6f8;text-align:left;z-index:1;padding:11px;border-bottom:1px solid #dbe7ec}
+.mat-admin-table td{padding:11px;border-bottom:1px solid #e8eef1;vertical-align:top}
+.mat-admin-tag{border-radius:7px;display:inline-block;padding:4px 7px;background:#eef5f8;color:#28556e;font-size:11px;font-weight:700}
+.mat-admin-tag.na{background:#f0f1f3;color:#71808a}.mat-admin-tag.pend{background:#fff3de;color:#946112}
+@media(max-width:600px){.mat-admin{margin:14px 15px}.mat-admin-search{padding:14px}.mat-admin-search input{width:100%}.mat-admin-result{padding:0 13px 16px}}
+
 </style></head><body>
 <header class="hero"><div class="shell"><nav class="topnav" aria-label="Navegación principal"><a href="visualizacion.html" class="brand"><span class="brand-symbol">◈</span><span><strong>DIMARZA</strong><small>Gestión de acreditaciones</small></span></a><a class="nav-link" href="visualizacion.html">← Volver a Visualización</a></nav>
 <div class="hero-grid"><div><p class="eyebrow">Centro de control documental</p><h1>Acreditaciones y certificados</h1><p class="sub">Administra certificados, exámenes médicos y permisos de trabajo. Controla fechas críticas y documentación por trabajador y operación.</p></div><div class="hero-status"><div id="conexion" class="conn" role="status">Conectando con DIMARZA…</div><div class="role-pill">🔐 ACCESO RESIDENTE</div><small id="dbInfo"></small></div></div></div></header>
@@ -229,7 +246,17 @@
 <section class="card ac-tabpanel" id="biblioteca" role="tabpanel" aria-labelledby="ac-tab-biblioteca" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">▤</div><div><div class="section-number">Control de registros · 02</div><h2>Biblioteca de certificados <span id="total" class="tag-neutral">0</span></h2><p>Consulta, visualiza y descarga certificados. Cambia la asignación o los permisos sin volver a subir el archivo.</p></div></div><span id="catalogoCount" class="muted"></span></div>
 <div class="filters"><div><label for="filtroBibliotecaMina">UNIDAD MINERA</label><select id="filtroBibliotecaMina" onchange="render()"><option value="">Todas las minas</option></select></div><div><label for="filtroBibliotecaCargo">PUESTO / CARGO</label><select id="filtroBibliotecaCargo" onchange="render()"><option value="">Todos los puestos</option></select></div><div><label for="filtro">BUSCADOR</label><input id="filtro" placeholder="Buscar nombre, DNI, curso o emisor…" oninput="render()"></div></div>
 <label class="ren-history-filter"><input type="checkbox" id="mostrarHistoricos" onchange="render()"> Mostrar también certificados históricos renovados</label>
-<div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Matriz Antapaccay</th><th>Acceso al PDF</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div><div style="padding:0 24px 19px"><p id="panelMsg" class="feedback" role="status"></p></div></section>
+<div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Matriz Antapaccay</th><th>Acceso al PDF</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div>
+<div class="mat-admin">
+  <div class="mat-admin-head"><h3>Fechas y estados reportados por Antapaccay · Sin PDF</h3><p>Consulta por DNI los conceptos de la matriz recibida. No equivalen a constancias PDF ni modifican el porcentaje documental o las alertas.</p></div>
+  <form class="mat-admin-search" onsubmit="consultarMatrizReportadaAdmin();return false;">
+    <label for="matAdminDni"><strong>DNI</strong></label>
+    <input id="matAdminDni" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" placeholder="8 dígitos" required>
+    <button class="soft" type="submit" id="matAdminBtn">Consultar matriz</button>
+  </form>
+  <div class="mat-admin-result" id="matAdminResultado" role="status" aria-live="polite">Ingresa un DNI para ver fechas y estados reportados.</div>
+</div>
+<div style="padding:0 24px 19px"><p id="panelMsg" class="feedback" role="status"></p></div></section>
 </section></main>
 <dialog id="residentPdfDialog" class="resident-pdf-dialog" aria-labelledby="residentPdfTitle" aria-modal="true">
   <div class="pdf-dialog-head"><div><strong id="residentPdfTitle">Visualización de certificado</strong><p>Documento abierto con acceso RESIDENTE · DIMARZA</p></div><button type="button" class="pdf-dialog-close" onclick="cerrarVistaPdf()">✕ Cerrar</button></div>
@@ -387,6 +414,25 @@ function limpiarVistaPdf(){
   if(frame)frame.removeAttribute('src');
   if(RESIDENT_PDF_URL){URL.revokeObjectURL(RESIDENT_PDF_URL);RESIDENT_PDF_URL='';}
 }
+
+async function consultarMatrizReportadaAdmin(){
+  const dni=String($('matAdminDni').value||'').replace(/\D/g,'');
+  if(!/^\d{8}$/.test(dni)){$('matAdminResultado').textContent='Ingresa un DNI válido de 8 dígitos.';return;}
+  const btn=$('matAdminBtn');btn.disabled=true;
+  $('matAdminResultado').textContent='Consultando matriz Antapaccay…';
+  try{
+    const m=await api('matrizReportadaAdmin',TOKEN,dni);
+    if(!m?.cursos?.length){$('matAdminResultado').textContent='No hay datos de la matriz recibida para ese DNI.';return;}
+    const fechas=m.cursos.filter(c=>!!c.fechaReportada).length;
+    const nap=m.cursos.filter(c=>c.clase==='NO_APLICA').length;
+    $('matAdminResultado').innerHTML=`<p style="margin:0 0 12px"><strong>Perfil Antapaccay:</strong> ${esc(m.perfil)} · <strong>${fechas}</strong> conceptos con fecha · <strong>${nap}</strong> N/A · <strong>${m.total}</strong> registros. <small style="display:block;color:#748b98;margin-top:5px">Fuente: ${esc(m.fuente)}. Fechas informativas: la cabecera original no define inequívocamente su significado.</small></p><div class="mat-admin-scroll"><table class="mat-admin-table"><thead><tr><th>Curso</th><th>Fecha / dato</th><th>Estado</th><th>PDF</th></tr></thead><tbody>${m.cursos.map(c=>{
+      const noAplica=c.clase==='NO_APLICA';
+      const v=noAplica?'N/A':c.fechaReportada?formatearFecha(c.fechaReportada):c.valorOriginal||'Sin fecha';
+      return `<tr><td><strong>${esc(c.nombre)}</strong></td><td>${esc(v)}</td><td><span class="mat-admin-tag ${noAplica?'na':c.estadoReportado==='PROGRAMAR'?'pend':''}">${esc(noAplica?'NO APLICA':c.estadoReportado||'SIN REGISTRO')}</span></td><td><span class="muted">No adjunto en matriz</span></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  }catch(err){$('matAdminResultado').textContent='No se pudo consultar: '+msg(err);}finally{btn.disabled=false;}
+}
+
 async function probarConexion(){
   const el=document.getElementById('conexion');
   try{const r=await qget({action:'ping'});if(!r.ok)throw Error(r.error);el.textContent='Conectado a DIMARZA';el.style.color='#15803d';}
