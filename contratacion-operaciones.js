@@ -3023,13 +3023,19 @@ function crearModalEntrevista() {
                   Puesto en que clasifica
                 </label>
 
-                <input
-                  type="text"
+                <select
                   id="entrevistaPuestoClasifica"
-                  placeholder="Calcule primero"
                   disabled
                   required
                 >
+                  <option value="">Seleccione un puesto</option>
+                  <option value="OPERARIO ANDAMIERO">OPERARIO ANDAMIERO</option>
+                  <option value="OFICIAL ANDAMIERO">OFICIAL ANDAMIERO</option>
+                  <option value="MECANICO ANDAMIERO">MECANICO ANDAMIERO</option>
+                  <option value="SUPERVISOR ANDAMIERO">SUPERVISOR ANDAMIERO</option>
+                  <option value="LIDER ANDAMIERO">LIDER ANDAMIERO</option>
+                  <option value="SUPERVISOR JUNIOR ANDAMIERO">SUPERVISOR JUNIOR ANDAMIERO</option>
+                </select>
 
               </div>
 
