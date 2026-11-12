@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIMARZA | Modificar entrevista técnica</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#172b49;background:#eef2f7}
+*{box-sizing:border-box}
+body{margin:0}
+header{background:#123360;color:white;padding:22px 5%}
+header h1{font-size:22px;margin:0 0 6px}
+header p{margin:0;color:#d6e7fa;font-size:13px}
+main{max-width:1160px;margin:26px auto;padding:0 20px 35px}
+a.back{color:#d5eaff;font-weight:bold;text-decoration:none;display:inline-block;margin-bottom:12px;font-size:13px}
+.card{background:white;border:1px solid #e1e8f0;border-radius:14px;padding:23px;margin-bottom:19px;box-shadow:0 4px 16px rgba(0,0,0,.04)}
+h2{margin:0 0 17px;font-size:18px;color:#15355e}
+.sub{font-size:13px;color:#53677b;margin:-8px 0 20px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-size:12px;font-weight:700;color:#49637b}
+input,select,textarea{font:inherit;font-size:14px;min-height:40px;padding:10px;border:1px solid #bdcddd;border-radius:8px;background:white;color:#19344e;width:100%}
+textarea{min-height:75px;resize:vertical}
+input[readonly],textarea[readonly]{background:#eff3f8;color:#596c7d}
+.full{grid-column:1/-1}
+.message{padding:14px 16px;border:1px solid #bad3f2;border-radius:9px;background:#f0f7ff;font-size:13px;margin-bottom:17px}
+.message.error{background:#fff0f0;border-color:#eababa;color:#981d26}
+.message.ok{background:#eaf9ee;border-color:#a9ddbb;color:#17673b}
+.group{border:1px solid #e2e9f0;padding:14px;border-radius:10px;margin-bottom:12px}
+.group h3{font-size:14px;margin:0 0 10px}
+.note{color:#64748b;font-size:12px}
+button{border:0;border-radius:8px;padding:11px 17px;font:inherit;font-size:13px;font-weight:bold;cursor:pointer;background:#1769c2;color:white}
+button.secondary{background:#e4edf7;color:#124675}
+button.danger{background:#fbe8e8;color:#a82828}
+button:disabled{opacity:.55;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:13px}
+#editor[hidden],#editorForm[hidden]{display:none}
+#pdfAnterior{color:#1962ac}
+@media(max-width:790px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.card{padding:16px}}
+</style>
+</head>
+<body>
+<header>
+<a class="back" href="contratacion-andamios.html">← Volver al seguimiento de Contratación</a>
+<h1>Modificar entrevista técnica</h1>
+<p>Acceso exclusivo del Residente · La evaluación original y su PDF se conservarán en el historial</p>
+</header>
+<main>
+<div class="message" id="estado">Verificando la sesión de Visualización…</div>
+<section id="editor" hidden>
+<div class="card">
+<h2>Datos de la evaluación</h2>
+<div id="encabezado" class="sub"></div>
+<form id="editorForm">
+<div class="grid" id="campos"></div>
+</div>
+<div class="card">
+<h2>Experiencia laboral</h2>
+<div class="grid" id="experiencia"></div>
+</div>
+<div class="card">
+<h2>Unidades mineras</h2>
+<p class="sub">Puedes corregir las unidades relacionadas con la entrevista.</p>
+<div id="unidades"></div>
+<div class="actions"><button type="button" class="secondary" id="agregarUnidad">+ Añadir unidad minera</button></div>
+</div>
+<div class="card">
+<h2>Respuestas de la entrevista</h2>
+<p class="sub">Las preguntas originales permanecen fijas. Solo pueden corregirse sus respuestas.</p>
+<div id="preguntas"></div>
+</div>
+<div class="card">
+<h2>Confirmar modificación</h2>
+<p class="sub">No modifica la etapa actual, la decisión APTO/NO APTO ni el entrevistador original. Si se requiere cambiar el resultado, corresponde reabrir la entrevista y regularizar el flujo.</p>
+<div class="field">
+<label for="motivo">Motivo de la modificación (obligatorio)</label>
+<textarea id="motivo" required minlength="10" maxlength="500" placeholder="Explica qué dato se corrige y por qué"></textarea>
+</div>
+<div class="actions">
+<button type="submit" id="btnGuardar">Guardar cambios y generar nuevo PDF</button>
+<a href="#" id="pdfAnterior" target="_blank" rel="noopener noreferrer" hidden>Ver PDF actual</a>
+</div>
+</form>
+</div>
+</section>
+</main>
+<script>
+'use strict';
+const API='https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
+const CARGOS=['OPERARIO ANDAMIERO','OFICIAL ANDAMIERO','MECANICO ANDAMIERO','SUPERVISOR ANDAMIERO','LIDER ANDAMIERO','SUPERVISOR JUNIOR ANDAMIERO'];
+const EXP=[
+['tiempoExperiencia','Tiempo de experiencia'],['ultimaEmpresa','Última empresa'],
+['tiempoUltimaEmpresa','Tiempo en última empresa'],['modalidadTrabajo','Modalidad de trabajo'],
+['motivoRetiro','Motivo de retiro'],['otroMotivo','Otro motivo'],
+['tuvoAccidente','¿Tuvo accidente?'],['tipoAccidente','Tipo de accidente'],
+['detalleAccidente','Detalle de accidente'],['comentarios','Comentarios de experiencia']
+];
+const FIELDS=[
+['fechaEntrevista','Fecha de entrevista','date'],
+['lugarEntrevista','Lugar o enlace','text'],
+['modalidadEntrevista','Modalidad','select',['VIRTUAL','PRESENCIAL']],
+['gradoAcademico','Grado académico','text'],
+['estudios','Estudios','text'],
+['puestoPostula','Puesto al que postuló','readonly'],
+['puestoClasifica','Puesto en que clasifica','select',CARGOS],
+['entrevistador','Entrevistador original','readonly'],
+['disponibilidad','Disponibilidad','text'],
+['tipoRemuneracion','Tipo de remuneración','select',['','VALOR HORA','MENSUAL']],
+['monto','Monto de pretensión','number'],
+['resultado','Resultado','readonly'],
+['valoracionSeguridad','Valoración Seguridad (1–5)','rating'],
+['valoracionExperiencia','Valoración Experiencia (1–5)','rating'],
+['valoracionTecnica','Valoración Técnica (1–5)','rating'],
+['promedio','Promedio recalculado','readonly'],
+['criterio','Criterio de clasificación','readonly'],
+['comentariosGenerales','Comentarios generales','textarea']
+];
+const $=id=>document.getElementById(id);
+let activo=null;
+const sesion=localStorage.getItem('dimarzaTokenVisualizacion')||'';
+const residente=sessionStorage.getItem('dimarzaRolVisualizacion')==='RESIDENTE';
+const idCandidato=new URLSearchParams(location.search).get('idCandidato')||'';
+function mensaje(t,estilo){$('estado').textContent=t;$('estado').className='message '+(estilo||'');}
+function campo(parent,id,label,value,type,choices){
+ const div=document.createElement('div');div.className='field';
+ if(id==='comentariosGenerales')div.classList.add('full');
+ const tag=document.createElement('label');tag.htmlFor=id;tag.textContent=label;div.appendChild(tag);
+ let el;
+ if(type==='select'){
+   el=document.createElement('select');
+   const opts=choices||[];
+   if(value && !opts.includes(String(value)))opts.unshift(String(value));
+   opts.forEach(opt=>{const op=document.createElement('option');op.value=opt;op.textContent=opt||'Seleccione';el.appendChild(op);});
+ }else if(type==='textarea'){
+   el=document.createElement('textarea');
+ }else{
+   el=document.createElement('input');
+   el.type=type==='number'||type==='rating'?'number':type==='date'?'date':'text';
+   if(type==='rating'){el.min=1;el.max=5;el.step=1;el.required=true;}
+   if(type==='readonly')el.readOnly=true;
+   if(type==='number')el.step='any';
+ }
+ el.id=id;el.name=id;
+ el.value=value===undefined||value===null?'':String(value);
+ div.appendChild(el);parent.appendChild(div);return el;
+}
+async function api(accion,extra){
+ const rsp=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+ body:JSON.stringify(Object.assign({accion,tokenSesion:sesion,idCandidato},extra||{}))});
+ const data=await rsp.json();
+ if(!rsp.ok||!data.ok)throw new Error(data.mensaje||'Operación no disponible. Verifica la publicación del Apps Script de Contrataciones.');
+ return data;
+}
+function agregarUnidad(d){
+ const item=document.createElement('div');item.className='group';
+ const g=document.createElement('div');g.className='grid';
+ [['unidadMinera','Unidad minera'],['acreditado','Acreditado (SI / NO)'],['liberado','Liberado (SI / NO)'],
+ ['cargo','Cargo anterior'],['empresa','Empresa']].forEach(([key,label])=>{
+   const el=campo(g,'unidad_'+key+'_'+$('unidades').children.length,label,(d||{})[key]||'','text');
+   el.dataset.campo=key;
+ });
+ const b=document.createElement('button');b.type='button';b.className='danger';b.textContent='Quitar unidad';
+ b.addEventListener('click',()=>item.remove());item.appendChild(g);item.appendChild(b);$('unidades').appendChild(item);
+}
+function render(d){
+ activo=d;$('encabezado').textContent=d.nombres+' · DNI '+d.dni+' · '+d.idEntrevista+' · Área actual: '+d.areaActual;
+ $('campos').replaceChildren();$('experiencia').replaceChildren();$('unidades').replaceChildren();$('preguntas').replaceChildren();
+ FIELDS.forEach(([id,label,type,choices])=>campo($('campos'),id,label,d[id],type,choices&&[...choices]));
+ EXP.forEach(([id,label])=>campo($('experiencia'),'exp_'+id,label,(d.experiencia||{})[id]||'','text'));
+ (d.unidades||[]).forEach(agregarUnidad);
+ (d.respuestas||[]).forEach((r,i)=>{
+   const item=document.createElement('div');item.className='group';item.dataset.pregunta=String(i);
+   const titulo=document.createElement('h3');titulo.textContent=(r.seccion||'Pregunta')+' · '+(r.codigoPregunta||'')+' — '+(r.pregunta||'');item.appendChild(titulo);
+   const respuesta=document.createElement('textarea');respuesta.value=r.respuesta||'';respuesta.dataset.codigoPregunta=r.codigoPregunta||'';
+   respuesta.maxLength=2500;item.appendChild(respuesta);$('preguntas').appendChild(item);
+ });
+ const link=$('pdfAnterior');
+ if(/^https:\/\/drive\.google\.com\//i.test(d.urlPdf||'')){link.hidden=false;link.href=d.urlPdf;}else link.hidden=true;
+ $('editor').hidden=false;actualizarResultado();
+}
+function valor(id){return $(id).value.trim();}
+function actualizarResultado(){
+ if(!activo)return;
+ const nums=['valoracionSeguridad','valoracionExperiencia','valoracionTecnica'].map(id=>Number(valor(id)));
+ if(nums.every(n=>Number.isInteger(n)&&n>=1&&n<=5)){
+  const p=nums.reduce((a,b)=>a+b,0)/3;
+  $('promedio').value=p.toFixed(2);
+  $('criterio').value=p<2?'MUY POR DEBAJO DEL PERFIL':p<3?'POR DEBAJO DEL PERFIL':p<4?'CUMPLE CON EL PERFIL':p<5?'POR ENCIMA DEL PERFIL':'SOBREPASA EL PERFIL';
+ }else{$('promedio').value='';$('criterio').value='';}
+}
+function payload(){
+ const obj={idEntrevista:activo.idEntrevista,ultimaActualizacionBase:activo.fechaUltimaActualizacion,motivo:valor('motivo')};
+ FIELDS.forEach(([id])=>obj[id]=valor(id));
+ obj.experiencia={};EXP.forEach(([id])=>obj.experiencia[id]=valor('exp_'+id));
+ obj.unidades=[...$('unidades').children].map(item=>Object.fromEntries([...item.querySelectorAll('[data-campo]')].map(el=>[el.dataset.campo,el.value.trim()])));
+ obj.respuestas=[...$('preguntas').children].map(item=>{
+  const x=item.querySelector('textarea');return {codigoPregunta:x.dataset.codigoPregunta,respuesta:x.value.trim()};
+ });
+ return obj;
+}
+$('agregarUnidad').addEventListener('click',()=>agregarUnidad({}));
+['valoracionSeguridad','valoracionExperiencia','valoracionTecnica'].forEach(id=>document.addEventListener('input',ev=>{if(ev.target.id===id)actualizarResultado();}));
+$('editorForm').addEventListener('submit',async ev=>{
+ ev.preventDefault();
+ if(!activo||!residente)return;
+ const boton=$('btnGuardar');
+ if(!confirm('¿Guardar corrección? Se generará un nuevo PDF conservando la versión original.'))return;
+ boton.disabled=true;mensaje('Guardando la corrección y generando la nueva versión del PDF…');
+ try{
+  const result=await api('guardarEntrevistaEdicion',payload());
+  mensaje(result.mensaje||'Entrevista actualizada.','ok');
+  $('motivo').value='';
+  const fresh=await api('obtenerEntrevistaEdicion');
+  render(fresh.entrevista);
+  window.scrollTo({top:0,behavior:'smooth'});
+ }catch(e){mensaje(e.message,'error');window.scrollTo({top:0,behavior:'smooth'});}
+ finally{boton.disabled=false;}
+});
+(async()=>{
+ if(!residente||!/^[0-9a-f-]{36}$/i.test(sesion)){mensaje('Acceso restringido: inicia sesión como RESIDENTE desde Visualización.','error');return;}
+ if(!/^CAN-\d{6}$/.test(idCandidato)){mensaje('Selecciona una entrevista desde Seguimiento por persona.','error');return;}
+ try{
+  const data=await api('obtenerEntrevistaEdicion');
+  render(data.entrevista);mensaje('Entrevista cargada. Las correcciones quedarán registradas en el historial.','ok');
+ }catch(e){mensaje(e.message,'error');}
+})();
+</script>
+</body>
+</html>
