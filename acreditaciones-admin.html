@@ -134,6 +134,21 @@
 .mat-admin-tag.na{background:#f0f1f3;color:#71808a}.mat-admin-tag.pend{background:#fff3de;color:#946112}
 @media(max-width:600px){.mat-admin{margin:14px 15px}.mat-admin-search{padding:14px}.mat-admin-search input{width:100%}.mat-admin-result{padding:0 13px 16px}}
 
+
+/* Biblioteca unificada RESIDENTE · cursos reportados vs. certificados */
+.bib-options{padding:0 0 10px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 17px}
+.bib-options .ren-history-filter{margin:12px 0 0 26px}
+.bib-options #bibMatrizEstado{font-size:11px;margin:11px 27px 0 auto}
+.bib-legend{display:flex;gap:9px 18px;align-items:center;flex-wrap:wrap;margin:7px 26px 14px;color:#405d6e;font-size:11px;font-weight:650}
+.bib-legend-cert{color:#13795b}.bib-legend-matriz{color:#357896}.bib-legend-note{color:#718596;font-weight:450}
+.bib-row-matriz{background:#fcfeff}.bib-row-matriz .td-course strong{font-weight:750}
+.bib-tipo{display:inline-flex;padding:4px 8px;border-radius:7px;background:#e8f4fb;color:#296c89;font-size:10px;font-weight:800;margin:8px 0 2px}
+.bib-tipo-extra{background:#f0f3f5;color:#697d89}.bib-tipo-na{background:#f0f0f2;color:#7c8790}
+.bib-sin-pdf{display:inline-block;background:#f0f4f7;color:#6b7f8e;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:750}
+.bib-estado{display:inline-block;padding:5px 8px;border-radius:7px;font-size:10px;background:#e6f7ee;color:#127c4e;font-weight:800;margin-top:6px}
+.bib-estado.pend{background:#fff2dc;color:#a0640d}.bib-estado.na{background:#eef0f2;color:#697a86}
+.bib-more{display:flex;justify-content:center;margin:12px 25px 23px}
+@media(max-width:680px){.bib-options .ren-history-filter{margin-left:16px}.bib-options #bibMatrizEstado{margin:9px 16px}.bib-legend{margin:7px 16px 11px}}
 </style></head><body>
 <header class="hero"><div class="shell"><nav class="topnav" aria-label="Navegación principal"><a href="visualizacion.html" class="brand"><span class="brand-symbol">◈</span><span><strong>DIMARZA</strong><small>Gestión de acreditaciones</small></span></a><a class="nav-link" href="visualizacion.html">← Volver a Visualización</a></nav>
 <div class="hero-grid"><div><p class="eyebrow">Centro de control documental</p><h1>Acreditaciones y certificados</h1><p class="sub">Administra certificados, exámenes médicos y permisos de trabajo. Controla fechas críticas y documentación por trabajador y operación.</p></div><div class="hero-status"><div id="conexion" class="conn" role="status">Conectando con DIMARZA…</div><div class="role-pill">🔐 ACCESO RESIDENTE</div><small id="dbInfo"></small></div></div></div></header>
@@ -243,12 +258,13 @@
 <div id="bloqueHistorico" class="subsection hidden"><div class="subhead"><span>↳</span> Datos del trabajador histórico</div><div class="grid"><div class="field span4"><label for="dniHistorico">DNI histórico</label><input id="dniHistorico" maxlength="8" inputmode="numeric" placeholder="8 dígitos"></div><div class="field span8"><label for="nombreHistorico">Apellidos y nombres</label><input id="nombreHistorico" placeholder="Nombre completo"></div></div></div>
 <div class="subsection"><div class="subhead"><span>02</span> Información del certificado</div><div class="grid"><div class="field span8"><label for="curso">Curso o capacitación</label><input id="curso" placeholder="Ej. Persona competente para trabajos en altura"></div><div class="field span6 hidden" id="bloqueCursoMatriz"><label for="cursoMatriz">Curso de la matriz Antapaccay 2026 (opcional)</label><select id="cursoMatriz"><option value="">No vincular con la matriz</option></select><div class="hint">Relaciona el certificado con un requisito obligatorio validado por el RESIDENTE.</div></div><div class="field span4"><label for="visibilidad">Acceso al PDF</label><select id="visibilidad"><option value="PRIVADO">Privado / restringido</option><option value="PUBLICO">Público autorizado · DNI</option></select></div><div class="field span4"><label for="emisor">Entidad emisora</label><input id="emisor" placeholder="Ej. CFC Group / MSA / Layher"></div><div class="field span4"><label for="emision">Fecha de emisión</label><input id="emision" type="date"></div><div class="field span4"><label for="vencimiento">Fecha de vencimiento (si consta)</label><input id="vencimiento" type="date"></div><div class="field span6"><label for="numero">N.º de certificado (opcional)</label><input id="numero" placeholder="Código del documento"></div><div class="field span6"><label for="pdf">Documento PDF original</label><input id="pdf" type="file" accept="application/pdf,.pdf"><div class="hint">Máximo 4 MB · Se guarda en Drive privado</div></div></div></div>
 <div class="upload-footer"><div class="tiny-note"><span>🔒</span><span>Los certificados son <strong>privados por defecto</strong>. Usa «Público autorizado» solo para capacitación divulgable: el trabajador podrá verla por DNI. La visualización en navegador no impide guardar o copiar archivos. No publiques información médica o sensible.</span></div><button id="btnGuardar" class="green" onclick="guardar()">＋ Guardar certificado</button></div><p id="uploadMsg" class="feedback" role="status"></p></div></section>
-<section class="card ac-tabpanel" id="biblioteca" role="tabpanel" aria-labelledby="ac-tab-biblioteca" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">▤</div><div><div class="section-number">Control de registros · 02</div><h2>Biblioteca de certificados <span id="total" class="tag-neutral">0</span></h2><p>Consulta, visualiza y descarga certificados. Cambia la asignación o los permisos sin volver a subir el archivo.</p></div></div><span id="catalogoCount" class="muted"></span></div>
+<section class="card ac-tabpanel" id="biblioteca" role="tabpanel" aria-labelledby="ac-tab-biblioteca" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">▤</div><div><div class="section-number">Control de registros · 02</div><h2>Biblioteca de certificados y cursos <span id="total" class="tag-neutral">0</span></h2><p>Certificados con PDF y cursos informados por Antapaccay, en una sola biblioteca. Los cursos sin PDF se identifican como registros informativos.</p></div></div><span id="catalogoCount" class="muted"></span></div>
 <div class="filters"><div><label for="filtroBibliotecaMina">UNIDAD MINERA</label><select id="filtroBibliotecaMina" onchange="render()"><option value="">Todas las minas</option></select></div><div><label for="filtroBibliotecaCargo">PUESTO / CARGO</label><select id="filtroBibliotecaCargo" onchange="render()"><option value="">Todos los puestos</option></select></div><div><label for="filtro">BUSCADOR</label><input id="filtro" placeholder="Buscar nombre, DNI, curso o emisor…" oninput="render()"></div></div>
-<label class="ren-history-filter"><input type="checkbox" id="mostrarHistoricos" onchange="render()"> Mostrar también certificados históricos renovados</label>
-<div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Matriz Antapaccay</th><th>Acceso al PDF</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div>
+<div class="bib-options"><label class="ren-history-filter"><input type="checkbox" id="mostrarHistoricos" onchange="render()"> Mostrar certificados históricos renovados</label><label class="ren-history-filter"><input type="checkbox" id="bibMostrarNA" onchange="render()"> Mostrar también cursos «No aplica»</label><span id="bibMatrizEstado" class="muted" role="status">Cargando cursos de Antapaccay…</span></div>
+<div class="bib-legend"><span class="bib-legend-cert">● Certificado con PDF</span><span class="bib-legend-matriz">● Curso informado por Antapaccay · sin PDF</span><span class="bib-legend-note">Las fechas de la matriz no se asumen como vencimiento.</span></div>
+<div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th title="Vinculación de certificados PDF con los cursos del perfil">Vinculación PDF / matriz</th><th>Acceso al PDF</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios de certificados quedan registrados en auditoría</span></div><div class="bib-more"><button class="soft" id="bibMostrarMas" type="button" hidden onclick="mostrarMasCursosBiblioteca()">Mostrar más cursos reportados ↓</button></div>
 <div class="mat-admin">
-  <div class="mat-admin-head"><h3>Fechas y estados reportados por Antapaccay · Sin PDF</h3><p>Consulta por DNI los conceptos de la matriz recibida. Se vinculan con los requisitos para calcular el indicador reportado. No equivalen a constancias PDF, no modifican el porcentaje documental ni activan alertas.</p></div>
+  <div class="mat-admin-head"><h3>Consulta detallada de matriz por DNI</h3><p>La Biblioteca de arriba muestra todos los cursos reportados. Aquí puedes consultar la matriz completa de un trabajador y revisar también los conceptos «No aplica». Los registros no equivalen a certificados PDF ni activan alertas.</p></div>
   <form class="mat-admin-search" onsubmit="consultarMatrizReportadaAdmin();return false;">
     <label for="matAdminDni"><strong>DNI</strong></label>
     <input id="matAdminDni" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" placeholder="8 dígitos" required>
@@ -441,6 +457,7 @@ async function probarConexion(){
 window.addEventListener('DOMContentLoaded',async()=>{ $('minaRegistro').addEventListener('change',alternarCursoMatriz); $('residentPdfDialog')?.addEventListener('close',limpiarVistaPdf); await probarConexion();await entrar();});
 
 let TOKEN='',CERTS=[],PERSONAL=[],MINAS=[],MINAS_INFO=[],CURSOS_PERFIL=[];
+let BIB_MATRIZ=[],BIB_EQUIV=new Map(),BIB_MATRIZ_FALLO='',BIB_LIMITE=45;
 let VIGENCIAS={emo:[],chile:[],resumen:{}},VIG_TIPO='EMO',VIG_EDITANDO='';
 let CONSOLIDADO=[],CONS_FILTRADOS=[],CONS_PAGINA=0;const CONS_POR_PAGINA=20;
 const $=id=>document.getElementById(id);
@@ -481,7 +498,7 @@ async function consultarEstadoAlertas(){
 }
 async function cargar(){
  $('panelMsg').textContent='Consultando…';
- try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.filter(c=>!c.historico).length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};CURSOS_PERFIL=r.cursosPerfil||[];prepararCursosPerfil();actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render();await cargarConsolidado();await consultarEstadoAlertas()}
+ try{const r=await api('listaAdmin',TOKEN);CERTS=r.certificados||[];PERSONAL=r.personal||[];MINAS=r.minas||MINAS;MINAS_INFO=r.minasInfo||MINAS_INFO;$('total').textContent=CERTS.filter(c=>!c.historico).length;VIGENCIAS=r.vigencias||{emo:[],chile:[],resumen:{}};CURSOS_PERFIL=r.cursosPerfil||[];prepararCursosPerfil();actualizarKpis();prepararFiltrosPersonal(true);prepararFiltrosMinas(true);prepararPersonalVigencia(true);renderVigencias();$('panelMsg').textContent='';render();await cargarConsolidado();await consultarEstadoAlertas();await cargarCursosReportadosBiblioteca()}
  catch(e){$('panelMsg').textContent=msg(e)}
 }
 function anunciarCambioAcreditaciones(){
@@ -491,6 +508,29 @@ function anunciarCambioAcreditaciones(){
 function actualizarKpis(){
   $('catalogoCount').textContent=Math.max(0,MINAS.length-1)+' minas disponibles';
 }
+/** Descarga la matriz por páginas bajo autenticación RESIDENTE, sin tocar certificados PDF. */
+async function cargarCursosReportadosBiblioteca(){
+ BIB_MATRIZ=[];BIB_EQUIV=new Map();BIB_MATRIZ_FALLO='';BIB_LIMITE=45;
+ $('bibMatrizEstado').textContent='Cargando cursos de Antapaccay…';
+ try{
+  let pagina=0,continuar=true,total=0;
+  while(continuar&&pagina<50){
+   const r=await api('listaMatrizReportadaAdmin',TOKEN,pagina);
+   if(!r||!Array.isArray(r.filas))throw new Error('Respuesta de matriz inválida');
+   for(const a of r.filas)if(Array.isArray(a)&&a.length>=9)BIB_MATRIZ.push({dni:a[0],nombre:a[1],perfil:a[2],id:a[3],curso:a[4],fecha:a[5],estado:a[6],clase:a[7],valor:a[8]});
+   if(pagina===0){for(const e of (r.relaciones||[]))if(Array.isArray(e)&&e[0])BIB_EQUIV.set(String(e[0]),{cursoDimarza:e[1],equivalencia:e[2]});}
+   total=Number(r.total)||0;
+   continuar=!!r.hayMas;pagina++;
+  }
+  $('bibMatrizEstado').textContent=`${BIB_MATRIZ.length} registros de Antapaccay cargados · ${new Set(BIB_MATRIZ.map(c=>c.dni)).size} trabajadores`;
+ }catch(err){
+  BIB_MATRIZ_FALLO=msg(err);
+  $('bibMatrizEstado').textContent='No se pudieron cargar los cursos: '+BIB_MATRIZ_FALLO+'. Publica también el nuevo Código.gs.';
+ }
+ render();
+}
+function mostrarMasCursosBiblioteca(){BIB_LIMITE+=45;render();}
+
 function opcionesCursosPerfil(selected=''){
   return `<option value="">Sin vincular a requisito</option>`+CURSOS_PERFIL.map(c=>`<option value="${esc(c.id)}" ${c.id===selected?'selected':''}>${esc(c.nombre)}</option>`).join('');
 }
@@ -511,12 +551,21 @@ function render(){
  const q=$('filtro').value.toUpperCase().trim();
  const cargo=$('filtroBibliotecaCargo').value;
  const mina=$('filtroBibliotecaMina').value;
- const personalPorDni=new Map(PERSONAL.map(p=>[p.dni,String(p.cargo||'Sin cargo').trim()]));
- const visibles=CERTS.filter(c=>(!!$('mostrarHistoricos').checked||!c.historico) && (!cargo||personalPorDni.get(c.dni)===cargo) &&
+ const personalPorDni=new Map(PERSONAL.map(p=>[String(p.dni),String(p.cargo||'Sin cargo').trim()]));
+ const visibles=CERTS.filter(c=>(!!$('mostrarHistoricos').checked||!c.historico) && (!cargo||personalPorDni.get(String(c.dni))===cargo) &&
    (!mina||(c.mina||'SIN ASIGNAR')===mina) &&
    [c.dni,c.nombre,c.curso,c.emisor,c.numero,c.mina].join(' ').toUpperCase().includes(q));
- $('conteoFiltrado').textContent=visibles.length+' de '+CERTS.filter(c=>!!$('mostrarHistoricos').checked||!c.historico).length+' certificados '+($('mostrarHistoricos').checked?'incluyendo histórico':'actuales');
- $('tabla').innerHTML=visibles.map(c=>{
+ const matrizFiltrada=BIB_MATRIZ.filter(c=>(!!$('bibMostrarNA').checked||c.clase!=='NO_APLICA') &&
+   (!cargo||personalPorDni.get(String(c.dni))===cargo) &&
+   (!mina||mina==='ANTAPACCAY') &&
+   [c.dni,c.nombre,c.curso,c.perfil,c.estado,c.valor].join(' ').toUpperCase().includes(q));
+ const cursosVisibles=matrizFiltrada.slice(0,BIB_LIMITE);
+ $('conteoFiltrado').textContent=`${visibles.length} certificados PDF · ${matrizFiltrada.length} cursos de matriz reportados`+
+   (matrizFiltrada.length>cursosVisibles.length?` · mostrando ${cursosVisibles.length} cursos`:'');
+ const verMas=$('bibMostrarMas');
+ verMas.hidden=matrizFiltrada.length<=cursosVisibles.length;
+ verMas.textContent=`Mostrar más cursos ↓ (${matrizFiltrada.length-cursosVisibles.length} restantes)`;
+ const filasPdf=visibles.map(c=>{
    const libre=c.visibilidad==='PUBLICO';
    const opcionesMinas=crearOpcionesMinas(c.mina);
    const minaNombre=nombreMina(c.mina);
@@ -524,14 +573,35 @@ function render(){
    return `<tr class="${c.historico?'ren-row-old':''}">
      <td data-label="Titular" class="td-person"><strong>${esc(c.nombre)}</strong><span class="subline">DNI · ${esc(c.dni)}</span></td>
      <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong>
+       <span class="ren-badge">PDF registrado</span>
        ${c.historico?`<span class="ren-badge historico">Histórico · reemplazado</span><span class="subline">Renovado por: ${esc(c.renovadoPor||'—')}</span>`:c.renovacionDe?`<span class="ren-badge">✓ Renovación actual</span>`:''}
        <span class="subline">${esc(c.emisor)}</span><span class="subline">Emisión: ${esc(formatearFecha(c.emision))} · ${c.vencimiento?'Vence: '+esc(formatearFecha(c.vencimiento)):'Sin vencimiento registrado'}</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(c.id)}" aria-label="Ver certificado PDF de ${esc(c.curso)}">◉ Ver PDF</button><button type="button" class="btn-download" data-cert="${esc(c.id)}" aria-label="Descargar certificado PDF de ${esc(c.curso)}">↧ Descargar</button>${!c.historico?`<button type="button" class="ren-btn" data-renovar-cert="${esc(c.id)}" aria-label="Renovar certificado de ${esc(c.curso)}">↻ Renovar</button>`:''}</div></td>
      <td data-label="Mina"><span class="tag-neutral">${esc(minaNombre)}</span><select aria-label="Unidad minera del certificado" data-mina-id="${esc(c.id)}" class="table-select">${opcionesMinas}</select><button class="small-action" data-cambiar-mina="${esc(c.id)}">Guardar mina</button></td>
      <td data-label="Matriz">${cursoMatriz}</td>
      <td data-label="Permisos"><span class="status-badge ${libre?'public':'private'}">${libre?'Público autorizado':'Restringido'}</span><select aria-label="Visibilidad del PDF" data-visibilidad-id="${esc(c.id)}" class="table-select"><option value="PRIVADO" ${!libre?'selected':''}>Privado</option><option value="PUBLICO" ${libre?'selected':''}>Público autorizado</option></select><button class="small-action" data-cambiar="${esc(c.id)}">Guardar acceso</button></td>
    </tr>`;
- }).join('') || '<tr class="empty-row"><td colspan="5">No hay certificados con los filtros seleccionados.</td></tr>';
+ });
+ const filasMatriz=cursosVisibles.map(c=>{
+   const noAplica=c.clase==='NO_APLICA'||String(c.valor).toUpperCase()==='N/A';
+   const rel=BIB_EQUIV.get(c.id);
+   const v=noAplica?'No aplica':c.fecha?formatearFecha(c.fecha):c.valor||'Sin fecha reportada';
+   const pendiente=String(c.estado||'').toUpperCase()==='PROGRAMAR';
+   const est=noAplica?'NO APLICA':c.estado||'SIN REGISTRO';
+   const tipo=rel?'Requisito del perfil · relación'+(rel.equivalencia==='EQUIVALENCIA_PRELIMINAR'?' preliminar':''):'Curso adicional reportado';
+   const relacionado=rel?CERTS.find(x=>!x.historico&&String(x.dni)===String(c.dni)&&x.mina==='ANTAPACCAY'&&x.idCurso===rel.cursoDimarza):null;
+   const acceso=relacionado?`<span class="bib-estado">PDF relacionado en DIMARZA</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(relacionado.id)}">◉ Ver PDF vinculado</button></div><span class="subline">La matriz original no contiene PDF; revisar equivalencia del certificado.</span>`:'<span class="bib-sin-pdf">Sin PDF adjunto</span><span class="subline">Registro informativo de la matriz</span>';
+   return `<tr class="bib-row-matriz">
+     <td data-label="Titular" class="td-person"><strong>${esc(c.nombre)}</strong><span class="subline">DNI · ${esc(c.dni)}</span></td>
+     <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong><span class="bib-tipo ${rel?'':'bib-tipo-extra'}">Matriz Antapaccay · Sin PDF</span><span class="subline">Fecha / dato informado: ${esc(v)}</span><span class="bib-estado ${noAplica?'na':pendiente?'pend':''}">${esc(est)}</span></td>
+     <td data-label="Mina"><span class="tag-neutral">Antapaccay</span><span class="subline">Perfil: ${esc(c.perfil)}</span></td>
+     <td data-label="Matriz"><strong>${esc(tipo)}</strong>${rel?`<span class="subline">Código ${esc(rel.cursoDimarza)}</span>`:''}</td>
+     <td data-label="Permisos">${acceso}</td>
+   </tr>`;
+ });
+ const todo=filasPdf.concat(filasMatriz);
+ $('tabla').innerHTML=todo.join('') || '<tr class="empty-row"><td colspan="5">No hay certificados ni cursos reportados con los filtros seleccionados.</td></tr>';
 }
+
 function cancelarRenovacion(){
  $('renuevaId').value='';
  $('renovacionBanner').classList.add('hidden');
