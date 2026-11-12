@@ -989,6 +989,8 @@ tbody tr:last-child td {
 .btn-detalle-persona:hover {
   background: #dbeafe;
 }
+.enlace-editar-entrevista {display:inline-block; margin:5px 0 0 6px; text-decoration:none; background:#e6f5ed; color:#18683e; border:1px solid #b0dec2; white-space:nowrap}
+.enlace-editar-entrevista:hover {background:#d1ebde;}
 
 /* =====================================================
    MODAL RECORRIDO
@@ -2108,6 +2110,7 @@ const API_PERSONAL =
 
 
 let seguimientoPersonas = [];
+let entrevistasEditables = new Set();
   
 /* =====================================================
    INICIO
@@ -3624,6 +3627,19 @@ async function cargarSeguimientoPersonas() {
     const personas =
       resultado.personas || [];
       seguimientoPersonas = personas;
+      // Mostrar edición solo al Residente y si existe entrevista activa.
+      entrevistasEditables = new Set();
+      if (sessionStorage.getItem('dimarzaRolVisualizacion') === 'RESIDENTE' &&
+          localStorage.getItem('dimarzaTokenVisualizacion')) {
+        try {
+          const respEntrevistas = await fetch(API + '?accion=listarEntrevistasOperaciones&t=' + Date.now());
+          const dataEntrevistas = await respEntrevistas.json();
+          if (dataEntrevistas.ok) {
+            entrevistasEditables = new Set((dataEntrevistas.entrevistas || [])
+              .map(x => String(x.idCandidato)));
+          }
+        } catch (err) { console.warn('No se pudo cargar entrevistas para edición', err); }
+      }
 
     if (!personas.length) {
 
@@ -3712,6 +3728,11 @@ async function cargarSeguimientoPersonas() {
         >
           Ver recorrido
         </button>
+        ${entrevistasEditables.has(String(p.idCandidato)) ? `
+          <a class="btn-detalle-persona enlace-editar-entrevista"
+            href="contratacion-entrevista-editar.html?idCandidato=${encodeURIComponent(p.idCandidato)}">
+            Editar entrevista
+          </a>` : ''}
 
       </td>
 
