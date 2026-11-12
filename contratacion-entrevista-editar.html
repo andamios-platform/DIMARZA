@@ -36,6 +36,14 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:13px}
 #editor[hidden],#editorForm[hidden]{display:none}
 #pdfAnterior{color:#1962ac}
+.preguntas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.preguntas-grid .group{margin:0}
+.preguntas-grid textarea{min-height:95px}
+.campo-valoracion{margin-top:15px;padding-top:15px;border-top:1px solid #e3eaf1}
+.impacto{font-size:13px;line-height:1.55;padding:14px 16px;margin-top:17px;background:#eef6ff;border:1px solid #cadff6;border-radius:8px}
+.impacto.advertencia{background:#fff8e9;border-color:#f6d58e}
+.impacto.bloqueado{background:#fff0f0;border-color:#efb1b1}
+@media(max-width:790px){.preguntas-grid{grid-template-columns:1fr}}
 @media(max-width:790px){.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.card{padding:16px}}
 </style>
@@ -44,41 +52,58 @@ button:disabled{opacity:.55;cursor:not-allowed}
 <header>
 <a class="back" href="contratacion-andamios.html">← Volver al seguimiento de Contratación</a>
 <h1>Modificar entrevista técnica</h1>
-<p>Acceso exclusivo del Residente · La evaluación original y su PDF se conservarán en el historial</p>
+<p>Acceso exclusivo del Residente · Corrección integral de la entrevista, con historial, PDF y flujo controlado</p>
 </header>
 <main>
 <div class="message" id="estado">Verificando la sesión de Visualización…</div>
 <section id="editor" hidden>
 <div class="card">
-<h2>Datos de la evaluación</h2>
+<h2>1. Datos generales y postulación</h2>
 <div id="encabezado" class="sub"></div>
 <form id="editorForm">
-<div class="grid" id="campos"></div>
+<div class="grid" id="datosGenerales"></div>
 </div>
+
 <div class="card">
-<h2>Experiencia laboral</h2>
-<div class="grid" id="experiencia"></div>
-</div>
-<div class="card">
-<h2>Unidades mineras</h2>
-<p class="sub">Puedes corregir las unidades relacionadas con la entrevista.</p>
+<h2>2. Unidades mineras donde ha trabajado</h2>
+<p class="sub">Registra los antecedentes laborales y de acreditación tal como aparecen en el formulario de Operaciones.</p>
 <div id="unidades"></div>
 <div class="actions"><button type="button" class="secondary" id="agregarUnidad">+ Añadir unidad minera</button></div>
 </div>
+
 <div class="card">
-<h2>Respuestas de la entrevista</h2>
-<p class="sub">Las preguntas originales permanecen fijas. Solo pueden corregirse sus respuestas.</p>
-<div id="preguntas"></div>
+<h2>3. Conocimientos de seguridad</h2>
+<div id="preguntasSeguridad" class="preguntas-grid"></div>
+<div class="grid campo-valoracion" id="valoracionSeguridadHost"></div>
 </div>
+
 <div class="card">
-<h2>Confirmar modificación</h2>
-<p class="sub">No modifica la etapa actual, la decisión APTO/NO APTO ni el entrevistador original. Si se requiere cambiar el resultado, corresponde reabrir la entrevista y regularizar el flujo.</p>
+<h2>4. Experiencia laboral</h2>
+<div class="grid" id="experiencia"></div>
+<div class="grid campo-valoracion" id="valoracionExperienciaHost"></div>
+</div>
+
+<div class="card">
+<h2>5. Conocimientos técnicos</h2>
+<div id="preguntasTecnica" class="preguntas-grid"></div>
+<div class="grid campo-valoracion" id="valoracionTecnicaHost"></div>
+</div>
+
+<div class="card">
+<h2>6. Resultado final de la entrevista</h2>
+<div class="grid" id="resultadoCampos"></div>
+<div class="impacto" id="impactoResultado" aria-live="polite"></div>
+</div>
+
+<div class="card">
+<h2>7. Confirmar modificación — solo Residente</h2>
+<p class="sub">Puedes corregir APTO / NO APTO. Si la decisión cambia, la plataforma ajustará el flujo cuando aún sea reversible. Si el candidato ya avanzó a contratación o habilitación, la modificación del dictamen se bloqueará para evitar inconsistencias.</p>
 <div class="field">
 <label for="motivo">Motivo de la modificación (obligatorio)</label>
-<textarea id="motivo" required minlength="10" maxlength="500" placeholder="Explica qué dato se corrige y por qué"></textarea>
+<textarea id="motivo" required minlength="10" maxlength="500" placeholder="Especifica qué se corrige y por qué se toma esta decisión"></textarea>
 </div>
 <div class="actions">
-<button type="submit" id="btnGuardar">Guardar cambios y generar nuevo PDF</button>
+<button type="submit" id="btnGuardar">Guardar entrevista, actualizar flujo y generar PDF</button>
 <a href="#" id="pdfAnterior" target="_blank" rel="noopener noreferrer" hidden>Ver PDF actual</a>
 </div>
 </form>
@@ -90,13 +115,18 @@ button:disabled{opacity:.55;cursor:not-allowed}
 const API='https://script.google.com/macros/s/AKfycbzex_3Lnbvymek_tx_IVkm4S6EA1ShGGbdhQzCJdNTBW3lJjHlt76yF5meToB6Ng64V/exec';
 const CARGOS=['OPERARIO ANDAMIERO','OFICIAL ANDAMIERO','MECANICO ANDAMIERO','SUPERVISOR ANDAMIERO','LIDER ANDAMIERO','SUPERVISOR JUNIOR ANDAMIERO'];
 const EXP=[
-['tiempoExperiencia','Tiempo de experiencia'],['ultimaEmpresa','Última empresa'],
-['tiempoUltimaEmpresa','Tiempo en última empresa'],['modalidadTrabajo','Modalidad de trabajo'],
-['motivoRetiro','Motivo de retiro'],['otroMotivo','Otro motivo'],
-['tuvoAccidente','¿Tuvo accidente?'],['tipoAccidente','Tipo de accidente'],
-['detalleAccidente','Detalle de accidente'],['comentarios','Comentarios de experiencia']
+['tiempoExperiencia','Tiempo de experiencia','text'],
+['ultimaEmpresa','Última empresa','text'],
+['tiempoUltimaEmpresa','Tiempo en última empresa','text'],
+['modalidadTrabajo','Modalidad de trabajo','select',['','PERMANENTE','INTERMITENTE','OTRO']],
+['motivoRetiro','Motivo de retiro','text'],
+['otroMotivo','Otro motivo','text'],
+['tuvoAccidente','¿Tuvo accidente?','select',['','SI','NO']],
+['tipoAccidente','Tipo de accidente','select',['','LEVE','PERMANENTE']],
+['detalleAccidente','Detalle de accidente','textarea'],
+['comentarios','Comentarios de experiencia','textarea']
 ];
-const FIELDS=[
+const DATOS_FIELDS=[
 ['fechaEntrevista','Fecha de entrevista','date'],
 ['lugarEntrevista','Lugar o enlace','text'],
 ['modalidadEntrevista','Modalidad','select',['VIRTUAL','PRESENCIAL']],
@@ -104,40 +134,44 @@ const FIELDS=[
 ['estudios','Estudios','text'],
 ['puestoPostula','Puesto al que postuló','readonly'],
 ['puestoClasifica','Puesto en que clasifica','select',CARGOS],
-['entrevistador','Entrevistador original','readonly'],
+['entrevistador','Entrevistador responsable','select',[]],
 ['disponibilidad','Disponibilidad','text'],
 ['tipoRemuneracion','Tipo de remuneración','select',['','VALOR HORA','MENSUAL']],
-['monto','Monto de pretensión','number'],
-['resultado','Resultado','readonly'],
-['valoracionSeguridad','Valoración Seguridad (1–5)','rating'],
-['valoracionExperiencia','Valoración Experiencia (1–5)','rating'],
-['valoracionTecnica','Valoración Técnica (1–5)','rating'],
-['promedio','Promedio recalculado','readonly'],
-['criterio','Criterio de clasificación','readonly'],
-['comentariosGenerales','Comentarios generales','textarea']
+['monto','Monto de pretensión','number']
 ];
+const SEG_FIELDS=[['valoracionSeguridad','Valoración de Seguridad (1 a 5)','rating']];
+const EXP_FIELDS=[['valoracionExperiencia','Valoración de Experiencia (1 a 5)','rating']];
+const TEC_FIELDS=[['valoracionTecnica','Valoración Técnica (1 a 5)','rating']];
+const RESULT_FIELDS=[
+['promedio','Promedio calculado','readonly'],
+['criterio','Criterio de clasificación','readonly'],
+['resultado','Decisión del entrevistador','select',['APTO','NO APTO']],
+['comentariosGenerales','Observaciones y comentarios generales','textarea']
+];
+const FIELDS=[...DATOS_FIELDS,...SEG_FIELDS,...EXP_FIELDS,...TEC_FIELDS,...RESULT_FIELDS];
 const $=id=>document.getElementById(id);
 let activo=null;
+let supervisoresEdicion=[];
 const sesion=localStorage.getItem('dimarzaTokenVisualizacion')||'';
 const residente=sessionStorage.getItem('dimarzaRolVisualizacion')==='RESIDENTE';
 const idCandidato=new URLSearchParams(location.search).get('idCandidato')||'';
 function mensaje(t,estilo){$('estado').textContent=t;$('estado').className='message '+(estilo||'');}
 function campo(parent,id,label,value,type,choices){
  const div=document.createElement('div');div.className='field';
- if(id==='comentariosGenerales')div.classList.add('full');
+ if(['comentariosGenerales','exp_detalleAccidente','exp_comentarios'].includes(id))div.classList.add('full');
  const tag=document.createElement('label');tag.htmlFor=id;tag.textContent=label;div.appendChild(tag);
  let el;
- if(type==='select'){
+ if(type==='select'||type==='rating'){
    el=document.createElement('select');
-   const opts=choices||[];
-   if(value && !opts.includes(String(value)))opts.unshift(String(value));
+   const opts=type==='rating'?['1','2','3','4','5']:[...(choices||[])];
+   if(value!=='' && value!==null && value!==undefined && !opts.includes(String(value)))opts.unshift(String(value));
    opts.forEach(opt=>{const op=document.createElement('option');op.value=opt;op.textContent=opt||'Seleccione';el.appendChild(op);});
+   if(type==='rating')el.required=true;
  }else if(type==='textarea'){
    el=document.createElement('textarea');
  }else{
    el=document.createElement('input');
-   el.type=type==='number'||type==='rating'?'number':type==='date'?'date':'text';
-   if(type==='rating'){el.min=1;el.max=5;el.step=1;el.required=true;}
+   el.type=type==='number'?'number':type==='date'?'date':'text';
    if(type==='readonly')el.readOnly=true;
    if(type==='number')el.step='any';
  }
@@ -164,20 +198,33 @@ function agregarUnidad(d){
  b.addEventListener('click',()=>item.remove());item.appendChild(g);item.appendChild(b);$('unidades').appendChild(item);
 }
 function render(d){
- activo=d;$('encabezado').textContent=d.nombres+' · DNI '+d.dni+' · '+d.idEntrevista+' · Área actual: '+d.areaActual;
- $('campos').replaceChildren();$('experiencia').replaceChildren();$('unidades').replaceChildren();$('preguntas').replaceChildren();
- FIELDS.forEach(([id,label,type,choices])=>campo($('campos'),id,label,d[id],type,choices&&[...choices]));
- EXP.forEach(([id,label])=>campo($('experiencia'),'exp_'+id,label,(d.experiencia||{})[id]||'','text'));
+ activo=d;
+ $('encabezado').textContent=d.nombres+' · DNI '+d.dni+' · '+d.idEntrevista+' · Etapa: '+d.areaActual+' / '+d.etapaActual;
+ ['datosGenerales','experiencia','unidades','preguntasSeguridad','preguntasTecnica',
+  'valoracionSeguridadHost','valoracionExperienciaHost','valoracionTecnicaHost','resultadoCampos']
+   .forEach(id=>$(id).replaceChildren());
+ DATOS_FIELDS.forEach(([id,label,type,choices])=>
+   campo($('datosGenerales'),id,label,d[id],type,id==='entrevistador'?supervisoresEdicion:choices));
+ EXP.forEach(([id,label,type,choices])=>
+   campo($('experiencia'),'exp_'+id,label,(d.experiencia||{})[id]||'',type,choices));
+ SEG_FIELDS.forEach(([id,label,type])=>campo($('valoracionSeguridadHost'),id,label,d[id],type));
+ EXP_FIELDS.forEach(([id,label,type])=>campo($('valoracionExperienciaHost'),id,label,d[id],type));
+ TEC_FIELDS.forEach(([id,label,type])=>campo($('valoracionTecnicaHost'),id,label,d[id],type));
+ RESULT_FIELDS.forEach(([id,label,type,choices])=>campo($('resultadoCampos'),id,label,d[id],type,choices));
  (d.unidades||[]).forEach(agregarUnidad);
  (d.respuestas||[]).forEach((r,i)=>{
-   const item=document.createElement('div');item.className='group';item.dataset.pregunta=String(i);
+   const item=document.createElement('div');item.className='group';
+   item.dataset.pregunta=String(i);
    const titulo=document.createElement('h3');titulo.textContent=(r.seccion||'Pregunta')+' · '+(r.codigoPregunta||'')+' — '+(r.pregunta||'');item.appendChild(titulo);
-   const respuesta=document.createElement('textarea');respuesta.value=r.respuesta||'';respuesta.dataset.codigoPregunta=r.codigoPregunta||'';
-   respuesta.maxLength=2500;item.appendChild(respuesta);$('preguntas').appendChild(item);
+   const respuesta=document.createElement('textarea');respuesta.value=r.respuesta||'';
+   respuesta.dataset.codigoPregunta=r.codigoPregunta||'';
+   respuesta.maxLength=2500;item.appendChild(respuesta);
+   const seguridad=String(r.codigoPregunta||'').toUpperCase().startsWith('SEG-');
+   $(seguridad?'preguntasSeguridad':'preguntasTecnica').appendChild(item);
  });
  const link=$('pdfAnterior');
  if(/^https:\/\/drive\.google\.com\//i.test(d.urlPdf||'')){link.hidden=false;link.href=d.urlPdf;}else link.hidden=true;
- $('editor').hidden=false;actualizarResultado();
+ $('editor').hidden=false;actualizarResultado();mostrarImpacto();
 }
 function valor(id){return $(id).value.trim();}
 function actualizarResultado(){
@@ -188,6 +235,27 @@ function actualizarResultado(){
   $('promedio').value=p.toFixed(2);
   $('criterio').value=p<2?'MUY POR DEBAJO DEL PERFIL':p<3?'POR DEBAJO DEL PERFIL':p<4?'CUMPLE CON EL PERFIL':p<5?'POR ENCIMA DEL PERFIL':'SOBREPASA EL PERFIL';
  }else{$('promedio').value='';$('criterio').value='';}
+}
+function mostrarImpacto(){
+ if(!activo)return;
+ const impacto=$('impactoResultado'),actual=String(activo.resultado||'').toUpperCase(),nuevo=valor('resultado');
+ impacto.className='impacto';
+ if(actual===nuevo){
+   impacto.textContent='La decisión continúa como '+actual+'. Se actualizarán únicamente los datos corregidos, sin cambiar la etapa.';
+   return;
+ }
+ const area=String(activo.areaActual||'').toUpperCase(),etapa=String(activo.etapaActual||'').toUpperCase();
+ const estado=String(activo.estadoGeneral||'').toUpperCase();
+ if(actual==='APTO'&&nuevo==='NO APTO'&&area==='ATH'&&etapa==='VALOR HORA'){
+   impacto.classList.add('advertencia');
+   impacto.textContent='Cambiar APTO a NO APTO: se anulará el pendiente ATH – Valor Hora, el candidato pasará a FINALIZADO / NO APTO y se registrará la rectificación.';
+ }else if(actual==='NO APTO'&&nuevo==='APTO'&&area==='FINALIZADO'&&etapa==='ENTREVISTA TECNICA'){
+   impacto.classList.add('advertencia');
+   impacto.textContent='Cambiar NO APTO a APTO: se reabrirá el proceso y el candidato volverá a ATH – Valor Hora como PENDIENTE.';
+ }else{
+   impacto.classList.add('bloqueado');
+   impacto.textContent='El candidato ya está en '+area+' / '+etapa+'. No se puede cambiar el dictamen automáticamente aquí: el Residente debe regularizar las etapas posteriores antes de continuar.';
+ }
 }
 function payload(){
  const obj={idEntrevista:activo.idEntrevista,ultimaActualizacionBase:activo.fechaUltimaActualizacion,motivo:valor('motivo')};
@@ -200,18 +268,24 @@ function payload(){
  return obj;
 }
 $('agregarUnidad').addEventListener('click',()=>agregarUnidad({}));
+$('resultadoCampos').addEventListener('change',ev=>{if(ev.target.id==='resultado')mostrarImpacto();});
 ['valoracionSeguridad','valoracionExperiencia','valoracionTecnica'].forEach(id=>document.addEventListener('input',ev=>{if(ev.target.id===id)actualizarResultado();}));
 $('editorForm').addEventListener('submit',async ev=>{
  ev.preventDefault();
  if(!activo||!residente)return;
  const boton=$('btnGuardar');
- if(!confirm('¿Guardar corrección? Se generará un nuevo PDF conservando la versión original.'))return;
+ const cambiaDictamen=String(activo.resultado||'').toUpperCase()!==valor('resultado');
+ const aviso=cambiaDictamen
+   ? '¿Confirmar el cambio de '+activo.resultado+' a '+valor('resultado')+'? Se actualizará la etapa cuando sea seguro y se generará un PDF nuevo. El anterior se conservará.'
+   : '¿Guardar las correcciones? Se generará un PDF nuevo y conservará la versión anterior.';
+ if(!confirm(aviso))return;
  boton.disabled=true;mensaje('Guardando la corrección y generando la nueva versión del PDF…');
  try{
   const result=await api('guardarEntrevistaEdicion',payload());
   mensaje(result.mensaje||'Entrevista actualizada.','ok');
   $('motivo').value='';
   const fresh=await api('obtenerEntrevistaEdicion');
+  supervisoresEdicion=fresh.supervisores||[];
   render(fresh.entrevista);
   window.scrollTo({top:0,behavior:'smooth'});
  }catch(e){mensaje(e.message,'error');window.scrollTo({top:0,behavior:'smooth'});}
@@ -222,7 +296,8 @@ $('editorForm').addEventListener('submit',async ev=>{
  if(!/^CAN-\d{6}$/.test(idCandidato)){mensaje('Selecciona una entrevista desde Seguimiento por persona.','error');return;}
  try{
   const data=await api('obtenerEntrevistaEdicion');
-  render(data.entrevista);mensaje('Entrevista cargada. Las correcciones quedarán registradas en el historial.','ok');
+  supervisoresEdicion=data.supervisores||[];
+  render(data.entrevista);mensaje('Entrevista cargada. Puedes corregir APTO / NO APTO y cualquier sección del formulario.','ok');
  }catch(e){mensaje(e.message,'error');}
 })();
 </script>
