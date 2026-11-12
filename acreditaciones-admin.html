@@ -248,7 +248,7 @@
 <label class="ren-history-filter"><input type="checkbox" id="mostrarHistoricos" onchange="render()"> Mostrar también certificados históricos renovados</label>
 <div class="table-wrap"><table class="library"><thead><tr><th>Titular</th><th>Curso / Institución</th><th>Unidad minera</th><th>Matriz Antapaccay</th><th>Acceso al PDF</th></tr></thead><tbody id="tabla"></tbody></table></div><div class="library-footer"><span id="conteoFiltrado">0 registros</span><span>Los cambios quedan registrados en auditoría</span></div>
 <div class="mat-admin">
-  <div class="mat-admin-head"><h3>Fechas y estados reportados por Antapaccay · Sin PDF</h3><p>Consulta por DNI los conceptos de la matriz recibida. No equivalen a constancias PDF ni modifican el porcentaje documental o las alertas.</p></div>
+  <div class="mat-admin-head"><h3>Fechas y estados reportados por Antapaccay · Sin PDF</h3><p>Consulta por DNI los conceptos de la matriz recibida. Se vinculan con los requisitos para calcular el indicador reportado. No equivalen a constancias PDF, no modifican el porcentaje documental ni activan alertas.</p></div>
   <form class="mat-admin-search" onsubmit="consultarMatrizReportadaAdmin();return false;">
     <label for="matAdminDni"><strong>DNI</strong></label>
     <input id="matAdminDni" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" placeholder="8 dígitos" required>
@@ -750,13 +750,16 @@ function renderConsolidado(){
  const vista=CONS_FILTRADOS.slice(CONS_PAGINA*CONS_POR_PAGINA,(CONS_PAGINA+1)*CONS_POR_PAGINA);
  $('consTabla').innerHTML=vista.map(r=>{
   const pf=r.perfil;
-  const pct=pf?`<span class="cons-pct">${pf.porcentaje}%</span><div class="cons-progress"><span style="width:${pf.porcentaje}%"></span></div><span class="cons-micro">${pf.completos} de ${pf.total} cursos · ${pf.pendientes} faltan</span>`:'<span class="cons-micro">Matriz no cargada</span>';
+  const pct=pf?(pf.reportado?.disponible
+    ?`<span class="cons-pct">${pf.reportado.porcentaje}% <small style="font-size:10px;font-weight:600">Reportado Antapaccay</small></span><div class="cons-progress"><span style="width:${pf.reportado.porcentaje}%"></span></div><span class="cons-micro">${pf.reportado.completos} de ${pf.reportado.total} con estado reportado · Sin validar PDF</span><br><span class="cons-micro"><strong>PDF vinculado:</strong> ${pf.porcentaje}% (${pf.completos}/${pf.total})</span>`
+    :`<span class="cons-pct">${pf.porcentaje}%</span><div class="cons-progress"><span style="width:${pf.porcentaje}%"></span></div><span class="cons-micro">${pf.completos} de ${pf.total} cursos con PDF</span>`)
+    :'<span class="cons-micro">Matriz no cargada</span>';
   const mines=r.mina==='SIN ASIGNAR'?'Sin unidad':nombreMina(r.mina);
   const emos=r.emo.estado==='NO_APLICA'?'—':consChip(r.emo.estado)+(r.emo.fecha?`<small>${esc(formatearFecha(r.emo.fecha))}</small>`:'');
   const permiso=r.permiso.estado==='NO_APLICA'?'—':consChip(r.permiso.estado)+(r.permiso.fecha?`<small>${esc(formatearFecha(r.permiso.fecha))}</small>`:'');
   const pendientes=pf?pf.cursos.filter(c=>c.estado!=='VIGENTE'&&c.estado!=='SIN_FECHA'):[];
   const sinFecha=pf?pf.cursos.filter(c=>c.estado==='SIN_FECHA'):[];
-  let det=pf?`<div style="margin-top:8px;font-size:11px;color:#587184">${pf.pendientes} pendientes · ${pf.vencidos} vencidos · ${pf.sinFecha} sin vencimiento declarado</div>`:'';
+  let det=pf?`<div style="margin-top:8px;font-size:11px;color:#587184">PDF: ${pf.pendientes} sin respaldo · ${pf.vencidos} vencidos · ${pf.sinFecha} sin vencimiento declarado. La situación del consolidado conserva el criterio documental.</div>`:'';
   det+=pendientes.length?`<b style="display:block;margin-top:8px;font-size:11px">Faltantes / vencidos</b><ul>${pendientes.map(c=>`<li>${esc(c.nombre)} · ${esc(c.estado==='VENCIDO'?'Vencido':'Pendiente')}</li>`).join('')}</ul>`:'';
   det+=sinFecha.length?`<b style="display:block;margin-top:8px;font-size:11px">Vigencia por confirmar</b><ul>${sinFecha.map(c=>`<li>${esc(c.nombre)}</li>`).join('')}</ul>`:'';
   if(!pf)det='<p class="muted">Para esta mina no existe todavía una matriz de cursos o el cargo no tiene perfil definido.</p>';
@@ -793,11 +796,12 @@ $('consTabla').addEventListener('click',async e=>{
 });
 function exportarConsolidado(){
  if(!CONS_FILTRADOS.length){$('consMensaje').textContent='No hay registros para exportar.';return}
- const h=['DNI','APELLIDOS Y NOMBRES','CARGO','UNIDAD MINERA','ASIGNACION CONFIRMADA','CERTIFICADOS','CUMPLIMIENTO %','CURSOS CUMPLIDOS','CURSOS OBLIGATORIOS','CURSOS PENDIENTES','CURSOS SIN FECHA','CURSOS VENCIDOS','ESTADO EMO','VENCIMIENTO EMO','PERMISO CHILE','VENCIMIENTO PERMISO','SITUACION','CURSOS FALTANTES'];
+  const h=['DNI','APELLIDOS Y NOMBRES','CARGO','UNIDAD MINERA','ASIGNACION CONFIRMADA','CERTIFICADOS','CUMPLIMIENTO CON PDF %','CURSOS CON PDF','CURSOS OBLIGATORIOS','CURSOS SIN PDF','CURSOS PDF SIN FECHA','CURSOS PDF VENCIDOS','ESTADO EMO','VENCIMIENTO EMO','PERMISO CHILE','VENCIMIENTO PERMISO','SITUACION','CURSOS SIN PDF','CUMPLIMIENTO REPORTADO ANTAPACCAY %','CURSOS REPORTADOS VIGENTES','CURSOS REPORTADOS EXIGIBLES'];
  const rows=CONS_FILTRADOS.map(r=>[r.dni,r.nombre,r.cargo,r.mina,r.asignado?'SI':'NO',r.certificados,
   r.perfil?.porcentaje??'',r.perfil?.completos??'',r.perfil?.total??'',r.perfil?.pendientes??'',r.perfil?.sinFecha??'',r.perfil?.vencidos??'',
   r.emo.estado,r.emo.fecha||'',r.permiso.estado,r.permiso.fecha||'',r.situacion,
-  (r.perfil?.cursos||[]).filter(c=>c.estado==='PENDIENTE'||c.estado==='VENCIDO').map(c=>c.nombre).join(' | ')]);
+  (r.perfil?.cursos||[]).filter(c=>c.estado==='PENDIENTE'||c.estado==='VENCIDO').map(c=>c.nombre).join(' | '),
+  r.perfil?.reportado?.porcentaje??'',r.perfil?.reportado?.completos??'',r.perfil?.reportado?.total??'']);
  // CSV separado por punto y coma, BOM UTF-8 y escape de fórmula para Excel.
  const safe=v=>{let s=String(v??'');if(/^[=+@\-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};
  const csv='\ufeff'+[h,...rows].map(r=>r.map(safe).join(';')).join('\r\n');
