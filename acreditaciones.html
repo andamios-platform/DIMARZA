@@ -285,8 +285,9 @@
       </div>
       <section class="panel profile-panel hidden" id="perfilCapacitacion" aria-label="Cumplimiento de capacitación Antapaccay">
         <div class="profile-head"><div><div class="eyebrow">MATRIZ DE CAPACITACIÓN · ANTAPACCAY 2026</div><h3>Cumplimiento del perfil de capacitación</h3><p id="perfilCargo" class="profile-sub"></p></div><div class="profile-score"><strong id="perfilPorcentaje">0%</strong><span id="perfilCantidad">0 de 10 cursos</span></div></div>
-        <div class="profile-track" role="progressbar" aria-label="Cumplimiento documental del perfil" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="perfilProgreso"><div id="perfilBarra"></div></div>
+        <div class="profile-track" role="progressbar" aria-label="Cumplimiento reportado del perfil" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="perfilProgreso"><div id="perfilBarra"></div></div>
         <p class="profile-message" id="perfilMensaje"></p>
+        <p class="profile-message" id="perfilRespaldo" style="margin-top:9px;font-weight:700;color:#285475"></p>
         <details class="profile-details"><summary>Ver detalle de los cursos obligatorios</summary><div class="profile-courses" id="perfilLista"></div></details>
       </section>
 
@@ -294,7 +295,7 @@
         <div class="matrix-report-head">
           <div class="eyebrow">INFORMACIÓN REPORTADA · ANTAPACCAY</div>
           <h3>Fechas y estados de cursos de capacitación</h3>
-          <p>Datos transcritos de la matriz recibida, incluso cuando no se dispone del PDF. Son informativos: no reemplazan el certificado ni alteran el porcentaje de cumplimiento documental.</p>
+          <p>Datos transcritos de la matriz recibida, incluso cuando no se dispone del PDF. Son registros informativos. El indicador de cursos reportados usa estas fechas y estados; el porcentaje de respaldo documental solo utiliza PDFs.</p>
         </div>
         <div class="matrix-report-summary" id="matrizReportadaResumen">Consultando registros…</div>
         <details><summary>Ver fechas y estados de los cursos</summary>
@@ -562,8 +563,6 @@
     function renderPerfil() {
       const el=$('perfilCapacitacion');
       const p=perfilActual;
-      // Antapaccay siempre debe mostrar su tarjeta: incluso con 0 cursos,
-      // o si el Apps Script publicado todavía no entrega el perfil.
       const miraAntapaccay = minaActual === 'ANTAPACCAY' || (
         !minaActual && (
           p?.aplica || certificadosActuales.some(c => minaCertificado(c)==='ANTAPACCAY') ||
@@ -578,28 +577,41 @@
         $('perfilCantidad').textContent='Sin cálculo disponible';
         $('perfilProgreso').setAttribute('aria-valuenow','0');
         $('perfilBarra').style.width='0%';
-        const motivo=p?.motivo
-          ? String(p.motivo)
-          : 'La implementación de Apps Script no devolvió el perfil de capacitación.';
-        $('perfilMensaje').textContent=motivo+' Verifica que publicaste una NUEVA VERSIÓN del Código.gs de Acreditaciones y después pulsa «Actualizar datos». No mostramos 0 % sin un cálculo real.';
-        $('perfilLista').innerHTML='<div class="profile-course"><span class="profile-name">Los 10 cursos aparecerán aquí cuando la API envíe la matriz del trabajador.</span></div>';
+        $('perfilRespaldo').textContent='';
+        $('perfilMensaje').textContent=p?.motivo||'No se recibió el perfil del trabajador. Revisa la versión de Apps Script publicada.';
+        $('perfilLista').innerHTML='';
         return;
       }
-      const n=Math.max(0,Math.min(100,Number(p.porcentaje)||0));
+      const r=p.reportado?.disponible?p.reportado:null;
+      const n=Math.max(0,Math.min(100,Number(r?r.porcentaje:p.porcentaje)||0));
+      const title=el.querySelector('.profile-head h3');
+      if(title)title.textContent=r?'Cumplimiento reportado por Antapaccay':'Cumplimiento documental del perfil de capacitación';
       $('perfilCargo').textContent='Perfil: '+(p.cargoPerfil||'Andamiero')+' · Cargo registrado: '+(p.cargoReal||'—');
       $('perfilPorcentaje').textContent=n+'%';
-      $('perfilCantidad').textContent=`${p.completos||0} de ${p.total||0} cursos`; 
+      $('perfilCantidad').textContent=`${r?r.completos:p.completos} de ${r?r.total:p.total} cursos`;
       $('perfilProgreso').setAttribute('aria-valuenow',String(n));
       $('perfilBarra').style.width=n+'%';
-      const mensaje=p.perfilDocumentalCompleto
-        ?(p.sinFecha>0?'Los diez cursos tienen evidencia, pero '+p.sinFecha+' necesitan confirmar su vigencia. No equivale a acreditación oficial.':'Perfil documental de capacitación completo. No equivale a acreditación oficial de la mina.')
-        :`Faltan ${p.pendientes||0} cursos con evidencia vigente o sin vencimiento declarado. El porcentaje refleja los documentos registrados, no una aprobación oficial.`;
-      $('perfilMensaje').textContent=mensaje;
-      $('perfilLista').innerHTML=(p.cursos||[]).map((curso,i)=>{
-        const estado=curso.estado||'PENDIENTE';
-        const cfg={VIGENTE:['Cumplido','pass'],SIN_FECHA:['Registrado · vigencia por confirmar','review'],VENCIDO:['Vencido','fail'],PENDIENTE:['Pendiente','wait']}[estado]||['Pendiente','wait'];
-        return `<div class="profile-course"><span class="profile-num">${i+1}</span><span class="profile-name">${escapeHtml(curso.nombre||'Curso')}<small>${curso.fechaVencimiento?'Vence: '+escapeHtml(fmtDate(curso.fechaVencimiento)):''}</small></span><span class="profile-pill ${cfg[1]}">${cfg[0]}</span></div>`;
-      }).join('');
+      if(r){
+        $('perfilMensaje').textContent=`${r.completos} de ${r.total} cursos figuran VIGENTES y con fecha en la matriz recibida. Este indicador solo refleja lo reportado por Antapaccay; no certifica aprobación oficial ni que la fecha sea de vencimiento.`;
+        $('perfilRespaldo').textContent=`Respaldo documental en DIMARZA: ${p.completos} de ${p.total} cursos (${p.porcentaje}%) vinculados a PDF. Las equivalencias de certificados especializados deben revisarse.`;
+        const porId=new Map((r.cursos||[]).map(c=>[String(c.id),c]));
+        $('perfilLista').innerHTML=(p.cursos||[]).map((c,i)=>{
+          const t=porId.get(String(c.id));
+          const ok=t?.estado==='REPORTADO_VIGENTE';
+          const cls=ok?'pass':t?.estado==='PROGRAMAR'||t?.estado==='INSCRITO'?'review':'wait';
+          const etiqueta=ok?'Reportado vigente':t?.estado==='PROGRAMAR'?'Por programar':t?.estado==='INSCRITO'?'Inscrito':t?.estado==='NO_APLICA'?'No aplica':'No confirmado';
+          const pdf=c.estado==='VIGENTE'||c.estado==='SIN_FECHA'?'PDF vinculado':'Sin PDF de requisito';
+          const d=t?.fechaReportada?' · Fecha reportada: '+fmtDate(t.fechaReportada):'';
+          return `<div class="profile-course"><span class="profile-num">${i+1}</span><span class="profile-name">${escapeHtml(c.nombre||'Curso')}<small>${escapeHtml('Antapaccay: '+(t?.nombreMatriz||'Sin vínculo')+d+' · '+pdf)}</small></span><span class="profile-pill ${cls}">${escapeHtml(etiqueta)}</span></div>`;
+        }).join('');
+      } else {
+        $('perfilRespaldo').textContent='';
+        $('perfilMensaje').textContent='Este porcentaje solo cuenta documentos PDF vinculados. Las fechas y estados importados aún no están relacionados con los requisitos.';
+        $('perfilLista').innerHTML=(p.cursos||[]).map((c,i)=>{
+          const st=c.estado||'PENDIENTE';const cfg={VIGENTE:['Cumplido','pass'],SIN_FECHA:['Registrado · vigencia por confirmar','review'],VENCIDO:['Vencido','fail'],PENDIENTE:['Pendiente','wait']}[st]||['Pendiente','wait'];
+          return `<div class="profile-course"><span class="profile-num">${i+1}</span><span class="profile-name">${escapeHtml(c.nombre||'Curso')}</span><span class="profile-pill ${cfg[1]}">${cfg[0]}</span></div>`;
+        }).join('');
+      }
     }
     function renderMatrizReportada() {
       const panel=$('matrizReportada');
