@@ -221,6 +221,28 @@
 .matrix-report-tag.vigente{background:#e5f6ee;color:#27734b}
 @media(max-width:650px){.matrix-report-head{padding:18px}.matrix-report-summary{padding:13px 18px}.matrix-report-card details{padding:15px 14px 22px}.matrix-report-table th,.matrix-report-table td{padding:9px 7px;font-size:11px}.matrix-report-table th:nth-child(1){width:43%}}
 
+
+    /* Biblioteca unificada: distinguir certificados PDF de cursos reportados por la mina. */
+    .reported-count{background:#e6f6ef;color:#0d7568}
+    .library-group-title{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:800;color:#456779;padding:14px 1px 0}
+    .library-matrix{padding:0 22px 23px}
+    .library-matrix-head{padding:18px 0 10px;border-top:1px solid #e6eef1}
+    .library-matrix-head h4{font-size:15px;letter-spacing:-.015em;margin:0 0 4px;color:#1b3c4b}
+    .library-matrix-head p{color:#708797;font-size:11px;margin:0;line-height:1.65}
+    .library-matrix-head strong{color:#126b60}
+    .library-course .cert-icon{background:#eaf4f8;color:#27758a}
+    .library-course .cert-issuer{margin-top:5px}
+    .library-course .cert-bottom{margin-top:10px}
+    .library-course .cert-date{line-height:1.6}
+    .library-course .status-pill.reported{background:#e1f6eb;color:#127a4d}
+    .library-course .status-pill.pending{background:#fff1dc;color:#946012}
+    .library-course .status-pill.not-applicable{background:#eef2f5;color:#657887}
+    .library-na{border-top:1px solid #e9edf0;padding:12px 0}
+    .library-na summary{font-size:12px;font-weight:780;color:#4e6e82;cursor:pointer;padding:4px 0}
+    .library-na[open] summary{margin-bottom:9px}
+    .library-matrix .empty{padding:24px 10px}
+    @media(max-width:560px){.library-matrix{padding:0 15px 18px}.library-group-title{font-size:10px}.library-matrix-head{padding-top:17px}}
+
 </style>
 </head>
 <body>
@@ -305,17 +327,19 @@
       <div class="result-grid">
         <section class="panel" aria-labelledby="tituloDocumentos">
           <div class="panel-head">
-            <div class="panel-title"><h3 id="tituloDocumentos">Mis certificados <span class="count-pill" id="total">0</span></h3></div>
-            <p>Consulta tus capacitaciones y abre los documentos disponibles.</p>
+            <div class="panel-title"><h3 id="tituloDocumentos">Mis certificados y cursos <span class="count-pill" id="total">0 PDF</span> <span class="count-pill reported-count hidden" id="totalCursos">0 reportados</span></h3></div>
+            <p>Consulta certificados con PDF y cursos informados por la unidad minera, aunque todavía no tengan un documento adjunto.</p>
             <div class="mine-filter"><label for="filtroMina">Unidad minera</label><select id="filtroMina"><option value="">Todas las unidades mineras</option></select></div>
             <div class="searchline"><svg class="icon"><use href="#i-search"/></svg><label class="sr-only" for="busqueda">Buscar curso o institución</label><input id="busqueda" placeholder="Buscar curso o institución…" autocomplete="off"></div>
             <div class="tabs" id="filtros" aria-label="Filtrar certificados">
               <button class="tab-btn active" type="button" data-filter="todos" aria-pressed="true">Todos</button>
               <button class="tab-btn" type="button" data-filter="disponibles" aria-pressed="false">Disponibles</button>
               <button class="tab-btn" type="button" data-filter="restringidos" aria-pressed="false">Restringidos</button>
+              <button class="tab-btn" type="button" data-filter="reportados" aria-pressed="false">Cursos reportados</button>
             </div>
           </div>
           <div id="listado" class="cert-list"></div>
+          <div id="listadoMatriz" class="library-matrix"></div>
           <p class="inline-feedback" id="msg" role="status"></p>
         </section>
         <aside class="aside-stack">
@@ -632,22 +656,67 @@
         return `<tr><td><strong>${escapeHtml(c.nombre)}</strong><small>Matriz sin PDF adjunto</small></td><td>${escapeHtml(dato)}${c.clase==='FECHA_EN_TEXTO'?'<small>Fecha extraída de texto original</small>':''}</td><td><span class="matrix-report-tag ${css}">${escapeHtml(estado)}</span></td></tr>`;
       }).join('')}</tbody></table></div>`;
     }
+    /** Cursos informados por Antapaccay, independientes de certificados con PDF. */
+    function renderCursosEnBiblioteca(term, mostrarMatriz) {
+      const panel=$('listadoMatriz');
+      const list=Array.isArray(matrizActual?.cursos)?matrizActual.cursos:[];
+      const visibles=mostrarMatriz && (!minaActual || minaActual==='ANTAPACCAY') &&
+        (filtroActual==='todos' || filtroActual==='reportados');
+      if(!visibles || !list.length){panel.innerHTML='';return;}
+      const mapa=new Map((perfilActual?.reportado?.cursos||[])
+        .filter(c=>c.idMatriz).map(c=>[c.idMatriz,c]));
+      const filtered=list.filter(c=>!term ||
+        `${c.nombre||''} ${c.valorOriginal||''} ${c.estadoReportado||''} Antapaccay`
+          .toLocaleLowerCase('es').includes(term));
+      const aplican=filtered.filter(c=>c.clase!=='NO_APLICA');
+      const base=aplican.filter(c=>mapa.has(c.id));
+      const adicionales=aplican.filter(c=>!mapa.has(c.id));
+      const noAplican=filtered.filter(c=>c.clase==='NO_APLICA');
+      const conFecha=aplican.filter(c=>!!c.fechaReportada).length;
+      const filas = items=>items.map(c=>{
+        const na=c.clase==='NO_APLICA';
+        const espera=String(c.estadoReportado||'').toUpperCase()==='PROGRAMAR';
+        const conFecha=!!c.fechaReportada;
+        const inscrito=!conFecha && /INSCRITO/i.test(c.valorOriginal||'');
+        const fecha=na?'No aplica':conFecha?'Fecha informada: '+fmtDate(c.fechaReportada):
+          (c.valorOriginal?'Dato informado: '+c.valorOriginal:'Sin fecha informada');
+        const etiqueta=na?'No aplica':inscrito?'Inscrito · verificar':espera?'Por programar':
+          conFecha&&String(c.estadoReportado||'').toUpperCase()==='VIGENTE'?'Vigente según matriz':
+          (c.estadoReportado||'Por verificar');
+        const clase=na?'not-applicable':inscrito||espera?'pending':'reported';
+        const eq=mapa.get(c.id);
+        const vinculo=eq?`<div class="cert-issuer"><span>${eq.equivalencia==='EQUIVALENCIA_PRELIMINAR'?'Relación preliminar':'Corresponde al requisito'}: ${escapeHtml(eq.nombre||'Curso DIMARZA')}</span></div>`:'';
+        return `<article class="cert-item library-course"><div class="cert-icon">${icon('calendar','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.nombre||'Curso sin nombre')}</h4><div class="cert-issuer"><span>Antapaccay · información reportada</span><span>·</span><span>Sin PDF en la matriz</span></div>${vinculo}<div class="cert-bottom"><div><span class="status-pill ${clase}">${escapeHtml(etiqueta)}</span> <span class="cert-date">${escapeHtml(fecha)}</span></div></div></div></article>`;
+      }).join('');
+      const titulo=`<div class="library-matrix-head"><h4>Cursos reportados por Antapaccay</h4><p><strong>${conFecha} con fecha informada</strong> · ${noAplican.length} no aplican${aplican.length-conFecha?' · '+(aplican.length-conFecha)+' sin fecha':''}. Estos registros no incluyen el PDF original y sus fechas <strong>no se interpretan automáticamente como vencimientos</strong>.</p></div>`;
+      panel.innerHTML=titulo + (base.length?`<div class="library-group-title">${base.length} cursos del perfil de capacitación</div>`+filas(base):'') +
+        (adicionales.length?`<div class="library-group-title">${adicionales.length} cursos adicionales informados</div>`+filas(adicionales):'') +
+        (noAplican.length?`<details class="library-na"><summary>Ver ${noAplican.length} curso${noAplican.length===1?'':'s'} marcado${noAplican.length===1?'':'s'} «No aplica»</summary>${filas(noAplican)}</details>`:'')+
+        (!filtered.length?'<div class="empty">No hay cursos reportados que coincidan con la búsqueda.</div>':'');
+    }
     function renderCertificados() {
       const subset=certificadosDeMina();
+      const listaMatriz=Array.isArray(matrizActual?.cursos)?matrizActual.cursos:[];
+      const minaMatriz=!minaActual || minaActual==='ANTAPACCAY';
+      const mostrarMatriz=minaMatriz && listaMatriz.length>0;
+      const cuentaCursos=listaMatriz.filter(c=>c.clase!=='NO_APLICA').length;
       $('numeroPrincipal').textContent=String(subset.length);
-      $('total').textContent=String(subset.length);
+      $('total').textContent=`${subset.length} PDF`;
+      $('totalCursos').textContent=`${cuentaCursos} cursos reportados`;
+      $('totalCursos').classList.toggle('hidden',!mostrarMatriz);
       renderVigencias();
       renderExpiry();
       renderPerfil();
       renderMatrizReportada();
       const term=$('busqueda').value.toLocaleLowerCase('es').trim();
-      const listado=subset.filter(c=>{
+      const listado=filtroActual==='reportados'?[]:subset.filter(c=>{
         const available=c.descargaPublica===true;
         if(filtroActual==='disponibles'&&!available)return false;
         if(filtroActual==='restringidos'&&available)return false;
         return !term || `${c.curso||''} ${c.emisor||''}`.toLocaleLowerCase('es').includes(term);
       });
-      $('listado').innerHTML=listado.length?listado.map(c=>{
+      const muestraReportados=(filtroActual==='todos'||filtroActual==='reportados') && mostrarMatriz;
+      let certificadosHTML=listado.map(c=>{
         const available=c.descargaPublica===true;
         const exp=daysToExpiry(c.vencimiento);
         let statusText=available?'PDF disponible':'Acceso restringido';
@@ -656,7 +725,11 @@
         else if(exp!==null&&exp<=30){statusText='Próximo a vencer';statusClass='warning';}
         const buttons=available?`<div class="cert-actions"><button class="btn-secondary" type="button" data-view="${escapeHtml(c.id)}">${icon('eye')}Ver PDF</button></div>`:'';
         return `<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.curso||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`;
-      }).join(''):`<div class="empty">${icon('file')}<div>${subset.length?'No hay certificados que coincidan con los filtros.':certificadosActuales.length?'No hay certificados asignados a esta unidad minera.':'Aún no hay certificados registrados para este DNI.'}</div></div>`;
+      }).join('');
+      if(listado.length && muestraReportados)certificadosHTML='<div class="library-group-title">Certificados con PDF</div>'+certificadosHTML;
+      if(!listado.length && !muestraReportados)certificadosHTML=`<div class="empty">${icon('file')}<div>${subset.length?'No hay certificados que coincidan con los filtros.':certificadosActuales.length?'No hay certificados asignados a esta unidad minera.':'Aún no hay certificados registrados para este DNI.'}</div></div>`;
+      $('listado').innerHTML=certificadosHTML;
+      renderCursosEnBiblioteca(term,mostrarMatriz);
     }
     function feedback(text,isError=false){$('msg').textContent=text;$('msg').classList.toggle('error',isError);}
     function cerrarVistaPdf() {
