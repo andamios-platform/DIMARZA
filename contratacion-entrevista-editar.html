@@ -40,12 +40,13 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .preguntas-grid .group{margin:0}
 .preguntas-grid textarea{min-height:95px}
 .campo-valoracion{margin-top:15px;padding-top:15px;border-top:1px solid #e3eaf1}
+#resultadoCampos{grid-template-columns:repeat(2,minmax(0,1fr))}
 .impacto{font-size:13px;line-height:1.55;padding:14px 16px;margin-top:17px;background:#eef6ff;border:1px solid #cadff6;border-radius:8px}
 .impacto.advertencia{background:#fff8e9;border-color:#f6d58e}
 .impacto.bloqueado{background:#fff0f0;border-color:#efb1b1}
 @media(max-width:790px){.preguntas-grid{grid-template-columns:1fr}}
 @media(max-width:790px){.grid{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.grid{grid-template-columns:1fr}.card{padding:16px}}
+@media(max-width:560px){.grid,#resultadoCampos{grid-template-columns:1fr}.card{padding:16px}}
 </style>
 </head>
 <body>
@@ -133,7 +134,6 @@ const DATOS_FIELDS=[
 ['gradoAcademico','Grado académico','text'],
 ['estudios','Estudios','text'],
 ['puestoPostula','Puesto al que postuló','readonly'],
-['puestoClasifica','Puesto en que clasifica','select',CARGOS],
 ['entrevistador','Entrevistador responsable','select',[]],
 ['disponibilidad','Disponibilidad','text'],
 ['tipoRemuneracion','Tipo de remuneración','select',['','VALOR HORA','MENSUAL']],
@@ -146,6 +146,7 @@ const RESULT_FIELDS=[
 ['promedio','Promedio calculado','readonly'],
 ['criterio','Criterio de clasificación','readonly'],
 ['resultado','Decisión del entrevistador','select',['APTO','NO APTO']],
+['puestoClasifica','Puesto en que clasifica','select',CARGOS],
 ['comentariosGenerales','Observaciones y comentarios generales','textarea']
 ];
 const FIELDS=[...DATOS_FIELDS,...SEG_FIELDS,...EXP_FIELDS,...TEC_FIELDS,...RESULT_FIELDS];
