@@ -564,15 +564,16 @@ function adjuntarPdfMatriz(indice){
  $('filtroCargo').value='';filtrarPersonal();
  if(esPersonal){$('trabajador').value=String(c.dni);seleccionarTrabajador();}
  else {$('dniHistorico').value=String(c.dni);$('nombreHistorico').value=c.nombre||'';}
+ $('tipoCertificacion').value='OTRO';
+ $('nivelLayher').value='';
+ $('bloqueNivelLayher').classList.add('hidden');
+ $('nivelLayher').required=false;
  $('minaRegistro').value='ANTAPACCAY';alternarCursoMatriz();
  const equivalente=BIB_EQUIV.get(c.id)?.cursoDimarza||'';
  $('cursoMatriz').value=CURSOS_PERFIL.some(x=>x.id===equivalente)?equivalente:'';
  $('curso').value=c.curso||'';$('curso').readOnly=true;
  ['emisor','emision','vencimiento','numero','pdf'].forEach(id=>$(id).value='');
  $('visibilidad').value='PRIVADO';
- $('tipoCertificacion').value='OTRO';
- $('nivelLayher').value='';
- actualizarTipoCertificacion();
  $('tipoCertificacion').disabled=true;
  ADJUNTANDO_MATRIZ={dni:String(c.dni),curso:c.curso||'',id:c.id};
  $('adjuntarMatrizInfo').textContent=(c.nombre||'')+' · DNI '+c.dni+' · '+c.curso;
