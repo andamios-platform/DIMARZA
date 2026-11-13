@@ -153,7 +153,15 @@
     .preview-head{padding:15px 19px;background:#f4f9f8;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
     .preview-title{min-width:0;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:760;overflow-wrap:anywhere}
     .preview-close{background:#fff;border:1px solid #d6e4e5;border-radius:8px;padding:8px 12px;color:#304c59;font-size:11px;font-weight:750}
+    .pdf-panel{overflow:hidden;min-width:0}
     .pdf-panel iframe{display:block;width:100%;height:min(78vh,850px);min-height:450px;border:0;background:#dce4e9}
+    .pdf-pages{display:flex;flex-direction:column;align-items:center;gap:14px;padding:13px;background:#e8eef2;min-width:0}
+    .pdf-pages canvas{display:block;max-width:100%;height:auto!important;background:#fff;box-shadow:0 2px 10px rgba(25,48,64,.17);border-radius:3px}
+    .pdf-view-status{padding:13px 16px;text-align:center;font-size:12px;font-weight:700;color:#425e6e;background:#f0f6f8;line-height:1.5}
+    .pdf-view-status.error{color:#a93030;background:#fff0ef}
+    .pdf-actions-bar{display:flex;flex-wrap:wrap;gap:10px;padding:10px 15px;align-items:center;background:#fff;border-bottom:1px solid #e3eaef}
+    .pdf-actions-bar a{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;font-size:12px;font-weight:750;color:#086b67;background:#eaf7f4;border:1px solid #bfdfd9;border-radius:8px;padding:9px 12px;min-height:38px}
+    .pdf-actions-bar a:hover{background:#d7f1eb}
     .pdf-help{padding:10px 18px;margin:0;color:#8291a0;font-size:11px}
     .footer{text-align:center;padding:0 20px 30px;color:#91a2b0;font-size:11px}
     @media(min-width:801px){body.has-results .hero-content{display:none}body.has-results .topnav{border-bottom:0}body.has-results .site-hero{min-height:82px}}
@@ -352,8 +360,14 @@
       </div>
       <section class="panel pdf-panel hidden" id="visorPdf" aria-label="Vista previa del PDF">
         <div class="preview-head"><div class="preview-title"><svg class="icon"><use href="#i-file"/></svg><span id="nombrePdf">Certificado PDF</span></div><button class="preview-close" id="cerrarPdf" type="button"><svg class="icon"><use href="#i-x"/></svg> Cerrar visor</button></div>
+        <div class="pdf-actions-bar">
+          <a id="abrirPdfExterno" target="_blank" rel="noopener noreferrer" href="#" aria-label="Abrir el PDF con el visor del dispositivo">Abrir en otra aplicación</a>
+          <a id="descargarPdf" href="#" download="certificado.pdf" aria-label="Guardar archivo PDF en el dispositivo">Guardar PDF</a>
+        </div>
+        <div class="pdf-view-status hidden" id="estadoPdf" role="status" aria-live="polite"></div>
+        <div class="pdf-pages hidden" id="paginasPdf" aria-label="Páginas del certificado"></div>
         <iframe id="marcoPdf" title="Vista previa del certificado PDF" loading="lazy"></iframe>
-        <p class="pdf-help">Visualización en línea para consulta. El documento permanece sujeto a la configuración del visor de tu navegador.</p>
+        <p class="pdf-help">En celular, las páginas se muestran directamente en esta pantalla. Si el visor no funciona, utiliza Abrir en otra aplicación o Guardar PDF.</p>
       </section>
     </section>
     <div class="section-note" id="landingNote">DIMARZA · Gestión documental de capacitaciones</div>
@@ -374,6 +388,9 @@
     let filtroActual = 'todos';
     let minaActual = '';
     let urlVistaPdf = null;
+    let pdfJsPromise = null;
+    let documentoPdfActual = null;
+    let turnoVisorPdf = 0;
     let getQueue = Promise.resolve();
     // El DNI se conserva solo durante esta pestaña; el registro se consulta siempre a Apps Script.
     const DNI_TAB_KEY = 'dimarzaAcreditacionesDniTab';
@@ -756,9 +773,83 @@
     }
     function feedback(text,isError=false){$('msg').textContent=text;$('msg').classList.toggle('error',isError);}
     function cerrarVistaPdf() {
+      turnoVisorPdf++;
       $('marcoPdf').src='about:blank';
+      $('marcoPdf').classList.remove('hidden');
+      $('paginasPdf').replaceChildren();
+      $('paginasPdf').classList.add('hidden');
+      $('estadoPdf').textContent='';
+      $('estadoPdf').className='pdf-view-status hidden';
       $('visorPdf').classList.add('hidden');
+      $('abrirPdfExterno').removeAttribute('href');
+      $('descargarPdf').removeAttribute('href');
+      if(documentoPdfActual){
+        const viejo=documentoPdfActual;
+        documentoPdfActual=null;
+        try{Promise.resolve(viejo.destroy()).catch(()=>{});}catch(_){}
+      }
       if(urlVistaPdf){URL.revokeObjectURL(urlVistaPdf);urlVistaPdf=null;}
+    }
+    function visorEnMovil(){
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        (navigator.userAgentData && navigator.userAgentData.mobile===true) ||
+        (window.innerWidth <= 700);
+    }
+    function estadoRenderPdf(mensaje,error=false){
+      const el=$('estadoPdf');
+      el.textContent=mensaje;
+      el.className='pdf-view-status'+(error?' error':'');
+    }
+    async function bibliotecaPdfJs(){
+      if(window.pdfjsLib)return window.pdfjsLib;
+      if(!pdfJsPromise){
+        pdfJsPromise=new Promise((resolve,reject)=>{
+          const script=document.createElement('script');
+          script.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+          script.async=true;
+          script.onload=()=>{
+            if(!window.pdfjsLib){reject(Error('No se pudo iniciar el visor móvil de PDF.'));return;}
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            resolve(window.pdfjsLib);
+          };
+          script.onerror=()=>reject(Error('No se pudo cargar el visor móvil. Usa Abrir en otra aplicación.'));
+          document.head.appendChild(script);
+        }).catch(err=>{pdfJsPromise=null;throw err;});
+      }
+      return pdfJsPromise;
+    }
+    async function mostrarPaginasPdf(blob,turno){
+      estadoRenderPdf('Preparando las páginas del certificado…');
+      const lib=await bibliotecaPdfJs();
+      if(turno!==turnoVisorPdf)return;
+      const datos=new Uint8Array(await blob.arrayBuffer());
+      if(turno!==turnoVisorPdf)return;
+      const documento=await lib.getDocument({data:datos}).promise;
+      if(turno!==turnoVisorPdf){await documento.destroy();return;}
+      documentoPdfActual=documento;
+      const contenedor=$('paginasPdf');
+      for(let numero=1;numero<=documento.numPages;numero++){
+        if(turno!==turnoVisorPdf)return;
+        estadoRenderPdf('Mostrando página '+numero+' de '+documento.numPages+'…');
+        const pagina=await documento.getPage(numero);
+        const original=pagina.getViewport({scale:1});
+        const anchoDisponible=Math.max(180,Math.min(900,contenedor.clientWidth-28));
+        const escala=anchoDisponible/original.width;
+        const vista=pagina.getViewport({scale:escala});
+        const dpi=Math.min(2,Math.max(1,window.devicePixelRatio||1));
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.ceil(vista.width*dpi);
+        canvas.height=Math.ceil(vista.height*dpi);
+        canvas.style.width=Math.floor(vista.width)+'px';
+        canvas.style.height=Math.floor(vista.height)+'px';
+        canvas.setAttribute('role','img');
+        canvas.setAttribute('aria-label','Página '+numero+' de '+documento.numPages);
+        const ctx=canvas.getContext('2d',{alpha:false});
+        if(!ctx)throw Error('No se pudo dibujar el certificado en este dispositivo.');
+        contenedor.appendChild(canvas);
+        await pagina.render({canvasContext:ctx,viewport:vista,transform:[dpi,0,0,dpi,0,0]}).promise;
+      }
+      if(turno===turnoVisorPdf)estadoRenderPdf(documento.numPages+' página(s) listas para visualizar.');
     }
     async function obtenerBlobPublico(dni,id,onProgress) {
       const res=await qget({action:'pdfPublicoInfo',dni,id});
@@ -818,15 +909,34 @@
           btn.textContent='Cargando '+(avance||hechas+'/'+total)+'…';
           feedback('Recuperando certificado: '+hechas+' de '+total+' partes'+(avance?' · '+avance:''));
         });
-        const url=URL.createObjectURL(pdf.blob);
         cerrarVistaPdf();
-        urlVistaPdf=url;$('nombrePdf').textContent=pdf.filename;
-        // Desactiva visualmente la barra nativa si el navegador respeta el parámetro.
-        // No constituye protección anticopia, ya que todo PDF visualizado llega al cliente.
-        $('marcoPdf').src=url+'#toolbar=0&navpanes=0';
+        const url=URL.createObjectURL(pdf.blob);
+        urlVistaPdf=url;
+        $('nombrePdf').textContent=pdf.filename;
+        $('abrirPdfExterno').href=url;
+        $('descargarPdf').href=url;
+        $('descargarPdf').download=pdf.filename;
         $('visorPdf').classList.remove('hidden');
-        $('visorPdf').scrollIntoView({behavior:'smooth',block:'start'});
-        feedback('Certificado abierto en modo consulta.');
+        const turno=turnoVisorPdf;
+        if(visorEnMovil()){
+          $('marcoPdf').classList.add('hidden');
+          $('paginasPdf').classList.remove('hidden');
+          $('visorPdf').scrollIntoView({behavior:'smooth',block:'start'});
+          try{
+            await mostrarPaginasPdf(pdf.blob,turno);
+            if(turno===turnoVisorPdf)feedback('Certificado listo para visualizar en el celular.');
+          }catch(error){
+            if(turno===turnoVisorPdf){
+              estadoRenderPdf('El visor de este dispositivo no pudo mostrar el certificado: '+message(error)+'. Puedes usar Abrir en otra aplicación o Guardar PDF.',true);
+              feedback('Usa Abrir en otra aplicación o Guardar PDF para consultar este certificado.',true);
+            }
+          }
+        }else{
+          // El visor integrado nativo se conserva en computadoras.
+          $('marcoPdf').src=url+'#toolbar=0&navpanes=0';
+          $('visorPdf').scrollIntoView({behavior:'smooth',block:'start'});
+          feedback('Certificado abierto en modo consulta.');
+        }
       }catch(err){
         feedback(message(err),true);
         const aviso=document.createElement('small');
