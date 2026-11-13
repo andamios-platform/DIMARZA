@@ -651,9 +651,11 @@ function render(){
  const cargo=$('filtroBibliotecaCargo').value;
  const mina=$('filtroBibliotecaMina').value;
  const personalPorDni=new Map(PERSONAL.map(p=>[String(p.dni),String(p.cargo||'Sin cargo').trim()]));
- const visibles=CERTS.filter(c=>(!!$('mostrarHistoricos').checked||!c.historico) && (!cargo||personalPorDni.get(String(c.dni))===cargo) &&
-   (!mina||(c.mina||'SIN ASIGNAR')===mina) &&
-   [c.dni,c.nombre,c.curso,c.emisor,c.numero,c.mina].join(' ').toUpperCase().includes(q));
+ const mostrarHistorial=$('mostrarHistoricos').checked;
+ const base=CERTS.filter(c=>(mostrarHistorial||!c.historico)&&(!cargo||personalPorDni.get(String(c.dni))===cargo)&&
+   (!mina||(c.mina||'SIN ASIGNAR')===mina));
+ const visibles=(mostrarHistorial?base:seleccionarNivelLayherVisible(base)).filter(c=>
+   [c.dni,c.nombre,c.curso,c.emisor,c.numero,c.mina,nombreCursoCertificado(c)].join(' ').toUpperCase().includes(q));
  const matrizFiltrada=BIB_MATRIZ.filter(c=>(!!$('bibMostrarNA').checked||c.clase!=='NO_APLICA') &&
    (!cargo||personalPorDni.get(String(c.dni))===cargo) &&
    (!mina||mina==='ANTAPACCAY') &&
@@ -673,10 +675,10 @@ function render(){
    const minaNombre=nombreMina(c.mina);
    const matrizExacta=c.mina==='ANTAPACCAY'?BIB_MATRIZ.find(m=>claveCursoBiblioteca(m.dni,m.curso)===claveCursoBiblioteca(c.dni,c.curso)):null;
    const subtituloMatriz=matrizExacta?`<span class="subline">Matriz Antapaccay · ${esc(matrizExacta.estado||'Sin estado')} · Reportado: ${esc(matrizExacta.fecha?formatearFecha(matrizExacta.fecha):matrizExacta.valor||'Sin fecha')}</span>`:'';
-   const cursoMatriz=c.mina==='ANTAPACCAY'?`<select aria-label="Vincular a curso de matriz Antapaccay" data-matriz-id="${esc(c.id)}" class="table-select">${opcionesCursosPerfil(c.idCurso||'')}</select><button class="small-action" data-cambiar-matriz="${esc(c.id)}">Guardar curso</button>`:'<span class="subline">No aplica</span>';
+   const cursoMatriz=c.mina==='ANTAPACCAY'&&!nivelCertificacionLayher(c)?`<select aria-label="Vincular a curso de matriz Antapaccay" data-matriz-id="${esc(c.id)}" class="table-select">${opcionesCursosPerfil(c.idCurso||'')}</select><button class="small-action" data-cambiar-matriz="${esc(c.id)}">Guardar curso</button>`:`<span class="subline">${nivelCertificacionLayher(c)?'Layher opcional · no afecta matriz':'No aplica'}</span>`;
    return `<tr class="${c.historico?'ren-row-old':''}">
      <td data-label="Titular" class="td-person"><strong>${esc(c.nombre)}</strong><span class="subline">DNI · ${esc(c.dni)}</span></td>
-     <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong>
+     <td data-label="Capacitación" class="td-course"><strong>${esc(nombreCursoCertificado(c))}</strong>${nivelCertificacionLayher(c)?`<span class="layher-label">NIVEL ${esc(nivelCertificacionLayher(c))} · OPCIONAL</span><span class="subline">Nombre original: ${esc(c.curso)}</span>`:''}
        <span class="ren-badge">PDF registrado</span>
        ${c.historico?`<span class="ren-badge historico">Histórico · reemplazado</span><span class="subline">Renovado por: ${esc(c.renovadoPor||'—')}</span>`:c.renovacionDe?`<span class="ren-badge">✓ Renovación actual</span>`:''}
        <span class="subline">${esc(c.emisor)}</span><span class="subline">Emisión: ${esc(formatearFecha(c.emision))} · ${c.vencimiento?'Vence: '+esc(formatearFecha(c.vencimiento)):'Sin vencimiento registrado'}</span>${subtituloMatriz}<div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(c.id)}" aria-label="Ver certificado PDF de ${esc(c.curso)}">◉ Ver PDF</button><button type="button" class="btn-download" data-cert="${esc(c.id)}" aria-label="Descargar certificado PDF de ${esc(c.curso)}">↧ Descargar</button>${!c.historico?`<button type="button" class="ren-btn" data-renovar-cert="${esc(c.id)}" aria-label="Renovar certificado de ${esc(c.curso)}">↻ Renovar</button>`:''}</div></td>
@@ -726,12 +728,16 @@ function iniciarRenovacionCertificado(id){
  if(existe){ $('trabajador').value=c.dni;seleccionarTrabajador(); }
  else { $('dniHistorico').value=c.dni;$('nombreHistorico').value=c.nombre; }
  $('curso').value=c.curso;
+ const nivelExistente=nivelCertificacionLayher(c);
+ $('tipoCertificacion').value=nivelExistente?'LAYHER':'OTRO';
+ $('nivelLayher').value=nivelExistente||'';
  $('emisor').value=c.emisor;
  $('numero').value='';
  $('emision').value=''; $('vencimiento').value=''; $('pdf').value='';
  $('visibilidad').value=c.visibilidad;
  alternarCursoMatriz();
- if(c.mina==='ANTAPACCAY')$('cursoMatriz').value=c.idCurso||'';
+ if(c.mina==='ANTAPACCAY'&&!nivelExistente)$('cursoMatriz').value=c.idCurso||'';
+ actualizarTipoCertificacion();
  $('renovacionInfo').textContent=c.nombre+' · '+c.curso+' · '+nombreMina(c.mina)+' · ID '+c.id+'. El anterior se conservará en el historial.';
  $('renovacionBanner').classList.remove('hidden');
  $('btnGuardar').textContent='↻ Guardar renovación';
@@ -882,7 +888,13 @@ async function guardar(){
    }
    const unidadMinera=$('minaRegistro').value;
    if(!MINAS.includes(unidadMinera))throw Error('Selecciona una unidad minera o Certificados generales.');
-   const d={dni,renuevaId:$('renuevaId').value,unidadMinera,idCurso:unidadMinera==='ANTAPACCAY'?$('cursoMatriz').value:'',nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
+   const layher=$('tipoCertificacion').value==='LAYHER';
+   if(layher&&!LAYHER_NIVELES.includes($('nivelLayher').value))throw Error('Selecciona el nivel de certificación Layher.');
+   if(layher&&$('curso').value!=='CERTIFICACIÓN LAYHER - NIVEL '+$('nivelLayher').value)throw Error('El nombre Layher debe coincidir con el nivel seleccionado.');
+   const anterior=CERTS.find(c=>c.id===$('renuevaId').value);
+   if(layher&&anterior&&nivelCertificacionLayher(anterior)!==$('nivelLayher').value)throw Error('La renovación debe conservar el mismo nivel. Para registrar otro nivel, cancela Renovar y crea un certificado nuevo.');
+   if(layher&&!anterior&&CERTS.some(c=>!c.historico&&String(c.dni)===dni&&c.mina===unidadMinera&&nivelCertificacionLayher(c)===$('nivelLayher').value))throw Error('Ya existe un certificado Layher activo de ese nivel. Utiliza Renovar desde Biblioteca.');
+   const d={dni,renuevaId:$('renuevaId').value,unidadMinera,idCurso:!layher&&unidadMinera==='ANTAPACCAY'?$('cursoMatriz').value:'',nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
    if(d.visibilidad==='PUBLICO' && !confirm('¿Publicar este certificado? Cualquier persona que conozca el DNI podrá visualizarlo; la visualización no impide guardar una copia. No publiques documentos sensibles.')) {return;}
    if(d.renuevaId && !confirm('¿Guardar esta renovación? El certificado anterior permanecerá en el historial y el nuevo será el principal.'))return;
    $('uploadMsg').textContent='Guardando PDF en Drive…';
