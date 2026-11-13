@@ -266,7 +266,7 @@
 <div class="field span8"><div class="hint" style="padding-top:32px">El cargo solo ayuda a encontrar al trabajador. No modifica sus datos en DATA DE PERSONAL.</div></div></div></div>
 <label class="mini-check"><input type="checkbox" id="esHistorico" onchange="alternarHistorico()"> Registrar personal histórico (fuera de DATA DE PERSONAL)</label>
 <div id="bloqueHistorico" class="subsection hidden"><div class="subhead"><span>↳</span> Datos del trabajador histórico</div><div class="grid"><div class="field span4"><label for="dniHistorico">DNI histórico</label><input id="dniHistorico" maxlength="8" inputmode="numeric" placeholder="8 dígitos"></div><div class="field span8"><label for="nombreHistorico">Apellidos y nombres</label><input id="nombreHistorico" placeholder="Nombre completo"></div></div></div>
-<div class="subsection"><div class="subhead"><span>02</span> Información del certificado</div><div class="grid"><div class="field span4"><label for="tipoCertificacion">Tipo de certificado</label><select id="tipoCertificacion" onchange="actualizarTipoCertificacion()"><option value="OTRO">Curso o certificado general</option><option value="LAYHER">Certificación Layher (opcional)</option></select><div class="hint">Los niveles Layher se seleccionan aquí, no en el desplegable de la matriz Antapaccay.</div></div>
+<div class="subsection"><div class="subhead"><span>02</span> Información del certificado</div><div class="grid"><div class="field span4"><label for="tipoCertificacion">Tipo de certificado</label><select id="tipoCertificacion" onchange="actualizarTipoCertificacion()"><option value="OTRO">Curso o certificado general</option><option value="LAYHER">Certificación Layher (opcional)</option></select><div class="hint">Los niveles Layher se seleccionan aquí, no en el desplegable de la matriz Antapaccay.</div><button type="button" id="btnTipoLayherMatriz" class="bib-attach-btn hidden" onclick="pasarRegistroALayher()">¿Es un PDF Layher? Cambiar a Layher</button></div>
 <div class="field span4 hidden" id="bloqueNivelLayher"><label for="nivelLayher">Nivel Layher</label><select id="nivelLayher" onchange="actualizarTipoCertificacion()"><option value="">Seleccionar nivel</option><option value="OFICIAL">OFICIAL</option><option value="OPERARIO">OPERARIO</option><option value="CAPATAZ">CAPATAZ</option><option value="SUPERVISOR">SUPERVISOR</option></select><div class="hint">Opcional; no afecta el porcentaje de acreditación Antapaccay.</div></div>
 <div class="field span8"><label for="curso">Curso o capacitación</label><input id="curso" placeholder="Ej. Persona competente para trabajos en altura"></div><div class="field span6 hidden" id="bloqueCursoMatriz"><label for="cursoMatriz">Curso de la matriz Antapaccay 2026 (opcional)</label><select id="cursoMatriz"><option value="">No vincular con la matriz</option></select><div class="hint">Relaciona el certificado con un requisito obligatorio validado por el RESIDENTE.</div></div><div class="field span4"><label for="visibilidad">Acceso al PDF</label><select id="visibilidad"><option value="PRIVADO">Privado / restringido</option><option value="PUBLICO">Público autorizado · DNI</option></select></div><div class="field span4"><label for="emisor">Entidad emisora</label><input id="emisor" placeholder="Ej. CFC Group / MSA / Layher"></div><div class="field span4"><label for="emision">Fecha de emisión</label><input id="emision" type="date"></div><div class="field span4"><label for="vencimiento">Fecha de vencimiento (si consta)</label><input id="vencimiento" type="date"></div><div class="field span6"><label for="numero">N.º de certificado (opcional)</label><input id="numero" placeholder="Código del documento"></div><div class="field span6"><label for="pdf">Documento PDF original</label><input id="pdf" type="file" accept="application/pdf,.pdf"><div class="hint">Máximo 4 MB · Se guarda en Drive privado</div></div></div></div>
 <div class="upload-footer"><div class="tiny-note"><span>🔒</span><span>Los certificados son <strong>privados por defecto</strong>. Usa «Público autorizado» solo para capacitación divulgable: el trabajador podrá verla por DNI. La visualización en navegador no impide guardar o copiar archivos. No publiques información médica o sensible.</span></div><button id="btnGuardar" class="green" onclick="guardar()">＋ Guardar certificado</button></div><p id="uploadMsg" class="feedback" role="status"></p></div></section>
@@ -555,12 +555,12 @@ function cancelarAdjuntoMatriz(){
  ADJUNTANDO_MATRIZ=null;
  $('adjuntarMatrizBanner').classList.add('hidden');
  $('tipoCertificacion').disabled=false;
+ $('btnTipoLayherMatriz').classList.add('hidden');
  $('curso').readOnly=$('tipoCertificacion').value==='LAYHER';
 }
 function pasarRegistroALayher(){
  // Convertir el registro en curso independiente sin perder datos introducidos ni PDF elegido.
  // No se cambia DNI, minera, emisor, fechas, número ni el archivo seleccionado.
- const nivelAnterior=nivelCertificacionLayher({curso:$('curso').value,emisor:$('emisor').value});
  cancelarAdjuntoMatriz();
  cancelarRenovacion();
  $('tipoCertificacion').value='LAYHER';
@@ -592,6 +592,7 @@ function adjuntarPdfMatriz(indice){
  ['emisor','emision','vencimiento','numero','pdf'].forEach(id=>$(id).value='');
  $('visibilidad').value='PRIVADO';
  $('tipoCertificacion').disabled=true;
+ $('btnTipoLayherMatriz').classList.remove('hidden');
  ADJUNTANDO_MATRIZ={dni:String(c.dni),curso:c.curso||'',id:c.id};
  $('adjuntarMatrizInfo').textContent=(c.nombre||'')+' · DNI '+c.dni+' · '+c.curso;
  $('adjuntarMatrizBanner').classList.remove('hidden');
