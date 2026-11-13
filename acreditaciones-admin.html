@@ -697,7 +697,7 @@ function render(){
    const pendiente=String(c.estado||'').toUpperCase()==='PROGRAMAR';
    const est=noAplica?'NO APLICA':c.estado||'SIN REGISTRO';
    const tipo=rel?'Requisito del perfil · relación'+(rel.equivalencia==='EQUIVALENCIA_PRELIMINAR'?' preliminar':''):'Curso adicional reportado';
-   const relacionado=rel?CERTS.find(x=>!x.historico&&String(x.dni)===String(c.dni)&&x.mina==='ANTAPACCAY'&&x.idCurso===rel.cursoDimarza):null;
+   const relacionado=rel?CERTS.find(x=>!x.historico&&String(x.dni)===String(c.dni)&&x.mina==='ANTAPACCAY'&&x.idCurso===rel.cursoDimarza&&!nivelCertificacionLayher(x)):null;
    const acceso=relacionado?`<span class="bib-estado">PDF relacionado en DIMARZA</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(relacionado.id)}">◉ Ver PDF vinculado</button></div><span class="subline">La matriz original no contiene PDF; revisar equivalencia del certificado.</span>`:
      (noAplica?'<span class="bib-sin-pdf">No aplica</span>':
      `<span class="bib-sin-pdf">Sin PDF adjunto</span><span class="subline">Registro informativo de la matriz</span><button type="button" class="bib-attach-btn" data-adjuntar-pdf="${BIB_MATRIZ.indexOf(c)}">📎 Adjuntar PDF</button>`);
