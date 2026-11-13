@@ -87,7 +87,7 @@
 .op-summary .op-note{font-size:11px;line-height:1.5;margin:12px 0 0;color:#647e8b}
 .op-summary .op-error{color:#ad3c35}
 @media(max-width:900px){.op-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:620px){.op-summary{padding:17px 15px}.op-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.op-metric{padding:11px}.op-metric strong{font-size:23px}.op-summary table{min-width:735px}}
+@media(max-width:620px){.op-summary{padding:17px 15px}.op-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.op-metric{padding:11px}.op-metric strong{font-size:23px}.op-summary table{min-width:850px}}
 
 /* ==========================================================
    NAVEGACION POR PESTAÑAS · ADMINISTRACION DIMARZA
@@ -203,23 +203,23 @@
 
   <section class="op-summary" aria-label="Resumen operativo documental por mina" id="opResumen">
     <div class="op-head">
-      <div><h2>Resumen operativo por mina</h2><p>Dotación asignada y avance documental para planificar servicios.</p></div>
+      <div><h2>Resumen operativo por mina</h2><p>Capacitaciones reportadas por la mina, con respaldo PDF independiente.</p></div>
       <span class="op-updated" id="opFecha" role="status" aria-live="polite">Cargando datos…</span>
     </div>
     <div class="op-metrics" id="opMetricas">
-      <div class="op-metric"><strong id="opAsignados">—</strong><span>Trabajadores asignados (únicos)</span></div>
-      <div class="op-metric complete"><strong id="opCompletos">—</strong><span>Carpeta documental completa</span></div>
-      <div class="op-metric pending"><strong id="opPendientes">—</strong><span>Con documentos pendientes</span></div>
-      <div class="op-metric expired"><strong id="opVencidos">—</strong><span>Con documentos vencidos</span></div>
-      <div class="op-metric"><strong id="opRevisar">—</strong><span>Por revisar o sin matriz</span></div>
+      <div class="op-metric"><strong id="opAsignados">—</strong><span>Trabajadores en seguimiento (únicos)</span></div>
+      <div class="op-metric complete"><strong id="opCompletos">—</strong><span>100 % de cursos reportados</span></div>
+      <div class="op-metric pending"><strong id="opPendientes">—</strong><span>Capacitación en proceso</span></div>
+      <div class="op-metric expired"><strong id="opVencidos">—</strong><span>Cursos vencidos según matriz</span></div>
+      <div class="op-metric"><strong id="opRevisar">—</strong><span>Sin matriz de cursos reportados</span></div>
     </div>
     <div class="op-table-wrap">
       <table aria-label="Preparación documental por unidad minera">
-        <thead><tr><th>Unidad minera</th><th>Asignados</th><th>Completos</th><th>Pendientes</th><th>Vencidos</th><th>Por revisar / sin matriz</th><th>% documental</th><th>Trabajadores</th></tr></thead>
-        <tbody id="opTabla"><tr><td colspan="8">Preparando resumen de dotación…</td></tr></tbody>
+        <thead><tr><th>Unidad minera</th><th>Registrados</th><th>100 % cursos</th><th>En proceso</th><th>Vencidos</th><th>Sin matriz</th><th>% capacitación</th><th>Respaldo PDF</th><th>Trabajadores</th></tr></thead>
+        <tbody id="opTabla"><tr><td colspan="9">Preparando resumen de capacitación…</td></tr></tbody>
       </table>
     </div>
-    <p class="op-note" id="opNota">El cumplimiento documental no confirma acreditación oficial, habilitación de ingreso ni disponibilidad para el servicio. Solo cuenta asignaciones confirmadas por mina; un mismo trabajador puede figurar en varias minas.</p>
+    <p class="op-note" id="opNota">La capacitación reportada por la minera cuenta aunque no haya PDF en DIMARZA. La habilitación de ingreso y la disponibilidad para servicios se gestionan aparte.</p>
   </section>
 
 <section class="card ac-tabpanel" id="consolidado-general" role="tabpanel" aria-labelledby="ac-tab-consolidado">
