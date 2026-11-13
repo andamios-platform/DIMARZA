@@ -777,6 +777,7 @@
       if(!btn||!DNI_CONSULTADO)return;
       const id=btn.dataset.view;
       if(!id)return;
+      btn.parentElement.querySelector('.cert-error')?.remove();
       const contenidoOriginal=btn.innerHTML;
       btn.disabled=true;
       btn.textContent='Cargando PDF…';
@@ -796,7 +797,14 @@
         $('visorPdf').classList.remove('hidden');
         $('visorPdf').scrollIntoView({behavior:'smooth',block:'start'});
         feedback('Certificado abierto en modo consulta.');
-      }catch(err){feedback(message(err),true);}finally{btn.disabled=false;btn.innerHTML=contenidoOriginal;}
+      }catch(err){
+        feedback(message(err),true);
+        const aviso=document.createElement('small');
+        aviso.className='cert-error';
+        aviso.setAttribute('role','alert');
+        aviso.textContent='No se pudo abrir el PDF: '+message(err);
+        btn.parentElement.appendChild(aviso);
+      }finally{btn.disabled=false;btn.innerHTML=contenidoOriginal;}
     }
     function salir() {
       cerrarVistaPdf();certificadosActuales=[];perfilActual=null;matrizActual=null;vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
