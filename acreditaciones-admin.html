@@ -991,7 +991,9 @@ async function guardar(){
 function opEstadoDocumental(r){
   // Basado en el consolidado protegido por sesión RESIDENTE, no en la cantidad de PDF subidos.
   // El perfil (y sus requisitos) solo está configurado actualmente para algunas minas.
-  if(!r.asignado||r.historico||r.mina==='SIN ASIGNAR')return 'EXCLUIDO';
+  if(!r.asignado||r.mina==='SIN ASIGNAR')return 'EXCLUIDO';
+  // Una asignación con persona fuera del maestro no debe omitirse: se cuenta como por revisar.
+  if(r.historico)return 'REVISAR';
   const contrato=String(r.estadoPersonal||'').toUpperCase().trim();
   if(contrato&&!['VIGENTE','PRONTO A VENCERSE'].includes(contrato))return 'REVISAR';
   if(r.situacion==='VENCIDOS')return 'VENCIDOS';
@@ -1011,7 +1013,7 @@ function opEstadoDocumental(r){
 function calcularResumenOperativo(registros){
   const unicos=new Map();
   for(const r of registros||[]){
-    if(!r.asignado||r.historico||!r.dni||!r.mina||r.mina==='SIN ASIGNAR')continue;
+    if(!r.asignado||!r.dni||!r.mina||r.mina==='SIN ASIGNAR')continue;
     const k=String(r.dni)+'|'+String(r.mina);
     if(!unicos.has(k))unicos.set(k,r);
   }
@@ -1051,7 +1053,7 @@ function renderResumenOperativo(actualizado=''){
   }).join('')||'<tr><td colspan="8">No hay asignaciones confirmadas por mina. Utiliza Consolidado para registrar una.</td></tr>';
   $('opNota').textContent='Solo asignaciones confirmadas: '+t.relaciones+' relaciones trabajador–mina, '+t.asignados+' personas distintas. '+
     (t.sinMina?t.sinMina+' trabajadores sin mina asignada. ':'')+
-    '“Completo” exige cursos con PDF y vigencia declarada, EMO vigente y permiso Chile cuando aplica; no acredita habilitación oficial ni disponibilidad real para un servicio. Las minas sin matriz de requisitos requieren revisión.';
+    '“Completo” exige cursos con PDF y vigencia declarada, EMO vigente y permiso Chile cuando aplica; no acredita habilitación oficial ni disponibilidad real para un servicio. Los asignados fuera de DATA DE PERSONAL se marcan por revisar. La fuente Consolidado aún no incluye asignaciones de personas sin ficha ni certificado.';
 }
 document.addEventListener('click',ev=>{
   const boton=ev.target.closest('button[data-op-mina]');
