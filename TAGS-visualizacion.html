@@ -3141,7 +3141,7 @@ let edicionesGantt={};
 async function verificarResidenteGantt(){
  const token=localStorage.getItem('dimarzaTokenVisualizacion')||'';
  if(!/^[0-9a-f-]{36}$/i.test(token))return false;
- const id=Array.from(crypto.getRandomValues(new Uint8Array(24)),n=>n.toString(16).padStart(2,'0')).join('');
+ const id=Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');
  await fetch(API_GANTT_SESION,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
    body:JSON.stringify({id,method:'sesionVisualizacion',args:[token]}),redirect:'follow',referrerPolicy:'no-referrer'});
  const inicio=Date.now();
