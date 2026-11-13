@@ -988,72 +988,109 @@ async function guardar(){
 
 
 // === RESUMEN OPERATIVO DOCUMENTAL POR MINA ===
-function opEstadoDocumental(r){
-  // Basado en el consolidado protegido por sesión RESIDENTE, no en la cantidad de PDF subidos.
-  // El perfil (y sus requisitos) solo está configurado actualmente para algunas minas.
-  if(!r.asignado||r.mina==='SIN ASIGNAR')return 'EXCLUIDO';
-  // Una asignación con persona fuera del maestro no debe omitirse: se cuenta como por revisar.
-  if(r.historico)return 'REVISAR';
-  const contrato=String(r.estadoPersonal||'').toUpperCase().trim();
-  if(contrato&&!['VIGENTE','PRONTO A VENCERSE'].includes(contrato))return 'REVISAR';
-  if(r.situacion==='VENCIDOS')return 'VENCIDOS';
-  // La falta de EMO/permiso o certificados pendientes se cuenta como pendiente
-  // incluso cuando la mina todavía no tiene perfil de cursos configurado.
-  if(r.situacion==='PENDIENTES')return 'PENDIENTES';
-  const p=r.perfil;
-  if(!p||!Number(p.total))return 'REVISAR';
-  const cursosCompletos=Number(p.completos)===Number(p.total)&&Number(p.pendientes)===0 &&
-      Number(p.vencidos)===0&&Number(p.sinFecha)===0;
-  const emoValido=['VIGENTE','ALERTA','URGENTE'].includes(r.emo?.estado);
-  const permisoValido=['NO_APLICA','VIGENTE','ALERTA','URGENTE'].includes(r.permiso?.estado);
-  if(cursosCompletos&&emoValido&&permisoValido&&r.situacion==='PERFIL_COMPLETO')return 'COMPLETO';
-  if(r.situacion==='PENDIENTES'||!cursosCompletos||r.emo?.estado==='SIN_REGISTRO'||r.permiso?.estado==='SIN_REGISTRO')return 'PENDIENTES';
-  return 'REVISAR';
+// La capacitación reportada por Antapaccay tiene prioridad aunque no haya PDF.
+const OP_ANT_BASE=['MAT-01','MAT-02','MAT-03','MAT-04','MAT-05','MAT-06','MAT-09','MAT-10','MAT-11'];
+function opCumplimientoMatrizReportada(){
+ const porDni=new Map();
+ for(const c of BIB_MATRIZ){
+  const dni=String(c.dni||'').trim(),id=String(c.id||'').trim().toUpperCase();
+  if(!/^\d{8}$/.test(dni)||!OP_ANT_BASE.includes(id))continue;
+  if(!porDni.has(dni))porDni.set(dni,new Map());
+  porDni.get(dni).set(id,c);
+ }
+ const out=new Map();
+ for(const [dni,cursos] of porDni){
+  let completos=0,vencidos=0;const detalle=[];
+  for(const id of OP_ANT_BASE){
+   const item=cursos.get(id);
+   const estado=String(item?.estado||'').trim().toUpperCase();
+   const valor=String(item?.valor||'').trim().toUpperCase();
+   const valido=estado==='VIGENTE'&&!!item?.fecha&&valor!=='INSCRITO'&&valor!=='PROGRAMAR';
+   const vencido=estado==='VENCIDO';
+   if(valido)completos++;
+   if(vencido)vencidos++;
+   detalle.push({id,estado:vencido?'VENCIDO_REPORTADO':valido?'REPORTADO_VIGENTE':'PENDIENTE'});
+  }
+  out.set(dni,{disponible:true,fuente:'Matriz informada por Antapaccay',total:OP_ANT_BASE.length,
+   completos,porcentaje:Math.round(100*completos/OP_ANT_BASE.length),vencidos,cursos:detalle});
+ }
+ return out;
+}
+function opEstadoCapacitacion(r){
+ const p=r.perfil?.reportado;
+ if(!p?.disponible||!(Number(p.total)>0))return 'REVISAR';
+ if(Number(p.completos)===Number(p.total))return 'COMPLETO';
+ if(Number(p.vencidos)>0||(p.cursos||[]).some(c=>['VENCIDO_REPORTADO','VENCIDO'].includes(c.estado)))return 'VENCIDOS';
+ return 'PENDIENTES';
 }
 function calcularResumenOperativo(registros){
-  const unicos=new Map();
-  for(const r of registros||[]){
-    if(!r.asignado||!r.dni||!r.mina||r.mina==='SIN ASIGNAR')continue;
-    const k=String(r.dni)+'|'+String(r.mina);
-    if(!unicos.has(k))unicos.set(k,r);
+ const unicos=new Map();
+ for(const r of registros||[]){
+  if(!r.asignado||!r.dni||!r.mina||r.mina==='SIN ASIGNAR')continue;
+  const key=String(r.dni)+'|'+String(r.mina);
+  if(!unicos.has(key))unicos.set(key,{...r,soloMatriz:false});
+ }
+ // Recupera registros Antapaccay aunque aún no tengan ficha en DATA DE PERSONAL.
+ // No se afirma que sean una asignación confirmada si sólo están en la matriz.
+ for(const [dni,reportado] of opCumplimientoMatrizReportada()){
+  const key=dni+'|ANTAPACCAY';
+  if(unicos.has(key)){
+   const reg=unicos.get(key);reg.perfil={...(reg.perfil||{}),reportado};
+  }else{
+   unicos.set(key,{dni,mina:'ANTAPACCAY',asignado:false,soloMatriz:true,
+     perfil:{reportado},nombre:'Personal reportado en matriz'});
   }
-  const grupos=new Map();
-  for(const r of unicos.values()){
-    if(!grupos.has(r.mina))grupos.set(r.mina,{mina:r.mina,total:0,COMPLETO:0,PENDIENTES:0,VENCIDOS:0,REVISAR:0,conPerfil:0});
-    const g=grupos.get(r.mina);
-    g.total++;g[opEstadoDocumental(r)]++;
-    if(r.perfil?.total>0)g.conPerfil++;
+ }
+ const grupos=new Map();
+ for(const r of unicos.values()){
+  if(!grupos.has(r.mina))grupos.set(r.mina,{mina:r.mina,total:0,COMPLETO:0,
+    PENDIENTES:0,VENCIDOS:0,REVISAR:0,conPerfil:0,soloMatriz:0,pdfTotal:0,pdf100:0});
+  const g=grupos.get(r.mina),estado=opEstadoCapacitacion(r);
+  g.total++;g[estado]++;
+  if(r.perfil?.reportado?.disponible)g.conPerfil++;
+  if(r.soloMatriz)g.soloMatriz++;
+  if(r.perfil?.total>0){
+   g.pdfTotal++;
+   if(Number(r.perfil.completos)===Number(r.perfil.total)&&
+      !Number(r.perfil.sinFecha)&&!Number(r.perfil.vencidos))g.pdf100++;
   }
-  const minas=[...grupos.values()].sort((a,b)=>b.total-a.total||a.mina.localeCompare(b.mina,'es'));
-  const relaciones=[...unicos.values()];
-  const total={asignados:new Set(relaciones.map(r=>String(r.dni))).size,
-    relaciones:relaciones.length,COMPLETO:0,PENDIENTES:0,VENCIDOS:0,REVISAR:0,
-    sinMina:new Set((registros||[]).filter(r=>r.mina==='SIN ASIGNAR'&&!r.historico).map(r=>String(r.dni))).size};
-  minas.forEach(g=>{['COMPLETO','PENDIENTES','VENCIDOS','REVISAR'].forEach(k=>total[k]+=g[k]);});
-  return {minas,total};
+ }
+ const minas=[...grupos.values()].sort((a,b)=>b.total-a.total||a.mina.localeCompare(b.mina,'es'));
+ const relaciones=[...unicos.values()];
+ const total={asignados:new Set(relaciones.map(r=>String(r.dni))).size,
+  confirmados:new Set(relaciones.filter(r=>r.asignado).map(r=>String(r.dni))).size,
+  relaciones:relaciones.length,soloMatriz:relaciones.filter(r=>r.soloMatriz).length,
+  COMPLETO:0,PENDIENTES:0,VENCIDOS:0,REVISAR:0};
+ minas.forEach(g=>['COMPLETO','PENDIENTES','VENCIDOS','REVISAR'].forEach(k=>total[k]+=g[k]));
+ return {minas,total};
 }
 function renderResumenOperativo(actualizado=''){
-  $('opFecha').classList.remove('op-error');
-  const datos=calcularResumenOperativo(CONSOLIDADO);
-  const t=datos.total;
-  $('opAsignados').textContent=t.asignados;
-  $('opCompletos').textContent=t.COMPLETO;
-  $('opPendientes').textContent=t.PENDIENTES;
-  $('opVencidos').textContent=t.VENCIDOS;
-  $('opRevisar').textContent=t.REVISAR;
-  $('opFecha').textContent=actualizado?'Actualizado: '+actualizado:'Datos del último consolidado';
-  $('opTabla').innerHTML=datos.minas.map(g=>{
-    const pct=g.conPerfil?Math.round(100*g.COMPLETO/g.total):null;
-    const porcentaje=pct===null?'—':pct+' %';
-    return `<tr><td><strong>${esc(nombreMina(g.mina))}</strong></td>
-      <td><strong>${g.total}</strong></td><td>${g.COMPLETO}</td><td>${g.PENDIENTES}</td>
-      <td>${g.VENCIDOS}</td><td>${g.REVISAR}</td>
-      <td><span class="op-percent">${porcentaje}</span>${pct===null?'<small style="display:block;color:#7b8a98">Sin matriz</small>':`<div class="op-bar" aria-label="${pct} por ciento"><span style="width:${pct}%"></span></div>`}</td>
-      <td><button type="button" class="op-view" data-op-mina="${esc(g.mina)}" aria-label="Ver trabajadores de ${esc(g.mina)}">Ver personal</button></td></tr>`;
-  }).join('')||'<tr><td colspan="8">No hay asignaciones confirmadas por mina. Utiliza Consolidado para registrar una.</td></tr>';
-  $('opNota').textContent='Solo asignaciones confirmadas: '+t.relaciones+' relaciones trabajador–mina, '+t.asignados+' personas distintas. '+
-    (t.sinMina?t.sinMina+' trabajadores sin mina asignada. ':'')+
-    '“Completo” exige cursos con PDF y vigencia declarada, EMO vigente y permiso Chile cuando aplica; no acredita habilitación oficial ni disponibilidad real para un servicio. Los asignados fuera de DATA DE PERSONAL se marcan por revisar. La fuente Consolidado aún no incluye asignaciones de personas sin ficha ni certificado.';
+ $('opFecha').classList.remove('op-error');
+ const datos=calcularResumenOperativo(CONSOLIDADO),t=datos.total;
+ $('opAsignados').textContent=t.asignados;
+ $('opCompletos').textContent=t.COMPLETO;
+ $('opPendientes').textContent=t.PENDIENTES;
+ $('opVencidos').textContent=t.VENCIDOS;
+ $('opRevisar').textContent=t.REVISAR;
+ $('opFecha').textContent=actualizado?'Actualizado: '+actualizado:'Datos del último consolidado';
+ $('opTabla').innerHTML=datos.minas.map(g=>{
+  const pct=g.conPerfil?Math.round(100*g.COMPLETO/g.total):null;
+  const porcentaje=pct===null?'—':pct+' %';
+  const barra=pct===null?'<small style="display:block;color:#7b8a98">Sin matriz reportada</small>':
+   '<div class="op-bar" aria-label="'+pct+' por ciento"><span style="width:'+pct+'%"></span></div>';
+  const extra=g.soloMatriz?'<small style="display:block;color:#8496a1">'+g.soloMatriz+' solo en matriz</small>':'';
+  const pdf=g.pdfTotal?(g.pdf100+' de '+g.pdfTotal):'—';
+  return '<tr><td><strong>'+esc(nombreMina(g.mina))+'</strong></td>'+
+   '<td><strong>'+g.total+'</strong>'+extra+'</td>'+
+   '<td>'+g.COMPLETO+'</td><td>'+g.PENDIENTES+'</td><td>'+g.VENCIDOS+'</td><td>'+g.REVISAR+'</td>'+
+   '<td><span class="op-percent">'+porcentaje+'</span>'+barra+'</td>'+
+   '<td><strong>'+pdf+'</strong><small style="display:block;color:#8796a2">Perfil con PDF</small></td>'+
+   '<td><button type="button" class="op-view" data-op-mina="'+esc(g.mina)+'" aria-label="Ver trabajadores de '+esc(g.mina)+'">Ver personal</button></td></tr>';
+ }).join('')||'<tr><td colspan="9">No hay personal registrado por mina.</td></tr>';
+ $('opNota').textContent=t.asignados+' trabajadores distintos en seguimiento, de los cuales '+t.confirmados+
+   ' figuran en el Consolidado con asignación confirmada. '+
+   (t.soloMatriz?t.soloMatriz+' persona(s) figuran únicamente en la matriz reportada de Antapaccay; sus cursos cuentan, pero deben regularizar su ficha/asignación para aparecer en el detalle. ':'')+
+   'La capacitación reportada por la mina cuenta aunque falte el PDF. El respaldo documental se muestra aparte y no reduce el avance de cursos. Este resumen no confirma habilitación oficial de ingreso ni disponibilidad para movilizarse.';
 }
 document.addEventListener('click',ev=>{
   const boton=ev.target.closest('button[data-op-mina]');
