@@ -3134,6 +3134,105 @@ tbody tr:nth-child(even){
 const API_URL =
   'https://script.google.com/macros/s/AKfycbz-bVZbDwcMRz0LnGk34z6eFOgxUpe5FSPeY1f9QF2daROe2IWb0J4ad0gEKh2IQY7-ag/exec';
 
+// Validación remota de sesión RESIDENTE (la variable de rol del navegador no es una autorización).
+const API_GANTT_SESION='https://script.google.com/macros/s/AKfycbzUL5LGdXro4fzbGkBHsvP1cGvtEQe7IYFH2k-l9LO_cx0kTcBDrBNtHlmc5sX1VINl/exec';
+let ganttAutorizado=false;
+let edicionesGantt={};
+async function verificarResidenteGantt(){
+ const token=localStorage.getItem('dimarzaTokenVisualizacion')||'';
+ if(!/^[0-9a-f-]{36}$/i.test(token))return false;
+ const id=Array.from(crypto.getRandomValues(new Uint8Array(24)),n=>n.toString(16).padStart(2,'0')).join('');
+ await fetch(API_GANTT_SESION,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
+   body:JSON.stringify({id,method:'sesionVisualizacion',args:[token]}),redirect:'follow',referrerPolicy:'no-referrer'});
+ const inicio=Date.now();
+ while(Date.now()-inicio<35000){
+  const u=new URL(API_GANTT_SESION);u.searchParams.set('action','resultado');u.searchParams.set('id',id);
+  const res=await fetch(u.toString(),{cache:'no-store',redirect:'follow'});
+  if(!res.ok)throw Error('Fallo verificando permisos de Gantt.');
+  const x=await res.json();
+  if(x.pending){await new Promise(resolve=>setTimeout(resolve,850));continue;}
+  return x.ok===true;
+ }
+ throw Error('No se pudo verificar la sesión vigente.');
+}
+async function comprobarResidenteGantt(){
+ try{ganttAutorizado=await verificarResidenteGantt();}
+ catch(_){ganttAutorizado=false;}
+ document.getElementById('ganttSoloResidente').classList.toggle('oculto',!ganttAutorizado);
+ return ganttAutorizado;
+}
+function fechaEntradaGantt(valor){
+ const texto=String(valor||'').trim();
+ const local=texto.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:[ T](\d{2}):(\d{2}))?/);
+ if(local)return local[3]+'-'+local[2]+'-'+local[1]+'T'+(local[4]||'00')+':'+(local[5]||'00');
+ const iso=texto.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+ return iso?iso[1]+'T'+iso[2]:'';
+}
+function ganttBloqueado(s){
+ const estado=normalizarTexto(s.estado);
+ return !!s.fechaInicioArmado||['EN ARMADO','ANDAMIO OPERATIVO','OPERATIVO','CERRADO','POSTPARADA','CERRADO POSTPARADA'].includes(estado);
+}
+function abrirEditorGantt(){
+ if(!ganttAutorizado)return;
+ edicionesGantt={};
+ document.getElementById('ganttBuscar').value='';
+ const m=document.getElementById('ganttMensaje');m.textContent='';m.className='gantt-msg';
+ pintarEditorGantt();
+ document.getElementById('modalProgramacionGanttTags').classList.remove('oculto');
+}
+function cerrarEditorGantt(){document.getElementById('modalProgramacionGanttTags').classList.add('oculto');}
+function pintarEditorGantt(){
+ const q=normalizarTexto(document.getElementById('ganttBuscar').value);
+ const registros=serviciosOriginales.filter(x=>!q||normalizarTexto([x.tag,x.ot,x.descripcion,x.faena,x.servicioMina,x.idServicio].join(' ')).includes(q));
+ const tabla=document.getElementById('ganttTabla');
+ if(!registros.length){tabla.innerHTML='<tr><td colspan="5">Sin TAGs que coincidan con la búsqueda.</td></tr>';return;}
+ tabla.innerHTML=registros.map(x=>{
+  const bloqueado=ganttBloqueado(x);
+  const id=String(x.idServicio||'');
+  const fecha=Object.prototype.hasOwnProperty.call(edicionesGantt,id)?edicionesGantt[id]:fechaEntradaGantt(x.inicioProgramadoGantt);
+  return '<tr><td><strong>'+escaparHTML(x.tag||'-')+'</strong><small>'+escaparHTML(id)+'</small></td>'+
+   '<td>'+escaparHTML(x.ot||'-')+'<small>'+escaparHTML(x.descripcion||'')+'</small></td>'+
+   '<td>'+escaparHTML(x.fechaProgramada||'-')+'</td>'+
+   '<td><input type="datetime-local" data-gantt-id="'+escaparHTML(id)+'" value="'+escaparHTML(fecha)+'" '+(bloqueado?'disabled':'')+' aria-label="Inicio programado TAG '+escaparHTML(x.tag||'')+'"></td>'+
+   '<td>'+(bloqueado?'Armado iniciado · bloqueado':escaparHTML(x.estado||'-'))+'</td></tr>';
+ }).join('');
+}
+document.addEventListener('change',e=>{
+ const campo=e.target.closest('[data-gantt-id]');
+ if(!campo||!ganttAutorizado)return;
+ const id=campo.dataset.ganttId;
+ const actual=serviciosOriginales.find(x=>String(x.idServicio)===id);
+ if(!actual||ganttBloqueado(actual))return;
+ edicionesGantt[id]=campo.value;
+});
+document.addEventListener('keydown',e=>{
+ const modal=document.getElementById('modalProgramacionGanttTags');
+ if(e.key==='Escape'&&modal&&!modal.classList.contains('oculto'))cerrarEditorGantt();
+});
+async function guardarEditorGantt(){
+ const mensaje=document.getElementById('ganttMensaje'),boton=document.getElementById('ganttGuardar');
+ const cambios=Object.entries(edicionesGantt).filter(([id,fecha])=>fecha&&serviciosOriginales.some(x=>String(x.idServicio)===id&&!ganttBloqueado(x)))
+    .map(([idServicio,inicioProgramado])=>({idServicio,inicioProgramado}));
+ if(!cambios.length){mensaje.className='gantt-msg error';mensaje.textContent='Selecciona al menos una fecha y hora de un TAG sin armado iniciado.';return;}
+ boton.disabled=true;mensaje.textContent='Verificando sesión del Residente...';mensaje.className='gantt-msg';
+ try{
+  if(!(await comprobarResidenteGantt()))throw Error('La sesión del Residente no está vigente o no pudo verificarse.');
+  if(!confirm('¿Actualizar el Gantt de '+cambios.length+' TAG(s)?'))return;
+  mensaje.textContent='Guardando programación...';
+  const response=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({accion:'actualizarProgramacionGantt',cambios})});
+  if(!response.ok)throw Error('Error HTTP '+response.status);
+  const data=await response.json();
+  if(!data.ok)throw Error(data.mensaje||'No se pudo guardar la programación.');
+  mensaje.className='gantt-msg ok';mensaje.textContent=data.mensaje||'Programación actualizada.';
+  edicionesGantt={};
+  await cargarServicios();
+  pintarEditorGantt();
+ }catch(err){mensaje.className='gantt-msg error';mensaje.textContent=err.message||'Error al guardar.';}
+ finally{boton.disabled=false;}
+}
+
+
 
 /* =========================================================
    VARIABLES
@@ -3237,6 +3336,7 @@ document
   );
 
 
+  comprobarResidenteGantt();
   await cargarServicios();
 
 }
