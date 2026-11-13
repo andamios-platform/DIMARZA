@@ -1113,7 +1113,8 @@ function renderResumenOperativo(actualizado=''){
  }).join('')||'<tr><td colspan="9">No hay personal registrado por mina.</td></tr>';
  $('opNota').textContent=t.asignados+' trabajadores distintos en seguimiento, de los cuales '+t.confirmados+
    ' figuran en el Consolidado con asignación confirmada. '+
-   (t.soloMatriz?t.soloMatriz+' persona(s) figuran únicamente en la matriz reportada de Antapaccay; sus cursos cuentan, pero deben regularizar su ficha/asignación para aparecer en el detalle. ':'')+
+   (t.soloMatriz?t.soloMatriz+' registros aparecen únicamente en matrices reportadas; no son asignaciones activas. ':'')+
+   (CENTINELA_ERROR?' El reporte Centinela requiere publicar el complemento de Apps Script para mostrarse en la web. ':'')+
    'La capacitación reportada por la mina cuenta aunque falte el PDF. El respaldo documental se muestra aparte y no reduce el avance de cursos. Este resumen no confirma habilitación oficial de ingreso ni disponibilidad para movilizarse.';
 }
 document.addEventListener('click',ev=>{
@@ -1156,6 +1157,23 @@ async function cargarConsolidado(){
  try{
    const r=await api('consolidadoAdmin',TOKEN);
    CONSOLIDADO=r.registros||[];
+   CENTINELA_MATRIZ=[];CENTINELA_ERROR='';
+   try{
+     const cent=await api('centinelaReporteAdmin',TOKEN);
+     CENTINELA_MATRIZ=Array.isArray(cent.registros)?cent.registros:[];
+     for(const [dni,reportado] of opCumplimientoCentinelaReportado()){
+       const actual=CONSOLIDADO.find(row=>String(row.dni)===dni&&row.mina==='CENTINELA');
+       if(actual){actual.perfil={...(actual.perfil||{}),reportado};}
+       else{
+         const persona=CENTINELA_MATRIZ.find(x=>String(x.dni)===dni);
+         CONSOLIDADO.push({dni,mina:'CENTINELA',nombre:persona?.nombre||'Personal reportado en matriz',
+           cargo:persona?.cargo||'',historico:false,asignado:false,soloMatriz:true,
+           certificados:0,perfil:{reportado},estadoPersonal:'SOLO REPORTE CENTINELA',
+           emo:{estado:'SIN_REGISTRO',fecha:''},permiso:{estado:'SIN_REGISTRO',fecha:''},
+           situacion:'SIN_MATRIZ'});
+       }
+     }
+   }catch(err){CENTINELA_ERROR=msg(err);}
    renderResumenOperativo(r.actualizado||'');
    prepararFiltrosConsolidado();
    CONS_PAGINA=0;renderConsolidado();
