@@ -521,6 +521,7 @@ let BIB_MATRIZ=[],BIB_EQUIV=new Map(),BIB_MATRIZ_FALLO='',BIB_LIMITE=45;
 let ADJUNTANDO_MATRIZ=null;
 let VIGENCIAS={emo:[],chile:[],resumen:{}},VIG_TIPO='EMO',VIG_EDITANDO='';
 let CONSOLIDADO=[],CONS_FILTRADOS=[],CONS_PAGINA=0;const CONS_POR_PAGINA=20;
+let CENTINELA_MATRIZ=[],CENTINELA_ERROR='';
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function msg(e){return e&&e.message?e.message:'Error inesperado.';}
@@ -1017,6 +1018,17 @@ function opCumplimientoMatrizReportada(){
  }
  return out;
 }
+function opCumplimientoCentinelaReportado(){
+ const m=new Map();
+ for(const r of CENTINELA_MATRIZ||[]){
+  const dni=String(r.dni||'').trim();if(!/^\d{8}$/.test(dni))continue;
+  m.set(dni,{disponible:true,fuente:'Centinela · 24 cursos base',
+    total:24,completos:Number(r.completos)||0,porcentaje:Number(r.porcentaje)||0,
+    vencidos:Number(r.vencidos)||0,
+    cursos:(r.cursosPendientes||[]).map(c=>({id:c.id,nombre:c.nombre,estado:c.estado,fecha:c.fecha}))});
+ }
+ return m;
+}
 function opEstadoCapacitacion(r){
  const p=r.perfil?.reportado;
  if(!p?.disponible||!(Number(p.total)>0))return 'REVISAR';
@@ -1040,6 +1052,17 @@ function calcularResumenOperativo(registros){
   }else{
    unicos.set(key,{dni,mina:'ANTAPACCAY',asignado:false,soloMatriz:true,
      perfil:{reportado},nombre:'Personal reportado en matriz'});
+  }
+ }
+ for(const [dni,reportado] of opCumplimientoCentinelaReportado()){
+  const key=dni+'|CENTINELA';
+  if(unicos.has(key)){
+   const reg=unicos.get(key);reg.perfil={...(reg.perfil||{}),reportado};
+  }else{
+   const persona=CENTINELA_MATRIZ.find(x=>String(x.dni)===dni);
+   unicos.set(key,{dni,mina:'CENTINELA',asignado:false,soloMatriz:true,
+     perfil:{reportado},nombre:persona?.nombre||'Personal reportado en matriz',
+     cargo:persona?.cargo||''});
   }
  }
  const grupos=new Map();
