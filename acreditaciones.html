@@ -384,6 +384,7 @@
     let vigenciasActuales = {emo:[],chile:[]};
     let perfilActual = null;
     let matrizActual = null;
+    let centinelaActual = null;
     let minasChileActuales = new Set();
     let filtroActual = 'todos';
     let minaActual = '';
@@ -430,7 +431,8 @@
         ...certificadosActuales.map(minaCertificado),
         ...vigenciasActuales.emo.map(v=>v.mina).filter(Boolean),
         ...(perfilActual?.aplica?['ANTAPACCAY']:[]),
-        ...(matrizActual?.cursos?.length?['ANTAPACCAY']:[])
+        ...(matrizActual?.cursos?.length?['ANTAPACCAY']:[]),
+        ...(centinelaActual?.cursos?.length?['CENTINELA']:[])
       ])].sort((a,b)=>a.localeCompare(b,'es'));
       $('filtroMina').innerHTML='<option value="">Todas las unidades mineras</option>'+minas.map(m=>`<option value="${escapeHtml(m)}">${escapeHtml(nombreMina(m))}</option>`).join('');
       minaActual=minas.includes(seleccionAnterior)?seleccionAnterior:'';
@@ -480,6 +482,7 @@
       minasChileActuales=new Set(Array.isArray(data.minasChile)?data.minasChile:[]);
       perfilActual=data.perfilCapacitacion||null;
       matrizActual=data.matrizReportada||null;
+      centinelaActual=data.centinelaReportada||null;
       if(!conservarFiltros){
         filtroActual='todos';$('busqueda').value='';
         $('filtros').querySelectorAll('button').forEach(b=>{
@@ -594,6 +597,37 @@
     function renderPerfil() {
       const el=$('perfilCapacitacion');
       const p=perfilActual;
+      const cen=centinelaActual;
+      const mostrarCen=!!cen?.cursos?.length &&
+        (minaActual==='CENTINELA'||(!minaActual && !matrizActual?.cursos?.length));
+      if(mostrarCen){
+        el.classList.remove('hidden');
+        const head=el.querySelector('.profile-head .eyebrow');
+        if(head)head.textContent='CAPACITACIÓN INFORMADA · CENTINELA';
+        const title=el.querySelector('.profile-head h3');
+        if(title)title.textContent='Cumplimiento reportado · Centinela';
+        const n=Math.max(0,Math.min(100,Number(cen.porcentaje)||0));
+        $('perfilCargo').textContent='24 cursos base obligatorios · 6 Campus y 3 OTEC opcionales';
+        $('perfilPorcentaje').textContent=n+'%';
+        $('perfilCantidad').textContent=cen.completos+' de '+cen.total+' obligatorios';
+        $('perfilProgreso').setAttribute('aria-valuenow',String(n));
+        $('perfilBarra').style.width=n+'%';
+        $('perfilMensaje').textContent='Estado informado por Centinela: '+cen.completos+
+          ' de '+cen.total+' cursos base vigentes. No equivale a habilitación oficial.';
+        $('perfilRespaldo').textContent='Los cursos reportados no tienen necesariamente un PDF vinculado. Los 9 opcionales no afectan el porcentaje.';
+        const listado=(cen.cursos||[]).filter(c=>c.obligatorio);
+        $('perfilLista').innerHTML=listado.map((c,i)=>{
+          const st=String(c.estado||'').toUpperCase();
+          const css=st==='VIGENTE'?'pass':st==='VENCIDO'?'fail':st==='PROGRAMADO'||st==='EN_TRAMITE'?'review':'wait';
+          const label={VIGENTE:'Vigente según reporte',VENCIDO:'Vencido',PROGRAMADO:'Programado',
+            EN_TRAMITE:'En trámite',FALTA:'Falta',PENDIENTE:'Pendiente',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar';
+          return '<div class="profile-course"><span class="profile-num">'+(i+1)+'</span><span class="profile-name">'+
+            escapeHtml(c.nombre||'Curso')+'</span><span class="profile-pill '+css+'">'+escapeHtml(label)+'</span></div>';
+        }).join('');
+        return;
+      }
+      const head=el.querySelector('.profile-head .eyebrow');
+      if(head)head.textContent='MATRIZ DE CAPACITACIÓN · ANTAPACCAY 2026';
       const miraAntapaccay = minaActual === 'ANTAPACCAY' || (
         !minaActual && (
           p?.aplica || certificadosActuales.some(c => minaCertificado(c)==='ANTAPACCAY') ||
@@ -698,6 +732,33 @@
         noAplica:noAplican.length ? `<details class="library-na"><summary>Ver ${noAplican.length} curso${noAplican.length===1?'':'s'} marcado${noAplican.length===1?'':'s'} «No aplica»</summary>${filas(noAplican).map(x=>x.html).join('')}</details>` : ''
       };
     }
+    /** Cursos informados por Centinela, sin fingir que son PDF adjuntos. */
+    function renderCentinelaEnBiblioteca(term){
+      const lista=Array.isArray(centinelaActual?.cursos)?centinelaActual.cursos:[];
+      if(!lista.length||(minaActual&&minaActual!=='CENTINELA')||filtroActual!=='todos')return [];
+      const existentes=new Set(certificadosDeMina()
+        .filter(c=>minaCertificado(c)==='CENTINELA')
+        .map(c=>normalizarNombreCurso(c.curso)));
+      return lista.filter(c=>!existentes.has(normalizarNombreCurso(c.nombre)))
+        .filter(c=>!term||[c.nombre,c.estado,c.obligatorio?'obligatorio':'opcional','Centinela']
+          .join(' ').toLocaleLowerCase('es').includes(term))
+        .map(c=>{
+          const st=String(c.estado||'SIN_REGISTRO').toUpperCase();
+          const etiqueta={VIGENTE:'Vigente según reporte',VENCIDO:'Vencido según reporte',
+            PROGRAMADO:'Programado',NO_APLICA:'No aplica',FALTA:'Falta',
+            PENDIENTE:'Pendiente',EN_TRAMITE:'En trámite',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar';
+          const clase=st==='VIGENTE'?'reported':st==='NO_APLICA'?'not-applicable':'pending';
+          const tipo=c.obligatorio?'Obligatorio':'Opcional · no afecta el porcentaje';
+          const fecha=c.fechaReportada?'Fecha informada: '+fmtDate(c.fechaReportada):'Sin fecha informada';
+          return {nombre:c.nombre||'Curso Centinela',html:
+            '<article class="cert-item library-course">'+
+            '<div class="cert-icon">'+icon('calendar','icon-lg')+'</div>'+
+            '<div class="cert-body"><h4 class="cert-name">'+escapeHtml(c.nombre||'Curso')+'</h4>'+
+            '<div class="cert-issuer"><span>Centinela · '+escapeHtml(tipo)+' · sin PDF validado</span></div>'+
+            '<div class="cert-bottom"><div><span class="status-pill '+clase+'">'+escapeHtml(etiqueta)+
+            '</span> <span class="cert-date">'+escapeHtml(fecha)+'</span></div></div></div></article>'};
+        });
+    }
     /** Solo se fusionan nombres idénticos; no se equiparan cursos especializados automáticamente. */
     function normalizarNombreCurso(n){return String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();}
     const LAYHER_NIVELES=['OFICIAL','OPERARIO','CAPATAZ','SUPERVISOR'];
@@ -736,7 +797,10 @@
       const mostrarMatriz=minaMatriz && listaMatriz.length>0;
       const pdfAntapaccay=new Set(subset.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(c=>normalizarNombreCurso(c.curso)));
       const matrizSinDuplicados=mostrarMatriz?listaMatriz.filter(c=>c.clase!=='NO_APLICA'&&!pdfAntapaccay.has(normalizarNombreCurso(c.nombre))).length:0;
-      const totalGeneral=subset.length+matrizSinDuplicados;
+      const pdfCentinela=new Set(subset.filter(c=>minaCertificado(c)==='CENTINELA').map(c=>normalizarNombreCurso(c.curso)));
+      const centinelaVisibles=centinelaActual?.cursos?.length && (!minaActual||minaActual==='CENTINELA')?
+        centinelaActual.cursos.filter(c=>!pdfCentinela.has(normalizarNombreCurso(c.nombre))).length:0;
+      const totalGeneral=subset.length+matrizSinDuplicados+centinelaVisibles;
       $('numeroPrincipal').textContent=String(totalGeneral);
       $('total').textContent=`${totalGeneral} registros`;
       renderVigencias();
@@ -762,7 +826,8 @@
       });
       const cursosMatriz=renderCursosEnBiblioteca(term,mostrarMatriz);
       const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(c=>normalizarNombreCurso(c.curso)));
-      const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre)))]
+      const cursosCentinela=renderCentinelaEnBiblioteca(term);
+      const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela]
         .sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'}));
       const avisoVacio=term?'No hay cursos que coincidan con la búsqueda.':
         filtroActual==='disponibles'?'No hay documentos disponibles para esta selección.':
@@ -947,7 +1012,7 @@
       }finally{btn.disabled=false;btn.innerHTML=contenidoOriginal;}
     }
     function salir() {
-      cerrarVistaPdf();certificadosActuales=[];perfilActual=null;matrizActual=null;vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
+      cerrarVistaPdf();certificadosActuales=[];perfilActual=null;matrizActual=null;centinelaActual=null;vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
       try{sessionStorage.removeItem(DNI_TAB_KEY);}catch(_){}
       lastRefreshAt=0;
       document.body.classList.remove('has-results');$('dashboard').classList.add('hidden');
