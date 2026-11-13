@@ -734,17 +734,42 @@
       const res=await qget({action:'pdfPublicoInfo',dni,id});
       if(!res.ok||!res.data)throw Error(res.error||'No se pudo recuperar el certificado.');
       const info=res.data;
-      const cantidad=Number(info.parts);
+      const cantidad=Number(info.parts),size=Number(info.size||0);
       if(!Number.isInteger(cantidad)||cantidad<1||cantidad>200)throw Error('Respuesta de certificado inválida.');
-      const parts=[];let received=0;
-      for(let i=0;i<cantidad;i++){
-        const r=await qget({action:'pdfPublicoChunk',dni,id,index:i});
-        if(!r.ok||!r.data?.base64)throw Error(r.error||'Error al recuperar el certificado.');
-        const bin=atob(r.data.base64),bytes=new Uint8Array(bin.length);
-        for(let j=0;j<bin.length;j++)bytes[j]=bin.charCodeAt(j);
-        parts.push(bytes);received+=bytes.length;
-        if(onProgress)onProgress(info.size?Math.min(100,Math.round(received/info.size*100)):null);
+      // Apps Script entrega piezas de 24 KB. Descargarlas una por una tarda demasiado:
+      // se leen en paralelo con un límite de seis peticiones y se reordenan por índice.
+      const parts=new Array(cantidad);
+      let siguiente=0,recibidos=0,completados=0;
+      if(onProgress)onProgress(0,0,cantidad);
+      async function traerFragmento(index) {
+        let ultimoError=null;
+        for(let intento=1;intento<=3;intento++) {
+          try {
+            // No pasar por qget: esa cola serializa las solicitudes y ralentiza el visor.
+            const r=await getJson({action:'pdfPublicoChunk',dni,id,index});
+            if(!r.ok||!r.data?.base64)throw Error(r.error||'El servidor no devolvió este fragmento.');
+            const bin=atob(r.data.base64),bytes=new Uint8Array(bin.length);
+            for(let j=0;j<bin.length;j++)bytes[j]=bin.charCodeAt(j);
+            parts[index]=bytes;
+            recibidos+=bytes.length;
+            completados++;
+            if(onProgress)onProgress(size?Math.min(100,Math.round(recibidos/size*100)):null,completados,cantidad);
+            return;
+          }catch(err){
+            ultimoError=err;
+            if(intento<3)await new Promise(resolve=>setTimeout(resolve,intento*600));
+          }
+        }
+        throw Error('Falló la descarga de la parte '+(index+1)+' de '+cantidad+': '+message(ultimoError));
       }
+      await Promise.all(Array.from({length:Math.min(6,cantidad)},async()=>{
+        while(siguiente<cantidad){
+          const index=siguiente++;
+          await traerFragmento(index);
+        }
+      }));
+      if(parts.some(p=>!(p instanceof Uint8Array)))throw Error('La descarga quedó incompleta. Vuelve a intentarlo.');
+      if(size&&recibidos!==size)throw Error('El certificado llegó incompleto. Vuelve a intentarlo.');
       return {blob:new Blob(parts,{type:'application/pdf'}),filename:info.filename||'certificado.pdf'};
     }
     async function clickDocumento(event) {
@@ -752,10 +777,16 @@
       if(!btn||!DNI_CONSULTADO)return;
       const id=btn.dataset.view;
       if(!id)return;
+      const contenidoOriginal=btn.innerHTML;
       btn.disabled=true;
+      btn.textContent='Cargando PDF…';
       feedback('Preparando vista previa…');
       try {
-        const pdf=await obtenerBlobPublico(DNI_CONSULTADO,id,p=>feedback('Abriendo certificado… '+(p===null?'':p+'%')));
+        const pdf=await obtenerBlobPublico(DNI_CONSULTADO,id,(p,hechas,total)=>{
+          const avance=p===null?'':p+'%';
+          btn.textContent='Cargando '+(avance||hechas+'/'+total)+'…';
+          feedback('Recuperando certificado: '+hechas+' de '+total+' partes'+(avance?' · '+avance:''));
+        });
         const url=URL.createObjectURL(pdf.blob);
         cerrarVistaPdf();
         urlVistaPdf=url;$('nombrePdf').textContent=pdf.filename;
@@ -765,7 +796,7 @@
         $('visorPdf').classList.remove('hidden');
         $('visorPdf').scrollIntoView({behavior:'smooth',block:'start'});
         feedback('Certificado abierto en modo consulta.');
-      }catch(err){feedback(message(err),true);}finally{btn.disabled=false;}
+      }catch(err){feedback(message(err),true);}finally{btn.disabled=false;btn.innerHTML=contenidoOriginal;}
     }
     function salir() {
       cerrarVistaPdf();certificadosActuales=[];perfilActual=null;matrizActual=null;vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
