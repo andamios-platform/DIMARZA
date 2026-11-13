@@ -2701,6 +2701,23 @@ tbody tr:nth-child(even){
   font-size: 12px;
   color: rgba(255, 255, 255, 0.45);
 }
+
+.gantt-tools{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;background:white;padding:16px 18px;margin-bottom:18px;border:1px solid #d7e5eb;border-radius:13px;box-shadow:var(--sombra)}
+.gantt-tools strong{display:block;color:#17466a;margin-bottom:5px}.gantt-tools p{color:#667784;font-size:12px;margin:0}
+.gantt-action{background:#087a70;color:#fff;border:0;border-radius:9px;padding:12px 15px;font-weight:800;font-size:12px}.gantt-action:disabled{opacity:.55;cursor:wait}
+.gantt-overlay{position:fixed;inset:0;z-index:20000;background:#071b2bc9;display:flex;align-items:center;justify-content:center;padding:12px}
+.gantt-dialog{width:min(1100px,100%);max-height:94vh;overflow:hidden;display:flex;flex-direction:column;background:white;border-radius:14px}
+.gantt-head{padding:15px 18px;border-bottom:1px solid #dce5eb;display:flex;gap:15px;justify-content:space-between}.gantt-head h2{margin:0;font-size:19px;color:#164266}.gantt-head p{font-size:12px;color:#657c89;margin:5px 0 0}
+.gantt-close{border:1px solid #d1dce4;background:#eff4f6;border-radius:9px;padding:9px 12px;font-weight:700}
+.gantt-body{padding:17px;display:flex;flex-direction:column;gap:12px;min-height:0}.gantt-body p{font-size:12px;color:#657988;margin:0;line-height:1.5}
+.gantt-search{width:100%;border:1px solid #c9dbe5;border-radius:8px;padding:10px;min-height:40px}
+.gantt-scroll{max-height:55vh;overflow:auto;border:1px solid #e1e9ed;border-radius:9px}
+.gantt-table{width:100%;min-width:770px;border-collapse:collapse;font-size:12px}
+.gantt-table th{background:#f4f8fa;color:#627888;font-size:10px;text-transform:uppercase;text-align:left;padding:12px 9px;position:sticky;top:0}
+.gantt-table td{padding:11px 9px;border-top:1px solid #e6edf1;vertical-align:top}.gantt-table small{display:block;color:#788c99;margin-top:4px}
+.gantt-table input{width:100%;min-width:195px;padding:8px;border:1px solid #c8d8e1;border-radius:8px;font-size:12px}.gantt-table input:disabled{background:#f0f3f5}
+.gantt-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}.gantt-msg{min-height:16px}.gantt-msg.error{color:#a93434}.gantt-msg.ok{color:#117649}
+@media(max-width:600px){.gantt-tools .gantt-action{width:100%}.gantt-overlay{padding:5px}.gantt-body{padding:12px}.gantt-head h2{font-size:16px}}
 </style>
 
 </head>
@@ -2737,6 +2754,10 @@ tbody tr:nth-child(even){
 
   </section>
 
+  <section id="ganttSoloResidente" class="gantt-tools oculto">
+    <div><strong>📅 Programación Gantt · solo Residente</strong><p>Modificar las fechas y horas programadas de los TAGs.</p></div>
+    <button type="button" class="gantt-action" onclick="abrirEditorGantt()">Actualizar programación Gantt</button>
+  </section>
 
   <section class="panel">
 
@@ -3079,6 +3100,19 @@ tbody tr:nth-child(even){
 
 </div>
 
+<div id="modalProgramacionGanttTags" class="gantt-overlay oculto" role="dialog" aria-modal="true" aria-label="Actualizar programación Gantt" onclick="if(event.target===this)cerrarEditorGantt()">
+ <div class="gantt-dialog">
+  <div class="gantt-head"><div><h2>📅 Actualizar programación Gantt</h2><p>Solo Residente · Fechas y horas por TAG</p></div><button type="button" class="gantt-close" onclick="cerrarEditorGantt()">✕</button></div>
+  <div class="gantt-body">
+    <p>Modifica únicamente el inicio programado del Gantt, no el inicio real de armado. Los TAGs cuyo armado ya comenzó están bloqueados.</p>
+    <label for="ganttBuscar" style="font-size:12px;font-weight:700">Buscar TAG, OT o actividad</label>
+    <input id="ganttBuscar" class="gantt-search" type="search" placeholder="Filtrar..." oninput="pintarEditorGantt()">
+    <div class="gantt-scroll"><table class="gantt-table"><thead><tr><th>TAG</th><th>OT / Actividad</th><th>Fecha preliminar</th><th>Inicio Gantt</th><th>Estado</th></tr></thead><tbody id="ganttTabla"><tr><td colspan="5">Cargando...</td></tr></tbody></table></div>
+    <p id="ganttMensaje" class="gantt-msg" role="status"></p>
+    <div class="gantt-actions"><button type="button" class="gantt-close" onclick="cerrarEditorGantt()">Cancelar</button><button type="button" id="ganttGuardar" class="gantt-action" onclick="guardarEditorGantt()">Guardar programación</button></div>
+  </div>
+ </div>
+</div>
 <script
   async
   src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"
