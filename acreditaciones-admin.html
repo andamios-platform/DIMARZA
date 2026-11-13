@@ -1207,9 +1207,10 @@ function renderConsolidado(){
   let det=pf?.total?`<div style="margin-top:8px;font-size:11px;color:#587184">PDF: ${pf.pendientes} sin respaldo · ${pf.vencidos} vencidos · ${pf.sinFecha} sin vencimiento declarado. La situación del consolidado conserva el criterio documental.</div>`:'';
   det+=pendientes.length?`<b style="display:block;margin-top:8px;font-size:11px">Faltantes / vencidos</b><ul>${pendientes.map(c=>`<li>${esc(c.nombre)} · ${esc(c.estado==='VENCIDO'?'Vencido':'Pendiente')}</li>`).join('')}</ul>`:'';
   det+=sinFecha.length?`<b style="display:block;margin-top:8px;font-size:11px">Vigencia por confirmar</b><ul>${sinFecha.map(c=>`<li>${esc(c.nombre)}</li>`).join('')}</ul>`:'';
-  if(pf?.reportado?.cursos?.length){
+  const cursosReportadosPendientes=(pf?.reportado?.cursos||[]).filter(c=>!['REPORTADO_VIGENTE','VIGENTE_REPORTADO','VIGENTE'].includes(String(c.estado||'').toUpperCase()));
+  if(cursosReportadosPendientes.length){
    det+='<b style="display:block;margin-top:8px;font-size:11px">Cursos obligatorios reportados por regularizar</b><ul>'+
-    pf.reportado.cursos.map(c=>'<li>'+esc(c.nombre||c.id)+' · '+esc(c.estado||'PENDIENTE')+'</li>').join('')+'</ul>';
+    cursosReportadosPendientes.map(c=>'<li>'+esc(c.nombre||c.id)+' · '+esc(c.estado||'PENDIENTE')+'</li>').join('')+'</ul>';
   }
   if(!pf)det='<p class="muted">Para esta mina todavía no existe un reporte de cursos conectado.</p>';
   else if(!det)det='<p class="muted">Cursos base reportados completos. Habilitación oficial no confirmada.</p>';
