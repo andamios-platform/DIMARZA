@@ -995,6 +995,9 @@ function opEstadoDocumental(r){
   const contrato=String(r.estadoPersonal||'').toUpperCase().trim();
   if(contrato&&!['VIGENTE','PRONTO A VENCERSE'].includes(contrato))return 'REVISAR';
   if(r.situacion==='VENCIDOS')return 'VENCIDOS';
+  // La falta de EMO/permiso o certificados pendientes se cuenta como pendiente
+  // incluso cuando la mina todavía no tiene perfil de cursos configurado.
+  if(r.situacion==='PENDIENTES')return 'PENDIENTES';
   const p=r.perfil;
   if(!p||!Number(p.total))return 'REVISAR';
   const cursosCompletos=Number(p.completos)===Number(p.total)&&Number(p.pendientes)===0 &&
@@ -1028,6 +1031,7 @@ function calcularResumenOperativo(registros){
   return {minas,total};
 }
 function renderResumenOperativo(actualizado=''){
+  $('opFecha').classList.remove('op-error');
   const datos=calcularResumenOperativo(CONSOLIDADO);
   const t=datos.total;
   $('opAsignados').textContent=t.asignados;
