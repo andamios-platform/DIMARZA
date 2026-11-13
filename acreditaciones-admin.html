@@ -589,6 +589,7 @@ async function cargarCursosReportadosBiblioteca(){
   $('bibMatrizEstado').textContent='No se pudieron cargar los cursos: '+BIB_MATRIZ_FALLO+'. Publica también el nuevo Código.gs.';
  }
  render();
+ if(CONSOLIDADO.length)renderResumenOperativo();
 }
 function mostrarMasCursosBiblioteca(){BIB_LIMITE+=45;render();}
 
