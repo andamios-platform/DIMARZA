@@ -3170,7 +3170,7 @@ function fechaEntradaGantt(valor){
 }
 function ganttBloqueado(s){
  const estado=normalizarTexto(s.estado);
- return !!s.fechaInicioArmado||['EN ARMADO','ANDAMIO OPERATIVO','OPERATIVO','CERRADO','POSTPARADA','CERRADO POSTPARADA'].includes(estado);
+ return !!s.fechaInicioArmado||['ARMADO','EN ARMADO','ANDAMIO OPERATIVO','OPERATIVO','EN OPERACIÓN','CERRADO','POSTPARADA','CERRADO POSTPARADA'].includes(estado);
 }
 function abrirEditorGantt(){
  if(!ganttAutorizado)return;
