@@ -683,8 +683,37 @@
     }
     /** Solo se fusionan nombres idénticos; no se equiparan cursos especializados automáticamente. */
     function normalizarNombreCurso(n){return String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();}
+    const LAYHER_NIVELES=['OFICIAL','OPERARIO','CAPATAZ','SUPERVISOR'];
+    function nivelLayherCertificado(c){
+      const n=normalizarNombreCurso(c.curso);
+      const emisor=normalizarNombreCurso(c.emisor);
+      if(!n.includes('LAYHER')&&!(emisor.includes('LAYHER')&&/ANDAMIERO|CERTIFICACION|NIVEL/.test(n)))return '';
+      return [...LAYHER_NIVELES].reverse().find(nivel=>new RegExp('(?:^| )'+nivel+'(?: |$)').test(n))||'';
+    }
+    function estadoLayher(c){
+      const s=String(c.vencimiento||'').trim();
+      const dias=daysToExpiry(s);
+      return dias===null?1:dias>=0?2:0; // Sin fecha no equivale a vigencia confirmada.
+    }
+    function compararLayher(a,b){
+      const estado=estadoLayher(b)-estadoLayher(a);
+      if(estado)return estado;
+      const nivel=LAYHER_NIVELES.indexOf(nivelLayherCertificado(b))-LAYHER_NIVELES.indexOf(nivelLayherCertificado(a));
+      if(nivel)return nivel;
+      return String(b.vencimiento||'').localeCompare(String(a.vencimiento||''));
+    }
+    function seleccionarNivelLayher(certs){
+      const layher=certs.filter(c=>nivelLayherCertificado(c)).sort(compararLayher);
+      if(!layher.length)return certs;
+      const principal=layher[0];
+      return certs.filter(c=>!nivelLayherCertificado(c)||c===principal);
+    }
+    function nombreVisibleCertificado(c){
+      const nivel=nivelLayherCertificado(c);
+      return nivel?'CERTIFICACIÓN LAYHER · NIVEL '+nivel:(c.curso||'');
+    }
     function renderCertificados() {
-      const subset=certificadosDeMina();
+      const subset=seleccionarNivelLayher(certificadosDeMina());
       const listaMatriz=Array.isArray(matrizActual?.cursos)?matrizActual.cursos:[];
       const minaMatriz=!minaActual || minaActual==='ANTAPACCAY';
       const mostrarMatriz=minaMatriz && listaMatriz.length>0;
@@ -702,7 +731,7 @@
         const available=c.descargaPublica===true;
         if(filtroActual==='disponibles'&&!available)return false;
         if(filtroActual==='restringidos'&&available)return false;
-        return !term || `${c.curso||''} ${c.emisor||''}`.toLocaleLowerCase('es').includes(term);
+        return !term || `${c.curso||''} ${c.emisor||''} ${nombreVisibleCertificado(c)}`.toLocaleLowerCase('es').includes(term);
       });
       const registrosPDF=listado.map(c=>{
         const available=c.descargaPublica===true;
@@ -712,7 +741,7 @@
         if(exp!==null&&exp<0){statusText='Fecha vencida';statusClass='expired';}
         else if(exp!==null&&exp<=30){statusText='Próximo a vencer';statusClass='warning';}
         const buttons=available?`<div class="cert-actions"><button class="btn-secondary" type="button" data-view="${escapeHtml(c.id)}">${icon('eye')}Ver PDF</button></div>`:'';
-        return {nombre:c.curso||"Certificado sin nombre",html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.curso||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`};
+        return {nombre:nombreVisibleCertificado(c)||"Certificado sin nombre",html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(nombreVisibleCertificado(c)||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`};
       });
       const cursosMatriz=renderCursosEnBiblioteca(term,mostrarMatriz);
       const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(c=>normalizarNombreCurso(c.curso)));
