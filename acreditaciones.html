@@ -385,6 +385,7 @@
     let perfilActual = null;
     let matrizActual = null;
     let centinelaActual = null;
+    let centinelaCampoEnAPI = false;
     let minasChileActuales = new Set();
     let filtroActual = 'todos';
     let minaActual = '';
@@ -482,6 +483,7 @@
       minasChileActuales=new Set(Array.isArray(data.minasChile)?data.minasChile:[]);
       perfilActual=data.perfilCapacitacion||null;
       matrizActual=data.matrizReportada||null;
+      centinelaCampoEnAPI=Object.prototype.hasOwnProperty.call(data,'centinelaReportada');
       centinelaActual=data.centinelaReportada||null;
       if(!conservarFiltros){
         filtroActual='todos';$('busqueda').value='';
@@ -832,6 +834,10 @@
       const avisoVacio=term?'No hay cursos que coincidan con la búsqueda.':
         filtroActual==='disponibles'?'No hay documentos disponibles para esta selección.':
         filtroActual==='restringidos'?'No hay documentos restringidos para esta selección.':
+        minaActual==='CENTINELA' && !centinelaCampoEnAPI?
+          'La versión publicada del Apps Script todavía no devuelve los cursos de Centinela. Actualiza la implementación existente a una NUEVA VERSIÓN desde Apps Script; guardar Código.gs no basta.':
+        minaActual==='CENTINELA' && centinelaCampoEnAPI && !centinelaActual?.cursos?.length?
+          'El servidor de Acreditaciones respondió, pero no encontró cursos de Centinela para este DNI. Revisa la hoja ACREDITACION_ESTADOS y su implementación.':
         'Aún no hay capacitaciones registradas para este DNI.';
       $('listado').innerHTML=unificados.map(c=>c.html).join('')+cursosMatriz.noAplica+
         (!unificados.length&&!cursosMatriz.noAplica?`<div class="empty">${icon('file')}<div>${avisoVacio}</div></div>`:'');
@@ -1012,7 +1018,7 @@
       }finally{btn.disabled=false;btn.innerHTML=contenidoOriginal;}
     }
     function salir() {
-      cerrarVistaPdf();certificadosActuales=[];perfilActual=null;matrizActual=null;centinelaActual=null;vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
+      cerrarVistaPdf();certificadosActuales=[];perfilActual=null;matrizActual=null;centinelaActual=null;centinelaCampoEnAPI=false;vigenciasActuales={emo:[],chile:[]};minasChileActuales=new Set();DNI_CONSULTADO='';filtroActual='todos';minaActual='';
       try{sessionStorage.removeItem(DNI_TAB_KEY);}catch(_){}
       lastRefreshAt=0;
       document.body.classList.remove('has-results');$('dashboard').classList.add('hidden');
