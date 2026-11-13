@@ -61,6 +61,34 @@
 @media(max-width:1050px){.cons-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.cons-assign-form{grid-template-columns:1fr 1fr}.cons-assign-form>div:last-child{grid-column:1/-1}}
 @media(max-width:650px){.cons-toolbar{grid-template-columns:1fr;padding:15px}.cons-intro{padding:15px}.cons-assign-form{grid-template-columns:1fr}.cons-assign-form>div:last-child{grid-column:auto}.cons-footer{padding:15px}.cons-table{min-width:0}.cons-table thead{display:none}.cons-table,.cons-table tbody,.cons-table tr,.cons-table td{display:block;width:100%}.cons-table tr{border:1px solid #e3ecf0;border-radius:12px;margin:10px 0;padding:10px}.cons-table td{border:0;padding:6px 3px}.cons-table td:before{content:attr(data-col);display:block;color:#718a99;font-size:10px;text-transform:uppercase;font-weight:800}.cons-progress{width:100%}}
 
+/* RESUMEN OPERATIVO POR MINA: asignaciones confirmadas, no habilitación oficial */
+.op-summary{border:1px solid #dce8ed;background:#fff;border-radius:17px;box-shadow:0 8px 30px rgba(12,31,48,.045);padding:20px 23px;margin:0 0 21px}
+.op-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.op-head h2{margin:0;font-size:19px;font-weight:850;letter-spacing:-.02em;color:#18354b}
+.op-head p{margin:5px 0 0;color:#667e8e;font-size:12px}
+.op-updated{color:#6b8291;font-size:11px;white-space:nowrap}
+.op-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0}
+.op-metric{border:1px solid #e1eaf0;background:#f8fbfc;border-radius:12px;padding:14px;min-width:0}
+.op-metric strong{display:block;font-size:27px;font-weight:850;color:#17384d;line-height:1.2;font-variant-numeric:tabular-nums}
+.op-metric span{display:block;font-size:11px;font-weight:730;color:#647e8c;margin-top:5px}
+.op-metric.complete{background:#f0faf5;border-color:#caebd9}.op-metric.complete strong{color:#117148}
+.op-metric.pending{background:#fff9ee;border-color:#f1e0b8}.op-metric.pending strong{color:#9b6615}
+.op-metric.expired{background:#fff3f1;border-color:#f1d0cc}.op-metric.expired strong{color:#a33934}
+.op-summary table{width:100%;border-collapse:collapse;font-size:12px}
+.op-summary th{text-align:left;color:#6c8391;font-size:10px;text-transform:uppercase;letter-spacing:.055em;padding:11px 10px;background:#f5f9fb;white-space:nowrap}
+.op-summary td{padding:12px 10px;border-bottom:1px solid #e8eef2;color:#274356}
+.op-summary tbody tr:last-child td{border-bottom:0}
+.op-summary td strong{font-weight:800;color:#17334b}
+.op-summary .op-table-wrap{overflow-x:auto;border:1px solid #e4edf0;border-radius:11px}
+.op-summary .op-percent{display:inline-block;font-weight:850;color:#087b70;min-width:35px}
+.op-summary .op-bar{height:6px;max-width:90px;border-radius:20px;background:#e5eeef;overflow:hidden;margin-top:5px}
+.op-summary .op-bar span{display:block;height:100%;background:#11a78d}
+.op-summary .op-view{border:1px solid #cce3e3;border-radius:8px;background:#ecf7f6;color:#08756f;padding:8px 10px;font-size:11px;font-weight:760;white-space:nowrap}
+.op-summary .op-note{font-size:11px;line-height:1.5;margin:12px 0 0;color:#647e8b}
+.op-summary .op-error{color:#ad3c35}
+@media(max-width:900px){.op-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:620px){.op-summary{padding:17px 15px}.op-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.op-metric{padding:11px}.op-metric strong{font-size:23px}.op-summary table{min-width:735px}}
+
 /* ==========================================================
    NAVEGACION POR PESTAÑAS · ADMINISTRACION DIMARZA
    Vista unificada sin cambiar las APIs ni los identificadores
@@ -173,6 +201,26 @@
     <button type="button" class="ac-tab" id="ac-tab-biblioteca" role="tab" aria-selected="false" tabindex="-1" aria-controls="biblioteca" data-ac-tab="biblioteca"><span class="ac-tab-symbol" aria-hidden="true">▤</span><span class="ac-tab-text"><strong>Biblioteca</strong><small>Certificados y cursos</small></span></button>
   </nav>
 
+  <section class="op-summary" aria-label="Resumen operativo documental por mina" id="opResumen">
+    <div class="op-head">
+      <div><h2>Resumen operativo por mina</h2><p>Dotación asignada y avance documental para planificar servicios.</p></div>
+      <span class="op-updated" id="opFecha" role="status" aria-live="polite">Cargando datos…</span>
+    </div>
+    <div class="op-metrics" id="opMetricas">
+      <div class="op-metric"><strong id="opAsignados">—</strong><span>Trabajadores asignados (únicos)</span></div>
+      <div class="op-metric complete"><strong id="opCompletos">—</strong><span>Carpeta documental completa</span></div>
+      <div class="op-metric pending"><strong id="opPendientes">—</strong><span>Con documentos pendientes</span></div>
+      <div class="op-metric expired"><strong id="opVencidos">—</strong><span>Con documentos vencidos</span></div>
+      <div class="op-metric"><strong id="opRevisar">—</strong><span>Por revisar o sin matriz</span></div>
+    </div>
+    <div class="op-table-wrap">
+      <table aria-label="Preparación documental por unidad minera">
+        <thead><tr><th>Unidad minera</th><th>Asignados</th><th>Completos</th><th>Pendientes</th><th>Vencidos</th><th>Por revisar / sin matriz</th><th>% documental</th><th>Trabajadores</th></tr></thead>
+        <tbody id="opTabla"><tr><td colspan="8">Preparando resumen de dotación…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="op-note" id="opNota">El cumplimiento documental no confirma acreditación oficial, habilitación de ingreso ni disponibilidad para el servicio. Solo cuenta asignaciones confirmadas por mina; un mismo trabajador puede figurar en varias minas.</p>
+  </section>
 
 <section class="card ac-tabpanel" id="consolidado-general" role="tabpanel" aria-labelledby="ac-tab-consolidado">
   <div class="panel-head">
@@ -939,6 +987,80 @@ async function guardar(){
 
 
 
+// === RESUMEN OPERATIVO DOCUMENTAL POR MINA ===
+function opEstadoDocumental(r){
+  // Basado en el consolidado protegido por sesión RESIDENTE, no en la cantidad de PDF subidos.
+  // El perfil (y sus requisitos) solo está configurado actualmente para algunas minas.
+  if(!r.asignado||r.historico||r.mina==='SIN ASIGNAR')return 'EXCLUIDO';
+  const contrato=String(r.estadoPersonal||'').toUpperCase().trim();
+  if(contrato&&!['VIGENTE','PRONTO A VENCERSE'].includes(contrato))return 'REVISAR';
+  if(r.situacion==='VENCIDOS')return 'VENCIDOS';
+  const p=r.perfil;
+  if(!p||!Number(p.total))return 'REVISAR';
+  const cursosCompletos=Number(p.completos)===Number(p.total)&&Number(p.pendientes)===0 &&
+      Number(p.vencidos)===0&&Number(p.sinFecha)===0;
+  const emoValido=['VIGENTE','ALERTA','URGENTE'].includes(r.emo?.estado);
+  const permisoValido=['NO_APLICA','VIGENTE','ALERTA','URGENTE'].includes(r.permiso?.estado);
+  if(cursosCompletos&&emoValido&&permisoValido&&r.situacion==='PERFIL_COMPLETO')return 'COMPLETO';
+  if(r.situacion==='PENDIENTES'||!cursosCompletos||r.emo?.estado==='SIN_REGISTRO'||r.permiso?.estado==='SIN_REGISTRO')return 'PENDIENTES';
+  return 'REVISAR';
+}
+function calcularResumenOperativo(registros){
+  const unicos=new Map();
+  for(const r of registros||[]){
+    if(!r.asignado||r.historico||!r.dni||!r.mina||r.mina==='SIN ASIGNAR')continue;
+    const k=String(r.dni)+'|'+String(r.mina);
+    if(!unicos.has(k))unicos.set(k,r);
+  }
+  const grupos=new Map();
+  for(const r of unicos.values()){
+    if(!grupos.has(r.mina))grupos.set(r.mina,{mina:r.mina,total:0,COMPLETO:0,PENDIENTES:0,VENCIDOS:0,REVISAR:0,conPerfil:0});
+    const g=grupos.get(r.mina);
+    g.total++;g[opEstadoDocumental(r)]++;
+    if(r.perfil?.total>0)g.conPerfil++;
+  }
+  const minas=[...grupos.values()].sort((a,b)=>b.total-a.total||a.mina.localeCompare(b.mina,'es'));
+  const relaciones=[...unicos.values()];
+  const total={asignados:new Set(relaciones.map(r=>String(r.dni))).size,
+    relaciones:relaciones.length,COMPLETO:0,PENDIENTES:0,VENCIDOS:0,REVISAR:0,
+    sinMina:new Set((registros||[]).filter(r=>r.mina==='SIN ASIGNAR'&&!r.historico).map(r=>String(r.dni))).size};
+  minas.forEach(g=>{['COMPLETO','PENDIENTES','VENCIDOS','REVISAR'].forEach(k=>total[k]+=g[k]);});
+  return {minas,total};
+}
+function renderResumenOperativo(actualizado=''){
+  const datos=calcularResumenOperativo(CONSOLIDADO);
+  const t=datos.total;
+  $('opAsignados').textContent=t.asignados;
+  $('opCompletos').textContent=t.COMPLETO;
+  $('opPendientes').textContent=t.PENDIENTES;
+  $('opVencidos').textContent=t.VENCIDOS;
+  $('opRevisar').textContent=t.REVISAR;
+  $('opFecha').textContent=actualizado?'Actualizado: '+actualizado:'Datos del último consolidado';
+  $('opTabla').innerHTML=datos.minas.map(g=>{
+    const pct=g.conPerfil?Math.round(100*g.COMPLETO/g.total):null;
+    const porcentaje=pct===null?'—':pct+' %';
+    return `<tr><td><strong>${esc(nombreMina(g.mina))}</strong></td>
+      <td><strong>${g.total}</strong></td><td>${g.COMPLETO}</td><td>${g.PENDIENTES}</td>
+      <td>${g.VENCIDOS}</td><td>${g.REVISAR}</td>
+      <td><span class="op-percent">${porcentaje}</span>${pct===null?'<small style="display:block;color:#7b8a98">Sin matriz</small>':`<div class="op-bar" aria-label="${pct} por ciento"><span style="width:${pct}%"></span></div>`}</td>
+      <td><button type="button" class="op-view" data-op-mina="${esc(g.mina)}" aria-label="Ver trabajadores de ${esc(g.mina)}">Ver personal</button></td></tr>`;
+  }).join('')||'<tr><td colspan="8">No hay asignaciones confirmadas por mina. Utiliza Consolidado para registrar una.</td></tr>';
+  $('opNota').textContent='Solo asignaciones confirmadas: '+t.relaciones+' relaciones trabajador–mina, '+t.asignados+' personas distintas. '+
+    (t.sinMina?t.sinMina+' trabajadores sin mina asignada. ':'')+
+    '“Completo” exige cursos con PDF y vigencia declarada, EMO vigente y permiso Chile cuando aplica; no acredita habilitación oficial ni disponibilidad real para un servicio. Las minas sin matriz de requisitos requieren revisión.';
+}
+document.addEventListener('click',ev=>{
+  const boton=ev.target.closest('button[data-op-mina]');
+  if(!boton)return;
+  const mina=boton.dataset.opMina;
+  seleccionarPestanaAcreditaciones('consolidado-general');
+  $('consBuscar').value='';$('consCargo').value='';$('consEstado').value='';
+  $('consMina').value=mina;
+  CONS_PAGINA=0;
+  renderConsolidado();
+  $('consolidado-general').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
 // === CONSOLIDADO GENERAL (solo RESIDENTE) ===
 function consChip(estado,contexto=''){
  const names={VIGENTE:'Vigente',URGENTE:'Vence en 30 días',ALERTA:'Vence en 31–60 días',VENCIDO:'Vencido',SIN_FECHA:'Sin fecha',SIN_REGISTRO:'Sin registro',NO_APLICA:'No aplica',VENCIDOS:'Vencimientos',PENDIENTES:'Pendientes',REVISAR:'Por revisar',PERFIL_COMPLETO:'Perfil completo',SIN_MATRIZ:'Sin matriz',SIN_UNIDAD:'Sin unidad'};
@@ -967,10 +1089,16 @@ async function cargarConsolidado(){
  try{
    const r=await api('consolidadoAdmin',TOKEN);
    CONSOLIDADO=r.registros||[];
+   renderResumenOperativo(r.actualizado||'');
    prepararFiltrosConsolidado();
    CONS_PAGINA=0;renderConsolidado();
    $('consMensaje').textContent='Consolidado actualizado · '+(r.actualizado||'')+'. No representa acreditación oficial.';
- }catch(e){$('consMensaje').textContent='No se pudo cargar el consolidado: '+msg(e)}
+ }catch(e){
+   $('consMensaje').textContent='No se pudo cargar el consolidado: '+msg(e);
+   $('opFecha').textContent='Resumen no disponible';
+   $('opFecha').classList.add('op-error');
+   $('opTabla').innerHTML='<tr><td colspan="8">No fue posible consultar los datos. Actualiza el Consolidado para reintentar.</td></tr>';
+ } 
 }
 function renderConsolidado(){
  const q=($('consBuscar').value||'').trim().toUpperCase();
