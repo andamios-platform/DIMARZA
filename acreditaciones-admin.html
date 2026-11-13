@@ -1196,20 +1196,25 @@ function renderConsolidado(){
  $('consTabla').innerHTML=vista.map(r=>{
   const pf=r.perfil;
   const pct=pf?(pf.reportado?.disponible
-    ?`<span class="cons-pct">${pf.reportado.porcentaje}% <small style="font-size:10px;font-weight:600">Reportado Antapaccay</small></span><div class="cons-progress"><span style="width:${pf.reportado.porcentaje}%"></span></div><span class="cons-micro">${pf.reportado.completos} de ${pf.reportado.total} con estado reportado · Sin validar PDF</span><br><span class="cons-micro"><strong>PDF vinculado:</strong> ${pf.porcentaje}% (${pf.completos}/${pf.total})</span>`
+    ?`<span class="cons-pct">${pf.reportado.porcentaje}% <small style="font-size:10px;font-weight:600">${esc(pf.reportado.fuente||'Reportado por la mina')}</small></span><div class="cons-progress"><span style="width:${pf.reportado.porcentaje}%"></span></div><span class="cons-micro">${pf.reportado.completos} de ${pf.reportado.total} con estado reportado · Sin validar PDF</span><br><span class="cons-micro"><strong>PDF vinculado:</strong> ${pf.total?pf.porcentaje+'% ('+pf.completos+'/'+pf.total+')':'Sin PDF validado'}</span>`
     :`<span class="cons-pct">${pf.porcentaje}%</span><div class="cons-progress"><span style="width:${pf.porcentaje}%"></span></div><span class="cons-micro">${pf.completos} de ${pf.total} cursos con PDF</span>`)
     :'<span class="cons-micro">Matriz no cargada</span>';
   const mines=r.mina==='SIN ASIGNAR'?'Sin unidad':nombreMina(r.mina);
   const emos=r.emo.estado==='NO_APLICA'?'—':consChip(r.emo.estado)+(r.emo.fecha?`<small>${esc(formatearFecha(r.emo.fecha))}</small>`:'');
   const permiso=r.permiso.estado==='NO_APLICA'?'—':consChip(r.permiso.estado)+(r.permiso.fecha?`<small>${esc(formatearFecha(r.permiso.fecha))}</small>`:'');
-  const pendientes=pf?pf.cursos.filter(c=>c.estado!=='VIGENTE'&&c.estado!=='SIN_FECHA'):[];
-  const sinFecha=pf?pf.cursos.filter(c=>c.estado==='SIN_FECHA'):[];
-  let det=pf?`<div style="margin-top:8px;font-size:11px;color:#587184">PDF: ${pf.pendientes} sin respaldo · ${pf.vencidos} vencidos · ${pf.sinFecha} sin vencimiento declarado. La situación del consolidado conserva el criterio documental.</div>`:'';
+  const pendientes=pf?(pf.cursos||[]).filter(c=>c.estado!=='VIGENTE'&&c.estado!=='SIN_FECHA'):[];
+  const sinFecha=pf?(pf.cursos||[]).filter(c=>c.estado==='SIN_FECHA'):[];
+  let det=pf?.total?`<div style="margin-top:8px;font-size:11px;color:#587184">PDF: ${pf.pendientes} sin respaldo · ${pf.vencidos} vencidos · ${pf.sinFecha} sin vencimiento declarado. La situación del consolidado conserva el criterio documental.</div>`:'';
   det+=pendientes.length?`<b style="display:block;margin-top:8px;font-size:11px">Faltantes / vencidos</b><ul>${pendientes.map(c=>`<li>${esc(c.nombre)} · ${esc(c.estado==='VENCIDO'?'Vencido':'Pendiente')}</li>`).join('')}</ul>`:'';
   det+=sinFecha.length?`<b style="display:block;margin-top:8px;font-size:11px">Vigencia por confirmar</b><ul>${sinFecha.map(c=>`<li>${esc(c.nombre)}</li>`).join('')}</ul>`:'';
-  if(!pf)det='<p class="muted">Para esta mina no existe todavía una matriz de cursos o el cargo no tiene perfil definido.</p>';
+  if(pf?.reportado?.cursos?.length){
+   det+='<b style="display:block;margin-top:8px;font-size:11px">Cursos obligatorios reportados por regularizar</b><ul>'+
+    pf.reportado.cursos.map(c=>'<li>'+esc(c.nombre||c.id)+' · '+esc(c.estado||'PENDIENTE')+'</li>').join('')+'</ul>';
+  }
+  if(!pf)det='<p class="muted">Para esta mina todavía no existe un reporte de cursos conectado.</p>';
+  else if(!det)det='<p class="muted">Cursos base reportados completos. Habilitación oficial no confirmada.</p>';
   const details=`<details class="cons-details"><summary>Ver detalle</summary>${det}</details>`;
-  const asignacion=r.asignado?'<span class="mini-label">Asignación confirmada</span>':r.mina==='SIN ASIGNAR'?'<span class="mini-label">Pendiente de asignar</span>':'<span class="mini-label">Solo documentos asociados</span>';
+  const asignacion=r.asignado?'<span class="mini-label">Asignación confirmada</span>':r.soloMatriz?'<span class="mini-label">Solo matriz informada · no asignado</span>':r.mina==='SIN ASIGNAR'?'<span class="mini-label">Pendiente de asignar</span>':'<span class="mini-label">Solo documentos asociados</span>';
   const desactivar=r.asignado?`<button type="button" class="small-action" data-quitar-mina="${esc(r.dni)}" data-mina="${esc(r.mina)}" title="Desactivar asignación (los certificados se conservan)">Quitar asignación</button>`:'';
   return `<tr><td data-col="Trabajador"><strong>${esc(r.nombre)}</strong><small>DNI ${esc(r.dni)} · ${esc(r.cargo||'Sin cargo')}</small>${r.historico?'<span class="mini-label">Histórico</span>':''}</td>
    <td data-col="Unidad minera"><strong>${esc(mines)}</strong>${asignacion}<small>${r.certificados} certificado${r.certificados===1?'':'s'} asociados</small></td>
