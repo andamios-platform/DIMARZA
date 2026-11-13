@@ -145,6 +145,11 @@
 .bib-tipo{display:inline-flex;padding:4px 8px;border-radius:7px;background:#e8f4fb;color:#296c89;font-size:10px;font-weight:800;margin:8px 0 2px}
 .bib-tipo-extra{background:#f0f3f5;color:#697d89}.bib-tipo-na{background:#f0f0f2;color:#7c8790}
 .bib-sin-pdf{display:inline-block;background:#f0f4f7;color:#6b7f8e;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:750}
+.bib-attach-btn{margin-top:7px;display:inline-flex;gap:6px;align-items:center;border:1px solid #82cbbb;background:#e8faf4;color:#096b52;border-radius:8px;padding:8px 11px;font-size:11px;font-weight:800;cursor:pointer}
+.bib-attach-btn:hover{background:#d6f3e8}
+.bib-prefill{background:#edf8f4;border:1px solid #9bd9c0;color:#175c48;border-radius:10px;padding:13px 15px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.bib-prefill strong{display:block;font-size:13px}.bib-prefill small{display:block;font-size:11px;line-height:1.5;margin-top:4px}
+@media(max-width:680px){.bib-prefill{flex-direction:column;align-items:flex-start}}
 .bib-estado{display:inline-block;padding:5px 8px;border-radius:7px;font-size:10px;background:#e6f7ee;color:#127c4e;font-weight:800;margin-top:6px}
 .bib-estado.pend{background:#fff2dc;color:#a0640d}.bib-estado.na{background:#eef0f2;color:#697a86}
 .bib-more{display:flex;justify-content:center;margin:12px 25px 23px}
@@ -247,6 +252,7 @@
 <section class="card ac-tabpanel" id="registro" role="tabpanel" aria-labelledby="ac-tab-registro" hidden><div class="panel-head"><div class="card-title"><div class="card-title-icon">＋</div><div><div class="section-number">Registro documental · 01</div><h2>Registrar un certificado</h2><p>Selecciona un trabajador y registra un documento nuevo o una renovación desde Biblioteca.</p></div></div><div class="panel-actions"><button class="soft" onclick="cargar()">↻ Actualizar datos</button><button class="soft" onclick="salir()">Salir del módulo</button></div></div>
 <div class="content-area">
 <input type="hidden" id="renuevaId" value="">
+<div class="bib-prefill hidden" id="adjuntarMatrizBanner" role="status"><div><strong>📎 Adjuntar PDF a curso de Antapaccay</strong><small id="adjuntarMatrizInfo"></small><small>Completa los datos reales del documento. La fecha de la matriz no necesariamente corresponde a la emisión ni al vencimiento.</small></div><button type="button" class="soft" onclick="cancelarAdjuntoMatriz()">Cancelar vinculación</button></div>
 <div id="renovacionBanner" class="ren-banner hidden" role="status"><div><strong>↻ Renovación de certificado</strong><small id="renovacionInfo">El documento anterior pasará a histórico cuando registres el nuevo PDF.</small></div><button type="button" class="ren-btn" onclick="cancelarRenovacion()">Cancelar renovación</button></div>
 <div class="subsection highlight"><div class="subhead"><span>01</span> Asignación del certificado</div><div class="grid">
 <div class="field span4"><label for="minaRegistro">Unidad minera</label><select id="minaRegistro"><option value="">Seleccionar mina</option></select></div>
@@ -458,6 +464,7 @@ window.addEventListener('DOMContentLoaded',async()=>{ $('minaRegistro').addEvent
 
 let TOKEN='',CERTS=[],PERSONAL=[],MINAS=[],MINAS_INFO=[],CURSOS_PERFIL=[];
 let BIB_MATRIZ=[],BIB_EQUIV=new Map(),BIB_MATRIZ_FALLO='',BIB_LIMITE=45;
+let ADJUNTANDO_MATRIZ=null;
 let VIGENCIAS={emo:[],chile:[],resumen:{}},VIG_TIPO='EMO',VIG_EDITANDO='';
 let CONSOLIDADO=[],CONS_FILTRADOS=[],CONS_PAGINA=0;const CONS_POR_PAGINA=20;
 const $=id=>document.getElementById(id);
@@ -531,6 +538,41 @@ async function cargarCursosReportadosBiblioteca(){
 }
 function mostrarMasCursosBiblioteca(){BIB_LIMITE+=45;render();}
 
+function normalizarCursoBiblioteca(nombre){
+ return String(nombre||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
+}
+function claveCursoBiblioteca(dni,curso){return String(dni||'').trim()+'|'+normalizarCursoBiblioteca(curso);}
+function pdfActivoExactoMatriz(c){
+ return CERTS.find(x=>!x.historico&&x.mina==='ANTAPACCAY'&&claveCursoBiblioteca(x.dni,x.curso)===claveCursoBiblioteca(c.dni,c.curso))||null;
+}
+function cancelarAdjuntoMatriz(){
+ ADJUNTANDO_MATRIZ=null;
+ $('adjuntarMatrizBanner').classList.add('hidden');
+ $('curso').readOnly=false;
+}
+function adjuntarPdfMatriz(indice){
+ const c=BIB_MATRIZ[Number(indice)];
+ if(!c||c.clase==='NO_APLICA'){$('panelMsg').textContent='Curso no disponible para adjuntar.';return;}
+ if(pdfActivoExactoMatriz(c)){$('panelMsg').textContent='Este curso ya tiene PDF. Usa Ver PDF o Renovar en Biblioteca.';return;}
+ cancelarRenovacion();cancelarAdjuntoMatriz();
+ const esPersonal=PERSONAL.some(p=>String(p.dni)===String(c.dni));
+ $('esHistorico').checked=!esPersonal;alternarHistorico();
+ $('filtroCargo').value='';filtrarPersonal();
+ if(esPersonal){$('trabajador').value=String(c.dni);seleccionarTrabajador();}
+ else {$('dniHistorico').value=String(c.dni);$('nombreHistorico').value=c.nombre||'';}
+ $('minaRegistro').value='ANTAPACCAY';alternarCursoMatriz();
+ const equivalente=BIB_EQUIV.get(c.id)?.cursoDimarza||'';
+ $('cursoMatriz').value=CURSOS_PERFIL.some(x=>x.id===equivalente)?equivalente:'';
+ $('curso').value=c.curso||'';$('curso').readOnly=true;
+ ['emisor','emision','vencimiento','numero','pdf'].forEach(id=>$(id).value='');
+ $('visibilidad').value='PRIVADO';
+ ADJUNTANDO_MATRIZ={dni:String(c.dni),curso:c.curso||'',id:c.id};
+ $('adjuntarMatrizInfo').textContent=(c.nombre||'')+' · DNI '+c.dni+' · '+c.curso;
+ $('adjuntarMatrizBanner').classList.remove('hidden');
+ $('uploadMsg').textContent='Selecciona el PDF (máximo 4 MB) y completa institución y fechas del certificado.';
+ seleccionarPestanaAcreditaciones('registro');
+ $('pdf').focus({preventScroll:true});
+}
 function opcionesCursosPerfil(selected=''){
   return `<option value="">Sin vincular a requisito</option>`+CURSOS_PERFIL.map(c=>`<option value="${esc(c.id)}" ${c.id===selected?'selected':''}>${esc(c.nombre)}</option>`).join('');
 }
@@ -559,23 +601,28 @@ function render(){
    (!cargo||personalPorDni.get(String(c.dni))===cargo) &&
    (!mina||mina==='ANTAPACCAY') &&
    [c.dni,c.nombre,c.curso,c.perfil,c.estado,c.valor].join(' ').toUpperCase().includes(q));
- const cursosVisibles=matrizFiltrada.slice(0,BIB_LIMITE);
- $('conteoFiltrado').textContent=`${visibles.length} certificados PDF · ${matrizFiltrada.length} cursos de matriz reportados`+
-   (matrizFiltrada.length>cursosVisibles.length?` · mostrando ${cursosVisibles.length} cursos`:'');
+ const matrizConPdf=matrizFiltrada.filter(c=>!!pdfActivoExactoMatriz(c));
+ const matrizPendiente=matrizFiltrada.filter(c=>!pdfActivoExactoMatriz(c));
+ const cursosVisibles=matrizPendiente.slice(0,BIB_LIMITE);
+ $('conteoFiltrado').textContent=`${visibles.length} certificados PDF · ${matrizPendiente.length} cursos de matriz sin PDF`+
+   (matrizConPdf.length?` · ${matrizConPdf.length} vinculados por coincidencia exacta`:'')+
+   (matrizPendiente.length>cursosVisibles.length?` · mostrando ${cursosVisibles.length} pendientes`:'');
  const verMas=$('bibMostrarMas');
- verMas.hidden=matrizFiltrada.length<=cursosVisibles.length;
- verMas.textContent=`Mostrar más cursos ↓ (${matrizFiltrada.length-cursosVisibles.length} restantes)`;
+ verMas.hidden=matrizPendiente.length<=cursosVisibles.length;
+ verMas.textContent=`Mostrar más cursos ↓ (${matrizPendiente.length-cursosVisibles.length} restantes)`;
  const filasPdf=visibles.map(c=>{
    const libre=c.visibilidad==='PUBLICO';
    const opcionesMinas=crearOpcionesMinas(c.mina);
    const minaNombre=nombreMina(c.mina);
+   const matrizExacta=c.mina==='ANTAPACCAY'?BIB_MATRIZ.find(m=>claveCursoBiblioteca(m.dni,m.curso)===claveCursoBiblioteca(c.dni,c.curso)):null;
+   const subtituloMatriz=matrizExacta?`<span class="subline">Matriz Antapaccay · ${esc(matrizExacta.estado||'Sin estado')} · Reportado: ${esc(matrizExacta.fecha?formatearFecha(matrizExacta.fecha):matrizExacta.valor||'Sin fecha')}</span>`:'';
    const cursoMatriz=c.mina==='ANTAPACCAY'?`<select aria-label="Vincular a curso de matriz Antapaccay" data-matriz-id="${esc(c.id)}" class="table-select">${opcionesCursosPerfil(c.idCurso||'')}</select><button class="small-action" data-cambiar-matriz="${esc(c.id)}">Guardar curso</button>`:'<span class="subline">No aplica</span>';
    return `<tr class="${c.historico?'ren-row-old':''}">
      <td data-label="Titular" class="td-person"><strong>${esc(c.nombre)}</strong><span class="subline">DNI · ${esc(c.dni)}</span></td>
      <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong>
        <span class="ren-badge">PDF registrado</span>
        ${c.historico?`<span class="ren-badge historico">Histórico · reemplazado</span><span class="subline">Renovado por: ${esc(c.renovadoPor||'—')}</span>`:c.renovacionDe?`<span class="ren-badge">✓ Renovación actual</span>`:''}
-       <span class="subline">${esc(c.emisor)}</span><span class="subline">Emisión: ${esc(formatearFecha(c.emision))} · ${c.vencimiento?'Vence: '+esc(formatearFecha(c.vencimiento)):'Sin vencimiento registrado'}</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(c.id)}" aria-label="Ver certificado PDF de ${esc(c.curso)}">◉ Ver PDF</button><button type="button" class="btn-download" data-cert="${esc(c.id)}" aria-label="Descargar certificado PDF de ${esc(c.curso)}">↧ Descargar</button>${!c.historico?`<button type="button" class="ren-btn" data-renovar-cert="${esc(c.id)}" aria-label="Renovar certificado de ${esc(c.curso)}">↻ Renovar</button>`:''}</div></td>
+       <span class="subline">${esc(c.emisor)}</span><span class="subline">Emisión: ${esc(formatearFecha(c.emision))} · ${c.vencimiento?'Vence: '+esc(formatearFecha(c.vencimiento)):'Sin vencimiento registrado'}</span>${subtituloMatriz}<div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(c.id)}" aria-label="Ver certificado PDF de ${esc(c.curso)}">◉ Ver PDF</button><button type="button" class="btn-download" data-cert="${esc(c.id)}" aria-label="Descargar certificado PDF de ${esc(c.curso)}">↧ Descargar</button>${!c.historico?`<button type="button" class="ren-btn" data-renovar-cert="${esc(c.id)}" aria-label="Renovar certificado de ${esc(c.curso)}">↻ Renovar</button>`:''}</div></td>
      <td data-label="Mina"><span class="tag-neutral">${esc(minaNombre)}</span><select aria-label="Unidad minera del certificado" data-mina-id="${esc(c.id)}" class="table-select">${opcionesMinas}</select><button class="small-action" data-cambiar-mina="${esc(c.id)}">Guardar mina</button></td>
      <td data-label="Matriz">${cursoMatriz}</td>
      <td data-label="Permisos"><span class="status-badge ${libre?'public':'private'}">${libre?'Público autorizado':'Restringido'}</span><select aria-label="Visibilidad del PDF" data-visibilidad-id="${esc(c.id)}" class="table-select"><option value="PRIVADO" ${!libre?'selected':''}>Privado</option><option value="PUBLICO" ${libre?'selected':''}>Público autorizado</option></select><button class="small-action" data-cambiar="${esc(c.id)}">Guardar acceso</button></td>
@@ -589,7 +636,9 @@ function render(){
    const est=noAplica?'NO APLICA':c.estado||'SIN REGISTRO';
    const tipo=rel?'Requisito del perfil · relación'+(rel.equivalencia==='EQUIVALENCIA_PRELIMINAR'?' preliminar':''):'Curso adicional reportado';
    const relacionado=rel?CERTS.find(x=>!x.historico&&String(x.dni)===String(c.dni)&&x.mina==='ANTAPACCAY'&&x.idCurso===rel.cursoDimarza):null;
-   const acceso=relacionado?`<span class="bib-estado">PDF relacionado en DIMARZA</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(relacionado.id)}">◉ Ver PDF vinculado</button></div><span class="subline">La matriz original no contiene PDF; revisar equivalencia del certificado.</span>`:'<span class="bib-sin-pdf">Sin PDF adjunto</span><span class="subline">Registro informativo de la matriz</span>';
+   const acceso=relacionado?`<span class="bib-estado">PDF relacionado en DIMARZA</span><div class="pdf-actions"><button type="button" class="btn-preview" data-ver-cert="${esc(relacionado.id)}">◉ Ver PDF vinculado</button></div><span class="subline">La matriz original no contiene PDF; revisar equivalencia del certificado.</span>`:
+     (noAplica?'<span class="bib-sin-pdf">No aplica</span>':
+     `<span class="bib-sin-pdf">Sin PDF adjunto</span><span class="subline">Registro informativo de la matriz</span><button type="button" class="bib-attach-btn" data-adjuntar-pdf="${BIB_MATRIZ.indexOf(c)}">📎 Adjuntar PDF</button>`);
    return `<tr class="bib-row-matriz">
      <td data-label="Titular" class="td-person"><strong>${esc(c.nombre)}</strong><span class="subline">DNI · ${esc(c.dni)}</span></td>
      <td data-label="Capacitación" class="td-course"><strong>${esc(c.curso)}</strong><span class="bib-tipo ${rel?'':'bib-tipo-extra'}">Matriz Antapaccay · Sin PDF</span><span class="subline">Fecha / dato informado: ${esc(v)}</span><span class="bib-estado ${noAplica?'na':pendiente?'pend':''}">${esc(est)}</span></td>
@@ -608,6 +657,7 @@ function cancelarRenovacion(){
  $('btnGuardar').textContent='＋ Guardar certificado';
 }
 function iniciarRenovacionCertificado(id){
+ cancelarAdjuntoMatriz();
  const c=CERTS.find(x=>x.id===id);
  if(!c||c.historico){$('panelMsg').textContent='Selecciona el certificado actual para renovarlo.';return;}
  $('renuevaId').value=c.id;
@@ -632,6 +682,8 @@ function iniciarRenovacionCertificado(id){
  seleccionarPestanaAcreditaciones('registro');
 }
 $('tabla').addEventListener('click',async e=>{
+ const adjuntar=e.target.closest('button[data-adjuntar-pdf]');
+ if(adjuntar){adjuntarPdfMatriz(adjuntar.dataset.adjuntarPdf);return;}
  const renovar=e.target.closest('button[data-renovar-cert]');
  if(renovar){iniciarRenovacionCertificado(renovar.dataset.renovarCert);return;}
  const botonMina=e.target.closest('button[data-cambiar-mina]');
@@ -765,13 +817,28 @@ async function guardar(){
    const dni=hist?$('dniHistorico').value.trim():$('dni').value.trim();
    if(!/^\d{8}$/.test(dni)) throw Error('Selecciona un trabajador o registra un DNI histórico válido.');
    if(!hist && !PERSONAL.some(p=>p.dni===dni)) throw Error('Selecciona un trabajador de DATA DE PERSONAL.');
+   if(ADJUNTANDO_MATRIZ){
+     if(dni!==ADJUNTANDO_MATRIZ.dni||$('minaRegistro').value!=='ANTAPACCAY'||normalizarCursoBiblioteca($('curso').value)!==normalizarCursoBiblioteca(ADJUNTANDO_MATRIZ.curso)){
+       throw Error('Conserva el trabajador, la mina y el curso elegidos en Biblioteca; para otro registro, cancela la vinculación.');
+     }
+     if(pdfActivoExactoMatriz(ADJUNTANDO_MATRIZ))throw Error('Este curso ya tiene PDF. Usa Ver PDF o Renovar.');
+   }
    const unidadMinera=$('minaRegistro').value;
    if(!MINAS.includes(unidadMinera))throw Error('Selecciona una unidad minera o Certificados generales.');
    const d={dni,renuevaId:$('renuevaId').value,unidadMinera,idCurso:unidadMinera==='ANTAPACCAY'?$('cursoMatriz').value:'',nombreHistorico:hist?$('nombreHistorico').value:'',curso:$('curso').value,emisor:$('emisor').value,emision:$('emision').value,vencimiento:$('vencimiento').value,numero:$('numero').value,visibilidad:$('visibilidad').value,filename:f.name,base64};
    if(d.visibilidad==='PUBLICO' && !confirm('¿Publicar este certificado? Cualquier persona que conozca el DNI podrá visualizarlo; la visualización no impide guardar una copia. No publiques documentos sensibles.')) {return;}
    if(d.renuevaId && !confirm('¿Guardar esta renovación? El certificado anterior permanecerá en el historial y el nuevo será el principal.'))return;
    $('uploadMsg').textContent='Guardando PDF en Drive…';
-   const r=await api('guardarCertificado',TOKEN,d);anunciarCambioAcreditaciones();$('uploadMsg').textContent=(r.renovacion?'Renovación registrada. Certificado anterior conservado como histórico: ':'Certificado guardado: ')+r.id; $('pdf').value='';cancelarRenovacion();await cargar();
+   const desdeMatriz=!!ADJUNTANDO_MATRIZ;
+   const r=await api('guardarCertificado',TOKEN,d);
+   anunciarCambioAcreditaciones();
+   $('uploadMsg').textContent=(r.renovacion?'Renovación registrada. Certificado anterior conservado como histórico: ':'Certificado guardado: ')+r.id;
+   $('pdf').value='';cancelarRenovacion();if(desdeMatriz)cancelarAdjuntoMatriz();
+   await cargar();
+   if(desdeMatriz){
+     seleccionarPestanaAcreditaciones('biblioteca');
+     $('panelMsg').textContent='PDF adjuntado al curso '+d.curso+'. Biblioteca unifica el certificado con su registro informativo de matriz.';
+   }
  }catch(e){$('uploadMsg').textContent=msg(e)}finally{b.disabled=false}
 }
 
