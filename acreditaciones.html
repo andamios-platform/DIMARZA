@@ -737,29 +737,37 @@
     /** Cursos informados por Centinela, sin fingir que son PDF adjuntos. */
     function renderCentinelaEnBiblioteca(term){
       const lista=Array.isArray(centinelaActual?.cursos)?centinelaActual.cursos:[];
-      if(!lista.length||(minaActual&&minaActual!=='CENTINELA')||filtroActual!=='todos')return [];
+      if(!lista.length||(minaActual&&minaActual!=='CENTINELA')||filtroActual!=='todos')return {items:[],noAplica:''};
       const existentes=new Set(certificadosDeMina()
         .filter(c=>minaCertificado(c)==='CENTINELA')
         .map(c=>normalizarNombreCurso(c.curso)));
-      return lista.filter(c=>!existentes.has(normalizarNombreCurso(c.nombre)))
+      const filtrados=lista.filter(c=>!existentes.has(normalizarNombreCurso(c.nombre)))
         .filter(c=>!term||[c.nombre,c.estado,c.obligatorio?'obligatorio':'opcional','Centinela']
-          .join(' ').toLocaleLowerCase('es').includes(term))
-        .map(c=>{
-          const st=String(c.estado||'SIN_REGISTRO').toUpperCase();
-          const etiqueta={VIGENTE:'Vigente según reporte',VENCIDO:'Vencido según reporte',
-            PROGRAMADO:'Programado',NO_APLICA:'No aplica',FALTA:'Falta',
-            PENDIENTE:'Pendiente',EN_TRAMITE:'En trámite',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar';
-          const clase=st==='VIGENTE'?'reported':st==='NO_APLICA'?'not-applicable':'pending';
-          const tipo=c.obligatorio?'Obligatorio':'Opcional · no afecta el porcentaje';
-          const fecha=c.fechaReportada?'Fecha informada: '+fmtDate(c.fechaReportada):'Sin fecha informada';
-          return {nombre:c.nombre||'Curso Centinela',html:
-            '<article class="cert-item library-course">'+
-            '<div class="cert-icon">'+icon('calendar','icon-lg')+'</div>'+
-            '<div class="cert-body"><h4 class="cert-name">'+escapeHtml(c.nombre||'Curso')+'</h4>'+
-            '<div class="cert-issuer"><span>Centinela · '+escapeHtml(tipo)+' · sin PDF validado</span></div>'+
-            '<div class="cert-bottom"><div><span class="status-pill '+clase+'">'+escapeHtml(etiqueta)+
-            '</span> <span class="cert-date">'+escapeHtml(fecha)+'</span></div></div></div></article>'};
-        });
+          .join(' ').toLocaleLowerCase('es').includes(term));
+      const esNoAplica=c=>String(c.estado||'').trim().toUpperCase().replace(/\s+/g,'_')==='NO_APLICA';
+      const noAplican=filtrados.filter(esNoAplica);
+      const aplican=filtrados.filter(c=>!esNoAplica(c));
+      const filas=cursos=>cursos.map(c=>{
+        const st=String(c.estado||'SIN_REGISTRO').trim().toUpperCase().replace(/\s+/g,'_');
+        const etiqueta={VIGENTE:'Vigente según reporte',VENCIDO:'Vencido según reporte',
+          PROGRAMADO:'Programado',NO_APLICA:'No aplica',FALTA:'Falta',
+          PENDIENTE:'Pendiente',EN_TRAMITE:'En trámite',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar';
+        const clase=st==='VIGENTE'?'reported':st==='NO_APLICA'?'not-applicable':'pending';
+        const tipo=c.obligatorio?'Obligatorio':'Opcional · no afecta el porcentaje';
+        const fecha=c.fechaReportada?'Fecha informada: '+fmtDate(c.fechaReportada):'Sin fecha informada';
+        return {nombre:c.nombre||'Curso Centinela',html:
+          '<article class="cert-item library-course">'+
+          '<div class="cert-icon">'+icon('calendar','icon-lg')+'</div>'+
+          '<div class="cert-body"><h4 class="cert-name">'+escapeHtml(c.nombre||'Curso')+'</h4>'+
+          '<div class="cert-issuer"><span>Centinela · '+escapeHtml(tipo)+' · sin PDF validado</span></div>'+
+          '<div class="cert-bottom"><div><span class="status-pill '+clase+'">'+escapeHtml(etiqueta)+
+          '</span> <span class="cert-date">'+escapeHtml(fecha)+'</span></div></div></div></article>'};
+      });
+      return {
+        items:filas(aplican),
+        noAplica:noAplican.length?
+          `<details class="library-na"><summary>Ver ${noAplican.length} curso${noAplican.length===1?'':'s'} de Centinela marcado${noAplican.length===1?'':'s'} «No aplica»</summary>${filas(noAplican).map(c=>c.html).join('')}</details>`:''
+      };
     }
     /** Solo se fusionan nombres idénticos; no se equiparan cursos especializados automáticamente. */
     function normalizarNombreCurso(n){return String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();}
@@ -829,7 +837,7 @@
       const cursosMatriz=renderCursosEnBiblioteca(term,mostrarMatriz);
       const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(c=>normalizarNombreCurso(c.curso)));
       const cursosCentinela=renderCentinelaEnBiblioteca(term);
-      const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela]
+      const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela.items]
         .sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'}));
       const avisoVacio=term?'No hay cursos que coincidan con la búsqueda.':
         filtroActual==='disponibles'?'No hay documentos disponibles para esta selección.':
@@ -839,8 +847,8 @@
         minaActual==='CENTINELA' && centinelaCampoEnAPI && !centinelaActual?.cursos?.length?
           'El servidor de Acreditaciones respondió, pero no encontró cursos de Centinela para este DNI. Revisa la hoja ACREDITACION_ESTADOS y su implementación.':
         'Aún no hay capacitaciones registradas para este DNI.';
-      $('listado').innerHTML=unificados.map(c=>c.html).join('')+cursosMatriz.noAplica+
-        (!unificados.length&&!cursosMatriz.noAplica?`<div class="empty">${icon('file')}<div>${avisoVacio}</div></div>`:'');
+      $('listado').innerHTML=unificados.map(c=>c.html).join('')+cursosMatriz.noAplica+cursosCentinela.noAplica+
+        (!unificados.length&&!cursosMatriz.noAplica&&!cursosCentinela.noAplica?`<div class="empty">${icon('file')}<div>${avisoVacio}</div></div>`:'');
     }
     function feedback(text,isError=false){$('msg').textContent=text;$('msg').classList.toggle('error',isError);}
     function cerrarVistaPdf() {
