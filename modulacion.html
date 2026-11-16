@@ -2735,8 +2735,10 @@ async function cargarResponsables(){
   const supervisores =
     responsablesModulacion.filter(
       persona =>
-        normalizar(persona.cargo) ===
-        'supervisor andamiero'
+        [
+          'supervisor andamiero',
+          'supervisor junior andamiero'
+        ].includes(normalizar(persona.cargo))
     );
 
 
