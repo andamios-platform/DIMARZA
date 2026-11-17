@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Eliminar Herramientas | DIMARZA</title>
+<title>Baja de Herramientas | DIMARZA</title>
 
 <style>
 
@@ -577,6 +577,13 @@ h1{
   transform:translateY(-2px);
 }
 
+.modal{max-height:calc(100vh - 30px);overflow:auto}
+.baja-campos{display:grid;gap:12px;margin-top:17px}
+.baja-campos label{display:block;font-size:13px;font-weight:750;color:#334155;margin-bottom:5px}
+.baja-campos input,.baja-campos textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px 12px;color:#111827;font:inherit}
+.baja-campos textarea{resize:vertical;min-height:70px}
+.baja-historial{padding:17px 20px;margin:15px 0;background:#eef8f7;border:1px solid #bfe6dc;border-radius:12px;color:#205f59;font-size:14px}
+.baja-historial a{color:#03695e;text-decoration:underline;font-weight:800}
 .modal-boton:disabled{
   opacity:.65;
   cursor:not-allowed;
@@ -1045,11 +1052,11 @@ h1{
       </div>
 
       <h1>
-        ELIMINAR HERRAMIENTAS
+        BAJA DE HERRAMIENTAS
       </h1>
 
       <div class="subtitulo">
-        Búsqueda y eliminación definitiva de unidades registradas
+        Baja administrativa sin borrar filas del inventario
       </div>
 
     </div>
@@ -1090,6 +1097,7 @@ h1{
 
 </div>
 
+<div class="baja-historial"><strong>Historial de bajas:</strong> los registros se conservan en el maestro. <a href="https://docs.google.com/spreadsheets/d/1orei1518r8AB-gTwGJt1r0N-yaZPDqotcQuPqrYc-f0/edit#gid=1273664980" target="_blank" rel="noopener">Ver HISTORIAL_BAJAS</a>.</div>
 <div
   id="contador"
   class="contador"
@@ -1112,7 +1120,7 @@ h1{
 
   </div>
 
-   <!-- ELIMINACIÓN POR FECHA -->
+   <!-- BAJA POR FECHA -->
 
   <div class="eliminacion-fecha">
 
@@ -1121,7 +1129,7 @@ h1{
       <div>
 
         <h2>
-          Eliminar herramientas por fecha
+          Dar de baja herramientas por fecha
         </h2>
 
         <p>
@@ -1267,7 +1275,7 @@ h1{
         class="boton boton-eliminar-fecha"
         onclick="abrirModalEliminarFecha()"
       >
-        Eliminar herramientas de esta fecha
+        Registrar bajas de esta fecha
       </button>
 
     </div>
@@ -1291,11 +1299,11 @@ h1{
     <div class="modal-encabezado">
 
       <h3>
-        Eliminar herramienta
+        Dar de baja herramienta
       </h3>
 
       <p>
-        Confirma la eliminación definitiva de esta fila
+        Confirma la baja administrativa sin borrar la fila
       </p>
 
     </div>
@@ -1303,8 +1311,7 @@ h1{
     <div class="modal-contenido">
 
       <div class="advertencia">
-        Esta acción eliminará definitivamente la herramienta de
-        MAESTRO_HERRAMIENTAS. La fila no podrá recuperarse desde este módulo.
+        Se marcará ACTIVO = NO en MAESTRO_HERRAMIENTAS. La fila, los datos, el motivo y la fecha de modificación se conservarán.
       </div>
 
       <div class="modal-resumen">
@@ -1401,9 +1408,11 @@ h1{
         </div>
   
       </div>
-
+      <div class="baja-campos">
+       <div><label for="bajaResponsable">Responsable de la baja *</label><input id="bajaResponsable" maxlength="80" autocomplete="name" placeholder="Nombre y apellido"></div>
+       <div><label for="bajaMotivo">Motivo de la baja *</label><textarea id="bajaMotivo" maxlength="240" placeholder="Ej.: Equipo sustituido por el código 0944"></textarea></div>
+      </div>
     </div>
-
     <div class="modal-acciones">
 
       <button
@@ -1420,7 +1429,7 @@ h1{
         class="modal-boton modal-eliminar"
         onclick="confirmarEliminacion()"
       >
-        Eliminar definitivamente
+        Confirmar baja
       </button>
 
     </div>
@@ -1443,11 +1452,11 @@ h1{
     <div class="modal-encabezado">
 
       <h3>
-        Eliminar herramientas por fecha
+        Dar de baja herramientas por fecha
       </h3>
 
       <p>
-        Confirma la eliminación definitiva de todas las filas
+        Confirma las bajas sin borrar filas
       </p>
 
     </div>
@@ -1455,8 +1464,7 @@ h1{
     <div class="modal-contenido">
 
       <div class="advertencia">
-        Esta acción eliminará definitivamente todas las herramientas
-        registradas en la fecha seleccionada. Esta operación no se puede deshacer.
+        Cada herramienta quedará ACTIVO = NO y conservará su registro. Si alguna baja falla, el sistema informará cuáles se completaron.
       </div>
 
 <div class="modal-resumen">
@@ -1477,7 +1485,7 @@ h1{
   <div class="modal-fila">
 
     <span class="modal-etiqueta">
-      Cantidad a eliminar
+      Cantidad a dar de baja
     </span>
 
     <span
@@ -1509,13 +1517,16 @@ h1{
     </span>
 
     <span class="modal-valor">
-      🗑️ Eliminación masiva
+      📋 Bajas administrativas
     </span>
 
   </div>
 
 </div>
-
+    <div class="baja-campos">
+     <div><label for="bajaMasivaResponsable">Responsable de las bajas *</label><input id="bajaMasivaResponsable" maxlength="80" autocomplete="name" placeholder="Nombre y apellido"></div>
+     <div><label for="bajaMasivaMotivo">Motivo común de las bajas *</label><textarea id="bajaMasivaMotivo" maxlength="240" placeholder="Motivo aplicado a todos los registros seleccionados"></textarea></div>
+    </div>
     <div class="modal-acciones">
 
       <button
@@ -1532,7 +1543,7 @@ h1{
         class="modal-boton modal-eliminar"
         onclick="confirmarEliminarPorFecha()"
       >
-        Eliminar definitivamente
+        Confirmar baja
       </button>
 
     </div>
@@ -1849,6 +1860,7 @@ function renderizarHerramientas(herramientas){
 
       const estaAsignada =
         estadoNormalizado === 'ASIGNADO';
+      const estaInactiva=normalizarTexto(herramienta.activo)==='NO';
 
       const claseEstado =
         obtenerClaseEstado(
@@ -1958,12 +1970,12 @@ function renderizarHerramientas(herramientas){
             type="button"
             class="boton boton-eliminar"
             onclick="abrirModalEliminar(${index})"
-            ${estaAsignada ? 'disabled' : ''}
+            ${estaAsignada||estaInactiva?'disabled':''}
           >
             ${
               estaAsignada
-                ? 'No se puede eliminar'
-                : 'Eliminar herramienta'
+                ? 'Asignada · No se puede dar de baja'
+                : estaInactiva?'Ya dada de baja':'Registrar baja'
             }
           </button>
 
@@ -2038,16 +2050,17 @@ function abrirModalEliminar(index){
   ){
 
     mostrarMensaje(
-      'No se puede eliminar una herramienta asignada.',
+      'No se puede dar de baja una herramienta asignada.',
       'error'
     );
 
     return;
   }
 
-  herramientaPendiente = {
-    ...herramienta
-  };
+  if(normalizarTexto(herramienta.activo)==='NO'){mostrarMensaje('La herramienta ya está dada de baja.','error');return;}
+  document.getElementById('bajaResponsable').value='';
+  document.getElementById('bajaMotivo').value='';
+  herramientaPendiente = {...herramienta};
 
   document.getElementById(
     'modalId'
@@ -2714,8 +2727,8 @@ document.getElementById(
 
   botonEliminar.textContent =
     bloqueadas > 0
-      ? 'No se puede eliminar: existen herramientas asignadas'
-      : 'Eliminar las ' +
+      ? 'No se puede dar de baja: existen herramientas asignadas'
+      : 'Dar de baja las ' +
         eliminables +
         ' herramientas';
 
@@ -2740,7 +2753,7 @@ if(bloqueadas > 0){
     'advertencia-resumen-fecha permitida';
 
   advertenciaResumen.textContent =
-    '✓ Todas las herramientas encontradas están disponibles para eliminación.';
+    '✓ Todas las herramientas encontradas están disponibles para baja.';
 
 }
   ocultarMensajeFecha();
@@ -2817,7 +2830,7 @@ function abrirModalEliminarFecha(){
   if(totalBloqueadasFecha > 0){
 
     mostrarMensajeFecha(
-      'No se puede eliminar porque existen herramientas asignadas.',
+      'No se puede dar de baja: existen herramientas asignadas.',
       'error'
     );
 
@@ -2840,7 +2853,7 @@ function abrirModalEliminarFecha(){
     document.getElementById(
       'modalEstadoMasivo'
     ).textContent =
-      '✓ Validado: todas las herramientas están disponibles';
+      '✓ Validado: herramientas disponibles para baja';
     
     document.getElementById(
       'modalEliminarFecha'
