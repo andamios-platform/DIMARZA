@@ -614,8 +614,14 @@
         $('perfilCantidad').textContent=cen.completos+' de '+cen.total+' obligatorios';
         $('perfilProgreso').setAttribute('aria-valuenow',String(n));
         $('perfilBarra').style.width=n+'%';
+        const permisoHabilitante=vigenciasActuales.chile.find(v=>{
+          const dias=daysToExpiry(v.fechaVencimiento);
+          return /permiso de trabajo/i.test(String(v.tipoPermiso||'')) && dias!==null && dias>=0;
+        });
         $('perfilMensaje').textContent='Estado informado por Centinela: '+cen.completos+
-          ' de '+cen.total+' cursos base vigentes. No equivale a habilitación oficial.';
+          ' de '+cen.total+' cursos base vigentes. '+(permisoHabilitante
+            ?'Habilitado según permiso de trabajo vigente hasta '+fmtDate(permisoHabilitante.fechaVencimiento)+'.'
+            :'La habilitación se verifica mediante un permiso de trabajo vigente.');
         $('perfilRespaldo').textContent='Los cursos reportados no tienen necesariamente un PDF vinculado. Los 9 opcionales no afectan el porcentaje.';
         const listado=(cen.cursos||[]).filter(c=>c.obligatorio);
         $('perfilLista').innerHTML=listado.map((c,i)=>{
