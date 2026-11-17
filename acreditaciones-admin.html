@@ -49,7 +49,7 @@
 .cons-table .mini-label{display:inline-block;font-size:10px;font-weight:750;color:#487086;background:#edf4f8;padding:3px 7px;border-radius:6px;margin-top:7px}
 .cons-pct{font-weight:850;font-size:18px;color:#007e70}.cons-progress{height:6px;background:#e8eef1;border-radius:999px;overflow:hidden;margin-top:7px;width:120px;max-width:100%}.cons-progress>span{display:block;height:100%;background:linear-gradient(90deg,#10b4a3,#087c74)}
 .cons-chip{display:inline-block;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:800;white-space:nowrap}
-.cons-chip.VIGENTE,.cons-chip.PERFIL_COMPLETO{background:#e2f6ec;color:#147449}
+.cons-chip.VIGENTE,.cons-chip.PERFIL_COMPLETO,.cons-chip.HABILITADO{background:#e2f6ec;color:#147449}
 .cons-chip.URGENTE,.cons-chip.ALERTA,.cons-chip.REVISAR{background:#fff2d9;color:#935c12}
 .cons-chip.VENCIDO,.cons-chip.VENCIDOS{background:#ffe9e5;color:#b12d31}
 .cons-chip.PENDIENTES{background:#fff4e4;color:#986418}
@@ -219,7 +219,7 @@
         <tbody id="opTabla"><tr><td colspan="9">Preparando resumen de capacitación…</td></tr></tbody>
       </table>
     </div>
-    <p class="op-note" id="opNota">La capacitación reportada por la minera cuenta aunque no haya PDF en DIMARZA. La habilitación de ingreso y la disponibilidad para servicios se gestionan aparte.</p>
+    <p class="op-note" id="opNota">La capacitación reportada cuenta aunque falte el PDF en DIMARZA. En Centinela, el permiso de trabajo vigente acredita habilitación; la disponibilidad para servicios se gestiona aparte.</p>
   </section>
 
 <section class="card ac-tabpanel" id="consolidado-general" role="tabpanel" aria-labelledby="ac-tab-consolidado">
@@ -227,13 +227,13 @@
     <div class="card-title"><div class="card-title-icon">▦</div><div>
       <div class="section-number">Administración · Control general</div>
       <h2>Consolidado general de acreditaciones</h2>
-      <p>Todo el personal, capacitación por mina, EMO y permisos de Chile. No equivale a una acreditación oficial aprobada.</p>
+      <p>Todo el personal, capacitación por mina, EMO y permisos de Chile. En Centinela, un permiso de trabajo vigente acredita la habilitación del trabajador.</p>
     </div></div>
     <div class="panel-actions"><button type="button" class="soft" onclick="cargarConsolidado()">↻ Actualizar</button>
       <button type="button" class="btn" onclick="exportarConsolidado()">↓ Exportar a Excel (CSV)</button></div>
   </div>
   <div class="content-area cons-intro">
-    <div class="tiny-note">ℹ️ <span><strong>Asignación real vs. documentos:</strong> la mina de un certificado no demuestra dónde trabaja actualmente la persona. Confirma su unidad minera aquí. El <b>100 %</b> representa el perfil de capacitación documentado, nunca una aprobación oficial de la minera.</span></div>
+    <div class="tiny-note">ℹ️ <span><strong>Asignación real vs. documentos:</strong> la mina de un certificado no demuestra dónde trabaja actualmente la persona. Confirma su unidad minera aquí. El <b>100 %</b> representa el cumplimiento de cursos; en Centinela, la habilitación se comprueba con un permiso de trabajo vigente.</span></div>
     <div class="cons-assignment">
       <div class="subhead" style="margin-bottom:12px"><span>＋</span> Asignar un trabajador a una unidad minera</div>
       <div class="cons-assign-form">
@@ -248,7 +248,7 @@
     <div><label for="consBuscar">BUSCAR TRABAJADOR</label><input id="consBuscar" type="search" placeholder="Nombre o DNI…" oninput="renderConsolidado()"></div>
     <div><label for="consMina">UNIDAD MINERA</label><select id="consMina" onchange="renderConsolidado()"><option value="">Todas las unidades</option></select></div>
     <div><label for="consCargo">CARGO</label><select id="consCargo" onchange="renderConsolidado()"><option value="">Todos los cargos</option></select></div>
-    <div><label for="consEstado">SITUACIÓN</label><select id="consEstado" onchange="renderConsolidado()"><option value="">Todas</option><option value="VENCIDOS">Documentos vencidos</option><option value="PENDIENTES">Requisitos pendientes</option><option value="REVISAR">Vigencias por revisar</option><option value="PERFIL_COMPLETO">Perfil completo</option><option value="SIN_MATRIZ">Sin matriz configurada</option><option value="SIN_UNIDAD">Sin unidad registrada</option></select></div>
+    <div><label for="consEstado">SITUACIÓN</label><select id="consEstado" onchange="renderConsolidado()"><option value="">Todas</option><option value="VENCIDOS">Documentos vencidos</option><option value="PENDIENTES">Requisitos pendientes</option><option value="REVISAR">Vigencias por revisar</option><option value="HABILITADO">Habilitado · permiso vigente</option><option value="PERFIL_COMPLETO">Perfil completo</option><option value="SIN_MATRIZ">Sin matriz configurada</option><option value="SIN_UNIDAD">Sin unidad registrada</option></select></div>
   </div>
   <div class="cons-table-wrap"><table class="cons-table"><thead><tr><th>Trabajador</th><th>Unidad / vínculo</th><th>Capacitación</th><th>EMO</th><th>Permiso Chile</th><th>Situación</th><th>Detalle</th></tr></thead>
     <tbody id="consTabla"><tr><td colspan="7" class="cons-empty">Cargando personal…</td></tr></tbody></table></div>
@@ -1115,7 +1115,7 @@ function renderResumenOperativo(actualizado=''){
    ' figuran en el Consolidado con asignación confirmada. '+
    (t.soloMatriz?t.soloMatriz+' registros aparecen únicamente en matrices reportadas; no son asignaciones activas. ':'')+
    (CENTINELA_ERROR?' El reporte Centinela requiere publicar el complemento de Apps Script para mostrarse en la web. ':'')+
-   'La capacitación reportada por la mina cuenta aunque falte el PDF. El respaldo documental se muestra aparte y no reduce el avance de cursos. Este resumen no confirma habilitación oficial de ingreso ni disponibilidad para movilizarse.';
+   'La capacitación reportada por la mina cuenta aunque falte el PDF. El respaldo documental se muestra aparte y no reduce el avance de cursos. Para Centinela, un permiso de trabajo vigente acredita habilitación; la disponibilidad para movilizarse se gestiona aparte.';
 }
 document.addEventListener('click',ev=>{
   const boton=ev.target.closest('button[data-op-mina]');
@@ -1131,10 +1131,18 @@ document.addEventListener('click',ev=>{
 
 // === CONSOLIDADO GENERAL (solo RESIDENTE) ===
 function consChip(estado,contexto=''){
- const names={VIGENTE:'Vigente',URGENTE:'Vence en 30 días',ALERTA:'Vence en 31–60 días',VENCIDO:'Vencido',SIN_FECHA:'Sin fecha',SIN_REGISTRO:'Sin registro',NO_APLICA:'No aplica',VENCIDOS:'Vencimientos',PENDIENTES:'Pendientes',REVISAR:'Por revisar',PERFIL_COMPLETO:'Perfil completo',SIN_MATRIZ:'Sin matriz',SIN_UNIDAD:'Sin unidad'};
+ const names={VIGENTE:'Vigente',URGENTE:'Vence en 30 días',ALERTA:'Vence en 31–60 días',VENCIDO:'Vencido',SIN_FECHA:'Sin fecha',SIN_REGISTRO:'Sin registro',NO_APLICA:'No aplica',VENCIDOS:'Vencimientos',PENDIENTES:'Pendientes',REVISAR:'Por revisar',PERFIL_COMPLETO:'Perfil completo',HABILITADO:'Habilitado',SIN_MATRIZ:'Sin matriz',SIN_UNIDAD:'Sin unidad'};
  return `<span class="cons-chip ${esc(estado||'SIN_REGISTRO')}">${esc(names[estado]||contexto||'Por confirmar')}</span>`;
 }
 function consEsChile(mina){return MINAS_INFO.some(x=>x.valor===mina && x.pais==='CHILE');}
+ // Para Centinela, un permiso de trabajo vigente acredita la habilitación.
+ // El estado documental de los PDF se mantiene independiente.
+ function consPermisoHabilitanteVigente(r){
+  const p=r?.permiso;
+  return r?.mina==='CENTINELA' && !!p?.fecha &&
+   ['VIGENTE','ALERTA','URGENTE'].includes(String(p?.estado||'').toUpperCase());
+ }
+ function consSituacionVista(r){return consPermisoHabilitanteVigente(r)?'HABILITADO':r.situacion;}
 function prepararFiltrosConsolidado(){
  const current={mina:$('consMina').value,cargo:$('consCargo').value,persona:$('consPersona').value,unidad:$('consAsignarMina').value};
  const cargoList=[...new Set(CONSOLIDADO.map(x=>x.cargo).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
@@ -1188,7 +1196,7 @@ async function cargarConsolidado(){
 function renderConsolidado(){
  const q=($('consBuscar').value||'').trim().toUpperCase();
  const mina=$('consMina').value,cargo=$('consCargo').value,estado=$('consEstado').value;
- CONS_FILTRADOS=CONSOLIDADO.filter(r=>(!mina||r.mina===mina)&&(!cargo||r.cargo===cargo)&&(!estado||r.situacion===estado)&&
+ CONS_FILTRADOS=CONSOLIDADO.filter(r=>(!mina||r.mina===mina)&&(!cargo||r.cargo===cargo)&&(!estado||consSituacionVista(r)===estado)&&
    (!q||[r.nombre,r.dni,r.cargo,r.mina].join(' ').toUpperCase().includes(q)));
  const paginas=Math.max(1,Math.ceil(CONS_FILTRADOS.length/CONS_POR_PAGINA));
  CONS_PAGINA=Math.max(0,Math.min(CONS_PAGINA,paginas-1));
@@ -1213,7 +1221,10 @@ function renderConsolidado(){
     cursosReportadosPendientes.map(c=>'<li>'+esc(c.nombre||c.id)+' · '+esc(c.estado||'PENDIENTE')+'</li>').join('')+'</ul>';
   }
   if(!pf)det='<p class="muted">Para esta mina todavía no existe un reporte de cursos conectado.</p>';
-  else if(!det)det='<p class="muted">Cursos base reportados completos. Habilitación oficial no confirmada.</p>';
+  else if(!det)det='<p class="muted">Cursos base reportados completos.</p>';
+   if(consPermisoHabilitanteVigente(r)){
+    det='<p class="muted"><strong>Habilitado en Centinela según permiso de trabajo vigente hasta '+esc(formatearFecha(r.permiso.fecha))+'.</strong> El respaldo de los PDF se controla por separado.</p>'+det;
+   }
   const details=`<details class="cons-details"><summary>Ver detalle</summary>${det}</details>`;
   const asignacion=r.asignado?'<span class="mini-label">Asignación confirmada</span>':r.soloMatriz?'<span class="mini-label">Solo matriz informada · no asignado</span>':r.mina==='SIN ASIGNAR'?'<span class="mini-label">Pendiente de asignar</span>':'<span class="mini-label">Solo documentos asociados</span>';
   const desactivar=r.asignado?`<button type="button" class="small-action" data-quitar-mina="${esc(r.dni)}" data-mina="${esc(r.mina)}" title="Desactivar asignación (los certificados se conservan)">Quitar asignación</button>`:'';
@@ -1221,7 +1232,7 @@ function renderConsolidado(){
    <td data-col="Unidad minera"><strong>${esc(mines)}</strong>${asignacion}<small>${r.certificados} certificado${r.certificados===1?'':'s'} asociados</small></td>
    <td data-col="Capacitación">${pct}</td>
    <td data-col="EMO">${emos}</td><td data-col="Permiso Chile">${permiso}</td>
-   <td data-col="Situación">${consChip(r.situacion)}</td>
+   <td data-col="Situación">${consChip(consSituacionVista(r))}</td>
    <td data-col="Detalle"><div class="cons-actions">${details}${desactivar}</div></td></tr>`;
  }).join('')||'<tr><td colspan="7" class="cons-empty">No se encontraron trabajadores con esos filtros.</td></tr>';
  const unicos=new Set(CONS_FILTRADOS.map(r=>r.dni)).size;
@@ -1250,7 +1261,7 @@ function exportarConsolidado(){
   const h=['DNI','APELLIDOS Y NOMBRES','CARGO','UNIDAD MINERA','ASIGNACION CONFIRMADA','CERTIFICADOS','CUMPLIMIENTO CON PDF %','CURSOS CON PDF','CURSOS OBLIGATORIOS','CURSOS SIN PDF','CURSOS PDF SIN FECHA','CURSOS PDF VENCIDOS','ESTADO EMO','VENCIMIENTO EMO','PERMISO CHILE','VENCIMIENTO PERMISO','SITUACION','CURSOS SIN PDF','CUMPLIMIENTO REPORTADO ANTAPACCAY %','CURSOS REPORTADOS VIGENTES','CURSOS REPORTADOS EXIGIBLES'];
  const rows=CONS_FILTRADOS.map(r=>[r.dni,r.nombre,r.cargo,r.mina,r.asignado?'SI':'NO',r.certificados,
   r.perfil?.porcentaje??'',r.perfil?.completos??'',r.perfil?.total??'',r.perfil?.pendientes??'',r.perfil?.sinFecha??'',r.perfil?.vencidos??'',
-  r.emo.estado,r.emo.fecha||'',r.permiso.estado,r.permiso.fecha||'',r.situacion,
+  r.emo.estado,r.emo.fecha||'',r.permiso.estado,r.permiso.fecha||'',consSituacionVista(r),
   (r.perfil?.cursos||[]).filter(c=>c.estado==='PENDIENTE'||c.estado==='VENCIDO').map(c=>c.nombre).join(' | '),
   r.perfil?.reportado?.porcentaje??'',r.perfil?.reportado?.completos??'',r.perfil?.reportado?.total??'']);
  // CSV separado por punto y coma, BOM UTF-8 y escape de fórmula para Excel.
