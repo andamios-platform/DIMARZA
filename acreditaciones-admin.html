@@ -230,7 +230,7 @@
       <p>Todo el personal, capacitación por mina, EMO y permisos de Chile. En Centinela, un permiso de trabajo vigente acredita la habilitación del trabajador.</p>
     </div></div>
     <div class="panel-actions"><button type="button" class="soft" onclick="cargarConsolidado()">↻ Actualizar</button>
-      <button type="button" class="btn" onclick="exportarConsolidado()">↓ Exportar a Excel (CSV)</button></div>
+      <button type="button" class="btn" onclick="exportarConsolidado()">↓ Exportar a Excel</button></div>
   </div>
   <div class="content-area cons-intro">
     <div class="tiny-note">ℹ️ <span><strong>Asignación real vs. documentos:</strong> la mina de un certificado no demuestra dónde trabaja actualmente la persona. Confirma su unidad minera aquí. El <b>100 %</b> representa el cumplimiento de cursos; en Centinela, la habilitación se comprueba con un permiso de trabajo vigente.</span></div>
@@ -1256,20 +1256,154 @@ $('consTabla').addEventListener('click',async e=>{
  try{await api('desactivarAsignacion',TOKEN,dni,mina);anunciarCambioAcreditaciones();await cargarConsolidado();}
  catch(err){$('consMensaje').textContent=msg(err);b.disabled=false}
 });
-function exportarConsolidado(){
- if(!CONS_FILTRADOS.length){$('consMensaje').textContent='No hay registros para exportar.';return}
-  const h=['DNI','APELLIDOS Y NOMBRES','CARGO','UNIDAD MINERA','ASIGNACION CONFIRMADA','CERTIFICADOS','CUMPLIMIENTO CON PDF %','CURSOS CON PDF','CURSOS OBLIGATORIOS','CURSOS SIN PDF','CURSOS PDF SIN FECHA','CURSOS PDF VENCIDOS','ESTADO EMO','VENCIMIENTO EMO','PERMISO CHILE','VENCIMIENTO PERMISO','SITUACION','CURSOS SIN PDF','CUMPLIMIENTO REPORTADO ANTAPACCAY %','CURSOS REPORTADOS VIGENTES','CURSOS REPORTADOS EXIGIBLES'];
- const rows=CONS_FILTRADOS.map(r=>[r.dni,r.nombre,r.cargo,r.mina,r.asignado?'SI':'NO',r.certificados,
-  r.perfil?.porcentaje??'',r.perfil?.completos??'',r.perfil?.total??'',r.perfil?.pendientes??'',r.perfil?.sinFecha??'',r.perfil?.vencidos??'',
-  r.emo.estado,r.emo.fecha||'',r.permiso.estado,r.permiso.fecha||'',consSituacionVista(r),
-  (r.perfil?.cursos||[]).filter(c=>c.estado==='PENDIENTE'||c.estado==='VENCIDO').map(c=>c.nombre).join(' | '),
-  r.perfil?.reportado?.porcentaje??'',r.perfil?.reportado?.completos??'',r.perfil?.reportado?.total??'']);
- // CSV separado por punto y coma, BOM UTF-8 y escape de fórmula para Excel.
- const safe=v=>{let s=String(v??'');if(/^[=+@\-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};
- const csv='\ufeff'+[h,...rows].map(r=>r.map(safe).join(';')).join('\r\n');
- const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download='DIMARZA_Consolidado_Acreditaciones_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
- $('consMensaje').textContent='Exportación generada. Excel puede abrir el archivo CSV UTF-8.';
+// Generador Excel en el navegador: no modifica la base de datos ni el Apps Script.
+let excelJSLoader=null;
+function cargarExcelJS(){
+ if(window.ExcelJS)return Promise.resolve(window.ExcelJS);
+ if(excelJSLoader)return excelJSLoader;
+ const fuentes=[
+  'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'
+ ];
+ excelJSLoader=(async()=>{
+  for(const url of fuentes){
+   try{
+    await new Promise((resolve,reject)=>{
+     const script=document.createElement('script');
+     script.src=url;script.async=true;
+     script.onload=resolve;
+     script.onerror=()=>{script.remove();reject(new Error('No se pudo cargar la biblioteca Excel.'));};
+     document.head.appendChild(script);
+    });
+    if(window.ExcelJS)return window.ExcelJS;
+   }catch(_){}
+  }
+  throw new Error('No se pudo cargar el generador de Excel. Comprueba la conexión e inténtalo nuevamente.');
+ })().catch(err=>{excelJSLoader=null;throw err;});
+ return excelJSLoader;
+}
+function fechaExcelConsolidado(valor){
+ if(typeof valor!=='string')return valor||'';
+ const m=valor.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+ if(!m)return valor||'';
+ const dia=new Date(Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3])));
+ return dia.getUTCFullYear()===Number(m[1])&&dia.getUTCMonth()===Number(m[2])-1&&dia.getUTCDate()===Number(m[3])?dia:valor;
+}
+async function exportarConsolidado(){
+ if(!CONS_FILTRADOS.length){$('consMensaje').textContent='No hay registros para exportar.';return;}
+ const aviso=$('consMensaje');
+ const boton=document.querySelector('button[onclick="exportarConsolidado()"]');
+ const textoBoton=boton?.textContent||'↓ Exportar a Excel';
+ if(boton){boton.disabled=true;boton.textContent='Generando Excel…';}
+ aviso.textContent='Preparando el archivo Excel (.xlsx)…';
+ try{
+  const ExcelJS=await cargarExcelJS();
+  const encabezados=[
+   'DNI','APELLIDOS Y NOMBRES','CARGO','UNIDAD MINERA','ASIGNACIÓN CONFIRMADA',
+   'CERTIFICADOS','CUMPLIMIENTO CON PDF (%)','CURSOS CON PDF','CURSOS OBLIGATORIOS',
+   'CURSOS SIN PDF (CANT.)','CURSOS PDF SIN FECHA','CURSOS PDF VENCIDOS','ESTADO EMO',
+   'VENCIMIENTO EMO','ESTADO PERMISO CHILE','VENCIMIENTO PERMISO',
+   'SITUACIÓN','CURSOS PENDIENTES / VENCIDOS (DETALLE)','CUMPLIMIENTO REPORTADO POR MINA (%)',
+   'CURSOS REPORTADOS VIGENTES','CURSOS REPORTADOS EXIGIBLES'
+  ];
+  const libro=new ExcelJS.Workbook();
+  libro.creator='DIMARZA';
+  libro.subject='Consolidado general de acreditaciones';
+  libro.title='DIMARZA - Consolidado de Acreditaciones';
+  libro.created=new Date();
+  const hoja=libro.addWorksheet('Consolidado',{
+   views:[{state:'frozen',ySplit:5,xSplit:2,topLeftCell:'C6'}],
+   properties:{defaultRowHeight:19,showGridLines:false}
+  });
+  const anchos=[15,35,28,22,22,16,24,18,22,23,23,23,19,20,23,22,21,48,29,26,27];
+  hoja.columns=anchos.map((width,i)=>({key:'c'+(i+1),width}));
+  hoja.mergeCells(1,1,2,encabezados.length);
+  const titulo=hoja.getCell('A1');
+  titulo.value='DIMARZA  |  CONSOLIDADO GENERAL DE ACREDITACIONES';
+  titulo.font={name:'Aptos Display',bold:true,size:17,color:{argb:'FFFFFFFF'}};
+  titulo.alignment={vertical:'middle',horizontal:'left',indent:1};
+  for(let fila=1;fila<=2;fila++)hoja.getRow(fila).eachCell({includeEmpty:true},celda=>{
+   celda.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF10283C'}};
+  });
+  hoja.getRow(1).height=25;
+  hoja.getRow(2).height=22;
+  hoja.mergeCells(3,1,3,encabezados.length);
+  const meta=hoja.getCell('A3');
+  const fecha=new Date().toLocaleString('es-PE');
+  meta.value='Generado: '+fecha+'   |   Registros: '+CONS_FILTRADOS.length+'   |   Fuente: DIMARZA - Acreditaciones';
+  meta.font={name:'Aptos',size:11,color:{argb:'FF406173'}};
+  meta.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEAF5F4'}};
+  meta.alignment={vertical:'middle',indent:2};
+  hoja.getRow(3).height=27;
+  hoja.getRow(4).height=10;
+  const cabecera=hoja.getRow(5);
+  cabecera.values=encabezados;
+  cabecera.height=39;
+  cabecera.eachCell(celda=>{
+   celda.font={name:'Aptos',bold:true,size:10,color:{argb:'FFFFFFFF'}};
+   celda.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF126E72'}};
+   celda.alignment={vertical:'middle',horizontal:'center',wrapText:true};
+   celda.border={bottom:{style:'thin',color:{argb:'FF0A5157'}}};
+  });
+  const camposEnteros=new Set([6,8,9,10,11,12,20,21]);
+  const camposPct=new Set([7,19]);
+  const camposFecha=new Set([14,16]);
+  const estadoColor={
+   HABILITADO:['FFE2F6EC','FF147449'],
+   VIGENTE:['FFE2F6EC','FF147449'],
+   URGENTE:['FFFFF1D9','FF9A610B'],
+   ALERTA:['FFFFF6DC','FF926D16'],
+   VENCIDO:['FFFFE9E5','FFB12D31'],
+   PENDIENTES:['FFFFF2DD','FF986418'],
+   REVISAR:['FFFFF2DD','FF986418']
+  };
+  for(let i=0;i<CONS_FILTRADOS.length;i++){
+   const r=CONS_FILTRADOS[i],perfil=r.perfil||{},rep=perfil.reportado||{};
+   const pendiente=(perfil.cursos||[]).filter(c=>['PENDIENTE','VENCIDO'].includes(c.estado))
+    .map(c=>c.nombre).join(' | ');
+   const datos=[
+    String(r.dni||''),r.nombre||'',r.cargo||'',r.mina||'',r.asignado?'SI':'NO',
+    r.certificados??'',perfil.porcentaje==null?'':Number(perfil.porcentaje)/100,
+    perfil.completos??'',perfil.total??'',perfil.pendientes??'',perfil.sinFecha??'',perfil.vencidos??'',
+    r.emo?.estado||'',fechaExcelConsolidado(r.emo?.fecha||''),
+    r.permiso?.estado||'',fechaExcelConsolidado(r.permiso?.fecha||''),
+    consSituacionVista(r)||'',pendiente,rep.porcentaje==null?'':Number(rep.porcentaje)/100,
+    rep.completos??'',rep.total??''
+   ];
+   const fila=hoja.addRow(datos);
+   fila.height=23;
+   fila.eachCell({includeEmpty:true},(celda,col)=>{
+    celda.font={name:'Aptos',size:10,color:{argb:'FF24394B'}};
+    celda.alignment={vertical:'middle',wrapText:false};
+    if(i%2===1)celda.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F8F9'}};
+    if(camposEnteros.has(col)&&typeof celda.value==='number')celda.numFmt='0';
+    if(camposPct.has(col)&&typeof celda.value==='number')celda.numFmt='0%';
+    if(camposFecha.has(col)&&celda.value instanceof Date)celda.numFmt='dd/mm/yyyy';
+    if([13,15,17].includes(col)){
+     const colores=estadoColor[String(celda.value||'').toUpperCase()];
+     if(colores){
+      celda.fill={type:'pattern',pattern:'solid',fgColor:{argb:colores[0]}};
+      celda.font={name:'Aptos',size:10,bold:true,color:{argb:colores[1]}};
+     }
+    }
+   });
+   fila.getCell(1).numFmt='@'; // DNI: texto, conserva ceros iniciales
+  }
+  hoja.autoFilter={from:{row:5,column:1},to:{row:Math.max(6,5+CONS_FILTRADOS.length),column:encabezados.length}};
+  hoja.pageSetup={fitToPage:true,fitToWidth:1,fitToHeight:0,orientation:'landscape',paperSize:9};
+  const bytes=await libro.xlsx.writeBuffer();
+  const archivo=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(archivo),enlace=document.createElement('a');
+  enlace.href=url;
+  enlace.download='DIMARZA_Consolidado_Acreditaciones_'+new Date().toISOString().slice(0,10)+'.xlsx';
+  document.body.appendChild(enlace);enlace.click();enlace.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+  aviso.textContent='Archivo Excel (.xlsx) generado con '+CONS_FILTRADOS.length+' registros, filtros y formato.';
+ }catch(err){
+  aviso.textContent='No se pudo generar el Excel: '+(err?.message||String(err));
+ }finally{
+  if(boton){boton.disabled=false;boton.textContent=textoBoton;}
+ }
 }
 
 // === CONTROL DE VIGENCIAS: SOLO PARA SESION RESIDENTE ===
