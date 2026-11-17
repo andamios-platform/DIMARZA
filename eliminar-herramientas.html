@@ -1550,6 +1550,8 @@ h1{
 const WEB_APP_URL =
   'https://script.google.com/macros/s/AKfycbzfNm5RDpJOmMp-r5K1Glgg30zRc_bbCeoo6NZUK5zXVF8LM1xg2_Fh0cK6c1aNf_Mo/exec';
 
+// Endpoint no destructivo, utilizado por Actualizar Herramientas.
+const WEB_APP_ACTUALIZAR_URL = 'https://script.google.com/macros/s/AKfycbxmmUWQPZB2UC38RSlEozhSaXItSGEEABC5qjcD7Mn7_pJoy9YLbcKbZTW_VsbJOt8JyQ/exec';
 let herramientasActuales = [];
 let herramientaPendiente = null;
 let herramientasFechaActuales = [];
@@ -1557,6 +1559,39 @@ let fechaMasivaActual = '';
 let totalEliminablesFecha = 0;
 let totalBloqueadasFecha = 0;
 
+
+
+async function bajaSolicitar_(accion,parametros={}){
+ const query=new URLSearchParams({action:accion,...parametros,t:String(Date.now())});
+ const respuesta=await fetch(WEB_APP_ACTUALIZAR_URL+'?'+query.toString());
+ if(!respuesta.ok)throw new Error('No se pudo conectar con el servicio de actualización.');
+ const datos=await respuesta.json();
+ if(!datos||!datos.ok)throw new Error(datos?.message||'El servidor rechazó la operación.');
+ return datos;
+}
+async function bajaRegistrar_(id,motivo,responsable,codigoEsperado){
+ if(!String(id||'').trim())throw new Error('Falta el ID de la herramienta.');
+ const detalle=await bajaSolicitar_('obtenerHerramientaActualizar',{id:String(id)});
+ const herramienta=detalle.herramienta;
+ if(!herramienta||String(herramienta.id)!==String(id))throw new Error('No se encontró la herramienta '+id+'.');
+ if(normalizarTexto(herramienta.activo)==='NO')throw new Error('La herramienta '+id+' ya se encuentra dada de baja.');
+ if(normalizarTexto(herramienta.estado)==='ASIGNADO')throw new Error('La herramienta '+id+' está asignada; primero registra su devolución.');
+ if(codigoEsperado!==undefined&&normalizarTexto(herramienta.codigo||'S/C')!==normalizarTexto(codigoEsperado||'S/C'))
+  throw new Error('El código de '+id+' cambió. Actualiza la búsqueda antes de registrar la baja.');
+ const razon='BAJA ADMINISTRATIVA | Motivo: '+motivo+' | Responsable: '+responsable;
+ if(razon.length>450)throw new Error('El motivo es demasiado extenso.');
+ const payload={id:herramienta.id,codigo:herramienta.codigo||'S/C',serie:herramienta.serie||'S/S',
+  marca:herramienta.marca||'',caja:herramienta.caja||'SIN ASIGNAR',activo:'NO',motivo:razon};
+ return await bajaSolicitar_('actualizarHerramienta',{payload:JSON.stringify(payload)});
+}
+function bajaDatosFormulario_(masiva=false){
+ const r=document.getElementById(masiva?'bajaMasivaResponsable':'bajaResponsable');
+ const m=document.getElementById(masiva?'bajaMasivaMotivo':'bajaMotivo');
+ const responsable=limpiarTexto(r?.value||''),motivo=limpiarTexto(m?.value||'');
+ if(!responsable){r?.focus();throw new Error('Indica el responsable que registra la baja.');}
+ if(!motivo){m?.focus();throw new Error('Indica el motivo de la baja.');}
+ return {responsable,motivo};
+}
 
 /* =========================================================
    INICIO
@@ -2074,103 +2109,20 @@ function cerrarModalEliminar(){
 ========================================================= */
 
 async function confirmarEliminacion(){
-
-  if(!herramientaPendiente){
-    return;
-  }
-
-  const herramienta = {
-    ...herramientaPendiente
-  };
-
-  const boton =
-    document.getElementById(
-      'btnConfirmarEliminar'
-    );
-
-  const textoOriginal =
-    boton.textContent;
-
-  try{
-
-    boton.disabled = true;
-    boton.textContent = 'Eliminando...';
-
-    const url =
-      WEB_APP_URL +
-      '?action=eliminarHerramienta' +
-      '&id=' +
-      encodeURIComponent(
-        herramienta.id
-      ) +
-      '&t=' +
-      Date.now();
-
-    const respuesta = await fetch(url);
-
-    if(!respuesta.ok){
-      throw new Error(
-        'No se pudo conectar con el servidor.'
-      );
-    }
-
-    const resultado =
-      await respuesta.json();
-
-    if(!resultado.ok){
-      throw new Error(
-        resultado.message ||
-        'No se pudo eliminar la herramienta.'
-      );
-    }
-
-    document.getElementById(
-      'modalEliminar'
-    ).classList.remove('activo');
-
-    herramientaPendiente = null;
-
-    mostrarMensaje(
-      '✅ Herramienta eliminada correctamente: ' +
-      obtenerNombreCorto(
-        herramienta.item
-      ) +
-      ' | ' +
-      (
-        herramienta.codigo ||
-        herramienta.serie ||
-        herramienta.id
-      ),
-      'exito'
-    );
-
-    const termino = limpiarTexto(
-      document.getElementById(
-        'terminoBusqueda'
-      ).value
-    );
-
-    await buscarHerramientas(termino);
-
-  }catch(error){
-
-    console.error(error);
-
-    mostrarMensaje(
-      error.message,
-      'error'
-    );
-
-  }finally{
-
-    boton.disabled = false;
-    boton.textContent = textoOriginal;
-
-  }
-
+ if(!herramientaPendiente)return;
+ let datos;
+ try{datos=bajaDatosFormulario_();}catch(err){mostrarMensaje(err.message,'error');return;}
+ const herramienta={...herramientaPendiente};
+ const boton=document.getElementById('btnConfirmarEliminar'),original=boton.textContent;
+ try{
+  boton.disabled=true;boton.textContent='Registrando baja…';
+  await bajaRegistrar_(herramienta.id,datos.motivo,datos.responsable,herramienta.codigo);
+  cerrarModalEliminar();
+  await buscarHerramientas(limpiarTexto(document.getElementById('terminoBusqueda').value));
+  mostrarMensaje('✅ Baja registrada sin borrar filas: ID '+herramienta.id+' · Código '+(herramienta.codigo||'S/C')+'. Consulta HISTORIAL_BAJAS.','exito');
+ }catch(error){console.error(error);mostrarMensaje('No se confirmó la baja: '+error.message,'error');}
+ finally{boton.disabled=false;boton.textContent=original;}
 }
-
-
 /* =========================================================
    NOMBRES CORTOS
 ========================================================= */
@@ -2908,152 +2860,26 @@ function cerrarModalEliminarFecha(){
 
 }
 async function confirmarEliminarPorFecha(){
-
-  const boton=
-    document.getElementById(
-      "btnConfirmarEliminarFecha"
-    );
-
-  const textoOriginal=
-    boton.innerHTML;
-
-  try{
-
-    boton.disabled=true;
-
-    boton.innerHTML=
-      "Eliminando...";
-
-    const respuesta=
-      await fetch(
-
-        WEB_APP_URL+
-
-        "?action=eliminarHerramientasPorFecha"+
-
-        "&fecha="+
-
-        encodeURIComponent(
-          fechaMasivaActual
-        )+
-
-        "&t="+
-
-        Date.now()
-
-      );
-
-    if(!respuesta.ok){
-  throw new Error(
-    'No se pudo conectar con el servidor.'
-  );
+ let datos;
+ try{datos=bajaDatosFormulario_(true);}catch(err){mostrarMensajeFecha(err.message,'error');return;}
+ if(!fechaMasivaActual||totalBloqueadasFecha>0||totalEliminablesFecha<=0)return;
+ const boton=document.getElementById('btnConfirmarEliminarFecha'),original=boton.innerHTML;
+ let completadas=0;const errores=[];
+ try{
+  boton.disabled=true;
+  const pendientes=herramientasFechaActuales.filter(h=>h.eliminable!==false&&normalizarTexto(h.activo)!=='NO');
+  for(let i=0;i<pendientes.length;i++){
+   const h=pendientes[i];boton.textContent='Registrando '+(i+1)+' de '+pendientes.length+'…';
+   try{await bajaRegistrar_(h.id,datos.motivo,datos.responsable,h.codigo);completadas++;}
+   catch(error){errores.push(String(h.id||'?')+': '+error.message);}
+  }
+  cerrarModalEliminarFecha();
+  await buscarPorFecha();
+  mostrarMensajeFecha(completadas+' de '+pendientes.length+' bajas registradas (sin borrar filas).'+
+    (errores.length?' Pendientes/errores: '+errores.slice(0,4).join(' | '):' Consulta HISTORIAL_BAJAS.'),errores.length?'error':'info');
+ }catch(err){console.error(err);mostrarMensajeFecha('Proceso interrumpido; '+completadas+' bajas confirmadas. '+err.message,'error');}
+ finally{boton.disabled=false;boton.innerHTML=original;}
 }
-
-    const datos=
-      await respuesta.json();
-
-    if(!datos.ok){
-
-      throw new Error(
-        datos.message
-      );
-
-    }
-
-    cerrarModalEliminarFecha();
-
-    mostrarMensaje(
-      "✅ Se eliminaron correctamente " +
-      datos.totalEliminadas +
-      " herramienta(s) registradas el " +
-      datos.fecha +
-      ".",
-      "exito"
-    );
-    document.getElementById(
-      "resultadoFecha"
-    ).classList.remove(
-      "activo"
-    );
-
-    document.getElementById(
-      "tablaFechaBody"
-    ).innerHTML="";
-
-    document.getElementById(
-      "fechaEliminar"
-    ).value="";
-
-    document.getElementById(
-  "btnEliminarFecha"
-).textContent =
-  "Eliminar herramientas de esta fecha";
-
-document.getElementById(
-  "btnEliminarFecha"
-).disabled = true;
-
-document.getElementById(
-  'totalFechaNumero'
-).textContent = '0';
-
-document.getElementById(
-  'eliminablesFechaNumero'
-).textContent = '0';
-
-document.getElementById(
-  'bloqueadasFechaNumero'
-).textContent = '0';
-
-document.getElementById(
-  'fechaSeleccionadaTexto'
-).textContent = '—';
-
-const advertenciaResumen =
-  document.getElementById(
-    'advertenciaResumenFecha'
-  );
-
-advertenciaResumen.className =
-  'advertencia-resumen-fecha';
-
-advertenciaResumen.textContent = '';
-
-document.getElementById(
-  'modalEstadoMasivo'
-).textContent =
-    '✓ Validado: todas las herramientas están disponibles';
-
-ocultarMensajeFecha();
-
-    totalEliminablesFecha=0;
-    totalBloqueadasFecha=0;
-    herramientasFechaActuales=[];
-    fechaMasivaActual="";
-
-  }
-
-  catch(error){
-
-    mostrarMensajeFecha(
-      error.message,
-      "error"
-    );
-
-  }
-
-  finally{
-
-    boton.disabled=false;
-
-    boton.innerHTML=
-      textoOriginal;
-
-  }
-
-}
-
-
 /* =========================================================
    MENSAJES
 ========================================================= */
