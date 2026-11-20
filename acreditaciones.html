@@ -74,6 +74,8 @@
     .result-title .eyebrow{margin-bottom:9px}
     .result-title h2{margin:0;font-size:clamp(24px,3.2vw,36px);line-height:1.2;letter-spacing:-.035em}
     .result-title p{font-size:13px;color:#b3c8d5;margin:10px 0 0}
+    .result-title .worker-name{font-size:clamp(16px,1.75vw,21px);line-height:1.35;font-weight:800;color:#ffffff;margin:12px 0 0;overflow-wrap:anywhere;letter-spacing:-.015em}
+    .result-title .worker-name[hidden]{display:none}
     .result-summary .btn-new{align-self:start;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:white;border-radius:9px;padding:10px 13px;font-size:12px;font-weight:750;white-space:nowrap}
     .result-summary .btn-new:hover{background:rgba(255,255,255,.17)}
     .result-grid{display:grid;grid-template-columns:minmax(0,1.66fr) minmax(260px,.9fr);gap:18px;margin-top:20px;align-items:start}
@@ -321,7 +323,7 @@
     <section id="dashboard" class="hidden" aria-label="Resultados">
       <div class="result-summary">
         <div class="result-orb"><div><div id="numeroPrincipal" class="big">0</div><small>registros</small></div></div>
-        <div class="result-title"><div class="eyebrow">Consulta realizada</div><h2>Tu biblioteca documental</h2><p id="dniOculto">DNI terminado en ••••</p><p class="refresh-meta" id="actualizacionEstado" role="status" aria-live="polite">Consultando registros…</p></div>
+        <div class="result-title"><div class="eyebrow">Consulta realizada</div><h2>Tu biblioteca documental</h2><p class="worker-name" id="nombreTrabajador" hidden></p><p id="dniOculto">DNI terminado en ••••</p><p class="refresh-meta" id="actualizacionEstado" role="status" aria-live="polite">Consultando registros…</p></div>
         <div class="summary-actions"><button class="btn-new primary-refresh" id="actualizarDatos" type="button" title="Consultar nuevamente los registros sin salir"><svg class="icon"><use href="#i-refresh"/></svg>Actualizar datos</button><button class="btn-new" id="nuevaConsulta" type="button">Otro DNI</button></div>
       </div>
       <section class="panel profile-panel hidden" id="perfilCapacitacion" aria-label="Cumplimiento de capacitación Antapaccay">
@@ -530,6 +532,35 @@
       const hora=new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
       $('actualizacionEstado').textContent='Datos actualizados a las '+hora+' · actualización automática al regresar y cada 60 s';
     }
+    // La identidad se toma únicamente de los datos recibidos para el DNI consultado.
+    // No se cargan padrones ni datos personales de otros trabajadores en esta página.
+    function nombreTitularConsulta(data) {
+      const certs=Array.isArray(data?.certificados)?data.certificados:[];
+      const nombreDe=(obj,campos)=>{
+        if(!obj||typeof obj!=='object'||Array.isArray(obj))return '';
+        for(const campo of campos){
+          const texto=String(obj[campo]??'').replace(/\s+/g,' ').trim();
+          if(texto&&/[A-Za-zÁÉÍÓÚÑáéíóúñ]/.test(texto)&&
+             texto.split(/\s+/).length>=2&&
+             !/^(SIN (NOMBRE|DATOS|REGISTRO)|NO DISPONIBLE|PERSONAL REPORTADO|TRABAJADOR|N A)/i.test(texto)){
+            return texto;
+          }
+        }
+        return '';
+      };
+      const campos=['apellidosYNombres','apellidos_y_nombres','apellidosNombres',
+        'nombreCompleto','nombreTrabajador','nombreTitular','nombresCompletos','nombre'];
+      return nombreDe(data?.trabajador,campos)||
+        nombreDe(data?.personal,campos)||
+        nombreDe(data?.persona,campos)||
+        nombreDe(data,campos)||
+        nombreDe(data?.centinelaReportada,campos)||
+        nombreDe(data?.perfilCapacitacion,campos)||
+        nombreDe(data?.matrizReportada,campos)||
+        certs.map(c=>nombreDe(c,['nombreTrabajador','nombreTitular',
+          'apellidosYNombres','apellidosNombres','nombreCompleto','nombre'])).find(Boolean)||
+        '';
+    }
     function aplicarDatosConsulta(data,conservarFiltros=false) {
       certificadosActuales=Array.isArray(data.certificados)?data.certificados:[];
       vigenciasActuales={
@@ -550,6 +581,9 @@
         cerrarVistaPdf();
       }
       prepararSelectorMinas(conservarFiltros);
+      const titular=nombreTitularConsulta(data);
+      $('nombreTrabajador').textContent=titular;
+      $('nombreTrabajador').hidden=!titular;
       $('dniOculto').textContent='Consulta asociada al DNI ••••'+DNI_CONSULTADO.slice(-4);
       renderCertificados();
       lastRefreshAt=Date.now();
@@ -1271,7 +1305,7 @@
       lastRefreshAt=0;
       document.body.classList.remove('has-results');$('dashboard').classList.add('hidden');
       $('featureCards').classList.remove('hidden');$('landingNote').classList.remove('hidden');
-      $('dni').value='';$('loginMsg').textContent='';$('busqueda').value='';feedback('');
+      $('dni').value='';$('loginMsg').textContent='';$('busqueda').value='';$('nombreTrabajador').textContent='';$('nombreTrabajador').hidden=true;feedback('');
       window.scrollTo({top:0,behavior:'smooth'});$('dni').focus();
     }
     $('formConsulta').addEventListener('submit',entrar);
