@@ -863,14 +863,19 @@
       return String(b.vencimiento||'').localeCompare(String(a.vencimiento||''));
     }
     function cursoMatrizRelacionadoCertificado(c) {
-      // Relación específica proporcionada por el área de Andamios:
-      // este certificado PDF corresponde a TRAB. EN ALTURA (MAT-05), no al MAT-19.
+      // Correspondencias de certificados confirmadas por el área de Andamios para Antapaccay.
+      // MAT-19 (PERSONA COMPETENTE TRABAJO EN ALTURA) es otro concepto: no fusionarlo.
       if(minaCertificado(c)!=='ANTAPACCAY')return null;
       const nombre=normalizarNombreCurso(c.curso);
-      if(nombre!=='PERSONA COMPETENTE PARA TRABAJOS EN ALTURA')return null;
+      const codigosConfirmados={
+        'PERSONA COMPETENTE PARA TRABAJOS EN ALTURA':'MAT-05',
+        'PERSONA COMPETENTE PARA TRABAJOS EN ESPACIOS CONFINADOS':'MAT-06',
+        'CURSO DE SUPERVISOR DE IZAJES':'MAT-10'
+      };
+      const idMatriz=codigosConfirmados[nombre];
+      if(!idMatriz)return null;
       return (matrizActual?.cursos||[]).find(m=>
-        String(m.id||'').toUpperCase()==='MAT-05'||
-        normalizarNombreCurso(m.nombre)==='TRAB EN ALTURA')||null;
+        String(m.id||'').toUpperCase()===idMatriz)||null;
     }
     function nombreEquivalenteEnMatriz(c) {
       const relacionado=cursoMatrizRelacionadoCertificado(c);
@@ -925,11 +930,18 @@
         if(exp!==null&&exp<0){statusText='Fecha vencida';statusClass='expired';}
         else if(exp!==null&&exp<=30){statusText='Próximo a vencer';statusClass='warning';}
         const buttons=available?`<div class="cert-actions"><button class="btn-secondary" type="button" data-view="${escapeHtml(c.id)}">${icon('eye')}Ver PDF</button></div>`:'';
+        // Las dos fechas proceden de fuentes distintas. Si difieren, mostrar ambas.
+        // El semáforo sigue usando primero el vencimiento propio del certificado.
+        const fechaMatriz=relacionado?.fechaReportada||'';
         const fechaInfo=c.vencimiento?'Vence el certificado: '+fmtDate(c.vencimiento):
-          relacionado?.fechaReportada?'Vence según matriz Antapaccay: '+fmtDate(relacionado.fechaReportada):
+          fechaMatriz?'Vence según matriz Antapaccay: '+fmtDate(fechaMatriz):
           'Sin fecha de vencimiento registrada';
+        const fechaAdicional=c.vencimiento&&fechaMatriz&&c.vencimiento!==fechaMatriz
+          ?'<span class="cert-date">Vence según matriz Antapaccay: '+escapeHtml(fmtDate(fechaMatriz))+'</span>':'';
+        const avisoDiferencia=c.vencimiento&&fechaMatriz&&c.vencimiento!==fechaMatriz
+          ?'<span class="cert-date">Fechas distintas según sus fuentes</span>':'';
         const equivalencia=relacionado?`<span>·</span><span>Equivalente a ${escapeHtml(relacionado.nombre||'TRAB. EN ALTURA')} en Antapaccay</span>`:'';
-        return {nombre:nombreVisibleCertificado(c)||"Certificado sin nombre",dias:exp,html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(nombreVisibleCertificado(c)||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span>${equivalencia}</div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${escapeHtml(fechaInfo)}</span></div>${buttons}</div></div></article>`};
+        return {nombre:nombreVisibleCertificado(c)||"Certificado sin nombre",dias:exp,html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(nombreVisibleCertificado(c)||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span>${equivalencia}</div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${escapeHtml(fechaInfo)}</span>${fechaAdicional}${avisoDiferencia}</div>${buttons}</div></div></article>`};
       });
       const cursosMatriz=renderCursosEnBiblioteca(term,mostrarMatriz);
       const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(nombreEquivalenteEnMatriz));
