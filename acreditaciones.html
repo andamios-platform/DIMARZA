@@ -969,7 +969,15 @@
     }
     function nombreVisibleCertificado(c){
       const nivel=nivelLayherCertificado(c);
-      return nivel?'CERTIFICACIÓN LAYHER · NIVEL '+nivel:(c.curso||'');
+      if(nivel)return 'CERTIFICACIÓN LAYHER · NIVEL '+nivel;
+      // ULMA BRIO: mostrar su nivel real sin mezclarlo con Layher ni con Antapaccay.
+      const nombre=normalizarNombreCurso(c.curso);
+      if(minaCertificado(c)==='CENTINELA'&&nombre.includes('ULMA')&&nombre.includes('BRIO')){
+        const nivelUlma=nombre.includes('NIVEL TECNICO I')?'TÉCNICO I':
+          nombre.includes('NIVEL BASICO')?'BÁSICO':'';
+        if(nivelUlma)return 'CERTIFICACIÓN ULMA · BRIO · NIVEL '+nivelUlma;
+      }
+      return c.curso||'';
     }
     function renderCertificados() {
       const subset=seleccionarNivelLayher(certificadosDeMina());
