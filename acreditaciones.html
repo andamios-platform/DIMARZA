@@ -862,6 +862,23 @@
       if(nivel)return nivel;
       return String(b.vencimiento||'').localeCompare(String(a.vencimiento||''));
     }
+    function cursoMatrizRelacionadoCertificado(c) {
+      // Relación específica proporcionada por el área de Andamios:
+      // este certificado PDF corresponde a TRAB. EN ALTURA (MAT-05), no al MAT-19.
+      if(minaCertificado(c)!=='ANTAPACCAY')return null;
+      const nombre=normalizarNombreCurso(c.curso);
+      if(nombre!=='PERSONA COMPETENTE PARA TRABAJOS EN ALTURA')return null;
+      return (matrizActual?.cursos||[]).find(m=>
+        String(m.id||'').toUpperCase()==='MAT-05'||
+        normalizarNombreCurso(m.nombre)==='TRAB EN ALTURA')||null;
+    }
+    function nombreEquivalenteEnMatriz(c) {
+      const relacionado=cursoMatrizRelacionadoCertificado(c);
+      return normalizarNombreCurso(relacionado?.nombre||c.curso);
+    }
+    function fechaVencimientoParaMostrar(c) {
+      return c.vencimiento||cursoMatrizRelacionadoCertificado(c)?.fechaReportada||'';
+    }
     function seleccionarNivelLayher(certs){
       const layher=certs.filter(c=>nivelLayherCertificado(c)).sort(compararLayher);
       if(!layher.length)return certs;
@@ -877,7 +894,7 @@
       const listaMatriz=Array.isArray(matrizActual?.cursos)?matrizActual.cursos:[];
       const minaMatriz=!minaActual || minaActual==='ANTAPACCAY';
       const mostrarMatriz=minaMatriz && listaMatriz.length>0;
-      const pdfAntapaccay=new Set(subset.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(c=>normalizarNombreCurso(c.curso)));
+      const pdfAntapaccay=new Set(subset.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(nombreEquivalenteEnMatriz));
       const matrizSinDuplicados=mostrarMatriz?listaMatriz.filter(c=>c.clase!=='NO_APLICA'&&!pdfAntapaccay.has(normalizarNombreCurso(c.nombre))).length:0;
       const pdfCentinela=new Set(subset.filter(c=>minaCertificado(c)==='CENTINELA').map(c=>normalizarNombreCurso(c.curso)));
       const centinelaVisibles=centinelaActual?.cursos?.length && (!minaActual||minaActual==='CENTINELA')?
@@ -894,22 +911,28 @@
         const available=c.descargaPublica===true;
         if(filtroActual==='disponibles'&&!available)return false;
         if(filtroActual==='restringidos'&&available)return false;
-        if(filtroActual==='proximos'&&!venceEn30Dias(c.vencimiento))return false;
-        if(filtroActual==='vencidos'&&!cursoVencido(c.vencimiento,''))return false;
+        if(filtroActual==='proximos'&&!venceEn30Dias(fechaVencimientoParaMostrar(c)))return false;
+        if(filtroActual==='vencidos'&&!cursoVencido(fechaVencimientoParaMostrar(c),''))return false;
         return !term || `${c.curso||''} ${c.emisor||''} ${nombreVisibleCertificado(c)}`.toLocaleLowerCase('es').includes(term);
       });
       const registrosPDF=listado.map(c=>{
         const available=c.descargaPublica===true;
-        const exp=daysToExpiry(c.vencimiento);
+        const relacionado=cursoMatrizRelacionadoCertificado(c);
+        const fechaUsada=fechaVencimientoParaMostrar(c);
+        const exp=vencimientoCurso(fechaUsada).dias;
         let statusText=available?'PDF disponible':'Acceso restringido';
         let statusClass=available?'available':'restricted';
         if(exp!==null&&exp<0){statusText='Fecha vencida';statusClass='expired';}
         else if(exp!==null&&exp<=30){statusText='Próximo a vencer';statusClass='warning';}
         const buttons=available?`<div class="cert-actions"><button class="btn-secondary" type="button" data-view="${escapeHtml(c.id)}">${icon('eye')}Ver PDF</button></div>`:'';
-        return {nombre:nombreVisibleCertificado(c)||"Certificado sin nombre",dias:exp,html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(nombreVisibleCertificado(c)||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`};
+        const fechaInfo=c.vencimiento?'Vence el certificado: '+fmtDate(c.vencimiento):
+          relacionado?.fechaReportada?'Vence según matriz Antapaccay: '+fmtDate(relacionado.fechaReportada):
+          'Sin fecha de vencimiento registrada';
+        const equivalencia=relacionado?`<span>·</span><span>Equivalente a ${escapeHtml(relacionado.nombre||'TRAB. EN ALTURA')} en Antapaccay</span>`:'';
+        return {nombre:nombreVisibleCertificado(c)||"Certificado sin nombre",dias:exp,html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(nombreVisibleCertificado(c)||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span>${equivalencia}</div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${escapeHtml(fechaInfo)}</span></div>${buttons}</div></div></article>`};
       });
       const cursosMatriz=renderCursosEnBiblioteca(term,mostrarMatriz);
-      const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(c=>normalizarNombreCurso(c.curso)));
+      const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(nombreEquivalenteEnMatriz));
       const cursosCentinela=renderCentinelaEnBiblioteca(term);
       const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela.items]
         .sort((a,b)=>{
