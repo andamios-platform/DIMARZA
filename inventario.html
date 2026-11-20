@@ -263,25 +263,292 @@
       color: #6b7280;
       font-size: 12px;
     }
+
+
+    /* DIMARZA · Interfaz operativa v1: solo presentación */
+    :root {
+      --dm-ink: #14253a;
+      --dm-muted: #61738a;
+      --dm-navy: #0e2236;
+      --dm-navy-2: #173a50;
+      --dm-blue: #2563eb;
+      --dm-teal: #0aa99c;
+      --dm-border: #dce5ef;
+      --dm-canvas: #f3f6fb;
+      --dm-shadow: 0 18px 50px rgba(20, 42, 68, .07);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--dm-canvas);
+      color: var(--dm-ink);
+      padding: 28px 20px 40px;
+      line-height: 1.48;
+    }
+    .contenedor {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .page-header {
+      background:
+        radial-gradient(circle at 92% -12%, rgba(10,169,156,.19), transparent 37%),
+        linear-gradient(115deg, var(--dm-navy) 3%, #11334a 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 22px;
+      padding: 26px 32px 34px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--dm-shadow);
+      margin-bottom: 20px;
+    }
+    .page-header::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: 70px;
+      width: 390px;
+      height: 390px;
+      border: 1px solid rgba(255,255,255,.065);
+      border-radius: 50%;
+      box-shadow: 0 0 0 48px rgba(255,255,255,.023), 0 0 0 100px rgba(255,255,255,.018);
+      pointer-events: none;
+    }
+    .page-header-top, .page-hero { position: relative; z-index: 1; }
+    .page-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .brand-lockup { display: flex; gap: 12px; align-items: center; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg,#0698bd,var(--dm-teal));
+      border-radius: 12px;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+    }
+    .brand-name {
+      display: block;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .025em;
+      line-height: 1.1;
+    }
+    .brand-subtitle { display:block; font-size: 11px; color:#b9d8e3; letter-spacing:.065em; margin-top:5px; }
+    .btn-volver-menu {
+      margin: 0;
+      padding: 11px 16px;
+      background: rgba(255,255,255,.085);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      transition: background .18s, transform .18s;
+    }
+    .btn-volver-menu:hover { background: rgba(255,255,255,.18); }
+    .page-hero { padding-top: 28px; max-width: 690px; }
+    .eyebrow { color: #79e0d5; text-transform: uppercase; letter-spacing: .15em; font-size: 11px; font-weight: 800; }
+    .page-hero h1 { color:#fff; font-size: clamp(28px, 4.5vw, 42px); font-weight: 800; letter-spacing: -.035em; margin: 9px 0 8px; line-height: 1.16; }
+    .page-hero p { color:#c0d5e3; font-size: 14px; margin: 0; line-height: 1.7; }
+    .workspace {
+      background: #fff;
+      border: 1px solid var(--dm-border);
+      box-shadow: var(--dm-shadow);
+      border-radius: 20px;
+      padding: 30px 32px 34px;
+    }
+    .pasos { margin: 0 0 30px; gap: 12px; flex-wrap: nowrap; }
+    .paso-indicador {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      padding: 13px 16px;
+      border: 1px solid var(--dm-border);
+      border-radius: 12px;
+      background: #f7f9fc;
+      color: #728096;
+      font-weight: 600;
+      font-size: 13px;
+      transition: background .15s, border-color .15s;
+    }
+    .paso-numero {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e5ebf2;
+      color: #617187;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .paso-texto { display: block; line-height: 1.25; }
+    .paso-activo {
+      background: #eff6ff;
+      color: #164ba7;
+      border-color: #a9c8ff;
+      box-shadow: inset 0 0 0 1px rgba(37,99,235,.05);
+    }
+    .paso-activo .paso-numero { background: var(--dm-blue); color:#fff; }
+    #paso1 > h3, #paso2 > h3, #paso3 > h3 {
+      color: var(--dm-ink);
+      font-size: 21px;
+      font-weight: 750;
+      letter-spacing: -.025em;
+      margin: 0 0 23px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #edf1f5;
+    }
+    .grid { gap: 22px 18px; }
+    label {
+      font-family: inherit;
+      font-size: 13px;
+      color: #354b63;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    input, select {
+      width: 100%;
+      min-height: 46px;
+      background: #fff;
+      border: 1px solid #cfdae7;
+      border-radius: 10px;
+      color: #1e3147;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 11px 13px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:hover, select:hover { border-color:#9fb4ca; }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--dm-blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    button { font-family: inherit; font-size:14px; font-weight:700; transition: background .18s, transform .18s; }
+    button:focus-visible { outline: 3px solid rgba(10,169,156,.45); outline-offset: 3px; }
+    button:active { transform: translateY(1px); }
+    .btn-principal {
+      min-height: 47px;
+      background: var(--dm-blue);
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(37,99,235,.15);
+    }
+    .btn-principal:hover { background: #174dce; }
+    .btn-secundario { min-height:47px; border-radius:10px; background:#e8edf4; color:#2c4056; }
+    .btn-secundario:hover { background:#dce5f0; }
+    .btn-mas { min-height:44px; border-radius:10px; background:#e8f7f5; color:#007b73; border:1px solid #bce7e1; }
+    .btn-mas:hover { background:#d3f1ed; }
+    .btn-x { background:#fff0f0; color:#b42334; border:1px solid #ffd0d6; }
+    .btn-x:hover { background:#ffe0e5; }
+    .fila-botones { margin-top: 24px; }
+    .resumen {
+      background:#f7fafc;
+      border:1px solid var(--dm-border);
+      border-left: 4px solid var(--dm-teal);
+      padding: 18px 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 7px 18px;
+      font-size: 14px;
+    }
+    .resumen div { margin: 0; overflow-wrap: anywhere; }
+    .resumen strong { min-width:95px; color:#52667a; }
+    .tabla-scroll { border: 1px solid var(--dm-border); border-radius: 12px; overflow-x:auto; }
+    .tabla-items { margin:0; border-collapse: separate; border-spacing:0; }
+    .tabla-items th { padding: 13px 10px; color:#455b72; background:#f2f6fa; font-size:12px; letter-spacing:.04em; text-transform:uppercase; }
+    .tabla-items td { padding: 10px; background:#fff; }
+    .tabla-items th,.tabla-items td { border:0; border-bottom: 1px solid #e7edf4; }
+    .tabla-items th:not(:last-child), .tabla-items td:not(:last-child) { border-right:1px solid #eef2f6; }
+    .tabla-items tr:last-child td { border-bottom:0; }
+    .tabla-items select,.tabla-items input { min-height:42px; }
+    .acciones-items { margin-top:16px; }
+    .mensaje {
+      margin-top: 22px;
+      padding: 13px 16px;
+      border-radius: 10px;
+      border:1px solid #cfdfef;
+      background:#f3f8fe;
+      color:#194d87;
+      font-size:13px;
+      font-weight:600;
+    }
+    .mensaje:empty { display:none; }
+    .footer-copyright { margin-top:22px; border:0; padding-top:8px; color:#7b8ca0; }
+    @media (max-width: 768px) {
+      body { padding: 12px 10px 28px; }
+      .page-header { border-radius: 16px; padding:18px 18px 26px; margin-bottom: 12px; }
+      .page-header-top { padding-bottom: 17px; }
+      .brand-subtitle { font-size: 9px; }
+      .page-hero { padding-top: 21px; }
+      .page-hero h1 { font-size: 28px; }
+      .workspace { padding: 20px 16px 24px; border-radius: 16px; }
+      .pasos { gap: 6px; margin-bottom: 24px; }
+      .paso-indicador { padding: 9px 6px; gap:6px; flex-direction:column; text-align:center; font-size:11px; }
+      .paso-numero { flex-basis:auto; width:28px; height:28px; }
+      #paso1 > h3, #paso2 > h3, #paso3 > h3 { font-size:19px; }
+      .grid { gap:18px; }
+      .resumen { grid-template-columns:1fr; padding:14px; }
+      .fila-botones { flex-direction:column; }
+      .tabla-items { min-width:720px; }
+      .aviso-giro { display:block; }
+    }
+    @media (max-width: 430px) {
+      .page-header-top { gap: 10px; }
+      .btn-volver-menu { padding: 9px 10px; font-size: 11px; }
+      .brand-name { font-size:16px; }
+      .brand-mark { width:36px; height:36px; font-size:18px; }
+      .paso-texto { font-size:10px; }
+    }
+
   </style>
 </head>
 <body>
   <div class="contenedor">
 
-    <button
-      type="button"
-      class="btn-volver-menu"
-      onclick="window.location.href='index.html'"
-    >
-      ← Volver al menú
-    </button>
+    <header class="page-header">
+      <div class="page-header-top">
+        <div class="brand-lockup">
+          <span class="brand-mark" aria-hidden="true">D</span>
+          <div>
+            <span class="brand-name">DIMARZA</span>
+            <span class="brand-subtitle">GESTIÓN DE ANDAMIOS · MOVIMIENTOS</span>
+          </div>
+        </div>
+        <button type="button" class="btn-volver-menu" onclick="window.location.href='index.html'">← Volver al menú</button>
+      </div>
+      <div class="page-hero">
+        <span class="eyebrow">CONTROL OPERATIVO</span>
+        <h1>Registro de movimientos</h1>
+        <p>Registra el traslado, ingreso o salida de materiales en tres pasos, con la información organizada y lista para revisar.</p>
+      </div>
+    </header>
 
-    <h2>Registro de Movimientos</h2>
-
-    <div class="pasos">
-      <div class="paso-indicador paso-activo" id="indicador1">Paso 1</div>
-      <div class="paso-indicador" id="indicador2">Paso 2</div>
-      <div class="paso-indicador" id="indicador3">Paso 3</div>
+    <main class="workspace" id="contenido-principal">
+    <div class="pasos" aria-label="Progreso del registro">
+      <div class="paso-indicador paso-activo" id="indicador1"><span class="paso-numero">01</span><span class="paso-texto">Origen y destino</span></div>
+      <div class="paso-indicador" id="indicador2"><span class="paso-numero">02</span><span class="paso-texto">Datos generales</span></div>
+      <div class="paso-indicador" id="indicador3"><span class="paso-numero">03</span><span class="paso-texto">Materiales</span></div>
     </div>
 
     <div id="paso1">
@@ -436,6 +703,7 @@
     </div>
 
     <div class="mensaje" id="mensaje"></div>
+    </main>
 
        
 
