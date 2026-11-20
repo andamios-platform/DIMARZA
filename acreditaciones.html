@@ -239,6 +239,7 @@
     .library-course .cert-date.is-expired{color:#a6302b;background:#ffe9e7}
     .library-course .cert-date.is-soon{color:#865a0e;background:#fff2d4}
     .library-course .status-pill.reported{background:#e1f6eb;color:#127a4d}
+    .library-course .status-pill.recorded{background:#eaf3fc;color:#255987}
     .library-course .status-pill.pending{background:#fff1dc;color:#946012}
     .library-course .status-pill.not-applicable{background:#eef2f5;color:#657887}
     .library-na{border-top:1px solid #e9edf0;padding:12px 0}
@@ -459,6 +460,11 @@
       const now=new Date();now.setHours(0,0,0,0);
       if(Number.isNaN(end.getTime()))return null;
       return Math.round((end-now)/86400000);
+    }
+    // En la matriz de Antapaccay, la fecha de Inducción General es de realización.
+    function esInduccionGeneralAntapaccay(c) {
+      const nombre=normalizarNombreCurso(c?.nombreMatriz||c?.nombre||c?.curso||'');
+      return nombre==='INDUCCION GRAL'||nombre==='INDUCCION GENERAL';
     }
     function vencimientoCurso(raw) {
       const s=String(raw??'').trim();
@@ -683,16 +689,19 @@
       $('perfilProgreso').setAttribute('aria-valuenow',String(n));
       $('perfilBarra').style.width=n+'%';
       if(r){
-        $('perfilMensaje').textContent=`${r.completos} de ${r.total} cursos figuran VIGENTES y con fecha en la matriz recibida. Este indicador refleja el reporte de Antapaccay. Las fechas de cursos se interpretan como vencimientos, según la aclaración recibida; revisa la vigencia junto a cada curso.`;
+        $('perfilMensaje').textContent=`${r.completos} de ${r.total} cursos figuran VIGENTES y con fecha en la matriz recibida. Este indicador refleja el reporte de Antapaccay. INDUCCIÓN GRAL registra la fecha en que se llevó el curso; las demás fechas son vencimientos. El porcentaje corresponde al reporte recibido.`;
         $('perfilRespaldo').textContent=`Respaldo documental en DIMARZA: ${p.completos} de ${p.total} cursos (${p.porcentaje}%) vinculados a PDF. Las equivalencias de certificados especializados deben revisarse.`;
         const porId=new Map((r.cursos||[]).map(c=>[String(c.id),c]));
         $('perfilLista').innerHTML=(p.cursos||[]).map((c,i)=>{
           const t=porId.get(String(c.id));
           const ok=t?.estado==='REPORTADO_VIGENTE';
+          const esInduccion=esInduccionGeneralAntapaccay(t);
           const cls=ok?'pass':t?.estado==='PROGRAMAR'||t?.estado==='INSCRITO'?'review':'wait';
-          const etiqueta=ok?'Reportado vigente':t?.estado==='PROGRAMAR'?'Por programar':t?.estado==='INSCRITO'?'Inscrito':t?.estado==='NO_APLICA'?'No aplica':'No confirmado';
+          const etiqueta=esInduccion&&ok?'Realizado según matriz':ok?'Reportado vigente':t?.estado==='PROGRAMAR'?'Por programar':t?.estado==='INSCRITO'?'Inscrito':t?.estado==='NO_APLICA'?'No aplica':'No confirmado';
           const pdf=c.estado==='VIGENTE'||c.estado==='SIN_FECHA'?'PDF vinculado':'Sin PDF de requisito';
-          const d=t?.fechaReportada?' · '+vencimientoCurso(t.fechaReportada).texto:' · Vencimiento no registrado';
+          const d=esInduccion
+            ?(t?.fechaReportada?' · Realizado: '+fmtDate(t.fechaReportada)+' · Sin vencimiento informado':' · Fecha de realización no registrada')
+            :(t?.fechaReportada?' · '+vencimientoCurso(t.fechaReportada).texto:' · Vencimiento no registrado');
           return `<div class="profile-course"><span class="profile-num">${i+1}</span><span class="profile-name">${escapeHtml(c.nombre||'Curso')}<small>${escapeHtml('Antapaccay: '+(t?.nombreMatriz||'Sin vínculo')+d+' · '+pdf)}</small></span><span class="profile-pill ${cls}">${escapeHtml(etiqueta)}</span></div>`;
         }).join('');
       } else {
@@ -711,13 +720,14 @@
         panel.classList.add('hidden');return;
       }
       panel.classList.remove('hidden');
-      const conFecha=m.cursos.filter(c=>!!c.fechaReportada).length;
+      const conFecha=m.cursos.filter(c=>!!c.fechaReportada&&!esInduccionGeneralAntapaccay(c)).length;
+      const conFechaRealizacion=m.cursos.filter(c=>!!c.fechaReportada&&esInduccionGeneralAntapaccay(c)).length;
       const noAplica=m.cursos.filter(c=>c.clase==='NO_APLICA').length;
       const paraProgramar=m.cursos.filter(c=>String(c.estadoReportado).toUpperCase()==='PROGRAMAR').length;
-      $('matrizReportadaResumen').textContent=`${m.total} conceptos registrados · ${conFecha} con fecha de vencimiento · ${noAplica} N/A · ${paraProgramar} marcados PROGRAMAR`;
-      $('matrizReportadaDetalle').innerHTML=`<p class="muted" style="margin:0 0 12px;font-size:12px">Perfil informado: ${escapeHtml(m.perfil||'—')} · Fuente: ${escapeHtml(m.fuente||'Matriz recibida')}. Las fechas de cursos corresponden al término de vigencia según la aclaración recibida. Los estados son los que informa la mina.</p><div style="overflow-x:auto"><table class="matrix-report-table"><thead><tr><th>Curso</th><th>Vencimiento / dato reportado</th><th>Estado en matriz</th></tr></thead><tbody>${m.cursos.map(c=>{
+      $('matrizReportadaResumen').textContent=`${m.total} conceptos registrados · ${conFecha} con fecha de vencimiento · ${conFechaRealizacion} con fecha de realización · ${noAplica} N/A · ${paraProgramar} marcados PROGRAMAR`;
+      $('matrizReportadaDetalle').innerHTML=`<p class="muted" style="margin:0 0 12px;font-size:12px">Perfil informado: ${escapeHtml(m.perfil||'—')} · Fuente: ${escapeHtml(m.fuente||'Matriz recibida')}. INDUCCIÓN GRAL muestra su fecha de realización, no de vencimiento; en los demás cursos se muestra el vencimiento. Los estados son los reportados por la mina.</p><div style="overflow-x:auto"><table class="matrix-report-table"><thead><tr><th>Curso</th><th>Realización / vencimiento / dato</th><th>Estado en matriz</th></tr></thead><tbody>${m.cursos.map(c=>{
         const na=c.clase==='NO_APLICA',fecha=c.fechaReportada;
-        const dato=na?'No aplica':fecha?fmtDate(fecha):(c.valorOriginal||'Sin fecha');
+        const dato=na?'No aplica':fecha?(esInduccionGeneralAntapaccay(c)?'Realizado: ':'Vence: ')+fmtDate(fecha):(c.valorOriginal||'Sin fecha');
         const estado=na?'NO APLICA':String(c.estadoReportado||'SIN REGISTRO').toUpperCase();
         const css=na?'nap':estado==='PROGRAMAR'?'programar':estado==='VIGENTE'?'vigente':'';
         return `<tr><td><strong>${escapeHtml(c.nombre)}</strong><small>Matriz sin PDF adjunto</small></td><td>${escapeHtml(dato)}${c.clase==='FECHA_EN_TEXTO'?'<small>Fecha extraída de texto original</small>':''}</td><td><span class="matrix-report-tag ${css}">${escapeHtml(estado)}</span></td></tr>`;
@@ -740,21 +750,24 @@
       const noAplican=filtered.filter(c=>c.clase==='NO_APLICA');
       const filas = items=>items.map(c=>{
         const na=c.clase==='NO_APLICA';
+        const esInduccion=esInduccionGeneralAntapaccay(c);
         const espera=String(c.estadoReportado||'').toUpperCase()==='PROGRAMAR';
         const conFecha=!!c.fechaReportada;
         const inscrito=!conFecha && /INSCRITO/i.test(c.valorOriginal||'');
-        const fecha=na?'No aplica':conFecha?vencimientoCurso(c.fechaReportada).texto:
-          (c.valorOriginal?'Dato informado: '+c.valorOriginal:'Vencimiento no registrado');
-        const antDias=vencimientoCurso(c.fechaReportada).dias;
+        const fecha=na?'No aplica':esInduccion
+          ?(conFecha?'Realizado: '+fmtDate(c.fechaReportada)+' · Sin vencimiento informado':'Fecha de realización no registrada')
+          :(conFecha?vencimientoCurso(c.fechaReportada).texto:
+            (c.valorOriginal?'Dato informado: '+c.valorOriginal:'Vencimiento no registrado'));
+        const antDias=esInduccion?null:vencimientoCurso(c.fechaReportada).dias;
         const antVencido=!na&&antDias!==null&&antDias<0;
         const antProximo=!na&&!espera&&antDias!==null&&antDias>=0&&antDias<=30;
-        const etiqueta=na?'No aplica':antVencido?'Vencido':inscrito?'Inscrito · verificar':espera?'Por programar':antProximo?'Por vencer':
+        const etiqueta=na?'No aplica':esInduccion&&espera?'Por programar':esInduccion&&conFecha?'Curso realizado':antVencido?'Vencido':inscrito?'Inscrito · verificar':espera?'Por programar':antProximo?'Por vencer':
           conFecha&&String(c.estadoReportado||'').toUpperCase()==='VIGENTE'?'Vigente según matriz':
           (c.estadoReportado||'Por verificar');
-        const clase=na?'not-applicable':antVencido?'expired':inscrito||espera||antProximo?'pending':'reported';
+        const clase=na?'not-applicable':esInduccion?'recorded':antVencido?'expired':inscrito||espera||antProximo?'pending':'reported';
         const eq=mapa.get(c.id);
         const vinculo=eq?`<div class="cert-issuer"><span>${eq.equivalencia==='EQUIVALENCIA_PRELIMINAR'?'Relación preliminar':'Corresponde al requisito'}: ${escapeHtml(eq.nombre||'Curso DIMARZA')}</span></div>`:'';
-        return {nombre:c.nombre||"Curso sin nombre",html:`<article class="cert-item library-course"><div class="cert-icon">${icon('calendar','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.nombre||'Curso sin nombre')}</h4><div class="cert-issuer"><span>Antapaccay · fecha y estado informados por la mina</span></div>${vinculo}<div class="cert-bottom"><div><span class="status-pill ${clase}">${escapeHtml(etiqueta)}</span> <span class="cert-date ${vencimientoCurso(c.fechaReportada).clase}">${escapeHtml(fecha)}</span></div></div></div></article>`};
+        return {nombre:c.nombre||"Curso sin nombre",html:`<article class="cert-item library-course"><div class="cert-icon">${icon('calendar','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.nombre||'Curso sin nombre')}</h4><div class="cert-issuer"><span>Antapaccay · fecha y estado informados por la mina</span></div>${vinculo}<div class="cert-bottom"><div><span class="status-pill ${clase}">${escapeHtml(etiqueta)}</span> <span class="cert-date ${esInduccion?'':vencimientoCurso(c.fechaReportada).clase}">${escapeHtml(fecha)}</span></div></div></div></article>`};
       });
       return {
         items:filas([...base,...adicionales]),
