@@ -338,6 +338,7 @@
               <button class="tab-btn active" type="button" data-filter="todos" aria-pressed="true">Todos</button>
               <button class="tab-btn" type="button" data-filter="disponibles" aria-pressed="false">Disponibles</button>
               <button class="tab-btn" type="button" data-filter="restringidos" aria-pressed="false">Restringidos</button>
+              <button class="tab-btn" type="button" data-filter="proximos" aria-pressed="false" title="Cursos y certificados que vencen dentro de los próximos 30 días">Próximos a vencer</button>
             </div>
           </div>
           <div id="listado" class="cert-list"></div>
@@ -462,6 +463,10 @@
       return Math.round((end-now)/86400000);
     }
     // En la matriz de Antapaccay, la fecha de Inducción General es de realización.
+    function venceEn30Dias(raw) {
+      const dias=vencimientoCurso(raw).dias;
+      return dias!==null&&dias>=0&&dias<=30;
+    }
     function esInduccionGeneralAntapaccay(c) {
       const nombre=normalizarNombreCurso(c?.nombreMatriz||c?.nombre||c?.curso||'');
       return nombre==='INDUCCION GRAL'||nombre==='INDUCCION GENERAL';
@@ -737,13 +742,17 @@
     function renderCursosEnBiblioteca(term, mostrarMatriz) {
       const list=Array.isArray(matrizActual?.cursos)?matrizActual.cursos:[];
       const visibles=mostrarMatriz && (!minaActual || minaActual==='ANTAPACCAY') &&
-        (filtroActual==='todos' || filtroActual==='reportados');
+        (filtroActual==='todos' || filtroActual==='reportados' || filtroActual==='proximos');
       if(!visibles || !list.length)return {items:[],noAplica:''};
       const mapa=new Map((perfilActual?.reportado?.cursos||[])
         .filter(c=>c.idMatriz).map(c=>[c.idMatriz,c]));
-      const filtered=list.filter(c=>!term ||
-        `${c.nombre||''} ${c.valorOriginal||''} ${c.estadoReportado||''} Antapaccay`
-          .toLocaleLowerCase('es').includes(term));
+      const filtered=list.filter(c=>
+        (filtroActual!=='proximos'||(
+          c.clase!=='NO_APLICA'&&!esInduccionGeneralAntapaccay(c)&&
+          String(c.estadoReportado||'').toUpperCase()==='VIGENTE'&&venceEn30Dias(c.fechaReportada)
+        ))&&
+        (!term||`${c.nombre||''} ${c.valorOriginal||''} ${c.estadoReportado||''} Antapaccay`
+          .toLocaleLowerCase('es').includes(term)));
       const aplican=filtered.filter(c=>c.clase!=='NO_APLICA');
       const base=aplican.filter(c=>mapa.has(c.id));
       const adicionales=aplican.filter(c=>!mapa.has(c.id));
@@ -767,7 +776,7 @@
         const clase=na?'not-applicable':esInduccion?'recorded':antVencido?'expired':inscrito||espera||antProximo?'pending':'reported';
         const eq=mapa.get(c.id);
         const vinculo=eq?`<div class="cert-issuer"><span>${eq.equivalencia==='EQUIVALENCIA_PRELIMINAR'?'Relación preliminar':'Corresponde al requisito'}: ${escapeHtml(eq.nombre||'Curso DIMARZA')}</span></div>`:'';
-        return {nombre:c.nombre||"Curso sin nombre",html:`<article class="cert-item library-course"><div class="cert-icon">${icon('calendar','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.nombre||'Curso sin nombre')}</h4><div class="cert-issuer"><span>Antapaccay · fecha y estado informados por la mina</span></div>${vinculo}<div class="cert-bottom"><div><span class="status-pill ${clase}">${escapeHtml(etiqueta)}</span> <span class="cert-date ${esInduccion?'':vencimientoCurso(c.fechaReportada).clase}">${escapeHtml(fecha)}</span></div></div></div></article>`};
+        return {nombre:c.nombre||"Curso sin nombre",dias:antDias,html:`<article class="cert-item library-course"><div class="cert-icon">${icon('calendar','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(c.nombre||'Curso sin nombre')}</h4><div class="cert-issuer"><span>Antapaccay · fecha y estado informados por la mina</span></div>${vinculo}<div class="cert-bottom"><div><span class="status-pill ${clase}">${escapeHtml(etiqueta)}</span> <span class="cert-date ${esInduccion?'':vencimientoCurso(c.fechaReportada).clase}">${escapeHtml(fecha)}</span></div></div></div></article>`};
       });
       return {
         items:filas([...base,...adicionales]),
@@ -777,11 +786,16 @@
     /** Cursos informados por Centinela, sin fingir que son PDF adjuntos. */
     function renderCentinelaEnBiblioteca(term){
       const lista=Array.isArray(centinelaActual?.cursos)?centinelaActual.cursos:[];
-      if(!lista.length||(minaActual&&minaActual!=='CENTINELA')||filtroActual!=='todos')return {items:[],noAplica:''};
+      if(!lista.length||(minaActual&&minaActual!=='CENTINELA')||(filtroActual!=='todos'&&filtroActual!=='proximos'))return {items:[],noAplica:''};
       const existentes=new Set(certificadosDeMina()
         .filter(c=>minaCertificado(c)==='CENTINELA')
+        .filter(c=>filtroActual!=='proximos'||venceEn30Dias(c.vencimiento))
         .map(c=>normalizarNombreCurso(c.curso)));
       const filtrados=lista.filter(c=>!existentes.has(normalizarNombreCurso(c.nombre)))
+        .filter(c=>filtroActual!=='proximos'||(
+          String(c.estado||'').toUpperCase()==='VIGENTE'&&
+          venceEn30Dias(c.fechaVencimiento||c.vencimiento||c.fechaReportada)
+        ))
         .filter(c=>!term||[c.nombre,c.estado,c.obligatorio?'obligatorio':'opcional','Centinela']
           .join(' ').toLocaleLowerCase('es').includes(term));
       const esNoAplica=c=>String(c.estado||'').trim().toUpperCase().replace(/\s+/g,'_')==='NO_APLICA';
@@ -797,7 +811,7 @@
           PENDIENTE:'Pendiente',EN_TRAMITE:'En trámite',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar');
         const clase=cenVencido?'expired':st==='VIGENTE'?'reported':st==='NO_APLICA'?'not-applicable':'pending';
         const tipo=c.obligatorio?'Obligatorio':'Opcional · no afecta el porcentaje';
-        return {nombre:c.nombre||'Curso Centinela',html:
+        return {nombre:c.nombre||'Curso Centinela',dias:fecha.dias,html:
           '<article class="cert-item library-course">'+
           '<div class="cert-icon">'+icon('calendar','icon-lg')+'</div>'+
           '<div class="cert-body"><h4 class="cert-name">'+escapeHtml(c.nombre||'Curso')+'</h4>'+
@@ -864,6 +878,7 @@
         const available=c.descargaPublica===true;
         if(filtroActual==='disponibles'&&!available)return false;
         if(filtroActual==='restringidos'&&available)return false;
+        if(filtroActual==='proximos'&&!venceEn30Dias(c.vencimiento))return false;
         return !term || `${c.curso||''} ${c.emisor||''} ${nombreVisibleCertificado(c)}`.toLocaleLowerCase('es').includes(term);
       });
       const registrosPDF=listado.map(c=>{
@@ -874,16 +889,20 @@
         if(exp!==null&&exp<0){statusText='Fecha vencida';statusClass='expired';}
         else if(exp!==null&&exp<=30){statusText='Próximo a vencer';statusClass='warning';}
         const buttons=available?`<div class="cert-actions"><button class="btn-secondary" type="button" data-view="${escapeHtml(c.id)}">${icon('eye')}Ver PDF</button></div>`:'';
-        return {nombre:nombreVisibleCertificado(c)||"Certificado sin nombre",html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(nombreVisibleCertificado(c)||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`};
+        return {nombre:nombreVisibleCertificado(c)||"Certificado sin nombre",dias:exp,html:`<article class="cert-item"><div class="cert-icon ${available?'':'locked'}">${icon(available?'file':'lock','icon-lg')}</div><div class="cert-body"><h4 class="cert-name">${escapeHtml(nombreVisibleCertificado(c)||'Certificado sin nombre')}</h4><div class="cert-issuer"><span>${escapeHtml(c.emisor||'Institución no indicada')}</span><span>·</span><span>Emitido: ${escapeHtml(fmtDate(c.emision))}</span></div><span class="mine-chip">${escapeHtml(nombreMina(minaCertificado(c)))}</span><div class="cert-bottom"><div><span class="status-pill ${statusClass}">${icon(available?'check':'lock')}${statusText}</span> <span class="cert-date">${c.vencimiento?'Vence: '+escapeHtml(fmtDate(c.vencimiento)):'Sin fecha de vencimiento registrada'}</span></div>${buttons}</div></div></article>`};
       });
       const cursosMatriz=renderCursosEnBiblioteca(term,mostrarMatriz);
       const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(c=>normalizarNombreCurso(c.curso)));
       const cursosCentinela=renderCentinelaEnBiblioteca(term);
       const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela.items]
-        .sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'}));
+        .sort((a,b)=>filtroActual==='proximos'
+          ?(a.dias-b.dias||String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'}))
+          :String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'}));
+      if(filtroActual==='proximos')$('total').textContent=`${unificados.length} próximos a vencer (30 días)`;
       const avisoVacio=term?'No hay cursos que coincidan con la búsqueda.':
         filtroActual==='disponibles'?'No hay documentos disponibles para esta selección.':
         filtroActual==='restringidos'?'No hay documentos restringidos para esta selección.':
+        filtroActual==='proximos'?'No hay cursos o certificados con vencimiento registrado en los próximos 30 días para esta selección.':
         minaActual==='CENTINELA' && !centinelaCampoEnAPI?
           'La versión publicada del Apps Script todavía no devuelve los cursos de Centinela. Actualiza la implementación existente a una NUEVA VERSIÓN desde Apps Script; guardar Código.gs no basta.':
         minaActual==='CENTINELA' && centinelaCampoEnAPI && !centinelaActual?.cursos?.length?
