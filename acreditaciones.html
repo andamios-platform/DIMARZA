@@ -153,6 +153,14 @@
     .upcoming-date{font-size:11px;font-weight:750;color:#976013;white-space:nowrap;flex-shrink:0}
     .upcoming-more summary{font-size:11px;color:#277a78;cursor:pointer;padding:9px 0}
     .upcoming-empty{font-size:11px;color:#74889b;padding:7px 0}
+    .upcoming-section+.upcoming-section{border-top:1px solid #e3ebef;margin-top:15px;padding-top:3px}
+    .upcoming-section-title{font-size:12px;font-weight:800;color:#315a71;margin:12px 0 5px;display:flex;justify-content:space-between;gap:8px}
+    .upcoming-section-title small{font-size:10px;color:#8293a1;font-weight:700}
+    .expiry-group{padding:2px 0 13px}
+    .expiry-group+.expiry-group{border-top:2px solid #e6eef2;padding-top:9px}
+    .expiry-group-head{font-size:13px;font-weight:830;color:#24516a;padding:12px 0 8px;display:flex;justify-content:space-between;gap:9px;align-items:center}
+    .expiry-group-count{font-size:11px;color:#6a8798;font-weight:700}
+    .expiry-group-empty{padding:12px 4px 16px;font-size:12px;color:#8092a0}
     .empty{padding:33px 15px;text-align:center;color:#73889b;font-size:13px}
     .empty .icon{width:30px;height:30px;margin-bottom:10px;color:#9aabba}
     .inline-feedback{margin:0 22px 15px;font-size:12px;min-height:1px;color:#2b7f78}
@@ -368,7 +376,7 @@
           <section class="panel aside-panel">
             <h3><svg class="icon"><use href="#i-calendar"/></svg>Próximos vencimientos</h3>
             <div class="next-expiry" id="proximoBox"><strong id="proximoTitulo">Sin fechas registradas</strong><span id="proximoDetalle">Se mostrarán vencimientos de certificados, EMO y permisos de Chile.</span></div>
-            <div class="upcoming-caption">Certificaciones, cursos y EMO hasta el 31/01/2027</div>
+            <div class="upcoming-caption">Vencimientos registrados hasta el 31/01/2027</div>
             <div id="proximosDetalleLista" aria-live="polite"></div>
           </section>
         </aside>
@@ -652,19 +660,20 @@
       const listaProximos=[
         ...certs.map(c=>({
           titulo:nombreVisibleCertificado(c)||'Certificado',
+          grupo:'curso',
           tipo:'Certificado · '+nombreMina(minaCertificado(c)),
           fecha:fechaVencimientoParaMostrar(c)
         })),
         ...((!minaActual||minaActual==='ANTAPACCAY')?matrizActual?.cursos||[]:[])
           .filter(c=>c.clase!=='NO_APLICA'&&!esInduccionGeneralAntapaccay(c)&&
             !antPdf.has(normalizarNombreCurso(c.nombre)))
-          .map(c=>({titulo:c.nombre||'Curso',tipo:'Curso · Antapaccay',fecha:c.fechaReportada})),
+          .map(c=>({titulo:c.nombre||'Curso',grupo:'curso',tipo:'Curso · Antapaccay',fecha:c.fechaReportada})),
         ...((!minaActual||minaActual==='CENTINELA')?centinelaActual?.cursos||[]:[])
           .filter(c=>String(c.estado||'').toUpperCase()==='VIGENTE'&&
             !cenPdf.has(normalizarNombreCurso(c.nombre)))
-          .map(c=>({titulo:c.nombre||'Curso',tipo:'Curso · Centinela',
+          .map(c=>({titulo:c.nombre||'Curso',grupo:'curso',tipo:'Curso · Centinela',
             fecha:c.fechaVencimiento||c.vencimiento||c.fechaReportada})),
-        ...emoDeMina().map(v=>({titulo:'Examen médico ocupacional (EMO)',
+        ...emoDeMina().map(v=>({titulo:'Examen médico ocupacional (EMO)',grupo:'emo',
           tipo:nombreMina(v.mina||'SIN ASIGNAR'),fecha:v.fechaVencimiento}))
       ].map(x=>({...x,d:vencimientoCurso(x.fecha).dias}))
         .filter(x=>proximoPorDias(x.d))
@@ -672,13 +681,20 @@
       const fila=(v)=>'<div class="upcoming-row"><div class="upcoming-label">'+
         escapeHtml(v.titulo)+'<span class="upcoming-kind">'+escapeHtml(v.tipo)+'</span></div>'+
         '<span class="upcoming-date">'+escapeHtml(fmtDate(v.fecha))+'</span></div>';
-      $('proximosDetalleLista').innerHTML=listaProximos.length
-        ?listaProximos.slice(0,6).map(fila).join('')+
-          (listaProximos.length>6
-            ?'<details class="upcoming-more"><summary>Ver otros '+
-              (listaProximos.length-6)+' vencimientos</summary>'+
-              listaProximos.slice(6).map(fila).join('')+'</details>':'')
-        :'<div class="upcoming-empty">Sin vencimientos futuros registrados hasta el 31/01/2027.</div>';
+      // Presentación separada por tipo, como en el control anterior.
+      const seccionProximos=(nombre,grupo,mensaje)=>{
+        const registros=listaProximos.filter(x=>x.grupo===grupo);
+        return '<section class="upcoming-section"><div class="upcoming-section-title">'+escapeHtml(nombre)+
+          '<small>'+registros.length+' registro'+(registros.length===1?'':'s')+'</small></div>'+
+          (registros.length?registros.slice(0,6).map(fila).join('')+
+            (registros.length>6?'<details class="upcoming-more"><summary>Ver otros '+
+              (registros.length-6)+' vencimientos</summary>'+registros.slice(6).map(fila).join('')+
+              '</details>':''):'<div class="upcoming-empty">'+escapeHtml(mensaje)+'</div>')+
+          '</section>';
+      };
+      $('proximosDetalleLista').innerHTML=
+        seccionProximos('Exámenes médicos (EMO)','emo','Sin EMO próximos a vencer.')+
+        seccionProximos('Cursos y certificaciones','curso','Sin cursos próximos a vencer.');
     }
     function renderPerfil() {
       const el=$('perfilCapacitacion');
@@ -1027,18 +1043,19 @@
               '</span></div></div></div></article>'};
           })
         :[];
-      const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela.items,...registrosEMO]
-        .sort((a,b)=>{
-          const porNombre=String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'});
-          if(filtroActual==='proximos')return (a.dias-b.dias)||porNombre;
-          if(filtroActual==='vencidos'){
-            // Los recién vencidos primero. Sin fecha, al final.
-            const ad=a.dias===null?Number.NEGATIVE_INFINITY:a.dias;
-            const bd=b.dias===null?Number.NEGATIVE_INFINITY:b.dias;
-            return (bd-ad)||porNombre;
-          }
-          return porNombre;
-        });
+      const ordenarCursos=(a,b)=>{
+        const porNombre=String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'});
+        if(filtroActual==='proximos')return (a.dias-b.dias)||porNombre;
+        if(filtroActual==='vencidos'){
+          const ad=a.dias===null?Number.NEGATIVE_INFINITY:a.dias;
+          const bd=b.dias===null?Number.NEGATIVE_INFINITY:b.dias;
+          return (bd-ad)||porNombre;
+        }
+        return porNombre;
+      };
+      const cursosUnificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela.items].sort(ordenarCursos);
+      const emosUnificados=[...registrosEMO].sort(ordenarCursos);
+      const unificados=[...cursosUnificados,...emosUnificados];
       if(filtroActual==='proximos')$('total').textContent=`${unificados.length} próximos a vencer (hasta enero 2027)`;
       if(filtroActual==='vencidos')$('total').textContent=`${unificados.length} vencidos`;
       const avisoVacio=term?'No hay cursos que coincidan con la búsqueda.':
@@ -1051,8 +1068,19 @@
         minaActual==='CENTINELA' && centinelaCampoEnAPI && !centinelaActual?.cursos?.length?
           'El servidor de Acreditaciones respondió, pero no encontró cursos de Centinela para este DNI. Revisa la hoja ACREDITACION_ESTADOS y su implementación.':
         'Aún no hay capacitaciones registradas para este DNI.';
-      $('listado').innerHTML=unificados.map(c=>c.html).join('')+cursosMatriz.noAplica+cursosCentinela.noAplica+
-        (!unificados.length&&!cursosMatriz.noAplica&&!cursosCentinela.noAplica?`<div class="empty">${icon('file')}<div>${avisoVacio}</div></div>`:'');
+      const porTipo=filtroActual==='proximos'||filtroActual==='vencidos';
+      const etiquetaGrupo=(nombre,registros,mensaje)=>
+        '<section class="expiry-group"><div class="expiry-group-head">'+escapeHtml(nombre)+
+        '<span class="expiry-group-count">'+registros.length+' registro'+(registros.length===1?'':'s')+'</span></div>'+
+        (registros.length?registros.map(c=>c.html).join(''):
+          '<div class="expiry-group-empty">'+escapeHtml(mensaje)+'</div>')+'</section>';
+      $('listado').innerHTML=(porTipo
+        ?etiquetaGrupo('Exámenes médicos ocupacionales (EMO)',emosUnificados,'Sin EMO en esta categoría.')+
+         etiquetaGrupo('Cursos y certificaciones',cursosUnificados,'Sin cursos ni certificaciones en esta categoría.')
+        :unificados.map(c=>c.html).join(''))+
+        cursosMatriz.noAplica+cursosCentinela.noAplica+
+        (!porTipo&&!unificados.length&&!cursosMatriz.noAplica&&!cursosCentinela.noAplica?
+          `<div class="empty">${icon('file')}<div>${avisoVacio}</div></div>`:'');
     }
     function feedback(text,isError=false){$('msg').textContent=text;$('msg').classList.toggle('error',isError);}
     function cerrarVistaPdf() {
