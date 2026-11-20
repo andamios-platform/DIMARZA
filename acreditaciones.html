@@ -767,7 +767,17 @@
       const aplican=filtered.filter(c=>c.clase!=='NO_APLICA');
       const base=aplican.filter(c=>mapa.has(c.id));
       const adicionales=aplican.filter(c=>!mapa.has(c.id));
-      const noAplican=filtered.filter(c=>c.clase==='NO_APLICA');
+      // Oculta en el desplegable N/A los conceptos cuyo certificado ya aparece
+      // en la lista de cursos del trabajador. No altera la matriz original.
+      const certificadosConPdf=seleccionarNivelLayher(certificadosDeMina()).filter(c=>
+        minaCertificado(c)==='ANTAPACCAY'&&
+        (filtroActual!=='proximos'||venceEn30Dias(fechaVencimientoParaMostrar(c)))&&
+        (filtroActual!=='vencidos'||cursoVencido(fechaVencimientoParaMostrar(c),''))&&
+        (!term||[c.curso,c.emisor,nombreVisibleCertificado(c),cursoMatrizRelacionadoCertificado(c)?.nombre||'']
+          .join(' ').toLocaleLowerCase('es').includes(term)));
+      const yaRepresentados=new Set(certificadosConPdf.map(nombreEquivalenteEnMatriz));
+      const noAplican=filtered.filter(c=>c.clase==='NO_APLICA'&&
+        !yaRepresentados.has(normalizarNombreCurso(c.nombre)));
       const filas = items=>items.map(c=>{
         const na=c.clase==='NO_APLICA';
         const esInduccion=esInduccionGeneralAntapaccay(c);
@@ -869,8 +879,8 @@
       const nombre=normalizarNombreCurso(c.curso);
       const codigosConfirmados={
         'PERSONA COMPETENTE PARA TRABAJOS EN ALTURA':'MAT-05',
-        'PERSONA COMPETENTE PARA TRABAJOS EN ESPACIOS CONFINADOS':'MAT-06',
-        'CURSO DE SUPERVISOR DE IZAJES':'MAT-10'
+        'PERSONA COMPETENTE PARA TRABAJOS EN ESPACIOS CONFINADOS':'MAT-20',
+        'CURSO DE SUPERVISOR DE IZAJES':'MAT-21'
       };
       const idMatriz=codigosConfirmados[nombre];
       if(!idMatriz)return null;
@@ -918,7 +928,8 @@
         if(filtroActual==='restringidos'&&available)return false;
         if(filtroActual==='proximos'&&!venceEn30Dias(fechaVencimientoParaMostrar(c)))return false;
         if(filtroActual==='vencidos'&&!cursoVencido(fechaVencimientoParaMostrar(c),''))return false;
-        return !term || `${c.curso||''} ${c.emisor||''} ${nombreVisibleCertificado(c)}`.toLocaleLowerCase('es').includes(term);
+        return !term || [c.curso||'',c.emisor||'',nombreVisibleCertificado(c),cursoMatrizRelacionadoCertificado(c)?.nombre||'']
+          .join(' ').toLocaleLowerCase('es').includes(term);
       });
       const registrosPDF=listado.map(c=>{
         const available=c.descargaPublica===true;
