@@ -145,6 +145,14 @@
     .validity-break{height:1px;background:#e5edf1;margin:18px 0 11px}
     .next-expiry.is-overdue{background:#fff0ee;color:#a9352c}
     .next-expiry.is-soon{background:#fff2d8;color:#825b10}
+    .upcoming-caption{font-size:11px;font-weight:760;color:#526b7d;margin:14px 0 8px}
+    .upcoming-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #e9eef2}
+    .upcoming-row:last-child{border-bottom:0}
+    .upcoming-label{font-size:11px;font-weight:750;color:#254054;overflow-wrap:anywhere}
+    .upcoming-kind{display:block;font-size:10px;color:#78909e;font-weight:500;margin-top:2px}
+    .upcoming-date{font-size:11px;font-weight:750;color:#976013;white-space:nowrap;flex-shrink:0}
+    .upcoming-more summary{font-size:11px;color:#277a78;cursor:pointer;padding:9px 0}
+    .upcoming-empty{font-size:11px;color:#74889b;padding:7px 0}
     .empty{padding:33px 15px;text-align:center;color:#73889b;font-size:13px}
     .empty .icon{width:30px;height:30px;margin-bottom:10px;color:#9aabba}
     .inline-feedback{margin:0 22px 15px;font-size:12px;min-height:1px;color:#2b7f78}
@@ -330,16 +338,16 @@
       <div class="result-grid">
         <section class="panel" aria-labelledby="tituloDocumentos">
           <div class="panel-head">
-            <div class="panel-title"><h3 id="tituloDocumentos">Mis cursos <span class="count-pill" id="total">0 registros</span></h3></div>
-            <p>Consulta tus capacitaciones en una sola lista. Si un curso tiene documento disponible, podrás abrirlo desde aquí.</p>
+            <div class="panel-title"><h3 id="tituloDocumentos">Mis cursos y documentos <span class="count-pill" id="total">0 registros</span></h3></div>
+            <p>Consulta tus capacitaciones en una sola lista. Los EMO también aparecen en los filtros de próximos vencimientos y vencidos.</p>
             <div class="mine-filter"><label for="filtroMina">Unidad minera</label><select id="filtroMina"><option value="">Todas las unidades mineras</option></select></div>
             <div class="searchline"><svg class="icon"><use href="#i-search"/></svg><label class="sr-only" for="busqueda">Buscar curso o institución</label><input id="busqueda" placeholder="Buscar curso o institución…" autocomplete="off"></div>
             <div class="tabs" id="filtros" aria-label="Filtrar cursos">
               <button class="tab-btn active" type="button" data-filter="todos" aria-pressed="true">Todos</button>
               <button class="tab-btn" type="button" data-filter="disponibles" aria-pressed="false">Disponibles</button>
               <button class="tab-btn" type="button" data-filter="restringidos" aria-pressed="false">Restringidos</button>
-              <button class="tab-btn" type="button" data-filter="proximos" aria-pressed="false" title="Cursos y certificados que vencen dentro de los próximos 30 días">Próximos a vencer</button>
-              <button class="tab-btn" type="button" data-filter="vencidos" aria-pressed="false" title="Cursos y certificados con fecha vencida o reportados como vencidos">Vencidos</button>
+              <button class="tab-btn" type="button" data-filter="proximos" aria-pressed="false" title="Cursos, certificados y EMO que vencen desde hoy hasta el 31 de enero de 2027">Próximos a vencer</button>
+              <button class="tab-btn" type="button" data-filter="vencidos" aria-pressed="false" title="Cursos, certificados y EMO ya vencidos o reportados como vencidos">Vencidos</button>
             </div>
           </div>
           <div id="listado" class="cert-list"></div>
@@ -358,8 +366,10 @@
             </div>
           </section>
           <section class="panel aside-panel">
-            <h3><svg class="icon"><use href="#i-calendar"/></svg>Próximo vencimiento</h3>
+            <h3><svg class="icon"><use href="#i-calendar"/></svg>Próximos vencimientos</h3>
             <div class="next-expiry" id="proximoBox"><strong id="proximoTitulo">Sin fechas registradas</strong><span id="proximoDetalle">Se mostrarán vencimientos de certificados, EMO y permisos de Chile.</span></div>
+            <div class="upcoming-caption">Certificaciones, cursos y EMO hasta el 31/01/2027</div>
+            <div id="proximosDetalleLista" aria-live="polite"></div>
           </section>
         </aside>
       </div>
@@ -463,11 +473,16 @@
       if(Number.isNaN(end.getTime()))return null;
       return Math.round((end-now)/86400000);
     }
-    // En la matriz de Antapaccay, la fecha de Inducción General es de realización.
-    function venceEn30Dias(raw) {
-      const dias=vencimientoCurso(raw).dias;
-      return dias!==null&&dias>=0&&dias<=30;
+    // Alcance solicitado para Próximos a vencer: hasta el 31 de enero de 2027.
+    const LIMITE_PROXIMOS='2027-01-31';
+    function proximoPorDias(dias) {
+      const limite=daysToExpiry(LIMITE_PROXIMOS);
+      return dias!==null&&limite!==null&&dias>=0&&dias<=limite;
     }
+    function venceHastaEnero(raw) {
+      return proximoPorDias(vencimientoCurso(raw).dias);
+    }
+    // En la matriz de Antapaccay, la fecha de Inducción General es de realización.
     // También considera los cursos marcados VENCIDO cuando no existe fecha de vencimiento.
     function cursoVencido(raw,estado) {
       const dias=vencimientoCurso(raw).dias;
@@ -489,7 +504,7 @@
         if(fin.getDate()===d&&fin.getMonth()===m-1&&fin.getFullYear()===y) dias=Math.round((fin-hoy)/86400000);
       }
       if(dias===null)return {texto:'Fecha registrada: '+fmtDate(s),dias:null,clase:''};
-      return {texto:(dias<0?'Venció: ':'Vence: ')+fmtDate(s),dias,clase:dias<0?'is-expired':dias<=30?'is-soon':''};
+      return {texto:(dias<0?'Venció: ':'Vence: ')+fmtDate(s),dias,clase:dias<0?'is-expired':proximoPorDias(dias)?'is-soon':''};
     }
     async function probarConexion() {
       try {
@@ -582,7 +597,7 @@
       if(d===null)return {texto:'Sin fecha',clase:'missing',detalle:'Fecha pendiente de registro'};
       if(d<0)return {texto:'Vencido',clase:'overdue',detalle:`Venció hace ${Math.abs(d)} día${Math.abs(d)===1?'':'s'}`};
       if(d===0)return {texto:'Vence hoy',clase:'soon',detalle:'Vence hoy'};
-      if(d<=30)return {texto:'Próximo a vencer',clase:'soon',detalle:`Vence en ${d} día${d===1?'':'s'}`};
+      if(proximoPorDias(d))return {texto:'Próximo a vencer',clase:'soon',detalle:`Vence en ${d} día${d===1?'':'s'}`};
       if(d<=60)return {texto:'Alerta preventiva',clase:'alert',detalle:`Vence en ${d} días`};
       return {texto:'Vigente',clase:'valid',detalle:`Vence en ${d} días`};
     }
@@ -628,6 +643,42 @@
         $('proximoTitulo').textContent='Sin fechas registradas';
         $('proximoDetalle').textContent='No hay fechas de vencimiento registradas para los documentos de esta selección.';
       }
+      // Lista preventiva: cada curso/certificado relevante y cada EMO hasta enero.
+      // No duplica conceptos ya representados por un certificado vinculado.
+      const certs=seleccionarNivelLayher(certificadosDeMina());
+      const antPdf=new Set(certs.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(nombreEquivalenteEnMatriz));
+      const cenPdf=new Set(certs.filter(c=>minaCertificado(c)==='CENTINELA')
+        .map(c=>normalizarNombreCurso(c.curso)));
+      const listaProximos=[
+        ...certs.map(c=>({
+          titulo:nombreVisibleCertificado(c)||'Certificado',
+          tipo:'Certificado · '+nombreMina(minaCertificado(c)),
+          fecha:fechaVencimientoParaMostrar(c)
+        })),
+        ...((!minaActual||minaActual==='ANTAPACCAY')?matrizActual?.cursos||[]:[])
+          .filter(c=>c.clase!=='NO_APLICA'&&!esInduccionGeneralAntapaccay(c)&&
+            !antPdf.has(normalizarNombreCurso(c.nombre)))
+          .map(c=>({titulo:c.nombre||'Curso',tipo:'Curso · Antapaccay',fecha:c.fechaReportada})),
+        ...((!minaActual||minaActual==='CENTINELA')?centinelaActual?.cursos||[]:[])
+          .filter(c=>String(c.estado||'').toUpperCase()==='VIGENTE'&&
+            !cenPdf.has(normalizarNombreCurso(c.nombre)))
+          .map(c=>({titulo:c.nombre||'Curso',tipo:'Curso · Centinela',
+            fecha:c.fechaVencimiento||c.vencimiento||c.fechaReportada})),
+        ...emoDeMina().map(v=>({titulo:'Examen médico ocupacional (EMO)',
+          tipo:nombreMina(v.mina||'SIN ASIGNAR'),fecha:v.fechaVencimiento}))
+      ].map(x=>({...x,d:vencimientoCurso(x.fecha).dias}))
+        .filter(x=>proximoPorDias(x.d))
+        .sort((a,b)=>a.d-b.d||String(a.titulo).localeCompare(String(b.titulo),'es'));
+      const fila=(v)=>'<div class="upcoming-row"><div class="upcoming-label">'+
+        escapeHtml(v.titulo)+'<span class="upcoming-kind">'+escapeHtml(v.tipo)+'</span></div>'+
+        '<span class="upcoming-date">'+escapeHtml(fmtDate(v.fecha))+'</span></div>';
+      $('proximosDetalleLista').innerHTML=listaProximos.length
+        ?listaProximos.slice(0,6).map(fila).join('')+
+          (listaProximos.length>6
+            ?'<details class="upcoming-more"><summary>Ver otros '+
+              (listaProximos.length-6)+' vencimientos</summary>'+
+              listaProximos.slice(6).map(fila).join('')+'</details>':'')
+        :'<div class="upcoming-empty">Sin vencimientos futuros registrados hasta el 31/01/2027.</div>';
     }
     function renderPerfil() {
       const el=$('perfilCapacitacion');
@@ -756,7 +807,7 @@
       const filtered=list.filter(c=>
         (filtroActual!=='proximos'||(
           c.clase!=='NO_APLICA'&&!esInduccionGeneralAntapaccay(c)&&
-          String(c.estadoReportado||'').toUpperCase()==='VIGENTE'&&venceEn30Dias(c.fechaReportada)
+          String(c.estadoReportado||'').toUpperCase()==='VIGENTE'&&venceHastaEnero(c.fechaReportada)
         ))&&
         (filtroActual!=='vencidos'||(
           c.clase!=='NO_APLICA'&&!esInduccionGeneralAntapaccay(c)&&
@@ -771,7 +822,7 @@
       // en la lista de cursos del trabajador. No altera la matriz original.
       const certificadosConPdf=seleccionarNivelLayher(certificadosDeMina()).filter(c=>
         minaCertificado(c)==='ANTAPACCAY'&&
-        (filtroActual!=='proximos'||venceEn30Dias(fechaVencimientoParaMostrar(c)))&&
+        (filtroActual!=='proximos'||venceHastaEnero(fechaVencimientoParaMostrar(c)))&&
         (filtroActual!=='vencidos'||cursoVencido(fechaVencimientoParaMostrar(c),''))&&
         (!term||[c.curso,c.emisor,nombreVisibleCertificado(c),cursoMatrizRelacionadoCertificado(c)?.nombre||'']
           .join(' ').toLocaleLowerCase('es').includes(term)));
@@ -790,7 +841,7 @@
             (c.valorOriginal?'Dato informado: '+c.valorOriginal:'Vencimiento no registrado'));
         const antDias=esInduccion?null:vencimientoCurso(c.fechaReportada).dias;
         const antVencido=!na&&antDias!==null&&antDias<0;
-        const antProximo=!na&&!espera&&antDias!==null&&antDias>=0&&antDias<=30;
+        const antProximo=!na&&!espera&&proximoPorDias(antDias);
         const etiqueta=na?'No aplica':esInduccion&&espera?'Por programar':esInduccion&&conFecha?'Curso realizado':antVencido?'Vencido':inscrito?'Inscrito · verificar':espera?'Por programar':String(c.estadoReportado||'').toUpperCase()==='VENCIDO'?'Vencido según reporte':antProximo?'Por vencer':
           conFecha&&String(c.estadoReportado||'').toUpperCase()==='VIGENTE'?'Vigente según matriz':
           (c.estadoReportado||'Por verificar');
@@ -810,13 +861,13 @@
       if(!lista.length||(minaActual&&minaActual!=='CENTINELA')||(filtroActual!=='todos'&&filtroActual!=='proximos'&&filtroActual!=='vencidos'))return {items:[],noAplica:''};
       const existentes=new Set(certificadosDeMina()
         .filter(c=>minaCertificado(c)==='CENTINELA')
-        .filter(c=>(filtroActual!=='proximos'||venceEn30Dias(c.vencimiento))&&
+        .filter(c=>(filtroActual!=='proximos'||venceHastaEnero(c.vencimiento))&&
           (filtroActual!=='vencidos'||cursoVencido(c.vencimiento,'')))
         .map(c=>normalizarNombreCurso(c.curso)));
       const filtrados=lista.filter(c=>!existentes.has(normalizarNombreCurso(c.nombre)))
         .filter(c=>filtroActual!=='proximos'||(
           String(c.estado||'').toUpperCase()==='VIGENTE'&&
-          venceEn30Dias(c.fechaVencimiento||c.vencimiento||c.fechaReportada)
+          venceHastaEnero(c.fechaVencimiento||c.vencimiento||c.fechaReportada)
         ))
         .filter(c=>filtroActual!=='vencidos'||(
           String(c.estado||'').toUpperCase().replace(/\s+/g,'_').trim()!=='NO_APLICA'&&
@@ -831,7 +882,7 @@
         const st=String(c.estado||'SIN_REGISTRO').trim().toUpperCase().replace(/\s+/g,'_');
         const fecha=vencimientoCurso(c.fechaVencimiento||c.vencimiento||c.fechaReportada);
         const cenVencido=st!=='NO_APLICA'&&fecha.dias!==null&&fecha.dias<0;
-        const cenProximo=st==='VIGENTE'&&fecha.dias!==null&&fecha.dias>=0&&fecha.dias<=30;
+        const cenProximo=st==='VIGENTE'&&proximoPorDias(fecha.dias);
         const etiqueta=cenVencido?'Vencido':cenProximo?'Por vencer':({VIGENTE:'Vigente según reporte',VENCIDO:'Vencido según reporte',
           PROGRAMADO:'Programado',NO_APLICA:'No aplica',FALTA:'Falta',
           PENDIENTE:'Pendiente',EN_TRAMITE:'En trámite',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar');
@@ -926,7 +977,7 @@
         const available=c.descargaPublica===true;
         if(filtroActual==='disponibles'&&!available)return false;
         if(filtroActual==='restringidos'&&available)return false;
-        if(filtroActual==='proximos'&&!venceEn30Dias(fechaVencimientoParaMostrar(c)))return false;
+        if(filtroActual==='proximos'&&!venceHastaEnero(fechaVencimientoParaMostrar(c)))return false;
         if(filtroActual==='vencidos'&&!cursoVencido(fechaVencimientoParaMostrar(c),''))return false;
         return !term || [c.curso||'',c.emisor||'',nombreVisibleCertificado(c),cursoMatrizRelacionadoCertificado(c)?.nombre||'']
           .join(' ').toLocaleLowerCase('es').includes(term);
@@ -939,7 +990,7 @@
         let statusText=available?'PDF disponible':'Acceso restringido';
         let statusClass=available?'available':'restricted';
         if(exp!==null&&exp<0){statusText='Fecha vencida';statusClass='expired';}
-        else if(exp!==null&&exp<=30){statusText='Próximo a vencer';statusClass='warning';}
+        else if(proximoPorDias(exp)){statusText='Próximo a vencer';statusClass='warning';}
         const buttons=available?`<div class="cert-actions"><button class="btn-secondary" type="button" data-view="${escapeHtml(c.id)}">${icon('eye')}Ver PDF</button></div>`:'';
         // Las dos fechas proceden de fuentes distintas. Si difieren, mostrar ambas.
         // El semáforo sigue usando primero el vencimiento propio del certificado.
@@ -957,7 +1008,26 @@
       const cursosMatriz=renderCursosEnBiblioteca(term,mostrarMatriz);
       const conPdf=new Set(listado.filter(c=>minaCertificado(c)==='ANTAPACCAY').map(nombreEquivalenteEnMatriz));
       const cursosCentinela=renderCentinelaEnBiblioteca(term);
-      const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela.items]
+      // Mostrar EMO en los filtros de fechas, sin mezclarlo con los demás filtros de cursos.
+      const registrosEMO=(filtroActual==='proximos'||filtroActual==='vencidos')
+        ?emoDeMina().filter(v=>filtroActual==='proximos'
+            ?venceHastaEnero(v.fechaVencimiento)
+            :cursoVencido(v.fechaVencimiento,''))
+          .filter(v=>!term||('examen medico ocupacional emo '+nombreMina(v.mina)).toLocaleLowerCase('es').includes(term))
+          .map(v=>{
+            const dias=vencimientoCurso(v.fechaVencimiento).dias;
+            const vencido=dias<0;
+            return {nombre:'Examen médico ocupacional · '+nombreMina(v.mina),dias,html:
+              '<article class="cert-item library-course"><div class="cert-icon">'+icon('calendar','icon-lg')+
+              '</div><div class="cert-body"><h4 class="cert-name">Examen médico ocupacional (EMO)</h4>'+
+              '<div class="cert-issuer"><span>'+escapeHtml(nombreMina(v.mina))+' · Control de EMO</span></div>'+
+              '<div class="cert-bottom"><div><span class="status-pill '+(vencido?'expired':'pending')+'">'+
+              (vencido?'Vencido':'Próximo a vencer')+'</span> <span class="cert-date '+(vencido?'is-expired':'is-soon')+'">'+
+              escapeHtml((vencido?'Venció: ':'Vence: ')+fmtDate(v.fechaVencimiento))+
+              '</span></div></div></div></article>'};
+          })
+        :[];
+      const unificados=[...registrosPDF,...cursosMatriz.items.filter(c=>!conPdf.has(normalizarNombreCurso(c.nombre))),...cursosCentinela.items,...registrosEMO]
         .sort((a,b)=>{
           const porNombre=String(a.nombre).localeCompare(String(b.nombre),'es',{sensitivity:'base'});
           if(filtroActual==='proximos')return (a.dias-b.dias)||porNombre;
@@ -969,13 +1039,13 @@
           }
           return porNombre;
         });
-      if(filtroActual==='proximos')$('total').textContent=`${unificados.length} próximos a vencer (30 días)`;
+      if(filtroActual==='proximos')$('total').textContent=`${unificados.length} próximos a vencer (hasta enero 2027)`;
       if(filtroActual==='vencidos')$('total').textContent=`${unificados.length} vencidos`;
       const avisoVacio=term?'No hay cursos que coincidan con la búsqueda.':
         filtroActual==='disponibles'?'No hay documentos disponibles para esta selección.':
         filtroActual==='restringidos'?'No hay documentos restringidos para esta selección.':
-        filtroActual==='proximos'?'No hay cursos o certificados con vencimiento registrado en los próximos 30 días para esta selección.':
-        filtroActual==='vencidos'?'No hay cursos ni certificados vencidos para esta selección.':
+        filtroActual==='proximos'?'No hay cursos, certificados ni EMO con vencimiento desde hoy hasta el 31 de enero de 2027.':
+        filtroActual==='vencidos'?'No hay cursos, certificados ni EMO vencidos para esta selección.':
         minaActual==='CENTINELA' && !centinelaCampoEnAPI?
           'La versión publicada del Apps Script todavía no devuelve los cursos de Centinela. Actualiza la implementación existente a una NUEVA VERSIÓN desde Apps Script; guardar Código.gs no basta.':
         minaActual==='CENTINELA' && centinelaCampoEnAPI && !centinelaActual?.cursos?.length?
