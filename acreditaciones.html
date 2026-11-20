@@ -641,9 +641,12 @@
         const listado=(cen.cursos||[]).filter(c=>c.obligatorio);
         $('perfilLista').innerHTML=listado.map((c,i)=>{
           const st=String(c.estado||'').toUpperCase();
-          const css=st==='VIGENTE'?'pass':st==='VENCIDO'?'fail':st==='PROGRAMADO'||st==='EN_TRAMITE'?'review':'wait';
-          const label={VIGENTE:'Vigente según reporte',VENCIDO:'Vencido',PROGRAMADO:'Programado',
-            EN_TRAMITE:'En trámite',FALTA:'Falta',PENDIENTE:'Pendiente',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar';
+          const vig=vencimientoCurso(c.fechaVencimiento||c.vencimiento||c.fechaReportada);
+          const vencido=vig.dias!==null&&vig.dias<0;
+          const proximo=st==='VIGENTE'&&vig.dias!==null&&vig.dias>=0&&vig.dias<=30;
+          const css=vencido?'fail':proximo?'review':st==='VIGENTE'?'pass':st==='VENCIDO'?'fail':st==='PROGRAMADO'||st==='EN_TRAMITE'?'review':'wait';
+          const label=vencido?'Vencido':proximo?'Por vencer':({VIGENTE:'Vigente según reporte',VENCIDO:'Vencido',PROGRAMADO:'Programado',
+            EN_TRAMITE:'En trámite',FALTA:'Falta',PENDIENTE:'Pendiente',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar');
           return '<div class="profile-course"><span class="profile-num">'+(i+1)+'</span><span class="profile-name">'+
             escapeHtml(c.nombre||'Curso')+'<small>'+escapeHtml(vencimientoCurso(c.fechaVencimiento||c.vencimiento||c.fechaReportada).texto)+'</small></span><span class="profile-pill '+css+'">'+escapeHtml(label)+'</span></div>';
         }).join('');
@@ -773,14 +776,14 @@
       const aplican=filtrados.filter(c=>!esNoAplica(c));
       const filas=cursos=>cursos.map(c=>{
         const st=String(c.estado||'SIN_REGISTRO').trim().toUpperCase().replace(/\s+/g,'_');
+        const fecha=vencimientoCurso(c.fechaVencimiento||c.vencimiento||c.fechaReportada);
+        const cenVencido=st!=='NO_APLICA'&&fecha.dias!==null&&fecha.dias<0;
+        const cenProximo=st==='VIGENTE'&&fecha.dias!==null&&fecha.dias>=0&&fecha.dias<=30;
         const etiqueta=cenVencido?'Vencido':cenProximo?'Por vencer':({VIGENTE:'Vigente según reporte',VENCIDO:'Vencido según reporte',
           PROGRAMADO:'Programado',NO_APLICA:'No aplica',FALTA:'Falta',
           PENDIENTE:'Pendiente',EN_TRAMITE:'En trámite',SIN_REGISTRO:'Sin registro'}[st]||'Por verificar');
         const clase=cenVencido?'expired':st==='VIGENTE'?'reported':st==='NO_APLICA'?'not-applicable':'pending';
         const tipo=c.obligatorio?'Obligatorio':'Opcional · no afecta el porcentaje';
-        const fecha=vencimientoCurso(c.fechaVencimiento||c.vencimiento||c.fechaReportada);
-        const cenVencido=st!=='NO_APLICA'&&fecha.dias!==null&&fecha.dias<0;
-        const cenProximo=st==='VIGENTE'&&fecha.dias!==null&&fecha.dias>=0&&fecha.dias<=30;
         return {nombre:c.nombre||'Curso Centinela',html:
           '<article class="cert-item library-course">'+
           '<div class="cert-icon">'+icon('calendar','icon-lg')+'</div>'+
