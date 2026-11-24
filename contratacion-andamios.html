@@ -1919,6 +1919,7 @@ tbody tr:last-child td {
               <th>
                 REQUERIMIENTO
               </th>
+              <th>FECHA DE SOLICITUD</th>
 
               <th>
                 UNIDAD
@@ -1962,7 +1963,7 @@ tbody tr:last-child td {
             <tr>
 
               <td
-                colspan="13"
+                colspan="14"
                 class="vacio"
               >
                 Cargando requerimientos...
@@ -2790,7 +2791,7 @@ async function cargarRequerimientos() {
         <tr>
 
           <td
-            colspan="13"
+            colspan="14"
             class="vacio"
           >
             No existen requerimientos registrados.
@@ -2920,6 +2921,9 @@ const porcentajeHabilitacion =
 
                 </td>
 
+                <td>
+                  ${escapar(r.fechaSolicitud || '—')}
+                </td>
 
                 <td>
 
@@ -3064,7 +3068,7 @@ const porcentajeHabilitacion =
       <tr>
 
         <td
-          colspan="13"
+          colspan="14"
           class="vacio"
         >
 
