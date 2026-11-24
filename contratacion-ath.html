@@ -497,6 +497,41 @@ tbody tr:hover {
   }
 }
 
+
+/* CUL adjuntado después del registro */
+.btn-adjuntar-cul {
+  padding: 7px 10px;
+  font-size: 12px;
+  background: #e0f2fe;
+  color: #075985;
+  border: 1px solid #7dd3fc;
+  white-space: nowrap;
+}
+.btn-adjuntar-cul:hover { background: #bae6fd; }
+.dialogo-cul {
+  width: min(460px, 94vw);
+  max-width: 94vw;
+  padding: 24px;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(15,23,42,.24);
+}
+.dialogo-cul::backdrop { background: rgba(15,23,42,.62); }
+.dialogo-cul h3 { margin: 0 0 10px; font-size: 20px; }
+.dialogo-cul p { color: #475569; font-size: 13px; line-height: 1.5; }
+.dialogo-cul label { display: block; font-size: 13px; font-weight: 700; margin: 15px 0 6px; }
+.dialogo-cul input {
+  display: block; width: 100%; padding: 10px;
+  border: 1px solid #cbd5e1; border-radius: 7px;
+}
+.dialogo-cul .acciones-dialogo {
+  display: flex; justify-content: flex-end; gap: 9px;
+  flex-wrap: wrap; margin-top: 19px;
+}
+.dialogo-cul .btn-secundario { background: #e5e7eb; color:#334155; }
+.dialogo-cul .error-cul { color: #991b1b; font-size: 12px; margin-top: 10px; }
+.dialogo-cul button:disabled { opacity: .6; cursor: wait; }
+
 </style>
 
 </head>
@@ -926,6 +961,24 @@ tbody tr:hover {
 
 </section>
 
+
+
+<dialog id="dlgAdjuntarCul" class="dialogo-cul">
+  <form id="formAdjuntarCul">
+    <h3>Adjuntar CUL</h3>
+    <p id="descripcionAdjuntarCul"></p>
+    <p>El CUL es opcional. Puedes adjuntarlo cuando esté disponible, sin crear otro registro del candidato.</p>
+    <label for="culPosterior">CUL en formato PDF (máximo 8 MB) *</label>
+    <input id="culPosterior" type="file" accept=".pdf,application/pdf" required>
+    <label for="claveATHCUL">Clave del área ATH *</label>
+    <input id="claveATHCUL" type="password" autocomplete="off" placeholder="Ingresa la clave de ATH" required>
+    <p id="errorAdjuntarCul" class="error-cul" role="alert" hidden></p>
+    <div class="acciones-dialogo">
+      <button type="button" class="btn-secundario" onclick="cerrarCargaCul()">Volver</button>
+      <button type="submit" class="btn-principal" id="btnGuardarCul">Guardar CUL</button>
+    </div>
+  </form>
+</dialog>
 
 </main>
 
@@ -1810,13 +1863,94 @@ function crearFilaCandidato(c) {
       <td>
         ${c.archivoCul
           ? `<a href="${escapar(c.archivoCul)}" target="_blank" rel="noopener noreferrer" class="archivo">Ver CUL</a>`
-          : '—'}
+          : `<button type="button" class="btn-adjuntar-cul"
+                     data-adjuntar-cul="${escapar(c.idCandidato)}">Adjuntar CUL</button>`}
       </td>
 
     </tr>
   `;
 }
 
+
+
+
+/* =====================================================
+   CUL POSTERIOR: SIN DUPLICAR CANDIDATOS NI REGISTROS
+===================================================== */
+let candidatoParaCul = null;
+
+document.getElementById('tablaCandidatos').addEventListener('click', function(evento) {
+  const boton = evento.target.closest('button[data-adjuntar-cul]');
+  if (!boton) return;
+  abrirCargaCul(boton.dataset.adjuntarCul);
+});
+
+document.getElementById('formAdjuntarCul').addEventListener('submit', guardarCulPosterior);
+
+function abrirCargaCul(idCandidato) {
+  const candidato = candidatos.find(c => String(c.idCandidato) === String(idCandidato));
+  if (!candidato || candidato.archivoCul) {
+    alert('El candidato ya tiene CUL o no está disponible. Actualiza la lista.');
+    return;
+  }
+  candidatoParaCul = candidato.idCandidato;
+  document.getElementById('formAdjuntarCul').reset();
+  document.getElementById('descripcionAdjuntarCul').textContent =
+    candidato.idCandidato + ' — ' + candidato.nombres;
+  document.getElementById('errorAdjuntarCul').hidden = true;
+  document.getElementById('dlgAdjuntarCul').showModal();
+}
+
+function cerrarCargaCul() {
+  if (document.getElementById('btnGuardarCul').disabled) return;
+  document.getElementById('dlgAdjuntarCul').close();
+  document.getElementById('formAdjuntarCul').reset();
+  candidatoParaCul = null;
+}
+
+async function guardarCulPosterior(evento) {
+  evento.preventDefault();
+  if (!candidatoParaCul) return;
+  const archivo = document.getElementById('culPosterior').files[0];
+  const clave = document.getElementById('claveATHCUL').value;
+  const aviso = document.getElementById('errorAdjuntarCul');
+  const boton = document.getElementById('btnGuardarCul');
+  try {
+    validarArchivo(archivo, 'CUL');
+    if (!/\.pdf$/i.test(archivo.name) || (archivo.type && archivo.type !== 'application/pdf')) {
+      throw new Error('El CUL debe ser un archivo PDF.');
+    }
+    if (!clave.trim()) throw new Error('Ingresa la clave del área ATH.');
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+    aviso.hidden = true;
+
+    const datos = {
+      accion: 'adjuntarCulCandidato',
+      idCandidato: candidatoParaCul,
+      claveATH: clave,
+      archivoCul: await archivoAObjeto(archivo)
+    };
+    const respuesta = await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify(datos)
+    });
+    const resultado = await respuesta.json();
+    if (!resultado.ok) throw new Error(resultado.mensaje || 'No se pudo adjuntar el CUL.');
+
+    document.getElementById('dlgAdjuntarCul').close();
+    document.getElementById('formAdjuntarCul').reset();
+    candidatoParaCul = null;
+    await cargarCandidatos();
+    mostrarMensaje(resultado.mensaje || 'CUL adjuntado correctamente.', 'ok');
+  } catch (error) {
+    aviso.textContent = error.message || 'Error al adjuntar el CUL.';
+    aviso.hidden = false;
+  } finally {
+    boton.disabled = false;
+    boton.textContent = 'Guardar CUL';
+  }
+}
 
 
 function actualizarKPIs() {
