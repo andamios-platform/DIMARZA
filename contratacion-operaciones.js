@@ -1426,12 +1426,12 @@ function renderizarEntrevistas() {
 
 
         const realizadaA =
-          estadoA === 'REALIZADA'
+          (a.entrevista || estadoA === 'REALIZADA')
             ? 1
             : 0;
 
         const realizadaB =
-          estadoB === 'REALIZADA'
+          (b.entrevista || estadoB === 'REALIZADA')
             ? 1
             : 0;
 
@@ -1568,10 +1568,8 @@ function renderizarEntrevistas() {
                       .map(x => {
 
                         const realizada =
-                          String(
-                            x.agenda.estadoCita || ''
-                          ).toUpperCase()
-                          === 'REALIZADA';
+                          !!x.entrevista ||
+                          String(x.agenda.estadoCita || '').toUpperCase() === 'REALIZADA';
 
 
                         return `
@@ -1652,7 +1650,7 @@ function renderizarEntrevistas() {
                                 }"
                               >
                                 ${escaparHTML(
-                                  x.agenda.estadoCita
+                                  realizada ? 'REALIZADA' : x.agenda.estadoCita
                                 )}
                               </span>
 
