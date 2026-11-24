@@ -1325,7 +1325,15 @@ tbody tr:last-child td {
   }
 
 }
-  </style>
+  /* Cierre de requerimientos */
+.estado-finalizado { background:#dbeafe; color:#1e40af; }
+.estado-cancelado { background:#fee2e2; color:#991b1b; }
+.acciones-cierre { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; }
+.btn-finalizar-requerimiento { background:#0f766e; color:#fff; font-size:12px; padding:9px 12px; }
+.btn-finalizar-requerimiento:hover { background:#115e59; }
+.btn-cancelar-requerimiento { background:#f1f5f9; color:#475569; font-size:12px; padding:9px 12px; }
+.btn-cancelar-requerimiento:hover { background:#e2e8f0; }
+</style>
 
 </head>
 
@@ -1986,7 +1994,7 @@ tbody tr:last-child td {
     <form id="formCierreRequerimiento">
       <h3 id="tituloCierreRequerimiento" style="margin:0 0 8px">Finalizar requerimiento</h3>
       <p id="detalleCierreRequerimiento" style="margin:0 0 18px;line-height:1.5"></p>
-      <label for="motivoCierreRequerimiento" style="display:block;font-weight:600;margin-bottom:6px">Motivo del cierre *</label>
+      <label id="labelMotivoCierreRequerimiento" for="motivoCierreRequerimiento" style="display:block;font-weight:600;margin-bottom:6px">Motivo del cierre *</label>
       <textarea id="motivoCierreRequerimiento" required minlength="10" maxlength="500" rows="4" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #bbb;border-radius:7px" placeholder="Ej.: Finalizó la parada de planta y no se requiere cubrir los puestos restantes."></textarea>
       <label id="labelConfirmarServicioTerminado" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;line-height:1.4">
         <input id="confirmarServicioTerminado" type="checkbox" style="margin-top:4px">
@@ -2159,58 +2167,66 @@ function cambiarFiltroRequerimientos(filtro) {
   cargarRequerimientos();
 }
 
+
 function abrirCierreRequerimiento(id, tipo) {
   if (!esResidenteContratacion()) {
-    alert('Solo el residente con sesión vigente puede cerrar requerimientos.');
+    alert('Solo el residente con sesión vigente puede finalizar o cancelar requerimientos.');
     return;
   }
+  if (!['FINALIZAR', 'CANCELAR'].includes(tipo)) return;
   const req = todosLosRequerimientos.find(r => String(r.idRequerimiento) === String(id));
-  if (!req || String(req.estado || '').toUpperCase() !== 'ABIERTO') {
-    alert('El requerimiento ya no está abierto. Actualiza la lista.');
+  if (!req || String(req.estado || '').trim().toUpperCase() !== 'ABIERTO') {
+    alert('Este requerimiento ya no está abierto. Actualiza el listado.');
     cargarRequerimientos();
     return;
   }
   const requeridos = Number(req.cantidadRequerida || 0);
+  const contratados = Number(req.cantidadContratada || 0);
   const habilitados = Number(req.cantidadHabilitada || 0);
-  if (tipo === 'PARCIAL' && !(habilitados > 0 && habilitados < requeridos)) {
-    alert('Solo puede finalizar parcialmente un requerimiento con cobertura mayor que cero y menor que el total.');
+  if (tipo === 'CANCELAR' && (contratados > 0 || habilitados > 0)) {
+    alert('Este requerimiento ya registra personal. Utiliza Finalizar para mantener la cobertura real.');
     return;
   }
   cierreRequerimientoSeleccionado = {id: String(id), tipo};
-  const descripcion = 'Requerimiento ' + id + ': ' + habilitados + ' de ' +
-    requeridos + ' habilitados (' + (requeridos - habilitados) + ' no cubiertos).';
   document.getElementById('tituloCierreRequerimiento').textContent =
-    tipo === 'PARCIAL' ? 'Finalizar requerimiento parcialmente' : 'Cancelar requerimiento';
-  document.getElementById('detalleCierreRequerimiento').textContent = descripcion;
+    tipo === 'FINALIZAR' ? 'Finalizar requerimiento' : 'Cancelar requerimiento';
+  document.getElementById('detalleCierreRequerimiento').textContent =
+    'Requerimiento ' + id + ': ' + contratados + ' contratados y ' +
+    habilitados + ' habilitados de ' + requeridos + ' solicitados.';
+  document.getElementById('labelMotivoCierreRequerimiento').textContent =
+    tipo === 'FINALIZAR' ? 'Motivo de finalización *' : 'Motivo de cancelación *';
   document.getElementById('labelConfirmarServicioTerminado').style.display =
-    tipo === 'PARCIAL' ? 'flex' : 'none';
+    tipo === 'FINALIZAR' ? 'flex' : 'none';
   document.getElementById('confirmarServicioTerminado').checked = false;
   document.getElementById('motivoCierreRequerimiento').value = '';
   document.getElementById('errorCierreRequerimiento').style.display = 'none';
   document.getElementById('dlgCierreRequerimiento').showModal();
 }
-
 async function registrarCierreRequerimiento(evento) {
   evento.preventDefault();
   const seleccion = cierreRequerimientoSeleccionado;
   if (!seleccion) return;
   const tokenSesion = localStorage.getItem('dimarzaTokenVisualizacion');
   const motivo = document.getElementById('motivoCierreRequerimiento').value.trim();
-  const parcial = seleccion.tipo === 'PARCIAL';
+  const finalizar = seleccion.tipo === 'FINALIZAR';
   const confirmacion = document.getElementById('confirmarServicioTerminado').checked;
   const aviso = document.getElementById('errorCierreRequerimiento');
   const boton = document.getElementById('btnConfirmarCierreRequerimiento');
-  if (motivo.length < 10 || (parcial && !confirmacion)) {
-    aviso.textContent = 'Indica el motivo (mínimo 10 caracteres) y confirma el fin del servicio.';
+  if (motivo.length < 10 || (finalizar && !confirmacion)) {
+    aviso.textContent = 'Indica un motivo de al menos 10 caracteres' +
+      (finalizar ? ' y confirma que el servicio terminó.' : '.');
     aviso.style.display = 'block';
     return;
   }
-  if (!window.confirm('¿Confirmas el cierre de este requerimiento? Se conservará en el historial.')) return;
+  if (!window.confirm(finalizar
+    ? '¿Confirmas la finalización de este requerimiento? Se conservará su cobertura real.'
+    : '¿Confirmas que este requerimiento fue anulado y debe cancelarse?')) return;
   const datos = {
-    accion: parcial ? 'finalizarRequerimientoParcial' : 'cancelarRequerimiento',
-    idRequerimiento: seleccion.id, tokenSesion
+    accion: finalizar ? 'finalizarRequerimientoUniversal' : 'cancelarRequerimiento',
+    idRequerimiento: seleccion.id,
+    tokenSesion
   };
-  if (parcial) {
+  if (finalizar) {
     datos.motivoFinalizacion = motivo;
     datos.confirmarFinServicio = true;
   } else {
@@ -2889,20 +2905,12 @@ const porcentajeHabilitacion =
 
 
 
+            const estadoReq = String(r.estado || '').trim().toUpperCase();
             const claseEstado =
-
-              String(
-                r.estado || ''
-              )
-                .toUpperCase()
-
-              === 'ABIERTO'
-
-                ? 'estado-abierto'
-
-                : 'estado-cerrado';
-
-
+              estadoReq === 'ABIERTO' ? 'estado-abierto' :
+              estadoReq === 'CANCELADO' ? 'estado-cancelado' :
+              estadoReq.startsWith('FINALIZADO') ? 'estado-finalizado' : 'estado-cerrado';
+            const nombreEstado = estadoReq === 'CERRADO' ? 'CERRADO COMPLETO' : (r.estado || '—');
 
             return `
 
@@ -2985,7 +2993,7 @@ const porcentajeHabilitacion =
 
 <td>
   <span class="estado ${claseEstado}">
-    ${escapar(r.estado)}
+    ${escapar(nombreEstado)}
   </span>
 </td>
 
@@ -3036,12 +3044,16 @@ const porcentajeHabilitacion =
 
 
 <td>
-  ${esResidenteContratacion() && String(r.estado || '').toUpperCase() === 'ABIERTO'
-    ? `<div style="display:flex;flex-direction:column;gap:6px">
-        ${habilitado > 0 && habilitado < requerido
-          ? `<button type="button" data-cierre="PARCIAL" data-id="${escapar(r.idRequerimiento)}" title="Fin de servicio con cobertura parcial">Finalizar parcial</button>`
+  ${esResidenteContratacion() && estadoReq === 'ABIERTO'
+    ? `<div class="acciones-cierre">
+        <button type="button" class="btn-finalizar-requerimiento"
+          data-cierre="FINALIZAR" data-id="${escapar(r.idRequerimiento)}"
+          title="Cerrar servicio conservando la cantidad cubierta">Finalizar</button>
+        ${contratado === 0 && habilitado === 0
+          ? `<button type="button" class="btn-cancelar-requerimiento"
+               data-cierre="CANCELAR" data-id="${escapar(r.idRequerimiento)}"
+               title="Anular requerimiento sin personal contratado">Cancelar</button>`
           : ''}
-        ${habilitado === 0 ? `<button type="button" data-cierre="CANCELAR" data-id="${escapar(r.idRequerimiento)}">Cancelar</button>` : ''}
       </div>`
     : '—'}
 </td>
