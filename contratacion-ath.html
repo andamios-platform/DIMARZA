@@ -236,7 +236,7 @@ body {
   display: grid;
 
   grid-template-columns:
-    repeat(2, 1fr);
+    repeat(3, minmax(0, 1fr));
 
   gap: 15px;
 
@@ -826,6 +826,15 @@ tbody tr:hover {
 
       </div>
 
+      <div class="documento">
+        <label for="archivoCul">CUL (CERTIFICADO ÚNICO LABORAL) · OPCIONAL</label>
+        <input
+          id="archivoCul"
+          type="file"
+          accept=".pdf,application/pdf"
+        >
+      </div>
+
 
     </div>
 
@@ -887,6 +896,8 @@ tbody tr:hover {
 
           <th>ARCHIVO DNI</th>
 
+          <th>CUL</th>
+
         </tr>
 
       </thead>
@@ -899,7 +910,7 @@ tbody tr:hover {
         <tr>
 
           <td
-            colspan="12"
+            colspan="13"
             class="vacio"
           >
             Cargando candidatos...
@@ -1265,6 +1276,8 @@ async function registrarCandidato(
         'archivoDni'
       );
 
+    const culInput = document.getElementById('archivoCul');
+
 
     validarArchivo(
       cvInput.files[0],
@@ -1277,20 +1290,24 @@ async function registrarCandidato(
       'DNI'
     );
 
+    if (culInput.files[0]) {
+      validarArchivo(culInput.files[0], 'CUL');
+      if (!/\.pdf$/i.test(culInput.files[0].name) && culInput.files[0].type !== 'application/pdf') {
+        throw new Error('El CUL debe adjuntarse en formato PDF');
+      }
+    }
+
 
     const [
       cv,
-      archivoDni
+      archivoDni,
+      archivoCul
     ] =
       await Promise.all([
 
-        archivoAObjeto(
-          cvInput.files[0]
-        ),
-
-        archivoAObjeto(
-          dniInput.files[0]
-        )
+        archivoAObjeto(cvInput.files[0]),
+        archivoAObjeto(dniInput.files[0]),
+        culInput.files[0] ? archivoAObjeto(culInput.files[0]) : Promise.resolve(null)
 
       ]);
 
@@ -1371,7 +1388,10 @@ async function registrarCandidato(
         cv,
 
       archivoDni:
-        archivoDni
+        archivoDni,
+
+      archivoCul:
+        archivoCul
     };
 
 
@@ -1604,7 +1624,7 @@ async function cargarCandidatos() {
         <tr>
 
           <td
-            colspan="12"
+            colspan="13"
             class="vacio"
           >
             No existen candidatos registrados.
@@ -1636,7 +1656,7 @@ async function cargarCandidatos() {
       <tr>
 
         <td
-          colspan="12"
+          colspan="13"
           class="vacio"
         >
           No se pudieron cargar los candidatos.
@@ -1785,6 +1805,12 @@ function crearFilaCandidato(c) {
           : '-'
         }
 
+      </td>
+
+      <td>
+        ${c.archivoCul
+          ? `<a href="${escapar(c.archivoCul)}" target="_blank" rel="noopener noreferrer" class="archivo">Ver CUL</a>`
+          : '—'}
       </td>
 
     </tr>
