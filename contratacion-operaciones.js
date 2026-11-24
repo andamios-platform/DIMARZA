@@ -1589,6 +1589,23 @@ function renderizarEntrevistas() {
                           String(x.agenda?.estadoCita || '').toUpperCase() === 'REALIZADA';
 
 
+                        const resultadoEntrevista =
+                          String(x.entrevista?.resultado || '').trim().toUpperCase();
+
+                        const claseResultadoEntrevista =
+                          resultadoEntrevista === 'APTO'
+                            ? 'estado-entrevista-apto'
+                            : resultadoEntrevista === 'NO APTO'
+                              ? 'estado-entrevista-no-apto'
+                              : 'estado-realizada';
+
+                        const estadoMostrado =
+                          realizada
+                            ? (['APTO', 'NO APTO'].includes(resultadoEntrevista)
+                                ? resultadoEntrevista
+                                : 'SIN RESULTADO')
+                            : (x.agenda?.estadoCita || 'SIN PROGRAMAR');
+
                         return `
 
                               <tr
@@ -1660,14 +1677,14 @@ function renderizarEntrevistas() {
                               <span
                                 class="estado-agenda ${
                                   realizada
-                                    ? 'estado-realizada'
+                                    ? claseResultadoEntrevista
                                     : obtenerClaseEstadoAgenda(
                                         x.agenda?.estadoCita || 'PENDIENTE DE PROGRAMAR'
                                       )
                                 }"
                               >
                                 ${escaparHTML(
-                                  realizada ? 'REALIZADA' : (x.agenda?.estadoCita || 'SIN PROGRAMAR')
+                                  estadoMostrado
                                 )}
                               </span>
 
