@@ -3037,7 +3037,7 @@ const porcentajeHabilitacion =
         ${habilitado > 0 && habilitado < requerido
           ? `<button type="button" data-cierre="PARCIAL" data-id="${escapar(r.idRequerimiento)}" title="Fin de servicio con cobertura parcial">Finalizar parcial</button>`
           : ''}
-        <button type="button" data-cierre="CANCELAR" data-id="${escapar(r.idRequerimiento)}">Cancelar</button>
+        ${habilitado === 0 ? `<button type="button" data-cierre="CANCELAR" data-id="${escapar(r.idRequerimiento)}">Cancelar</button>` : ''}
       </div>`
     : '—'}
 </td>
