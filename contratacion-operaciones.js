@@ -28,6 +28,8 @@ let candidatoEntrevista = null;
 let agendaEntrevistaActual = null;
 
 let entrevistadoresOperaciones = [];
+let vistaEntrevistasActual = 'PENDIENTES';
+let filtroEntrevistadorSeleccionado = '';
 
 
 /* =====================================================
@@ -1528,6 +1530,14 @@ function renderizarEntrevistas() {
 </div>
 
 
+        <div class="subtabs-entrevistas" role="group" aria-label="Estado de las entrevistas">
+          <button type="button" class="subtab-entrevista activa" id="subtabPendientes" aria-pressed="true" onclick="cambiarVistaEntrevistas('PENDIENTES')">
+            Pendientes <span id="totalEntrevistasPendientes" class="contador-entrevistas">0</span>
+          </button>
+          <button type="button" class="subtab-entrevista" id="subtabRealizadas" aria-pressed="false" onclick="cambiarVistaEntrevistas('REALIZADAS')">
+            Realizadas <span id="totalEntrevistasRealizadas" class="contador-entrevistas">0</span>
+          </button>
+        </div>
         <div class="tabla-responsive">
 
           <table class="tabla-operaciones">
@@ -1575,6 +1585,7 @@ function renderizarEntrevistas() {
                                 data-entrevistador="${escaparHTML(
                                   x.agenda.entrevistador || ''
                                 )}"
+                                data-estado-entrevista="${realizada ? 'REALIZADA' : 'PENDIENTE'}"
                               >
 
                             <td>
@@ -1721,36 +1732,71 @@ function renderizarEntrevistas() {
 
     `;
 
-}
-
-function filtrarEntrevistas(){
-
-  const filtro =
-    document.getElementById(
-      'filtroEntrevistador'
-    )?.value || '';
-
-
-  document
-    .querySelectorAll(
-      '#tabEntrevistas tbody tr[data-entrevistador]'
-    )
-    .forEach(fila => {
-
-      const entrevistador =
-        fila.dataset.entrevistador || '';
-
-
-      fila.style.display =
-        !filtro ||
-        entrevistador === filtro
-          ? ''
-          : 'none';
-
-    });
+  const sel = document.getElementById('filtroEntrevistador');
+  if (sel) sel.value = filtroEntrevistadorSeleccionado;
+  filtrarEntrevistas();
 
 }
 
+function cambiarVistaEntrevistas(vista) {
+  if (vista !== 'PENDIENTES' && vista !== 'REALIZADAS') return;
+  vistaEntrevistasActual = vista;
+  filtrarEntrevistas();
+}
+
+function filtrarEntrevistas() {
+  filtroEntrevistadorSeleccionado = document.getElementById('filtroEntrevistador')?.value || '';
+  const filas = [...document.querySelectorAll('#tabEntrevistas tbody tr[data-entrevistador]')];
+  let pendientes = 0;
+  let realizadas = 0;
+  let visibles = 0;
+  for (const fila of filas) {
+    const esRealizada = fila.dataset.estadoEntrevista === 'REALIZADA';
+    const coincideEntrevistador = !filtroEntrevistadorSeleccionado ||
+      fila.dataset.entrevistador === filtroEntrevistadorSeleccionado;
+    if (coincideEntrevistador) {
+      if (esRealizada) realizadas++;
+      else pendientes++;
+    }
+    const coincideVista = vistaEntrevistasActual === 'REALIZADAS' ? esRealizada : !esRealizada;
+    const mostrar = coincideEntrevistador && coincideVista;
+    fila.style.display = mostrar ? '' : 'none';
+    if (mostrar) visibles++;
+  }
+  const pend = document.getElementById('totalEntrevistasPendientes');
+  const real = document.getElementById('totalEntrevistasRealizadas');
+  if (pend) pend.textContent = String(pendientes);
+  if (real) real.textContent = String(realizadas);
+  for (const [id, activo] of [
+    ['subtabPendientes', vistaEntrevistasActual === 'PENDIENTES'],
+    ['subtabRealizadas', vistaEntrevistasActual === 'REALIZADAS']
+  ]) {
+    const boton = document.getElementById(id);
+    if (!boton) continue;
+    boton.classList.toggle('activa', activo);
+    boton.setAttribute('aria-pressed', String(activo));
+  }
+  let vacio = document.getElementById('sinEntrevistasFiltradas');
+  if (!vacio && filas.length) {
+    const tbody = document.querySelector('#tabEntrevistas .tabla-operaciones tbody');
+    if (tbody) {
+      vacio = document.createElement('tr');
+      vacio.id = 'sinEntrevistasFiltradas';
+      const celda = document.createElement('td');
+      celda.colSpan = 11;
+      celda.className = 'sin-registros';
+      vacio.appendChild(celda);
+      tbody.appendChild(vacio);
+    }
+  }
+  if (vacio) {
+    vacio.style.display = visibles ? 'none' : '';
+    const celda = vacio.querySelector('td');
+    if (celda) celda.textContent = 'No hay entrevistas ' +
+      (vistaEntrevistasActual === 'REALIZADAS' ? 'realizadas' : 'pendientes') +
+      (filtroEntrevistadorSeleccionado ? ' para este entrevistador.' : '.');
+  }
+}
 function convertirFechaOrden(
   fecha,
   hora
