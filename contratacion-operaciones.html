@@ -109,6 +109,56 @@
       color: #213547;
       font-variant-numeric: tabular-nums;
     }
+
+    /* Subpestañas internas: pendientes y realizadas, sin alterar Agenda. */
+    #tabEntrevistas .subtabs-entrevistas {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #d9e2ec;
+    }
+    #tabEntrevistas .subtab-entrevista {
+      border: 1px solid #d9e2ec;
+      background: #f5f7fa;
+      color: #526175;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: background-color 140ms ease, border-color 140ms ease;
+    }
+    #tabEntrevistas .subtab-entrevista.activa {
+      color: #1e55dc;
+      background: #eef3ff;
+      border-color: #6e97fc;
+    }
+    #tabEntrevistas .subtab-entrevista:hover {
+      background: #e9effa;
+    }
+    #tabEntrevistas .subtab-entrevista:focus-visible {
+      outline: 3px solid #93b1fa;
+      outline-offset: 2px;
+    }
+    #tabEntrevistas .contador-entrevistas {
+      display: inline-block;
+      min-width: 21px;
+      padding: 2px 7px;
+      margin-left: 7px;
+      text-align: center;
+      border-radius: 999px;
+      color: inherit;
+      background: #dae4f3;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+    #tabEntrevistas .subtab-entrevista.activa .contador-entrevistas {
+      background: #d1deff;
+    }
+
   </style>
 </head>
 
