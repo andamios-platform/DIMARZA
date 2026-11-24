@@ -1412,16 +1412,32 @@ function renderizarEntrevistas() {
 
       })
       .filter(Boolean)
+      .concat(
+        // Mostrar también a quienes aún no tienen una entrevista programada.
+        candidatosOperaciones
+          .filter(candidato =>
+            !agendaEntrevistas.some(agenda =>
+              String(agenda.idCandidato) === String(candidato.idCandidato)
+            )
+          )
+          .map(candidato => ({
+            candidato,
+            agenda: null,
+            entrevista: entrevistasRealizadas.find(entrevista =>
+              String(entrevista.idCandidato) === String(candidato.idCandidato)
+            ) || null
+          }))
+      )
       .sort((a, b) => {
 
         const estadoA =
           String(
-            a.agenda.estadoCita || ''
+            a.agenda?.estadoCita || ''
           ).toUpperCase();
 
         const estadoB =
           String(
-            b.agenda.estadoCita || ''
+            b.agenda?.estadoCita || ''
           ).toUpperCase();
 
 
@@ -1460,14 +1476,14 @@ function renderizarEntrevistas() {
 
         const fechaA =
           convertirFechaOrden(
-            a.agenda.fechaProgramada,
-            a.agenda.horaProgramada
+            a.agenda?.fechaProgramada,
+            a.agenda?.horaProgramada
           );
 
         const fechaB =
           convertirFechaOrden(
-            b.agenda.fechaProgramada,
-            b.agenda.horaProgramada
+            b.agenda?.fechaProgramada,
+            b.agenda?.horaProgramada
           );
 
 
@@ -1493,7 +1509,7 @@ function renderizarEntrevistas() {
     </h2>
 
     <p>
-      Entrevistas programadas e historial de entrevistas realizadas.
+      Postulantes pendientes y entrevistas técnicas completadas.
     </p>
 
   </div>
@@ -1530,14 +1546,15 @@ function renderizarEntrevistas() {
 </div>
 
 
-        <div class="subtabs-entrevistas" role="group" aria-label="Estado de las entrevistas">
+        <div class="subtabs-entrevistas" role="group" aria-label="Separar entrevistas pendientes de realizadas">
           <button type="button" class="subtab-entrevista activa" id="subtabPendientes" aria-pressed="true" onclick="cambiarVistaEntrevistas('PENDIENTES')">
-            Pendientes <span id="totalEntrevistasPendientes" class="contador-entrevistas">0</span>
+            Por entrevistar <span id="totalEntrevistasPendientes" class="contador-entrevistas">0</span>
           </button>
           <button type="button" class="subtab-entrevista" id="subtabRealizadas" aria-pressed="false" onclick="cambiarVistaEntrevistas('REALIZADAS')">
-            Realizadas <span id="totalEntrevistasRealizadas" class="contador-entrevistas">0</span>
+            Entrevistados <span id="totalEntrevistasRealizadas" class="contador-entrevistas">0</span>
           </button>
         </div>
+        <p id="descripcionVistaEntrevistas" class="descripcion-vista-entrevistas" aria-live="polite"></p>
         <div class="tabla-responsive">
 
           <table class="tabla-operaciones">
@@ -1569,7 +1586,7 @@ function renderizarEntrevistas() {
 
                         const realizada =
                           !!x.entrevista ||
-                          String(x.agenda.estadoCita || '').toUpperCase() === 'REALIZADA';
+                          String(x.agenda?.estadoCita || '').toUpperCase() === 'REALIZADA';
 
 
                         return `
@@ -1581,7 +1598,7 @@ function renderizarEntrevistas() {
                                     : ''
                                 }"
                                 data-entrevistador="${escaparHTML(
-                                  x.agenda.entrevistador || ''
+                                  x.agenda?.entrevistador || ''
                                 )}"
                                 data-estado-entrevista="${realizada ? 'REALIZADA' : 'PENDIENTE'}"
                               >
@@ -1622,19 +1639,19 @@ function renderizarEntrevistas() {
 
                             <td>
                               ${escaparHTML(
-                                x.agenda.fechaProgramada || '-'
+                                x.agenda?.fechaProgramada || '-'
                               )}
                             </td>
 
                             <td>
                               ${escaparHTML(
-                                x.agenda.horaProgramada || '-'
+                                x.agenda?.horaProgramada || '-'
                               )}
                             </td>
 
                             <td>
                               ${escaparHTML(
-                                x.agenda.entrevistador || '-'
+                                x.agenda?.entrevistador || '-'
                               )}
                             </td>
 
@@ -1645,12 +1662,12 @@ function renderizarEntrevistas() {
                                   realizada
                                     ? 'estado-realizada'
                                     : obtenerClaseEstadoAgenda(
-                                        x.agenda.estadoCita
+                                        x.agenda?.estadoCita || 'PENDIENTE DE PROGRAMAR'
                                       )
                                 }"
                               >
                                 ${escaparHTML(
-                                  realizada ? 'REALIZADA' : x.agenda.estadoCita
+                                  realizada ? 'REALIZADA' : (x.agenda?.estadoCita || 'SIN PROGRAMAR')
                                 )}
                               </span>
 
@@ -1688,11 +1705,11 @@ function renderizarEntrevistas() {
                                       <button
                                         type="button"
                                         class="btn-iniciar-entrevista"
-                                        onclick="iniciarEntrevista('${escaparJS(
+                                        onclick="${x.agenda ? 'iniciarEntrevista' : 'abrirAgenda'}('${escaparJS(
                                           x.candidato.idCandidato
                                         )}')"
                                       >
-                                        Iniciar entrevista
+                                        ${x.agenda ? 'Iniciar entrevista' : 'Programar entrevista'}
                                       </button>
                                     `
                               }
@@ -1765,6 +1782,12 @@ function filtrarEntrevistas() {
   const real = document.getElementById('totalEntrevistasRealizadas');
   if (pend) pend.textContent = String(pendientes);
   if (real) real.textContent = String(realizadas);
+  const descripcion = document.getElementById('descripcionVistaEntrevistas');
+  if (descripcion) {
+    descripcion.textContent = vistaEntrevistasActual === 'REALIZADAS'
+      ? 'Entrevistas completadas, independientemente del resultado de la evaluación.'
+      : 'Candidatos sin entrevista realizada, incluidos los que todavía no tienen fecha programada.';
+  }
   for (const [id, activo] of [
     ['subtabPendientes', vistaEntrevistasActual === 'PENDIENTES'],
     ['subtabRealizadas', vistaEntrevistasActual === 'REALIZADAS']
