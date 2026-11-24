@@ -1896,6 +1896,14 @@ tbody tr:last-child td {
     <div class="titulo-card">
       Requerimientos registrados
     </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 18px">
+      <label for="filtroRequerimientos" style="font-weight:600">Mostrar:</label>
+      <select id="filtroRequerimientos" onchange="cambiarFiltroRequerimientos(this.value)" style="padding:9px;border:1px solid #ccd4da;border-radius:7px">
+        <option value="ACTIVOS">Activos</option>
+        <option value="HISTORIAL">Historial (cubiertos, parciales y cancelados)</option>
+        <option value="TODOS">Todos</option>
+      </select>
+    </div>
 
 
       <div class="tabla-contenedor">
@@ -1941,6 +1949,7 @@ tbody tr:last-child td {
               <th>PDF REQUERIMIENTO</th>
               <th>AVANCE CONTRATACIÓN</th>
               <th>AVANCE HABILITACIÓN</th>
+              <th>ACCIONES</th>
 
             </tr>
 
@@ -1953,7 +1962,7 @@ tbody tr:last-child td {
             <tr>
 
               <td
-                colspan="12"
+                colspan="13"
                 class="vacio"
               >
                 Cargando requerimientos...
@@ -1970,6 +1979,25 @@ tbody tr:last-child td {
 
   </div>
 
+
+
+  <dialog id="dlgCierreRequerimiento" style="border:0;border-radius:12px;max-width:min(490px,94vw);padding:24px;box-shadow:0 18px 60px #0004">
+    <form id="formCierreRequerimiento">
+      <h3 id="tituloCierreRequerimiento" style="margin:0 0 8px">Finalizar requerimiento</h3>
+      <p id="detalleCierreRequerimiento" style="margin:0 0 18px;line-height:1.5"></p>
+      <label for="motivoCierreRequerimiento" style="display:block;font-weight:600;margin-bottom:6px">Motivo del cierre *</label>
+      <textarea id="motivoCierreRequerimiento" required minlength="10" maxlength="500" rows="4" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #bbb;border-radius:7px" placeholder="Ej.: Finalizó la parada de planta y no se requiere cubrir los puestos restantes."></textarea>
+      <label id="labelConfirmarServicioTerminado" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;line-height:1.4">
+        <input id="confirmarServicioTerminado" type="checkbox" style="margin-top:4px">
+        Confirmo que el servicio terminó y no se buscará más personal para este requerimiento.
+      </label>
+      <p id="errorCierreRequerimiento" role="alert" style="color:#b42318;display:none"></p>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap">
+        <button type="button" onclick="document.getElementById('dlgCierreRequerimiento').close()">Volver</button>
+        <button type="submit" id="btnConfirmarCierreRequerimiento">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- =========================
        SEGUIMIENTO POR PERSONA
@@ -2111,6 +2139,113 @@ const API_PERSONAL =
 
 let seguimientoPersonas = [];
 let entrevistasEditables = new Set();
+
+/* =====================================================
+   CIERRE DE REQUERIMIENTOS - RESIDENTE
+   No oculta ni borra historial: solo filtra la vista.
+===================================================== */
+let filtroActualRequerimientos = 'ACTIVOS';
+let todosLosRequerimientos = [];
+let cierreRequerimientoSeleccionado = null;
+
+function esResidenteContratacion() {
+  return sessionStorage.getItem('dimarzaRolVisualizacion') === 'RESIDENTE' &&
+    !!localStorage.getItem('dimarzaTokenVisualizacion');
+}
+
+function cambiarFiltroRequerimientos(filtro) {
+  filtroActualRequerimientos = filtro;
+  cargarRequerimientos();
+}
+
+function abrirCierreRequerimiento(id, tipo) {
+  if (!esResidenteContratacion()) {
+    alert('Solo el residente con sesión vigente puede cerrar requerimientos.');
+    return;
+  }
+  const req = todosLosRequerimientos.find(r => String(r.idRequerimiento) === String(id));
+  if (!req || String(req.estado || '').toUpperCase() !== 'ABIERTO') {
+    alert('El requerimiento ya no está abierto. Actualiza la lista.');
+    cargarRequerimientos();
+    return;
+  }
+  const requeridos = Number(req.cantidadRequerida || 0);
+  const habilitados = Number(req.cantidadHabilitada || 0);
+  if (tipo === 'PARCIAL' && !(habilitados > 0 && habilitados < requeridos)) {
+    alert('Solo puede finalizar parcialmente un requerimiento con cobertura mayor que cero y menor que el total.');
+    return;
+  }
+  cierreRequerimientoSeleccionado = {id: String(id), tipo};
+  const descripcion = 'Requerimiento ' + id + ': ' + habilitados + ' de ' +
+    requeridos + ' habilitados (' + (requeridos - habilitados) + ' no cubiertos).';
+  document.getElementById('tituloCierreRequerimiento').textContent =
+    tipo === 'PARCIAL' ? 'Finalizar requerimiento parcialmente' : 'Cancelar requerimiento';
+  document.getElementById('detalleCierreRequerimiento').textContent = descripcion;
+  document.getElementById('labelConfirmarServicioTerminado').style.display =
+    tipo === 'PARCIAL' ? 'flex' : 'none';
+  document.getElementById('confirmarServicioTerminado').checked = false;
+  document.getElementById('motivoCierreRequerimiento').value = '';
+  document.getElementById('errorCierreRequerimiento').style.display = 'none';
+  document.getElementById('dlgCierreRequerimiento').showModal();
+}
+
+async function registrarCierreRequerimiento(evento) {
+  evento.preventDefault();
+  const seleccion = cierreRequerimientoSeleccionado;
+  if (!seleccion) return;
+  const tokenSesion = localStorage.getItem('dimarzaTokenVisualizacion');
+  const motivo = document.getElementById('motivoCierreRequerimiento').value.trim();
+  const parcial = seleccion.tipo === 'PARCIAL';
+  const confirmacion = document.getElementById('confirmarServicioTerminado').checked;
+  const aviso = document.getElementById('errorCierreRequerimiento');
+  const boton = document.getElementById('btnConfirmarCierreRequerimiento');
+  if (motivo.length < 10 || (parcial && !confirmacion)) {
+    aviso.textContent = 'Indica el motivo (mínimo 10 caracteres) y confirma el fin del servicio.';
+    aviso.style.display = 'block';
+    return;
+  }
+  if (!window.confirm('¿Confirmas el cierre de este requerimiento? Se conservará en el historial.')) return;
+  const datos = {
+    accion: parcial ? 'finalizarRequerimientoParcial' : 'cancelarRequerimiento',
+    idRequerimiento: seleccion.id, tokenSesion
+  };
+  if (parcial) {
+    datos.motivoFinalizacion = motivo;
+    datos.confirmarFinServicio = true;
+  } else {
+    datos.motivoCancelacion = motivo;
+  }
+  boton.disabled = true;
+  boton.textContent = 'Guardando...';
+  aviso.style.display = 'none';
+  try {
+    const respuesta = await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify(datos)
+    });
+    const resultado = await respuesta.json();
+    if (!resultado.ok) throw new Error(resultado.mensaje || 'No se pudo cerrar el requerimiento.');
+    document.getElementById('dlgCierreRequerimiento').close();
+    cierreRequerimientoSeleccionado = null;
+    await cargarRequerimientos();
+    mostrarMensaje(resultado.mensaje || 'Requerimiento actualizado.', 'ok');
+  } catch (error) {
+    aviso.textContent = error.message || 'No se pudo guardar el cierre.';
+    aviso.style.display = 'block';
+  } finally {
+    boton.disabled = false;
+    boton.textContent = 'Confirmar';
+  }
+}
+
+document.getElementById('tablaRequerimientos').addEventListener('click', evento => {
+  const boton = evento.target.closest('button[data-cierre]');
+  if (!boton) return;
+  abrirCierreRequerimiento(boton.dataset.id, boton.dataset.cierre);
+});
+document.getElementById('formCierreRequerimiento').addEventListener('submit', registrarCierreRequerimiento);
+
+
   
 /* =====================================================
    INICIO
@@ -2635,14 +2770,15 @@ async function cargarRequerimientos() {
 
 
 
-    const lista =
-      resultado.requerimientos || [];
-
-
-
-    actualizarKPIs(
-      lista
-    );
+    todosLosRequerimientos = resultado.requerimientos || [];
+    const lista = todosLosRequerimientos.filter(r => {
+      const abierto = String(r.estado || '').trim().toUpperCase() === 'ABIERTO';
+      return filtroActualRequerimientos === 'ACTIVOS' ? abierto :
+        filtroActualRequerimientos === 'HISTORIAL' ? !abierto : true;
+    });
+    actualizarKPIs(todosLosRequerimientos.filter(r =>
+      String(r.estado || '').trim().toUpperCase() === 'ABIERTO'
+    ));
 
 
 
@@ -2654,7 +2790,7 @@ async function cargarRequerimientos() {
         <tr>
 
           <td
-            colspan="12"
+            colspan="13"
             class="vacio"
           >
             No existen requerimientos registrados.
@@ -2895,6 +3031,17 @@ const porcentajeHabilitacion =
 </td>
 
 
+<td>
+  ${esResidenteContratacion() && String(r.estado || '').toUpperCase() === 'ABIERTO'
+    ? `<div style="display:flex;flex-direction:column;gap:6px">
+        ${habilitado > 0 && habilitado < requerido
+          ? `<button type="button" data-cierre="PARCIAL" data-id="${escapar(r.idRequerimiento)}" title="Fin de servicio con cobertura parcial">Finalizar parcial</button>`
+          : ''}
+        <button type="button" data-cierre="CANCELAR" data-id="${escapar(r.idRequerimiento)}">Cancelar</button>
+      </div>`
+    : '—'}
+</td>
+
               </tr>
 
             `;
@@ -2917,7 +3064,7 @@ const porcentajeHabilitacion =
       <tr>
 
         <td
-          colspan="12"
+          colspan="13"
           class="vacio"
         >
 
