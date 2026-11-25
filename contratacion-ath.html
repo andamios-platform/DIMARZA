@@ -532,6 +532,11 @@ tbody tr:hover {
 .dialogo-cul .error-cul { color: #991b1b; font-size: 12px; margin-top: 10px; }
 .dialogo-cul button:disabled { opacity: .6; cursor: wait; }
 
+/* Fecha de creación del candidato. */
+.celda-fecha-registro { white-space: nowrap; }
+.fecha-registro-ath { display: inline-flex; flex-direction: column; gap: 3px; font-weight: 600; }
+.fecha-registro-ath small { color: #64748b; font-size: 11px; font-weight: 400; }
+
 </style>
 
 </head>
@@ -911,6 +916,8 @@ tbody tr:hover {
 
           <th>REQUERIMIENTO</th>
 
+          <th>FECHA DE REGISTRO</th>
+
           <th>NOMBRE</th>
 
           <th>DNI</th>
@@ -945,7 +952,7 @@ tbody tr:hover {
         <tr>
 
           <td
-            colspan="13"
+            colspan="14"
             class="vacio"
           >
             Cargando candidatos...
@@ -1677,7 +1684,7 @@ async function cargarCandidatos() {
         <tr>
 
           <td
-            colspan="13"
+            colspan="14"
             class="vacio"
           >
             No existen candidatos registrados.
@@ -1709,7 +1716,7 @@ async function cargarCandidatos() {
       <tr>
 
         <td
-          colspan="13"
+          colspan="14"
           class="vacio"
         >
           No se pudieron cargar los candidatos.
@@ -1721,6 +1728,17 @@ async function cargarCandidatos() {
 }
 
 
+
+/* Fecha original de registro del candidato en CANDIDATOS. */
+function mostrarFechaRegistroATH(valor) {
+  const texto = String(valor || '').trim();
+  if (!texto) return '—';
+  const partes = texto.split(/\s+/);
+  const fecha = partes[0];
+  const hora = partes.length > 1 ? partes[1].substring(0, 5) : '';
+  return '<span class="fecha-registro-ath">' + escapar(fecha) +
+    (hora ? '<small>' + escapar(hora) + ' h</small>' : '') + '</span>';
+}
 
 function crearFilaCandidato(c) {
 
@@ -1770,6 +1788,11 @@ function crearFilaCandidato(c) {
 
       <td>
         ${escapar(c.idRequerimiento)}
+      </td>
+
+
+      <td class="celda-fecha-registro">
+        ${mostrarFechaRegistroATH(c.fechaRegistro)}
       </td>
 
 
