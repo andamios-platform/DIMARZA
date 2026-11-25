@@ -1473,6 +1473,10 @@ tbody tr:hover{
 
 }
 
+
+.carga-taller-buen-estado { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; padding:14px 16px; margin:0 0 18px; background:#edf9f1; border:1px solid #add9bd; border-radius:12px; }
+.carga-taller-buen-estado strong { display:block; margin-bottom:5px; color:#145c37; font-size:14px; }
+.carga-taller-buen-estado small { display:block; color:#476554; line-height:1.5; font-size:12px; }
 </style>
 
 </head>
@@ -1772,6 +1776,17 @@ tbody tr:hover{
         código o grupo y agrégalo al borrador.
       </p>
 
+
+
+      <div class="carga-taller-buen-estado">
+        <div>
+          <strong>Selección de taller: material en buen estado</strong>
+          <small>64 códigos · 2.145 piezas. Se cargarán en este borrador sin modificar el inventario.</small>
+        </div>
+        <button type="button" class="btn btn-primario" onclick="cargarBuenEstadoTaller()">
+          Cargar buen estado
+        </button>
+      </div>
 
       <div class="buscador-material">
       <div
@@ -3081,6 +3096,63 @@ document
 
 }
 
+
+
+/* SELECCIÓN EN TALLER — BUEN ESTADO (64 códigos, 2145 piezas).
+   Son cantidades seleccionadas en buen estado, no disponibilidad en tiempo real.
+   No modifica el inventario ni los borradores guardados. */
+const TALLER_BUEN_ESTADO = [{"codigo":"2125148","cantidad":3},{"codigo":"2125147","cantidad":2},{"codigo":"2128077","cantidad":7},{"codigo":"2125608","cantidad":5},{"codigo":"2127985","cantidad":2},{"codigo":"2127522","cantidad":189},{"codigo":"2127523","cantidad":83},{"codigo":"2127524","cantidad":31},{"codigo":"2127525","cantidad":221},{"codigo":"2127526","cantidad":106},{"codigo":"2127527","cantidad":49},{"codigo":"2127540","cantidad":39},{"codigo":"2127541","cantidad":20},{"codigo":"2127617","cantidad":16},{"codigo":"2127618","cantidad":34},{"codigo":"2127542","cantidad":49},{"codigo":"2127543","cantidad":21},{"codigo":"2127825","cantidad":166},{"codigo":"2135352","cantidad":20},{"codigo":"2124902","cantidad":21},{"codigo":"2124907","cantidad":33},{"codigo":"2127786","cantidad":56},{"codigo":"N900525","cantidad":11},{"codigo":"2127605","cantidad":21},{"codigo":"2127501","cantidad":11},{"codigo":"2127859","cantidad":43},{"codigo":"2127502","cantidad":39},{"codigo":"2127860","cantidad":20},{"codigo":"2127503","cantidad":6},{"codigo":"2127718","cantidad":28},{"codigo":"2127716","cantidad":24},{"codigo":"2127715","cantidad":58},{"codigo":"2127714","cantidad":54},{"codigo":"2127713","cantidad":28},{"codigo":"2127656","cantidad":1},{"codigo":"2127868","cantidad":16},{"codigo":"2127867","cantidad":1},{"codigo":"2127712","cantidad":5},{"codigo":"2127158","cantidad":2},{"codigo":"2127756","cantidad":7},{"codigo":"2127753","cantidad":6},{"codigo":"2125643","cantidad":10},{"codigo":"2127309","cantidad":4},{"codigo":"N901141","cantidad":6},{"codigo":"2124998","cantidad":70},{"codigo":"2124999","cantidad":62},{"codigo":"2124994","cantidad":35},{"codigo":"2124995","cantidad":82},{"codigo":"2124996","cantidad":69},{"codigo":"2124997","cantidad":28},{"codigo":"2129690","cantidad":4},{"codigo":"2128631","cantidad":1},{"codigo":"2128635","cantidad":6},{"codigo":"2127861","cantidad":6},{"codigo":"2127862","cantidad":5},{"codigo":"2127863","cantidad":6},{"codigo":"2127864","cantidad":5},{"codigo":"2127865","cantidad":10},{"codigo":"2127724","cantidad":1},{"codigo":"104232","cantidad":68},{"codigo":"N900382","cantidad":1},{"codigo":"N900383","cantidad":5},{"codigo":"2127510","cantidad":44},{"codigo":"9371529","cantidad":63}];
+
+function cargarBuenEstadoTaller() {
+  if (!catalogoCargado) {
+    mostrarMensaje('Espera a que termine de cargar el catálogo.', 'error');
+    return;
+  }
+  if (marcaModulacionActual !== 'ULMA') {
+    mostrarMensaje('Selecciona ULMA para cargar el material del taller.', 'error');
+    return;
+  }
+  if (idBorradorActual) {
+    mostrarMensaje('Para proteger las modulaciones existentes, primero crea un borrador nuevo.', 'error');
+    return;
+  }
+  const faltantes = [];
+  const ambiguos = [];
+  const seleccion = [];
+  for (const r of TALLER_BUEN_ESTADO) {
+    const opciones = catalogoMateriales.filter(m =>
+      String(m.codigo || '').trim().toUpperCase() === r.codigo.toUpperCase()
+    );
+    if (!opciones.length) { faltantes.push(r.codigo); continue; }
+    if (opciones.length !== 1) { ambiguos.push(r.codigo); continue; }
+    const m = opciones[0];
+    seleccion.push({
+      codigo: String(m.codigo || r.codigo),
+      descripcion: String(m.descripcion || m.subgrupo || ''),
+      grupo: String(m.grupo || ''),
+      subgrupo: String(m.subgrupo || m.descripcion || ''),
+      cantidad: r.cantidad,
+      pesoUnitario: Number(m.pesoUnitario) || 0,
+      observacion: 'SELECCIÓN EN TALLER - BUEN ESTADO'
+    });
+  }
+  if (faltantes.length || ambiguos.length) {
+    const detalle = [
+      faltantes.length ? 'Sin registro en catálogo: ' + faltantes.join(', ') : '',
+      ambiguos.length ? 'Códigos ambiguos: ' + ambiguos.join(', ') : ''
+    ].filter(Boolean).join(' | ');
+    mostrarMensaje('No se cargó el listado: ' + detalle, 'error', 15000);
+    alert('No se han modificado los materiales del borrador. Revisa los códigos en el catálogo ULMA. ' + detalle);
+    return;
+  }
+  if (materialesBorrador.length &&
+    !confirm('¿Reemplazar los materiales actuales del borrador por los 64 códigos en buen estado?')) return;
+  materialesBorrador = seleccion;
+  const referencia = document.getElementById('referencia');
+  if (!referencia.value.trim()) referencia.value = 'SELECCIÓN EN TALLER - BUEN ESTADO';
+  renderizarMateriales();
+  mostrarMensaje('Se cargaron 64 códigos y 2.145 piezas. Completa mina, responsable y TAG, y pulsa Guardar borrador.', 'exito', 10000);
+}
 
 /* =========================================================
    BUSCAR MATERIAL
