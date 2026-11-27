@@ -213,6 +213,15 @@ function agregarObservadosOps() {
       texto.title = valor;
       texto.textContent = valor;
       motivo.appendChild(texto);
+      if (metadata?.fecha) {
+        const fecha = new Date(metadata.fecha);
+        if (!Number.isNaN(fecha.getTime())) {
+          const nota = document.createElement('small');
+          nota.className = 'dato-secundario';
+          nota.textContent = 'Registrado: ' + fecha.toLocaleString('es-PE');
+          motivo.appendChild(nota);
+        }
+      }
     } else {
       motivo.textContent = '—';
     }
@@ -308,7 +317,7 @@ function marcarAgendaObservadosOps() {
     const id = fila.querySelector('.dato-secundario')?.textContent.trim() || '';
     const agenda = agendaEntrevistas.find(a => String(a.idCandidato) === id);
     if (!agenda || !leerNoRealizadaOps(agenda)) return;
-    marcados++;
+    if (['PROGRAMADA','REPROGRAMADA'].includes(String(agenda.estadoCita || '').toUpperCase())) marcados++;
     const estado = fila.querySelector('.estado-agenda');
     if (estado) {
       estado.className = 'estado-agenda estado-observada-ops';
